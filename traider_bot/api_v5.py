@@ -3,7 +3,6 @@ from config import *
 import time
 import hashlib
 import hmac
-import uuid
 
 api_key = API_KEY
 secret_key = API_SECRET
@@ -40,9 +39,4 @@ def genSignature(payload):
 
 
 if __name__ == '__main__':
-    # Create Order
-    endpoint = "/v5/order/create"
-    method = "POST"
-    orderLinkId = uuid.uuid4().hex
-    params = '{"category":"linear","symbol": "BTCUSDT","side": "Buy","positionIdx": 0,"orderType": "Limit","qty": "0.001","price": "26000","timeInForce": "GTC","orderLinkId": "' + orderLinkId + '"}'
-    HTTP_Request(endpoint, method, params, "Create")
+    pass
