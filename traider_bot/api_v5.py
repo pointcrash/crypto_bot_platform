@@ -12,7 +12,7 @@ secret_key = API_SECRET
 httpClient = requests.Session()
 recv_window = str(5000)
 url = "https://api-testnet.bybit.com"  # Testnet endpoint
-entry_qty = 0.002
+entry_qty = 0.006
 total_qty = 0
 
 
@@ -44,7 +44,7 @@ def genSignature(payload):
     return signature
 
 
-def orders(qty, orderLinkId):
+def orders():
     global total_qty
     endpoint = "/v5/order/create"
     method = "POST"
@@ -55,7 +55,7 @@ def orders(qty, orderLinkId):
     params = {
         'category': 'linear',
         'symbol': 'BTCUSDT',
-        'side': 'Buy',
+        'side': 'Sell',
         'positionIdx': 0,
         'orderType': 'Market',
         'qty': str(entry_qty),
@@ -72,7 +72,7 @@ def create_take_1():
     orderLinkId = uuid.uuid4().hex
     qty = round(get_qty_BTC() / 2, 3)
     price = get_position_price_BTC()
-    price_sell = round(price*Decimal('1.01'), 2)
+    price_sell = round(price * Decimal('1.01'), 2)
 
     params = {
         'category': 'linear',
@@ -88,6 +88,7 @@ def create_take_1():
     params = json.dumps(params)
     HTTP_Request(endpoint, method, params, "Create")
 
+
 def create_take_2():
     global total_qty
     endpoint = "/v5/order/create"
@@ -96,7 +97,7 @@ def create_take_2():
     qty = round(total_qty / 2, 3)
     print(qty)
     price = get_position_price_BTC()
-    price_sell = price*Decimal('1.02')
+    price_sell = price * Decimal('1.02')
     price_sell = round(price_sell, 2)
     print(price_sell)
 
@@ -113,6 +114,7 @@ def create_take_2():
     }
     params = json.dumps(params)
     HTTP_Request(endpoint, method, params, "Create")
+
 
 def cancel_all():
     endpoint = "/v5/order/cancel-all"
@@ -133,16 +135,6 @@ def get_price_BTC():
     print('BTC price = ', response["result"]["list"][0]["lastPrice"])
     return Decimal(response["result"]["list"][0]["lastPrice"])
 
-def get_position_price_BTC():
-    endpoint = "/v5/position/list"
-    method = "GET"
-    params = "category=linear&symbol=BTCUSDT"
-    response = json.loads(HTTP_Request(endpoint, method, params, "Price"))
-    # print('BTC price = ', response["result"]["list"][0]["avgPrice"])
-    # print('BTC price = ', response["result"]["list"])
-    print(Decimal(response["result"]["list"][0]["avgPrice"]))
-    return Decimal(response["result"]["list"][0]["avgPrice"])
-
 
 def control_price_BTC():
     global total_qty
@@ -154,21 +146,34 @@ def control_price_BTC():
         else:
             current_price = get_price_BTC()
             average_price = get_position_price_BTC()
-            print('Current price = ', current_price, '\n', 'Average price = ',  average_price)
-            if average_price - current_price > average_price*Decimal('0.01'):
+            print('Current price = ', current_price, '\n', 'Average price = ', average_price)
+            if average_price - current_price > average_price * Decimal('0.01'):
                 cancel_all()
                 orders()
                 create_take_1()
                 create_take_2()
             time.sleep(15)
 
-def get_qty_BTC():
+
+def get_position_price_BTC(BTC_list):
+    return Decimal(BTC_list["avgPrice"])
+
+
+def get_qty_BTC(BTC_list):
+    return Decimal(BTC_list["size"])
+
+
+def get_positional_side(BTC_list):
+    return BTC_list["side"]
+
+
+def get_BTC_list():
     endpoint = "/v5/position/list"
     method = "GET"
     params = "category=linear&symbol=BTCUSDT"
     response = json.loads(HTTP_Request(endpoint, method, params, "Price"))
-    print(Decimal(response["result"]["list"][0]["size"]))
-    return Decimal(response["result"]["list"][0]["size"])
+    # print(response["result"]["list"][0])
+    return response["result"]["list"][0]
 
 
 # orders()
@@ -178,4 +183,6 @@ def get_qty_BTC():
 # get_price_BTC()
 # get_qty_BTC()
 # get_position_price_BTC()
+# get_position_BTC()
 # cancel_all()
+print(get_positional_side(get_BTC_list()))
