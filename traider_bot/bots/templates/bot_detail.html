@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <h2 class="text-center">Edit bot</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    {{ form.symbol.label_tag }}
+                    {{ form.symbol }}
+                    {{ form.isLeverage.label_tag }}
+                    {{ form.isLeverage }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.side.label_tag }}
+                    {{ form.side }}
+                    {{ form.orderType.label_tag }}
+                    {{ form.orderType }}
+                    {{ form.qty.label_tag }}
+                    {{ form.qty }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success mt-3">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-3 mx-auto">
+
+
+        <h2 class="text-center">Create bot</h2>
+        <form method="POST">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit" class="btn btn-success">Create</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

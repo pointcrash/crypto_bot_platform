@@ -1,4 +1,5 @@
 import json
+import math
 import uuid
 from decimal import Decimal, ROUND_DOWN
 
@@ -117,12 +118,12 @@ def create_take_2():
     HTTP_Request(endpoint, method, params, "Create")
 
 
-def cancel_all():
+def cancel_all(category, symbol):
     endpoint = "/v5/order/cancel-all"
     method = "POST"
     params = {
-        'category': 'linear',
-        'symbol': 'BTCUSDT',
+        'category': category,
+        'symbol': symbol,
     }
     params = json.dumps(params)
     HTTP_Request(endpoint, method, params, "CancelAll")
@@ -137,41 +138,22 @@ def get_current_price(category, symbol):
     return Decimal(response["result"]["list"][0]["lastPrice"])
 
 
-def control_price_BTC():
-    global total_qty
-    while True:
-        if not get_position_price_BTC():
-            print(('The cycle is over'))
-            total_qty = 0
-            break
-        else:
-            current_price = get_current_price()
-            average_price = get_position_price_BTC()
-            print('Current price = ', current_price, '\n', 'Average price = ', average_price)
-            if average_price - current_price > average_price * Decimal('0.01'):
-                cancel_all()
-                orders()
-                create_take_1()
-                create_take_2()
-            time.sleep(15)
+def get_position_price(symbol_list):
+    return Decimal(symbol_list["avgPrice"])
 
 
-def get_position_price_BTC(BTC_list):
-    return Decimal(BTC_list["avgPrice"])
+def get_qty(symbol_list):
+    return Decimal(symbol_list["size"])
 
 
-def get_qty_BTC(BTC_list):
-    return Decimal(BTC_list["size"])
+def get_positional_side(symbol_list):
+    return symbol_list["side"]
 
 
-def get_positional_side(BTC_list):
-    return BTC_list["side"]
-
-
-def get_BTC_list():
+def get_list(category, symbol):
     endpoint = "/v5/position/list"
     method = "GET"
-    params = "category=linear&symbol=BTCUSDT"
+    params = f"category={category}&symbol={symbol}"
     response = json.loads(HTTP_Request(endpoint, method, params, "Price"))
     # print(response["result"]["list"][0])
     return response["result"]["list"][0]
@@ -179,3 +161,6 @@ def get_BTC_list():
 
 # def transfer_to_USDT():
 
+# print(get_qty_BTC(get_BTC_list()))
+# print(math.floor((0.001/2) * 1000) / 1000)
+# print("Buy" if "Bsdf" == "Sell" else "Sell")

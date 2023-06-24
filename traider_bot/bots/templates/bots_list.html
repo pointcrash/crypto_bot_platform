@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-11 mx-auto">
+        <a class="btn btn-success" href="{% url 'create_bot' %}">Add new bot</a>
+        <div class="card mt-2">
+            <table class="table">
+                <thead>
+                <tr  class=" text-center">
+                    <th>Bot ID</th>
+                    <th>Category</th>
+                    <th>Symbol</th>
+                    <th>Side</th>
+<!--                    <th>Position Index</th>-->
+                    <th>Order Type</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th style="color: orange">Edit</th>
+                    <th style="color: red">Delete</th>
+<!--                    <th>Time In Force</th>-->
+                </tr>
+                </thead>
+                <tbody>
+                {% for bot in bots %}
+                <tr class="text-center">
+                    <td>{{ bot.pk }}</td>
+                    <td>{{ bot.category }}</td>
+                    <td>{{ bot.symbol }}</td>
+                    <td>{{ bot.side }}</td>
+<!--                    <td>{{ order.positionIdx }}</td>-->
+                    <td>{{ bot.orderType }}</td>
+                    <td>{{ bot.qty }}</td>
+                    <td>{{ bot.price }}</td>
+                    <td><a class="btn btn-sm btn-warning" href="{% url 'bot_detail' bot_id=bot.pk %}">Edit</a></td>
+                    <td><a class="btn btn-sm btn-danger" href="#">Delete</a></td>
+<!--                    <td>{{ order.timeInForce }}</td>-->
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -57,4 +57,4 @@ class Bot(models.Model):
     # Округляем количество монет вниз чтобы не выйти за предел указанной стоимости
     def get_quantity_from_price(self, qty_USDT):
         current_price = Decimal(get_current_price(self.category, self.symbol))
-        return (Decimal(qty_USDT) / current_price).quantize(Decimal('0.001'), rounding=ROUND_DOWN)
+        return (Decimal(qty_USDT) / current_price).quantize(Decimal('0.001'), rounding=ROUND_DOWN), current_price
