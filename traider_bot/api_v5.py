@@ -1,8 +1,9 @@
 import json
 import math
+import statistics
 import uuid
 from decimal import Decimal, ROUND_DOWN
-
+from datetime import datetime
 import requests
 from config import *
 import time
@@ -159,8 +160,38 @@ def get_list(category, symbol):
     return response["result"]["list"][0]
 
 
-# def transfer_to_USDT():
+def get_kline(category, symbol, interval, qty_cline):
+    endpoint = "/v5/market/kline"
+    method = "GET"
+    params = f"category={category}&symbol={symbol}&interval={interval}&limit={qty_cline}"
+    response = json.loads(HTTP_Request(endpoint, method, params, "Cline"))
+    print(response["result"]["list"])
+    return response["result"]["list"]
+
+
+def get_closePrice_list(klines):
+    closePrice_list = []
+    for i in klines:
+        closePrice_list.append(Decimal(i[4]))
+    return closePrice_list
+
+
+def calculation_ML(closePrice_list):
+    return sum(closePrice_list) / len(closePrice_list)
+
+
+def calculation_std_dev(closePrice_list):
+    return statistics.stdev(closePrice_list)
+
+
+def calculation_TL(ml, d, std_dev):
+    return ml + (d * std_dev)
+
+
+def calculation_BL(ml, d, std_dev):
+    return ml - (d * std_dev)
 
 # print(get_qty_BTC(get_BTC_list()))
 # print(math.floor((0.001/2) * 1000) / 1000)
 # print("Buy" if "Bsdf" == "Sell" else "Sell")
+# print(0.005 % (2 / 10**3))

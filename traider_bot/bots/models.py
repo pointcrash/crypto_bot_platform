@@ -1,6 +1,6 @@
 from django.db import models
 from decimal import Decimal, ROUND_DOWN
-
+from django.core.exceptions import ValidationError
 from api_v5 import get_current_price
 
 
@@ -58,3 +58,7 @@ class Bot(models.Model):
     def get_quantity_from_price(self, qty_USDT):
         current_price = Decimal(get_current_price(self.category, self.symbol))
         return (Decimal(qty_USDT) / current_price).quantize(Decimal('0.001'), rounding=ROUND_DOWN), current_price
+
+    def clean(self):
+        if self.orderType == 'Limit' and not self.price:
+            raise ValidationError({'price': 'Price is required for Limit order type.'})

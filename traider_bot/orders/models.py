@@ -3,6 +3,7 @@ import math
 import uuid
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from api_v5 import *
@@ -20,6 +21,7 @@ class Order(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     timeInForce = models.CharField(default='GTC')
     orderLinkId = models.CharField(max_length=32, unique=True)
+    is_take = models.BooleanField(default=False)
 
     def realize_order(self):
         endpoint = "/v5/order/create"
@@ -39,37 +41,70 @@ class Order(models.Model):
         params = json.dumps(params)
         HTTP_Request(endpoint, method, params, "Create")
 
-    def create_teke(self):
+    def create_teke(self, fraction_length):
         symbol_list = get_list(self.category, self.symbol)
-        qty = math.floor((get_qty(symbol_list) / 2) * 1000) / 1000
+        current_qty = get_qty(symbol_list)
+        qty = math.floor((current_qty / 2) * 1000) / 1000
         price = get_position_price(symbol_list)
         side = ("Buy" if get_positional_side(symbol_list) == "Sell" else "Sell")
-        if not qty:
+
+        if not qty and current_qty:
             take1 = Order.objects.create(
+                bot=self.bot,
                 category='linear',
                 symbol=self.symbol,
                 side=side,
                 orderType='Limit',
                 qty=(qty+0.001),
-                price=round(price * Decimal('1.01'), 2)
+                price=round(price * Decimal('1.01'), 2),
+                is_take=True,
             )
-        else:
+        elif qty and float(current_qty) % (2 / 10**fraction_length) == 0:
             take1 = Order.objects.create(
+                bot=self.bot,
                 category='linear',
                 symbol=self.symbol,
                 side=side,
                 orderType='Limit',
                 qty=qty,
-                price=round(price * Decimal('1.01'), 2)
+                price=round(price * Decimal('1.01'), 2),
+                is_take=True,
             )
             take2 = Order.objects.create(
+                bot=self.bot,
+                category='linear',
+                symbol=self.symbol,
+                side=side,
+                orderType='Limit',
+                qty=qty,
+                price=round(price * Decimal('1.02'), 2),
+                is_take=True,
+            )
+        else:
+            take1 = Order.objects.create(
+                bot=self.bot,
+                category='linear',
+                symbol=self.symbol,
+                side=side,
+                orderType='Limit',
+                qty=qty,
+                price=round(price * Decimal('1.01'), 2),
+                is_take=True,
+            )
+            take2 = Order.objects.create(
+                bot=self.bot,
                 category='linear',
                 symbol=self.symbol,
                 side=side,
                 orderType='Limit',
                 qty=(qty+0.001),
-                price=round(price * Decimal('1.02'), 2)
+                price=round(price * Decimal('1.02'), 2),
+                is_take=True,
             )
+
+    def clean(self):
+        if self.orderType == 'Limit' and not self.price:
+            raise ValidationError({'price': 'Price is required for Limit order type.'})
 
     def save(self, *args, **kwargs):
 
@@ -77,9 +112,10 @@ class Order(models.Model):
             self.orderLinkId = uuid.uuid4().hex
         super().save(*args, **kwargs)
         self.realize_order()
-###################################################
-        cancel_all(self.category, self.symbol)
-        self.create_teke()
+
+        if not self.is_take:
+            cancel_all(self.category, self.symbol)
+            self.create_teke(3)
 
     def __str__(self):
         return self.orderLinkId
