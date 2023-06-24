@@ -1,6 +1,7 @@
 import json
 import uuid
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
+
 import requests
 from config import *
 import time
@@ -127,12 +128,12 @@ def cancel_all():
     HTTP_Request(endpoint, method, params, "CancelAll")
 
 
-def get_price_BTC():
+def get_current_price(category, symbol):
     endpoint = "/v5/market/tickers"
     method = "GET"
-    params = "category=linear&symbol=BTCUSDT"
+    params = f"category={category}&symbol={symbol}"
     response = json.loads(HTTP_Request(endpoint, method, params, "Price"))
-    print('BTC price = ', response["result"]["list"][0]["lastPrice"])
+    # print('BTC price = ', response["result"]["list"][0]["lastPrice"])
     return Decimal(response["result"]["list"][0]["lastPrice"])
 
 
@@ -144,7 +145,7 @@ def control_price_BTC():
             total_qty = 0
             break
         else:
-            current_price = get_price_BTC()
+            current_price = get_current_price()
             average_price = get_position_price_BTC()
             print('Current price = ', current_price, '\n', 'Average price = ', average_price)
             if average_price - current_price > average_price * Decimal('0.01'):
@@ -176,13 +177,5 @@ def get_BTC_list():
     return response["result"]["list"][0]
 
 
-# orders()
-# create_take_1()
-# create_take_2()
-# control_price_BTC()
-# get_price_BTC()
-# get_qty_BTC()
-# get_position_price_BTC()
-# get_position_BTC()
-# cancel_all()
-print(get_positional_side(get_BTC_list()))
+# def transfer_to_USDT():
+

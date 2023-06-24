@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from django.db import models
 
-from api_v5 import HTTP_Request, get_price_BTC, get_qty_BTC, get_position_price_BTC, cancel_all
+from api_v5 import HTTP_Request, get_price_BTC, get_qty_BTC, get_position_price_BTC, cancel_all, get_BTC_list
 
 
 class Order(models.Model):
@@ -59,8 +59,8 @@ class Order(models.Model):
         HTTP_Request(endpoint, method, params, "Create")
 
     def create_teke_on_sell(self):
-        qty = round(get_qty_BTC() / 2, 3)
-        price = get_position_price_BTC()
+        qty = round(get_qty_BTC(get_BTC_list()) / 2, 3)
+        price = get_position_price_BTC(get_BTC_list())
         take1 = Order.objects.create(
             category='linear',
             symbol=self.symbol,

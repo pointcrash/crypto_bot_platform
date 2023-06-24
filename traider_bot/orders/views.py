@@ -11,3 +11,6 @@ def create_order(request):
     else:
         form = OrderForm()
     return render(request, 'create_order.html', {'form': form})
+#
+# def create_order(request):
+#     return render(request, 'create_order.html', {'form': form})
