@@ -28,6 +28,10 @@ class Bot(models.Model):
     orderType = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='Limit')
     qty = models.DecimalField(max_digits=10, decimal_places=3)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    qty_kline = models.IntegerField(blank=True, null=True, default=20)
+    interval = models.IntegerField(blank=True, null=True, default=15)
+    d = models.IntegerField(blank=True, null=True, default=2)
+    process_id = models.CharField(max_length=255, null=True, blank=True)
 
     # triggerDirection = models.IntegerField(null=True)
     # orderFilter = models.CharField(max_length=100, null=True)

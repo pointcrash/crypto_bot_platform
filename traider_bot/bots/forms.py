@@ -14,6 +14,9 @@ class BotForm(forms.ModelForm):
             'side': forms.Select(attrs={'class': 'form-control'}),
             'orderType': forms.Select(attrs={'class': 'form-control'}),
             'isLeverage': forms.NumberInput(attrs={'class': 'form-control'}),
+            'qty_kline': forms.NumberInput(attrs={'class': 'form-control'}),
+            'interval': forms.NumberInput(attrs={'class': 'form-control'}),
+            'd': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'qty': 'Quantity USDT',
@@ -23,4 +26,7 @@ class BotForm(forms.ModelForm):
             'side': 'Side',
             'orderType': 'Order Type',
             'isLeverage': 'Leverage',
+            'qty_kline': 'Quantity Kline',
+            'interval': 'Time Interval',
+            'd': 'Digit multiply',
         }

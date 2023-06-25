@@ -1,8 +1,3 @@
-import json
-import math
-import uuid
-from decimal import Decimal
-
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -46,7 +41,7 @@ class Order(models.Model):
         current_qty = get_qty(symbol_list)
         qty = math.floor((current_qty / 2) * 1000) / 1000
         price = get_position_price(symbol_list)
-        side = ("Buy" if get_positional_side(symbol_list) == "Sell" else "Sell")
+        side = ("Buy" if get_side(symbol_list) == "Sell" else "Sell")
 
         if not qty and current_qty:
             take1 = Order.objects.create(
@@ -115,7 +110,7 @@ class Order(models.Model):
 
         if not self.is_take:
             cancel_all(self.category, self.symbol)
-            self.create_teke(3)
+            self.create_teke(fraction_length=3)
 
     def __str__(self):
         return self.orderLinkId

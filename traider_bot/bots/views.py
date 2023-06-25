@@ -1,5 +1,8 @@
+import math
+import multiprocessing
 from django.shortcuts import render, redirect
 
+from bots.bot_logic import set_takes
 from orders.models import Order
 from .forms import BotForm
 from .models import Bot
@@ -10,18 +13,11 @@ def create_bot(request):
         form = BotForm(request.POST)
         if form.is_valid():
             bot = form.save(commit=False)
-            qty, bot.price = bot.get_quantity_from_price(bot.qty)
             bot.save()
 
-            order = Order.objects.create(
-                bot=bot,
-                category=bot.category,
-                symbol=bot.symbol,
-                side=bot.side,
-                orderType=bot.orderType,
-                qty=qty,
-                # price=bot.price,
-            )
+            start_bot = multiprocessing.Process(target=set_takes, args=(bot, 3))
+            start_bot.start()
+
             return redirect('bots_list')
     else:
         form = BotForm()
@@ -46,4 +42,7 @@ def bot_detail(request, bot_id):
         form = BotForm(instance=bot)  # Передаем экземпляр модели в форму
 
     return render(request, 'bot_detail.html', {'form': form, 'bot': bot})
+
+# def terminate_bot(request, ):
+
 

@@ -47,78 +47,6 @@ def genSignature(payload):
     return signature
 
 
-def orders():
-    global total_qty
-    endpoint = "/v5/order/create"
-    method = "POST"
-    orderLinkId = uuid.uuid4().hex
-    total_qty += entry_qty
-    print(total_qty)
-
-    params = {
-        'category': 'linear',
-        'symbol': 'BTCUSDT',
-        'side': 'Sell',
-        'positionIdx': 0,
-        'orderType': 'Market',
-        'qty': str(entry_qty),
-        'timeInForce': 'GTC',
-        'orderLinkId': orderLinkId
-    }
-    params = json.dumps(params)
-    HTTP_Request(endpoint, method, params, "Create")
-
-
-def create_take_1():
-    endpoint = "/v5/order/create"
-    method = "POST"
-    orderLinkId = uuid.uuid4().hex
-    qty = round(get_qty_BTC() / 2, 3)
-    price = get_position_price_BTC()
-    price_sell = round(price * Decimal('1.01'), 2)
-
-    params = {
-        'category': 'linear',
-        'symbol': 'BTCUSDT',
-        'side': 'Sell',
-        'positionIdx': 0,
-        'orderType': 'Limit',
-        'qty': str(qty),
-        'price': str(price_sell),
-        'timeInForce': 'GTC',
-        'orderLinkId': orderLinkId
-    }
-    params = json.dumps(params)
-    HTTP_Request(endpoint, method, params, "Create")
-
-
-def create_take_2():
-    global total_qty
-    endpoint = "/v5/order/create"
-    method = "POST"
-    orderLinkId = uuid.uuid4().hex
-    qty = round(total_qty / 2, 3)
-    print(qty)
-    price = get_position_price_BTC()
-    price_sell = price * Decimal('1.02')
-    price_sell = round(price_sell, 2)
-    print(price_sell)
-
-    params = {
-        'category': 'linear',
-        'symbol': 'BTCUSDT',
-        'side': 'Sell',
-        'positionIdx': 0,
-        'orderType': 'Limit',
-        'qty': str(qty),
-        'price': str(price_sell),
-        'timeInForce': 'GTC',
-        'orderLinkId': orderLinkId
-    }
-    params = json.dumps(params)
-    HTTP_Request(endpoint, method, params, "Create")
-
-
 def cancel_all(category, symbol):
     endpoint = "/v5/order/cancel-all"
     method = "POST"
@@ -135,7 +63,6 @@ def get_current_price(category, symbol):
     method = "GET"
     params = f"category={category}&symbol={symbol}"
     response = json.loads(HTTP_Request(endpoint, method, params, "Price"))
-    # print('BTC price = ', response["result"]["list"][0]["lastPrice"])
     return Decimal(response["result"]["list"][0]["lastPrice"])
 
 
@@ -147,7 +74,7 @@ def get_qty(symbol_list):
     return Decimal(symbol_list["size"])
 
 
-def get_positional_side(symbol_list):
+def get_side(symbol_list):
     return symbol_list["side"]
 
 
@@ -158,38 +85,6 @@ def get_list(category, symbol):
     response = json.loads(HTTP_Request(endpoint, method, params, "Price"))
     # print(response["result"]["list"][0])
     return response["result"]["list"][0]
-
-
-def get_kline(category, symbol, interval, qty_cline):
-    endpoint = "/v5/market/kline"
-    method = "GET"
-    params = f"category={category}&symbol={symbol}&interval={interval}&limit={qty_cline}"
-    response = json.loads(HTTP_Request(endpoint, method, params, "Cline"))
-    print(response["result"]["list"])
-    return response["result"]["list"]
-
-
-def get_closePrice_list(klines):
-    closePrice_list = []
-    for i in klines:
-        closePrice_list.append(Decimal(i[4]))
-    return closePrice_list
-
-
-def calculation_ML(closePrice_list):
-    return sum(closePrice_list) / len(closePrice_list)
-
-
-def calculation_std_dev(closePrice_list):
-    return statistics.stdev(closePrice_list)
-
-
-def calculation_TL(ml, d, std_dev):
-    return ml + (d * std_dev)
-
-
-def calculation_BL(ml, d, std_dev):
-    return ml - (d * std_dev)
 
 # print(get_qty_BTC(get_BTC_list()))
 # print(math.floor((0.001/2) * 1000) / 1000)
