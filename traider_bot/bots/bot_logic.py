@@ -3,7 +3,7 @@ import math
 import statistics
 import time
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 
 import os
 import django
@@ -11,7 +11,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
-from api_v5 import HTTP_Request, cancel_all, get_qty, get_list, get_side, get_position_price
+from api_v5 import HTTP_Request, cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price
 from orders.models import Order
 
 
@@ -67,6 +67,10 @@ class BollingerBands:
 a = BollingerBands("linear", "BTCUSDT", 15, 20, 2)
 
 
+def get_quantity_from_price(qty_USDT, price):
+    return (Decimal(str(qty_USDT)) / price).quantize(Decimal('0.001'), rounding=ROUND_DOWN)
+
+
 def set_entry_point(bot, tl, bl):
     sell_order = Order.objects.create(
         bot=bot,
@@ -74,7 +78,7 @@ def set_entry_point(bot, tl, bl):
         symbol=bot.symbol,
         side="Sell",
         orderType="Limit",
-        qty=bot.qty,
+        qty=get_quantity_from_price(bot.qty, tl+1),
         price=tl + 1,
     )
 
@@ -84,13 +88,13 @@ def set_entry_point(bot, tl, bl):
         symbol=bot.symbol,
         side="Buy",
         orderType="Limit",
-        qty=bot.qty,
+        qty=get_quantity_from_price(bot.qty, bl-1),
         price=bl - 1,
     )
 
 
 def calculation_entry_point(bot):
-    BB_obj = BollingerBands(bot.category, bot.symbol, bot.interval, bot.qty_cline, bot.d)
+    BB_obj = BollingerBands(bot.category, bot.symbol, bot.interval, bot.qty_kline, bot.d)
     first_cycle = True
 
     while True:
@@ -113,7 +117,6 @@ def calculation_entry_point(bot):
 
 
 def set_takes(bot, fraction_length=3):
-
     while True:
         psn_qty, psn_side, psn_price, BB_obj, first_cycle = calculation_entry_point(bot)
 
@@ -189,4 +192,3 @@ def set_takes(bot, fraction_length=3):
                     price=round(exit_line, 2),
                     is_take=True,
                 )
-

@@ -7,7 +7,7 @@ from bots.models import Bot
 
 class Order(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='orders', blank=True, null=True)
-    category = models.CharField()
+    category = models.CharField(default="linear")
     symbol = models.CharField(max_length=10)
     side = models.CharField()
     positionIdx = models.IntegerField(blank=True, null=True, default=0)
@@ -97,9 +97,9 @@ class Order(models.Model):
                 is_take=True,
             )
 
-    def clean(self):
-        if self.orderType == 'Limit' and not self.price:
-            raise ValidationError({'price': 'Price is required for Limit order type.'})
+    # def clean(self):
+    #     if self.orderType == 'Limit' and not self.price:
+    #         raise ValidationError({'price': 'Price is required for Limit order type.'})
 
     def save(self, *args, **kwargs):
 
@@ -108,9 +108,9 @@ class Order(models.Model):
         super().save(*args, **kwargs)
         self.realize_order()
 
-        if not self.is_take:
-            cancel_all(self.category, self.symbol)
-            self.create_teke(fraction_length=3)
+        # if self.orderType == 'Market':
+        #     cancel_all(self.category, self.symbol)
+        #     self.create_teke(fraction_length=3)
 
     def __str__(self):
         return self.orderLinkId

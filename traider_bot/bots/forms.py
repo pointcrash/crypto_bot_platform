@@ -5,10 +5,10 @@ from .models import Bot
 class BotForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = '__all__'
+        fields = ['category', 'symbol', 'isLeverage', 'orderType', 'qty', 'qty_kline', 'interval', 'd', ]
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
-            'price': forms.TextInput(attrs={'class': 'form-control'}),
+            # 'price': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
             'symbol': forms.TextInput(attrs={'class': 'form-control'}),
             'side': forms.Select(attrs={'class': 'form-control'}),
@@ -20,7 +20,7 @@ class BotForm(forms.ModelForm):
         }
         labels = {
             'qty': 'Quantity USDT',
-            'price': 'Price',
+            # 'price': 'Price',
             'category': 'Category',
             'symbol': 'Symbol',
             'side': 'Side',

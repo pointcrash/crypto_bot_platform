@@ -31,7 +31,7 @@ class Bot(models.Model):
     qty_kline = models.IntegerField(blank=True, null=True, default=20)
     interval = models.IntegerField(blank=True, null=True, default=15)
     d = models.IntegerField(blank=True, null=True, default=2)
-    process_id = models.CharField(max_length=255, null=True, blank=True)
+    process_id = models.CharField(max_length=255, blank=True, null=True, default=None)
 
     # triggerDirection = models.IntegerField(null=True)
     # orderFilter = models.CharField(max_length=100, null=True)
@@ -63,6 +63,6 @@ class Bot(models.Model):
         current_price = Decimal(get_current_price(self.category, self.symbol))
         return (Decimal(qty_USDT) / current_price).quantize(Decimal('0.001'), rounding=ROUND_DOWN), current_price
 
-    def clean(self):
-        if self.orderType == 'Limit' and not self.price:
-            raise ValidationError({'price': 'Price is required for Limit order type.'})
+    # def clean(self):
+    #     if self.orderType == 'Limit' and not self.price:
+    #         raise ValidationError({'price': 'Price is required for Limit order type.'})

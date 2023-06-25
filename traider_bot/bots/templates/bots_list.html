@@ -16,13 +16,14 @@
                     <th>Order Type</th>
                     <th>Quantity</th>
                     <th>Price</th>
+                    <th>Is alive</th>
                     <th style="color: orange">Edit</th>
                     <th style="color: red">Delete</th>
 <!--                    <th>Time In Force</th>-->
                 </tr>
                 </thead>
                 <tbody>
-                {% for bot in bots %}
+                {% for bot, is_alive in bots %}
                 <tr class="text-center">
                     <td>{{ bot.pk }}</td>
                     <td>{{ bot.category }}</td>
@@ -32,6 +33,7 @@
                     <td>{{ bot.orderType }}</td>
                     <td>{{ bot.qty }}</td>
                     <td>{{ bot.price }}</td>
+                    <td>{{ is_alive }}</td>
                     <td><a class="btn btn-sm btn-warning" href="{% url 'bot_detail' bot_id=bot.pk %}">Edit</a></td>
                     <td><a class="btn btn-sm btn-danger" href="#">Delete</a></td>
 <!--                    <td>{{ order.timeInForce }}</td>-->
