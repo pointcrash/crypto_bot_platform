@@ -18,7 +18,7 @@
                     <th>Price</th>
                     <th>Is alive</th>
                     <th style="color: orange">Edit</th>
-                    <th style="color: red">Delete</th>
+                    <th style="color: red">Stop</th>
 <!--                    <th>Time In Force</th>-->
                 </tr>
                 </thead>
@@ -33,9 +33,10 @@
                     <td>{{ bot.orderType }}</td>
                     <td>{{ bot.qty }}</td>
                     <td>{{ bot.price }}</td>
-                    <td>{{ is_alive }}</td>
+                    <td>{% if is_alive %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
+                    {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}</td>
                     <td><a class="btn btn-sm btn-warning" href="{% url 'bot_detail' bot_id=bot.pk %}">Edit</a></td>
-                    <td><a class="btn btn-sm btn-danger" href="#">Delete</a></td>
+                    <td>{% include 'modal_stop_bot.html' %}</td>
 <!--                    <td>{{ order.timeInForce }}</td>-->
                 </tr>
                 {% endfor %}

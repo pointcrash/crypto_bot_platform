@@ -7,12 +7,14 @@ from api_v5 import get_current_price
 class Bot(models.Model):
     CATEGORY_CHOICES = (
         ('linear', 'Linear'),
+        ('spot', 'Spot'),
         # Другие варианты категории ордера
     )
 
     SIDE_CHOICES = (
         ('Buy', 'Buy'),
         ('Sell', 'Sell'),
+        ('Auto', 'Auto'),
     )
 
     ORDER_TYPE_CHOICES = (
@@ -21,15 +23,38 @@ class Bot(models.Model):
         # Другие варианты типа ордера
     )
 
+    MARGIN_TYPE_CHOICES = (
+        ('CROSS', 'CROSS'),
+        ('ISOLATED', 'ISOLATED'),
+        # Другие варианты типа ордера
+    )
+
+    KLINE_INTERVAL_CHOICES = (
+        ('1', '1'),
+        ('3', '3'),
+        ('5', '5'),
+        ('15', '15'),
+        ('30', '30'),
+        ('60', '60'),
+        ('120', '120'),
+        ('240', '240'),
+        ('360', '360'),
+        ('720', '720'),
+        ('D', 'D'),
+        ('M', 'M'),
+        ('W', 'W'),
+    )
+
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.CharField(max_length=100)
     isLeverage = models.IntegerField(default=10)
-    side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='Buy')
+    side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='Auto')
     orderType = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='Limit')
-    qty = models.DecimalField(max_digits=10, decimal_places=3)
+    qty = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS')
     qty_kline = models.IntegerField(blank=True, null=True, default=20)
-    interval = models.IntegerField(blank=True, null=True, default=15)
+    interval = models.CharField(max_length=3, choices=KLINE_INTERVAL_CHOICES, default='15')
     d = models.IntegerField(blank=True, null=True, default=2)
     process_id = models.CharField(max_length=255, blank=True, null=True, default=None)
 

@@ -7,24 +7,67 @@
         <form method="POST">
             {% csrf_token %}
             <div class="row">
-                <div class="col-md-6">
+                {% if message %}
+                <div class="alert alert-warning" role="alert">
+                    {{ message }}
+                </div>
+                {% endif %}
+
+                <div class="col-md-6 p-3">
                     {{ form.category.label_tag }}
                     {{ form.category }}
                     {{ form.symbol.label_tag }}
                     {{ form.symbol }}
+                    {{ form.interval.label_tag }}
+                    {{ form.interval }}
                     {{ form.isLeverage.label_tag }}
                     {{ form.isLeverage }}
+                    {{ form.margin_type.label_tag }}
+                    {{ form.margin_type }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 p-3">
                     {{ form.side.label_tag }}
                     {{ form.side }}
                     {{ form.orderType.label_tag }}
                     {{ form.orderType }}
                     {{ form.qty.label_tag }}
                     {{ form.qty }}
+                    {{ form.qty_kline.label_tag }}
+                    {{ form.qty_kline }}
+                    {{ form.d.label_tag }}
+                    {{ form.d }}
                 </div>
             </div>
-            <button type="submit" class="btn btn-success mt-3">Save</button>
+            <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
+                    data-bs-target="#deleteBotModal">Delete Bot</button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="deleteBotModal" tabindex="-1" aria-labelledby="stopBotModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="deleteBotModalLabel">{{ bot.symbol }}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6>Choose way to delete:</h6>
+                        </div>
+                        <div class="modal-footer">
+                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=1 %}"
+                               class="btn btn-warning col-12">Delete and stop bot only</a>
+                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
+                               class="btn btn-warning col-12">Delete bot with cancel all orders</a>
+                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"
+                               class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
+                                Market
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 </div>

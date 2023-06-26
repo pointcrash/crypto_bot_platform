@@ -3,6 +3,7 @@ from django.db import models
 
 from api_v5 import *
 from bots.models import Bot
+from main.models import Log
 
 
 class Order(models.Model):
@@ -19,9 +20,10 @@ class Order(models.Model):
     is_take = models.BooleanField(default=False)
 
     def realize_order(self):
+        Log.objects.create(content='Зашли в релиз ордер')
+
         endpoint = "/v5/order/create"
         method = "POST"
-
         params = {
             'category': self.category,
             'symbol': self.symbol,
@@ -33,10 +35,16 @@ class Order(models.Model):
             'timeInForce': self.timeInForce,
             'orderLinkId': self.orderLinkId
         }
+        # Log.objects.create(content='сформировали параметры')
         params = json.dumps(params)
-        HTTP_Request(endpoint, method, params, "Create")
+        # Log.objects.create(content='дамп параметров в строку')
+        response = HTTP_Request(endpoint, method, params, "Create")
+        # Log.objects.create(content='отправили запрос на создание ордера, все ОК')
+        print(response)
 
     def create_teke(self, fraction_length):
+        Log.objects.create(content='НЕПОНЯТНО НАХУЯ ВОШЛИ В КРЕАТЕ ТАКЕ')
+
         symbol_list = get_list(self.category, self.symbol)
         current_qty = get_qty(symbol_list)
         qty = math.floor((current_qty / 2) * 1000) / 1000
@@ -50,11 +58,11 @@ class Order(models.Model):
                 symbol=self.symbol,
                 side=side,
                 orderType='Limit',
-                qty=(qty+0.001),
+                qty=(qty + 0.001),
                 price=round(price * Decimal('1.01'), 2),
                 is_take=True,
             )
-        elif qty and float(current_qty) % (2 / 10**fraction_length) == 0:
+        elif qty and float(current_qty) % (2 / 10 ** fraction_length) == 0:
             take1 = Order.objects.create(
                 bot=self.bot,
                 category='linear',
@@ -92,7 +100,7 @@ class Order(models.Model):
                 symbol=self.symbol,
                 side=side,
                 orderType='Limit',
-                qty=(qty+0.001),
+                qty=(qty + 0.001),
                 price=round(price * Decimal('1.02'), 2),
                 is_take=True,
             )
@@ -103,10 +111,14 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
 
+        # Log.objects.create(content='Сохраняем объект ордера')
         if not self.orderLinkId:
+            # Log.objects.create(content='Устанавливаем orderLinkId')
             self.orderLinkId = uuid.uuid4().hex
         super().save(*args, **kwargs)
+        # Log.objects.create(content='Вызвали метод супер сейв')
         self.realize_order()
+        # Log.objects.create(content='отработал релиз ордер')
 
         # if self.orderType == 'Market':
         #     cancel_all(self.category, self.symbol)

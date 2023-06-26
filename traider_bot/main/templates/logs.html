@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center">Logs</h1>
+            <div class="card mt-4">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Logs ID</th>
+                        <th>Content</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.pk }}</td>
+                        <td>{{ log.content }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

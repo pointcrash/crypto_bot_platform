@@ -1,10 +1,12 @@
 import math
 import multiprocessing
 from django.shortcuts import render, redirect
-import psutil
-from bots.bot_logic import set_takes
+from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders, \
+    stop_bot_with_cancel_orders_and_drop_positions
+from .bot_logic import set_takes
 from .forms import BotForm
 from .models import Bot
+from django.contrib import messages
 
 
 def create_bot(request):
@@ -30,15 +32,7 @@ def bots_list(request):
     is_alive_list = []
     for bot in bots:
         if bot.process_id is not None:
-            try:
-                process = psutil.Process(int(bot.process_id))
-                if process.is_running():
-                    is_alive_list.append("Выполняется")
-                else:
-                    is_alive_list.append("Завершен")
-            except psutil.NoSuchProcess:
-                is_alive_list.append("Не найден")
-
+            is_alive_list.append(get_status_process(bot.process_id))
         else:
             is_alive_list.append(None)
 
@@ -47,29 +41,56 @@ def bots_list(request):
 
 
 def bot_detail(request, bot_id):
+    message = []
+    error_message = messages.get_messages(request)
+    if error_message:
+        message.append(error_message)
     bot = Bot.objects.get(pk=bot_id)
     if request.method == 'POST':
         form = BotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
-            form.save()
+            bot = form.save()
+            if get_status_process(bot.process_id):
+                terminate_process_by_pid(bot.process_id)
+            bot_process = multiprocessing.Process(target=set_takes, args=(bot, 3))
+            bot_process.start()
+            bot.process_id = str(bot_process.pid)
+            bot.save()
             return redirect('bots_list')
     else:
         form = BotForm(instance=bot)  # Передаем экземпляр модели в форму
 
-    return render(request, 'bot_detail.html', {'form': form, 'bot': bot})
+    return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'message': message})
 
 
-def start_bot(request, bot_id):
+def terminate_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
-    if bot.process_id is not None:
-        bot_process = multiprocessing.Process(int(bot.process_id))
-        bot_process.start()
+
+    if event_number == 1:
+        terminate_process_by_pid(bot.process_id)
+
+    elif event_number == 2:
+        stop_bot_with_cancel_orders(bot)
+
+    elif event_number == 3:
+        stop_bot_with_cancel_orders_and_drop_positions(bot)
+
+    bot.process_id = None
+    bot.save()
     return redirect('bots_list')
 
 
-def terminate_bot(request, bot_id):
+def delete_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
-    if bot.process_id is not None:
-        bot_process = multiprocessing.Process(int(bot.process_id))
-        bot_process.terminate()
+    if event_number == 1:
+        terminate_process_by_pid(bot.process_id)
+
+    elif event_number == 2:
+        stop_bot_with_cancel_orders(bot)
+
+    elif event_number == 3:
+        stop_bot_with_cancel_orders_and_drop_positions(bot)
+    bot.delete()
     return redirect('bots_list')
+
+

@@ -86,6 +86,7 @@ def get_list(category, symbol):
     # print(response["result"]["list"][0])
     return response["result"]["list"][0]
 
+
 # print(get_qty_BTC(get_BTC_list()))
 # print(math.floor((0.001/2) * 1000) / 1000)
 # print("Buy" if "Bsdf" == "Sell" else "Sell")
