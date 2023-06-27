@@ -2,6 +2,7 @@ from django.db import models
 from decimal import Decimal, ROUND_DOWN
 from django.core.exceptions import ValidationError
 from api_v5 import get_current_price
+from main.models import Account
 
 
 class Bot(models.Model):
@@ -45,6 +46,7 @@ class Bot(models.Model):
         ('W', 'W'),
     )
 
+    account = models.OneToOneField(Account, on_delete=models.DO_NOTHING)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.CharField(max_length=100)
     isLeverage = models.IntegerField(default=10)

@@ -17,7 +17,8 @@ from orders.models import Order
 
 
 class BollingerBands:
-    def __init__(self, category: str, symbol: str, interval: int, qty_cline: int, d: int):
+    def __init__(self, account, category: str, symbol: str, interval: int, qty_cline: int, d: int):
+        self.account = account
         self.category = category
         self.symbol = symbol
         self.interval = interval
@@ -37,7 +38,7 @@ class BollingerBands:
         endpoint = "/v5/market/kline"
         method = "GET"
         params = f"category={self.category}&symbol={self.symbol}&interval={self.interval}&limit={self.qty_cline}"
-        response = json.loads(HTTP_Request(endpoint, method, params, "Cline"))
+        response = json.loads(HTTP_Request(self.account, endpoint, method, params, "Cline"))
         self.kline_list = response["result"]["list"]
         # Log.objects.create(content='Получили пакет свечей')
         return response["result"]["list"]
@@ -73,7 +74,7 @@ class BollingerBands:
         return round(Decimal(self.ml - (self.d * self.std_dev)), 2)
 
 
-a = BollingerBands("linear", "BTCUSDT", 15, 20, 2)
+# a = BollingerBands("linear", "BTCUSDT", 15, 20, 2)
 
 
 def get_quantity_from_price(qty_USDT, price):
@@ -120,12 +121,12 @@ def set_entry_point(bot, tl, bl):
 def calculation_entry_point(bot):
     # Log.objects.create(content='Функция calculation_entry_point - вход')
 
-    BB_obj = BollingerBands(bot.category, bot.symbol, bot.interval, bot.qty_kline, bot.d)
+    BB_obj = BollingerBands(bot.account, bot.category, bot.symbol, bot.interval, bot.qty_kline, bot.d)
     first_cycle = True
     # Log.objects.create(content='Создан объект ВВ')
 
     while True:
-        symbol_list = get_list(bot.category, bot.symbol)
+        symbol_list = get_list(bot.account, bot.category, bot.symbol)
         # Log.objects.create(content='Получение данных по позиции')
 
         if get_qty(symbol_list):
@@ -148,7 +149,7 @@ def calculation_entry_point(bot):
 
         if first_cycle or tl != BB_obj.tl or bl != BB_obj.bl:
             # Log.objects.create(content='Первый цикл входа или тл бл изменилось')
-            cancel_all(bot.category, bot.symbol)
+            cancel_all(bot.account, bot.category, bot.symbol)
             set_entry_point(bot, tl, bl)
 
         first_cycle = False
@@ -170,7 +171,7 @@ def set_takes(bot, fraction_length=3):
 
         if not first_cycle or set_takes_qty != psn_qty or tl != BB_obj.tl or bl != BB_obj.bl:
             # Log.objects.create(content='Перый цикл тейков или тл бл изменились')
-            cancel_all(bot.category, bot.symbol)
+            cancel_all(bot.account, bot.category, bot.symbol)
 
             side = "Buy" if psn_side == "Sell" else "Sell"
             qty = math.floor((psn_qty / 2) * 10 ** fraction_length) / 10 ** fraction_length
@@ -244,7 +245,7 @@ def set_takes(bot, fraction_length=3):
 
 
 def to_avg(bot, side, psn_price):
-    current_price = get_current_price(bot.category, bot.symbol)
+    current_price = get_current_price(bot.account, bot.category, bot.symbol)
     if side == "Buy":
         if psn_price - current_price > psn_price * Decimal('0.01'):
             order = Order.objects.create(

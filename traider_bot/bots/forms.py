@@ -5,11 +5,12 @@ from .models import Bot
 class BotForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['category', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
+        fields = ['account', 'category', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
                   'qty_kline', 'd', ]
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
             # 'price': forms.TextInput(attrs={'class': 'form-control'}),
+            'account': forms.Select(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
             'symbol': forms.TextInput(attrs={'class': 'form-control'}),
             'side': forms.Select(attrs={'class': 'form-control'}),
@@ -23,6 +24,7 @@ class BotForm(forms.ModelForm):
         labels = {
             'qty': '1st order investments',
             # 'price': 'Price',
+            'account': 'Account',
             'category': 'Category',
             'symbol': 'Symbol',
             'side': 'Side',

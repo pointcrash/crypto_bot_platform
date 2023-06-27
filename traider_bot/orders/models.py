@@ -1,4 +1,6 @@
-from django.core.exceptions import ValidationError
+import math
+import uuid
+
 from django.db import models
 
 from api_v5 import *
@@ -20,7 +22,7 @@ class Order(models.Model):
     is_take = models.BooleanField(default=False)
 
     def realize_order(self):
-        Log.objects.create(content='Зашли в релиз ордер')
+        # Log.objects.create(content='Зашли в релиз ордер')
 
         endpoint = "/v5/order/create"
         method = "POST"
@@ -38,14 +40,14 @@ class Order(models.Model):
         # Log.objects.create(content='сформировали параметры')
         params = json.dumps(params)
         # Log.objects.create(content='дамп параметров в строку')
-        response = HTTP_Request(endpoint, method, params, "Create")
+        response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
         # Log.objects.create(content='отправили запрос на создание ордера, все ОК')
         print(response)
 
     def create_teke(self, fraction_length):
         Log.objects.create(content='НЕПОНЯТНО НАХУЯ ВОШЛИ В КРЕАТЕ ТАКЕ')
 
-        symbol_list = get_list(self.category, self.symbol)
+        symbol_list = get_list(self.bot.account, self.category, self.symbol)
         current_qty = get_qty(symbol_list)
         qty = math.floor((current_qty / 2) * 1000) / 1000
         price = get_position_price(symbol_list)

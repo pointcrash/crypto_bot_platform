@@ -33,7 +33,7 @@ def get_status_process(pid):
 
 
 def drop_position(bot):
-    symbol_list = get_list(bot.category, bot.symbol)
+    symbol_list = get_list(bot.account, bot.category, bot.symbol)
     psn_qty, psn_side = get_qty(symbol_list), get_side(symbol_list)
     side = "Buy" if psn_side == "Sell" else "Sell"
 
@@ -50,12 +50,12 @@ def drop_position(bot):
 
 def stop_bot_with_cancel_orders(bot):
     terminate_process_by_pid(bot.process_id)
-    cancel_all(bot.category, bot.symbol)
+    cancel_all(bot.account, bot.category, bot.symbol)
     Log.objects.create(content="Bot stopped and cancel all orders is success")
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
     terminate_process_by_pid(bot.process_id)
-    cancel_all(bot.category, bot.symbol)
+    cancel_all(bot.account, bot.category, bot.symbol)
     drop_position(bot)
     Log.objects.create(content="Bot stopped, cancel all orders and drop position is success")
