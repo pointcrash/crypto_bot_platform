@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-6 mx-auto">
+        <h2 class="text-center">Account create</h2>
+        <form method="POST">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit" class="btn btn-success mt-3">Create</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

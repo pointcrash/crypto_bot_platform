@@ -10,7 +10,6 @@
         <div class="collapse navbar-collapse rounded" id="navbarSupportedContent" style="background-color: #f6f8f8; opacity: 0.95;">
             <ul class="navbar-nav me-auto m-2 text-center mb-lg-0">
                 <li class="nav-item" style="opacity: 0.6;">
-<!--                    <a class="nav-link col-951" href="{% url 'home' %}">Orders</a>-->
                 </li>
 
             </ul>
@@ -21,16 +20,16 @@
                     <a style="opacity: 0.6;" class="nav-link active" aria-current="page" href="#">{{ user.username }}</a>
                 </li>
                 <li class="nav-item">
-                    <a style="opacity: 0.6;" class="nav-link active" aria-current="page" href="#">Выйти</a>
+                    <a style="opacity: 0.6;" class="nav-link active" aria-current="page" href="{% url 'logout' %}">Выйти</a>
                 </li>
             </ul>
             {% else %}
             <ul class="navbar-nav ms-auto m-2 text-center mb-lg-0">
                 <li class="nav-item">
-                    <a style="opacity: 0.6;" class="nav-link" href="#">Регистрация</a>
+                    <a style="opacity: 0.6;" class="nav-link" href="{% url 'register' %}">Регистрация</a>
                 </li>
                 <li class="nav-item" style="opacity: 0.6;">
-                    <a class="nav-link active" aria-current="page" href="#">Войти</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Войти</a>
                 </li>
             </ul>
             {% endif %}

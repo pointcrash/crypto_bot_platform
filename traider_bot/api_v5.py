@@ -15,8 +15,6 @@ secret_key = API_SECRET
 httpClient = requests.Session()
 recv_window = str(5000)
 url = "https://api-testnet.bybit.com"  # Testnet endpoint
-entry_qty = 0.006
-total_qty = 0
 
 
 def HTTP_Request(endPoint, method, payload, Info=' '):

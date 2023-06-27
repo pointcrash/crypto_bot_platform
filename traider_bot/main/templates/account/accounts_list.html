@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center">Accounts</h1>
+                <a href="{% url 'create_account' %}" class="btn btn-success">Add new account</a>
+            <div class="card mt-2 mt-2 border-0 shadow p-3">
+                <table class="table">
+                    <thead>
+                    <tr class=" text-center">
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Is mainnet</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for account in accounts %}
+                    <tr class=" text-center">
+                        <td>{{ account.pk }}</td>
+                        <td>{{ account.name }}</td>
+                        <td>{{ account.is_mainnet }}</td>
+                        <td><a class="btn btn-sm btn-warning" href="{% url 'edit_account' acc_id=account.pk %}">Edit</a></td>
+                        <td>{% include 'account/delete_account_modal.html' %}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

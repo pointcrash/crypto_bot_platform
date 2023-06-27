@@ -1,5 +1,7 @@
 import math
 import multiprocessing
+
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders, \
     stop_bot_with_cancel_orders_and_drop_positions
@@ -9,6 +11,7 @@ from .models import Bot
 from django.contrib import messages
 
 
+@login_required
 def create_bot(request):
     if request.method == 'POST':
         form = BotForm(request.POST)
@@ -27,6 +30,7 @@ def create_bot(request):
     return render(request, 'create_bot.html', {'form': form})
 
 
+@login_required
 def bots_list(request):
     bots = Bot.objects.all()
     is_alive_list = []
@@ -40,6 +44,7 @@ def bots_list(request):
     return render(request, 'bots_list.html', {'bots': bots})
 
 
+@login_required
 def bot_detail(request, bot_id):
     message = []
     error_message = messages.get_messages(request)
@@ -63,6 +68,7 @@ def bot_detail(request, bot_id):
     return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'message': message})
 
 
+@login_required
 def terminate_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
 
@@ -80,6 +86,7 @@ def terminate_bot(request, bot_id, event_number):
     return redirect('bots_list')
 
 
+@login_required
 def delete_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
     if event_number == 1:
@@ -92,5 +99,3 @@ def delete_bot(request, bot_id, event_number):
         stop_bot_with_cancel_orders_and_drop_positions(bot)
     bot.delete()
     return redirect('bots_list')
-
-

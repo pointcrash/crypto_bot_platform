@@ -3,11 +3,12 @@
 {% block content %}
 <div class="row">
     <div class="col-11 mx-auto">
+            <h1 class="text-center">Bots</h1>
         <a class="btn btn-success" href="{% url 'create_bot' %}">Add new bot</a>
-        <div class="card mt-2">
+        <div class="card mt-2 border-0 shadow p-3">
             <table class="table">
                 <thead>
-                <tr  class=" text-center">
+                <tr class=" text-center">
                     <th>Bot ID</th>
                     <th>Category</th>
                     <th>Symbol</th>
@@ -36,7 +37,9 @@
                     <td>{% if is_alive %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
                     {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}</td>
                     <td><a class="btn btn-sm btn-warning" href="{% url 'bot_detail' bot_id=bot.pk %}">Edit</a></td>
-                    <td>{% include 'modal_stop_bot.html' %}</td>
+                    {% if is_alive %}<td>{% include 'modal_stop_bot.html' %}</td>
+                    {% else %}<td><button class="btn btn-sm btn-danger" disabled>Stop</button></td>
+                    {% endif %}
 <!--                    <td>{{ order.timeInForce }}</td>-->
                 </tr>
                 {% endfor %}

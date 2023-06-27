@@ -1,8 +1,10 @@
 from pathlib import Path
 
+from config import django_app_key
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-2+zj$xk6c+=@fdw=(bv%m&vs3t03^7hyvllsoh(e!nubh5@v(o'
+SECRET_KEY = django_app_key
 
 DEBUG = True
 
@@ -61,6 +63,8 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+LOGIN_URL = "/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
