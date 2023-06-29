@@ -46,7 +46,7 @@ class Bot(models.Model):
         ('W', 'W'),
     )
 
-    account = models.OneToOneField(Account, on_delete=models.DO_NOTHING)
+    account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.CharField(max_length=100)
     isLeverage = models.IntegerField(default=10)

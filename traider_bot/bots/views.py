@@ -1,6 +1,7 @@
 import math
 import multiprocessing
-
+import time
+from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders, \
@@ -16,6 +17,7 @@ def create_bot(request):
     if request.method == 'POST':
         form = BotForm(request.POST)
         if form.is_valid():
+
             bot = form.save(commit=False)
             bot.save()
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, 3))

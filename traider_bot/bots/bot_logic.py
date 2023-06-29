@@ -28,7 +28,8 @@ class BollingerBands:
 
     def istime_update_kline(self):
         # Log.objects.create(content='Проверяем не время ли обновить данные по ВВ')
-        if datetime.now() - datetime.fromtimestamp(float(self.kline_list[0][0]) / 1000.0) > timedelta(minutes=int(self.interval)):
+        if datetime.now() - datetime.fromtimestamp(float(self.kline_list[0][0]) / 1000.0) > timedelta(
+                minutes=int(self.interval)):
             return True
         return False
 
@@ -145,7 +146,7 @@ def calculation_entry_point(bot):
 
         if not first_cycle:
             # Log.objects.create(content='Смотрим за ценами на вход, ждем 30 сек')
-            time.sleep(30)
+            time.sleep(10)
 
         if first_cycle or tl != BB_obj.tl or bl != BB_obj.bl:
             # Log.objects.create(content='Первый цикл входа или тл бл изменилось')
@@ -167,7 +168,7 @@ def set_takes(bot, fraction_length=3):
 
         if first_cycle:  # Not first cycle (-_-)
             # Log.objects.create(content='Проверка на первый цикл не прошла, ждем 30 сек')
-            time.sleep(30)
+            time.sleep(10)
 
         if not first_cycle or set_takes_qty != psn_qty or tl != BB_obj.tl or bl != BB_obj.bl:
             # Log.objects.create(content='Перый цикл тейков или тл бл изменились')
@@ -197,7 +198,7 @@ def set_takes(bot, fraction_length=3):
                     is_take=True,
                 )
                 # Log.objects.create(content='Создан один тейк not qty and psn_qty')
-            elif qty and float(psn_qty) % (2 / 10 ** fraction_length) == 0:
+            elif qty and (psn_qty * (10 ** fraction_length)) % 2 == 0:
                 take1 = Order.objects.create(
                     bot=bot,
                     category=bot.category,
@@ -273,3 +274,9 @@ def to_avg(bot, side, psn_price):
             return True
         else:
             return False
+
+
+# psn_qty = 0.050
+# fraction_length = 3
+# print(0.050)
+# print((psn_qty * 10 ** fraction_length) % 2)
