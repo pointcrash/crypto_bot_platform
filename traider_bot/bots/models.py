@@ -67,6 +67,17 @@ class Bot(models.Model):
     d = models.IntegerField(blank=True, null=True, default=2)
     process_id = models.CharField(max_length=255, blank=True, null=True, default=None)
     work_model = models.CharField(max_length=10, null=True, blank=True)
+    take_on_ml = models.BooleanField(default=True)
+    take_on_ml_percent = models.DecimalField(max_digits=5, decimal_places=2, default=50)
+    auto_avg = models.BooleanField(default=True)
+    bb_avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
+    grid_avg_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
+    grid_profit_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
+    is_percent_deviation_from_lines = models.BooleanField(default=False)
+    deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
+    dfm = models.IntegerField(default=30)
+    chw = models.IntegerField(default=2)
+    max_margin = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.symbol.name

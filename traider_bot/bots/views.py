@@ -23,7 +23,6 @@ def bb_create_bot(request):
             bot.owner = request.user
             bot.save()
             connections.close_all()
-
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, ))
             bot_process.start()
             bot.process_id = str(bot_process.pid)

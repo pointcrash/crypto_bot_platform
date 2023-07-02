@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-6 mx-auto">
+    <div class="col-10 mx-auto">
         <h2 class="text-center">Create {{ title }}</h2>
         <form method="POST">
             {% csrf_token %}
-            <div class="row">
+            <div class="row justify-content-center">
                 {% if form.errors %}
                 <div class="alert alert-danger">
                     {% for field_errors in form.errors.values %}
@@ -16,32 +16,97 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <div class="col-md-6 p-3">
+                <div class="card shadow col-md-3 p-3 m-2">
+                    <h4 class="text-center">Settings</h4>
+
                     {{ form.account.label_tag }}
                     {{ form.account }}
+                    <br>
                     {{ form.symbol.label_tag }}
                     {{ form.symbol }}
-                    {{ form.interval.label_tag }}
-                    {{ form.interval }}
-                    {{ form.isLeverage.label_tag }}
-                    {{ form.isLeverage }}
-                    {{ form.margin_type.label_tag }}
-                    {{ form.margin_type }}
-                </div>
-                <div class="col-md-6 p-3">
+                    <br>
                     {{ form.side.label_tag }}
                     {{ form.side }}
+                    <br>
+                    {{ form.interval.label_tag }}
+                    {{ form.interval }}
+                    <br>
+                    {{ form.isLeverage.label_tag }}
+                    {{ form.isLeverage }}
+                    <br>
+                    {{ form.margin_type.label_tag }}
+                    {{ form.margin_type }}
+                    <br>
+                </div>
+                <div class="card shadow col-md-3 p-3 m-2">
                     {{ form.orderType.label_tag }}
                     {{ form.orderType }}
+                    <br>
                     {{ form.qty.label_tag }}
                     {{ form.qty }}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form.deviation_from_lines.label_tag }}
+                            {{ form.deviation_from_lines }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ form.is_percent_deviation_from_lines }}
+                            {{ form.is_percent_deviation_from_lines.label_tag }}
+                        </div>
+                    </div>
+                    <hr>
+                    {% if title == 'Bollinger Bands Bot' %}
+                    <h4 class="text-center">Profit Orders</h4>
+                    <div class="d-inline">
+                        {{ form.take_on_ml.label_tag }}
+                        <div class="d-inline mx-1">{{ form.take_on_ml }}</div>
+                        {{ form.take_on_ml_percent.label_tag }}
+                        {{ form.take_on_ml_percent }}
+                    </div>
+                    {% else %}
+                    <h4 class="text-center">Profit Orders</h4>
+                    {{ form.grid_profit_value.label_tag }}
+                    {{ form.grid_profit_value }}
+                    {% endif %}
+                    <hr>
+                    <h4 class="text-center">Bollinger Bands Settings</h4>
                     {{ form.qty_kline.label_tag }}
                     {{ form.qty_kline }}
                     {{ form.d.label_tag }}
                     {{ form.d }}
                 </div>
+                <div class="card shadow col-md-3 p-3 m-2">
+                    <h4 class="text-center">Average</h4>
+                    <br>
+                    <div class="d-inline">
+                        <p class="d-inline">{{ form.auto_avg.label_tag }}</p>
+                        {{ form.auto_avg }} %:
+                    </div>
+                    {{ form.bb_avg_percent }}
+                    <br>
+                    {% if title == 'Bollinger Bands Bot' %}
+                    <div class="row">
+                        <div class="col-6">
+                    {{ form.dfm.label_tag }}
+                    {{ form.dfm }}
+                        </div>
+                        <div class="col-6">
+                    {{ form.chw.label_tag }}
+                    {{ form.chw }}
+                        </div>
+                    </div>
+                    {{ form.max_margin.label_tag }}
+                    {{ form.max_margin }}
+                    {% else %}
+                    {{ form.grid_avg_value.label_tag }}
+                    {{ form.grid_avg_value }}
+                    {% endif %}
+                </div>
             </div>
-            <button type="submit" class="btn btn-success mt-3">Start Bot</button>
+            <div class="col-3 mx-auto">
+            <button type="submit" class="col-12 btn btn-success mt-3">Start Bot</button>
+            </div>
         </form>
     </div>
 </div>

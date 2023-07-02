@@ -8,6 +8,8 @@ from decimal import Decimal, ROUND_DOWN
 import os
 import django
 
+from bots.bb_auto_avg import BBAutoAverage
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
@@ -122,11 +124,12 @@ def set_entry_point(bot, tl, bl):
 
 def calculation_entry_point(bot):
     if bot.orderType == "Limit":
-        BB_obj = BollingerBands(account=bot.account, category=bot.category, symbol_name=bot.symbol.name,
+        bb_obj = BollingerBands(account=bot.account, category=bot.category, symbol_name=bot.symbol.name,
                                 symbol_priceScale=bot.symbol.priceScale, interval=bot.interval,
                                 qty_cline=bot.qty_kline, d=bot.d)
+
     else:
-        BB_obj = None
+        bb_obj = None
     first_cycle = True
 
     while True:
@@ -137,24 +140,28 @@ def calculation_entry_point(bot):
             psn_side = get_side(symbol_list)
             psn_price = get_position_price(symbol_list)
             print(psn_qty)
+            if bot.auto_avg:
+                if bot.orderType == "Market" and to_avg_by_grid(bot, psn_side, psn_price):
+                    continue
+                elif bot.orderType == "Limit":
+                    bb_avg_obj = BBAutoAverage(bot=bot, psn_price=psn_price, psn_side=psn_side, psn_qty=psn_qty,
+                                               bb_obj=bb_obj)
 
-            if bot.orderType == "Market" and to_avg_by_market(bot, psn_side, psn_price):
-                continue
             print('Дошли до ретурна')
-            return psn_qty, psn_side, psn_price, BB_obj, first_cycle
+            return psn_qty, psn_side, psn_price, bb_obj, first_cycle
 
         if bot.orderType == "Market":
             set_entry_point_by_market(bot)
             first_cycle = False
             continue
 
-        tl = BB_obj.tl
-        bl = BB_obj.bl
+        tl = bb_obj.tl
+        bl = bb_obj.bl
 
         if not first_cycle:
             time.sleep(10)
 
-        if first_cycle or tl != BB_obj.tl or bl != BB_obj.bl:
+        if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
             cancel_all(bot.account, bot.category, bot.symbol)
             set_entry_point(bot, tl, bl)
 
@@ -196,7 +203,7 @@ def set_takes(bot):
                     side=side,
                     orderType='Limit',
                     qty=(qty + (1 / 10 ** fraction_length)),
-                    price=round(exit_line, round_number),
+                    price=round(ml, round_number),
                     is_take=True,
                 )
             elif qty and (psn_qty * (10 ** fraction_length)) % 2 == 0:
@@ -268,7 +275,7 @@ def set_takes(bot):
         set_takes_qty = psn_qty
 
 
-def to_avg_by_market(bot, side, psn_price):
+def to_avg_by_grid(bot, side, psn_price):
     current_price = get_current_price(bot.account, bot.category, bot.symbol)
     if side == "Buy":
         if psn_price - current_price > psn_price * Decimal('0.01'):
