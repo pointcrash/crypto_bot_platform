@@ -5,6 +5,8 @@ import time
 import hashlib
 import hmac
 
+from main.models import Account
+
 httpClient = requests.Session()
 recv_window = str(5000)
 
@@ -42,7 +44,7 @@ def cancel_all(account, category, symbol):
     method = "POST"
     params = {
         'category': category,
-        'symbol': symbol,
+        'symbol': symbol.name,
     }
     params = json.dumps(params)
     HTTP_Request(account, endpoint, method, params, "CancelAll")
@@ -51,7 +53,7 @@ def cancel_all(account, category, symbol):
 def get_current_price(account, category, symbol):
     endpoint = "/v5/market/tickers"
     method = "GET"
-    params = f"category={category}&symbol={symbol}"
+    params = f"category={category}&symbol={symbol.name}"
     response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
     return Decimal(response["result"]["list"][0]["lastPrice"])
 
@@ -71,12 +73,54 @@ def get_side(symbol_list):
 def get_list(account, category, symbol):
     endpoint = "/v5/position/list"
     method = "GET"
-    params = f"category={category}&symbol={symbol}"
+    params = f"category={category}&symbol={symbol.name}"
     response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
     # print(response["result"]["list"][0])
     return response["result"]["list"][0]
 
-# print(get_qty_BTC(get_BTC_list()))
-# print(math.floor((0.001/2) * 1000) / 1000)
-# print("Buy" if "Bsdf" == "Sell" else "Sell")
-# print(0.005 % (2 / 10**3))
+
+def get_order_book(account, category, symbol):
+    endpoint = "/v5/market/orderbook"
+    method = "GET"
+    params = f"category={category}&symbol={symbol.name}"
+    response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+    # print(response)
+    return None
+
+
+def get_instruments_info(account, category, symbol=None):
+    endpoint = "/v5/market/instruments-info"
+    method = "GET"
+    if symbol is not None:
+        params = f"category={category}&symbol={symbol.name}"
+    else:
+        params = f"category={category}"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    return response
+
+
+def get_symbol_set():
+    account_data = {
+        "name": "John Doe",
+        "API_TOKEN": "35cvb1aYDNlbIe7bZd",
+        "SECRET_KEY": "1X9PNigz5mRcPwknuOZeeKSkDa0dDR6v14a4",
+        "is_mainnet": False,
+        "url": "https://api-testnet.bybit.com"
+    }
+
+    account = Account(
+        name=account_data["name"],
+        API_TOKEN=account_data["API_TOKEN"],
+        SECRET_KEY=account_data["SECRET_KEY"],
+        is_mainnet=account_data["is_mainnet"],
+        url=account_data["url"]
+    )
+
+    data_set = get_instruments_info(account, category="linear")
+    symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
+                   i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
+                   i['lotSizeFilter']['minOrderQty']) for i in data_set['result']['list'] if
+                  i['symbol'].endswith('USDT')]
+
+    return symbol_set
+

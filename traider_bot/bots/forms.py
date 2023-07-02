@@ -5,14 +5,13 @@ from .models import Bot
 class BotForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['account', 'category', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
+        fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
                   'qty_kline', 'd', ]
+
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
-            # 'price': forms.TextInput(attrs={'class': 'form-control'}),
             'account': forms.Select(attrs={'class': 'form-control'}),
-            'category': forms.Select(attrs={'class': 'form-control'}),
-            'symbol': forms.TextInput(attrs={'class': 'form-control'}),
+            'symbol': forms.Select(attrs={'class': 'form-control'}),
             'side': forms.Select(attrs={'class': 'form-control'}),
             'orderType': forms.Select(attrs={'class': 'form-control'}),
             'margin_type': forms.Select(attrs={'class': 'form-control'}),
@@ -23,9 +22,7 @@ class BotForm(forms.ModelForm):
         }
         labels = {
             'qty': '1st order investments',
-            # 'price': 'Price',
             'account': 'Account',
-            'category': 'Category',
             'symbol': 'Symbol',
             'side': 'Side',
             'margin_type': 'Margin',
@@ -35,3 +32,13 @@ class BotForm(forms.ModelForm):
             'interval': 'Candle Interval',
             'd': 'Deviation',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        order_type = cleaned_data.get('orderType')
+        side = cleaned_data.get('side')
+
+        if order_type == 'Market' and side == 'Auto':
+            raise forms.ValidationError("Invalid combination: orderType - 'Market' cannot have side - 'Auto'.")
+
+        return cleaned_data

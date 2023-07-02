@@ -3,20 +3,20 @@
 {% block content %}
 <div class="row">
     <div class="col-11 mx-auto">
-            <h1 class="text-center">Bots</h1>
-        <a class="btn btn-success" href="{% url 'create_bot' %}">Add new bot</a>
+            <h1 class="text-center">Grid Bots</h1>
+        <a class="btn btn-success" href="{% url 'grid_create_bot' %}">Add new bot</a>
         <div class="card mt-2 border-0 shadow p-3">
             <table class="table">
                 <thead>
                 <tr class=" text-center">
                     <th>Bot ID</th>
-                    <th>Category</th>
+                    <th>Account</th>
                     <th>Symbol</th>
                     <th>Side</th>
 <!--                    <th>Position Index</th>-->
                     <th>Order Type</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
+                    <th>USDT$</th>
+<!--                    <th>Price</th>-->
                     <th>Is alive</th>
                     <th style="color: orange">Edit</th>
                     <th style="color: red">Stop</th>
@@ -27,16 +27,16 @@
                 {% for bot, is_alive in bots %}
                 <tr class="text-center">
                     <td>{{ bot.pk }}</td>
-                    <td>{{ bot.category }}</td>
+                    <td>{{ bot.account }}</td>
                     <td>{{ bot.symbol }}</td>
                     <td>{{ bot.side }}</td>
 <!--                    <td>{{ order.positionIdx }}</td>-->
                     <td>{{ bot.orderType }}</td>
                     <td>{{ bot.qty }}</td>
-                    <td>{{ bot.price }}</td>
+<!--                    <td>{{ bot.price }}</td>-->
                     <td>{% if is_alive %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
                     {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}</td>
-                    <td><a class="btn btn-sm btn-warning" href="{% url 'bot_detail' bot_id=bot.pk %}">Edit</a></td>
+                    <td><a class="btn btn-sm btn-warning" href="{% url 'grid_bot_detail' bot_id=bot.pk %}">Edit</a></td>
                     {% if is_alive %}<td>{% include 'modal_stop_bot.html' %}</td>
                     {% else %}<td><button class="btn btn-sm btn-danger" disabled>Stop</button></td>
                     {% endif %}

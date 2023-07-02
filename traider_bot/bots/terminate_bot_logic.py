@@ -40,7 +40,7 @@ def drop_position(bot):
     drop_order = Order.objects.create(
         bot=bot,
         category=bot.category,
-        symbol=bot.symbol,
+        symbol=bot.symbol.name,
         side=side,
         orderType='Market',
         qty=psn_qty,

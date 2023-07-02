@@ -42,77 +42,10 @@ class Order(models.Model):
         # Log.objects.create(content='дамп параметров в строку')
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
         # Log.objects.create(content='отправили запрос на создание ордера, все ОК')
+        # print(params)
         print(response)
 
-    def create_teke(self, fraction_length):
-        Log.objects.create(content='НЕПОНЯТНО НАХУЯ ВОШЛИ В КРЕАТЕ ТАКЕ')
-
-        symbol_list = get_list(self.bot.account, self.category, self.symbol)
-        current_qty = get_qty(symbol_list)
-        qty = math.floor((current_qty / 2) * 1000) / 1000
-        price = get_position_price(symbol_list)
-        side = ("Buy" if get_side(symbol_list) == "Sell" else "Sell")
-
-        if not qty and current_qty:
-            take1 = Order.objects.create(
-                bot=self.bot,
-                category='linear',
-                symbol=self.symbol,
-                side=side,
-                orderType='Limit',
-                qty=(qty + 0.001),
-                price=round(price * Decimal('1.01'), 2),
-                is_take=True,
-            )
-        elif qty and float(current_qty) % (2 / 10 ** fraction_length) == 0:
-            take1 = Order.objects.create(
-                bot=self.bot,
-                category='linear',
-                symbol=self.symbol,
-                side=side,
-                orderType='Limit',
-                qty=qty,
-                price=round(price * Decimal('1.01'), 2),
-                is_take=True,
-            )
-            take2 = Order.objects.create(
-                bot=self.bot,
-                category='linear',
-                symbol=self.symbol,
-                side=side,
-                orderType='Limit',
-                qty=qty,
-                price=round(price * Decimal('1.02'), 2),
-                is_take=True,
-            )
-        else:
-            take1 = Order.objects.create(
-                bot=self.bot,
-                category='linear',
-                symbol=self.symbol,
-                side=side,
-                orderType='Limit',
-                qty=qty,
-                price=round(price * Decimal('1.01'), 2),
-                is_take=True,
-            )
-            take2 = Order.objects.create(
-                bot=self.bot,
-                category='linear',
-                symbol=self.symbol,
-                side=side,
-                orderType='Limit',
-                qty=(qty + 0.001),
-                price=round(price * Decimal('1.02'), 2),
-                is_take=True,
-            )
-
-    # def clean(self):
-    #     if self.orderType == 'Limit' and not self.price:
-    #         raise ValidationError({'price': 'Price is required for Limit order type.'})
-
     def save(self, *args, **kwargs):
-
         # Log.objects.create(content='Сохраняем объект ордера')
         if not self.orderLinkId:
             # Log.objects.create(content='Устанавливаем orderLinkId')
@@ -121,10 +54,6 @@ class Order(models.Model):
         # Log.objects.create(content='Вызвали метод супер сейв')
         self.realize_order()
         # Log.objects.create(content='отработал релиз ордер')
-
-        # if self.orderType == 'Market':
-        #     cancel_all(self.category, self.symbol)
-        #     self.create_teke(fraction_length=3)
 
     def __str__(self):
         return self.orderLinkId

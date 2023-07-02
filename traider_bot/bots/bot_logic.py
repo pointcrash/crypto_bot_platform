@@ -11,23 +11,24 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
-from main.models import Log
-from api_v5 import HTTP_Request, cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price
+from bots.models import Symbol
+from api_v5 import HTTP_Request, cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
+    get_symbol_set
 from orders.models import Order
 
 
 class BollingerBands:
-    def __init__(self, account, category: str, symbol: str, interval: int, qty_cline: int, d: int):
+    def __init__(self, account, category: str, symbol_name, symbol_priceScale, interval: int, qty_cline: int, d: int):
         self.account = account
         self.category = category
-        self.symbol = symbol
+        self.symbol = symbol_name
+        self.priceScale = int(symbol_priceScale)
         self.interval = interval
         self.qty_cline = qty_cline
         self.d = d
         self.kline_list = [[time.time() - 90000]]  # получаем значение времени на 25 часов раньше текущего
 
     def istime_update_kline(self):
-        # Log.objects.create(content='Проверяем не время ли обновить данные по ВВ')
         if datetime.now() - datetime.fromtimestamp(float(self.kline_list[0][0]) / 1000.0) > timedelta(
                 minutes=int(self.interval)):
             return True
@@ -41,7 +42,6 @@ class BollingerBands:
         params = f"category={self.category}&symbol={self.symbol}&interval={self.interval}&limit={self.qty_cline}"
         response = json.loads(HTTP_Request(self.account, endpoint, method, params, "Cline"))
         self.kline_list = response["result"]["list"]
-        # Log.objects.create(content='Получили пакет свечей')
         return response["result"]["list"]
 
     @property
@@ -49,64 +49,65 @@ class BollingerBands:
         closePrice_list = []
         for i in self.get_kline():
             closePrice_list.append(Decimal(i[4]))
-        # Log.objects.create(content='Сформирован список закрывающих цен')
         return closePrice_list
 
     @property
     def ml(self):
-        # Log.objects.create(content='получение МЛ')
-        return round(Decimal(sum(self.closePrice_list) / len(self.closePrice_list)), 2)
+        return round(Decimal(sum(self.closePrice_list) / len(self.closePrice_list)), self.priceScale)
 
     @property
     def std_dev(self):
-        # Log.objects.create(content='получение стд_дев')
         return Decimal(statistics.stdev(self.closePrice_list))
 
     @property
     def tl(self):
 
-        # Log.objects.create(content='получение ТЛ')
-
-        return round(Decimal(self.ml + (self.d * self.std_dev)), 2)
+        return round(Decimal(self.ml + (self.d * self.std_dev)), self.priceScale)
 
     @property
     def bl(self):
-        # Log.objects.create(content='Получение БЛ')
-        return round(Decimal(self.ml - (self.d * self.std_dev)), 2)
+        return round(Decimal(self.ml - (self.d * self.std_dev)), self.priceScale)
 
 
-# a = BollingerBands("linear", "BTCUSDT", 15, 20, 2)
+def get_quantity_from_price(qty_USDT, price, minOrderQty):
+    return (Decimal(str(qty_USDT)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
 
 
-def get_quantity_from_price(qty_USDT, price):
-    # Log.objects.create(content='Расчитываем количество монет которое можно купить')
-    return (Decimal(str(qty_USDT)) / price).quantize(Decimal('0.001'), rounding=ROUND_DOWN)
+def set_entry_point_by_market(bot):
+    order = Order.objects.create(
+        bot=bot,
+        category=bot.category,
+        symbol=bot.symbol.name,
+        side=bot.side,
+        orderType=bot.orderType,
+        qty=get_quantity_from_price(bot.qty,
+                                    get_current_price(bot.account, bot.category, bot.symbol),
+                                    bot.symbol.minOrderQty)
+    )
 
 
 def set_buy_entry_point(bot, bl):
     buy_order = Order.objects.create(
         bot=bot,
         category=bot.category,
-        symbol=bot.symbol,
+        symbol=bot.symbol.name,
         side="Buy",
-        orderType="Limit",
-        qty=get_quantity_from_price(bot.qty, bl - 1),
-        price=bl - 1,
+        orderType=bot.orderType,
+        qty=get_quantity_from_price(bot.qty, bl - Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty),
+        price=bl - Decimal(bot.symbol.minPrice),
     )
-    # Log.objects.create(content='Создали ордер на лонг')
 
 
 def set_sell_entry_point(bot, tl):
     sell_order = Order.objects.create(
         bot=bot,
         category=bot.category,
-        symbol=bot.symbol,
+        symbol=bot.symbol.name,
         side="Sell",
-        orderType="Limit",
-        qty=get_quantity_from_price(bot.qty, tl + 1),
-        price=tl + 1,
+        orderType=bot.orderType,
+        qty=get_quantity_from_price(bot.qty, tl + Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty),
+        price=tl + Decimal(bot.symbol.minPrice),
     )
-    # Log.objects.create(content='Создали ордер на шорт')
 
 
 def set_entry_point(bot, tl, bl):
@@ -120,58 +121,61 @@ def set_entry_point(bot, tl, bl):
 
 
 def calculation_entry_point(bot):
-    # Log.objects.create(content='Функция calculation_entry_point - вход')
-
-    BB_obj = BollingerBands(bot.account, bot.category, bot.symbol, bot.interval, bot.qty_kline, bot.d)
+    if bot.orderType == "Limit":
+        BB_obj = BollingerBands(account=bot.account, category=bot.category, symbol_name=bot.symbol.name,
+                                symbol_priceScale=bot.symbol.priceScale, interval=bot.interval,
+                                qty_cline=bot.qty_kline, d=bot.d)
+    else:
+        BB_obj = None
     first_cycle = True
-    # Log.objects.create(content='Создан объект ВВ')
 
     while True:
         symbol_list = get_list(bot.account, bot.category, bot.symbol)
-        # Log.objects.create(content='Получение данных по позиции')
 
         if get_qty(symbol_list):
             psn_qty = get_qty(symbol_list)
             psn_side = get_side(symbol_list)
             psn_price = get_position_price(symbol_list)
-            # Log.objects.create(content='Сработал ордер на вход, позиция открыта')
+            print(psn_qty)
 
-            if to_avg(bot, psn_side, psn_price):
+            if bot.orderType == "Market" and to_avg_by_market(bot, psn_side, psn_price):
                 continue
-
+            print('Дошли до ретурна')
             return psn_qty, psn_side, psn_price, BB_obj, first_cycle
+
+        if bot.orderType == "Market":
+            set_entry_point_by_market(bot)
+            first_cycle = False
+            continue
 
         tl = BB_obj.tl
         bl = BB_obj.bl
 
         if not first_cycle:
-            # Log.objects.create(content='Смотрим за ценами на вход, ждем 30 сек')
             time.sleep(10)
 
         if first_cycle or tl != BB_obj.tl or bl != BB_obj.bl:
-            # Log.objects.create(content='Первый цикл входа или тл бл изменилось')
             cancel_all(bot.account, bot.category, bot.symbol)
             set_entry_point(bot, tl, bl)
 
         first_cycle = False
 
 
-def set_takes(bot, fraction_length=3):
-    # Log.objects.create(content='Функция set_takes - вход')
+def set_takes(bot):
+    fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
+    round_number = int(bot.symbol.priceScale)
+    current_price = get_current_price(bot.account, bot.category, bot.symbol)
     set_takes_qty = 0
     while True:
         psn_qty, psn_side, psn_price, BB_obj, first_cycle = calculation_entry_point(bot)
-        # Log.objects.create(content='Цикл calculation_entry_point отработал, выставляем тейки')
 
         tl = BB_obj.tl
         bl = BB_obj.bl
 
         if first_cycle:  # Not first cycle (-_-)
-            # Log.objects.create(content='Проверка на первый цикл не прошла, ждем 30 сек')
             time.sleep(10)
 
         if not first_cycle or set_takes_qty != psn_qty or tl != BB_obj.tl or bl != BB_obj.bl:
-            # Log.objects.create(content='Перый цикл тейков или тл бл изменились')
             cancel_all(bot.account, bot.category, bot.symbol)
 
             side = "Buy" if psn_side == "Sell" else "Sell"
@@ -180,82 +184,102 @@ def set_takes(bot, fraction_length=3):
             if side == "Buy":
                 ml = BB_obj.ml
                 exit_line = BB_obj.bl
-                # Log.objects.create(content='Вошли на лонг значит exit_line = бл')
             else:
                 ml = BB_obj.ml
                 exit_line = BB_obj.tl
-                # Log.objects.create(content='Вошли на шорт значит exit_line = тл')
 
             if not qty and psn_qty:
                 take1 = Order.objects.create(
                     bot=bot,
                     category=bot.category,
-                    symbol=bot.symbol,
+                    symbol=bot.symbol.name,
                     side=side,
                     orderType='Limit',
                     qty=(qty + (1 / 10 ** fraction_length)),
-                    price=round(exit_line, 2),
+                    price=round(exit_line, round_number),
                     is_take=True,
                 )
-                # Log.objects.create(content='Создан один тейк not qty and psn_qty')
             elif qty and (psn_qty * (10 ** fraction_length)) % 2 == 0:
-                take1 = Order.objects.create(
-                    bot=bot,
-                    category=bot.category,
-                    symbol=bot.symbol,
-                    side=side,
-                    orderType='Limit',
-                    qty=qty,
-                    price=round(ml, 2),
-                    is_take=True,
-                )
-                take2 = Order.objects.create(
-                    bot=bot,
-                    category=bot.category,
-                    symbol=bot.symbol,
-                    side=side,
-                    orderType='Limit',
-                    qty=qty,
-                    price=round(exit_line, 2),
-                    is_take=True,
-                )
-                # Log.objects.create(content='qty and float(psn_qty) % (2 / 10 ** fraction_length) == 0')
+                if current_price < ml:
+                    take1 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType='Limit',
+                        qty=qty,
+                        price=round(ml, round_number),
+                        is_take=True,
+                    )
+                    take2 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType='Limit',
+                        qty=qty,
+                        price=round(exit_line, round_number),
+                        is_take=True,
+                    )
+                else:
+                    take2 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType='Limit',
+                        qty=psn_qty,
+                        price=round(exit_line, round_number),
+                        is_take=True,
+                    )
             else:
-                take1 = Order.objects.create(
-                    bot=bot,
-                    category=bot.category,
-                    symbol=bot.symbol,
-                    side=side,
-                    orderType='Limit',
-                    qty=qty,
-                    price=round(ml, 2),
-                    is_take=True,
-                )
-                take2 = Order.objects.create(
-                    bot=bot,
-                    category=bot.category,
-                    symbol=bot.symbol,
-                    side=side,
-                    orderType='Limit',
-                    qty=(qty + (1 / 10 ** fraction_length)),
-                    price=round(exit_line, 2),
-                    is_take=True,
-                )
-                # Log.objects.create(content='созданы тейки по нечетной позиции')
+                if current_price < ml:
+                    take1 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType='Limit',
+                        qty=qty,
+                        price=round(ml, round_number),
+                        is_take=True,
+                    )
+                    take2 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType='Limit',
+                        qty=(qty + (1 / 10 ** fraction_length)),
+                        price=round(exit_line, round_number),
+                        is_take=True,
+                    )
+                else:
+                    take2 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType='Limit',
+                        qty=psn_qty,
+                        price=round(exit_line, round_number),
+                        is_take=True,
+                    )
         set_takes_qty = psn_qty
 
 
-def to_avg(bot, side, psn_price):
+def to_avg_by_market(bot, side, psn_price):
     current_price = get_current_price(bot.account, bot.category, bot.symbol)
     if side == "Buy":
         if psn_price - current_price > psn_price * Decimal('0.01'):
+            print('avg')
             order = Order.objects.create(
                 bot=bot,
                 category=bot.category,
-                symbol=bot.symbol,
+                symbol=bot.symbol.name,
                 side=side,
                 orderType="Market",
-                qty=get_quantity_from_price(bot.qty, current_price),
+                qty=get_quantity_from_price(bot.qty, current_price, bot.symbol.minOrderQty),
             )
             return True
         else:
@@ -263,20 +287,38 @@ def to_avg(bot, side, psn_price):
 
     if side == "Sell":
         if current_price - psn_price > psn_price * Decimal('0.01'):
+            print('avg')
+
             order = Order.objects.create(
                 bot=bot,
                 category=bot.category,
-                symbol=bot.symbol,
+                symbol=bot.symbol.name,
                 side=side,
                 orderType="Market",
-                qty=get_quantity_from_price(bot.qty, current_price),
+                qty=get_quantity_from_price(bot.qty, current_price, bot.symbol.minOrderQty),
             )
             return True
         else:
             return False
 
 
-# psn_qty = 0.050
-# fraction_length = 3
-# print(0.050)
-# print((psn_qty * 10 ** fraction_length) % 2)
+def get_update_symbols():
+    symbol_set = get_symbol_set()
+    Symbol.objects.all().delete()
+    for symbol in symbol_set:
+        Symbol.objects.create(
+            name=symbol[0],
+            priceScale=symbol[1],
+            minLeverage=symbol[2],
+            maxLeverage=symbol[3],
+            leverageStep=symbol[4],
+            minPrice=symbol[5],
+            maxPrice=symbol[6],
+            minOrderQty=symbol[7],
+        )
+
+
+def count_decimal_places(number):
+    decimal_tuple = number.as_tuple()
+    decimal_places = -decimal_tuple.exponent
+    return decimal_places

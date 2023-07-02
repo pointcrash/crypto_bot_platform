@@ -16,8 +16,6 @@
                 <div class="col-md-6 p-3">
                     {{ form.account.label_tag }}
                     {{ form.account }}
-                    {{ form.category.label_tag }}
-                    {{ form.category }}
                     {{ form.symbol.label_tag }}
                     {{ form.symbol }}
                     {{ form.interval.label_tag }}
@@ -58,11 +56,11 @@
                             <h6>Choose way to delete:</h6>
                         </div>
                         <div class="modal-footer">
-                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=1 %}"
+                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=1 redirect_to=bot.work_model %}"
                                class="btn btn-warning col-12">Delete and stop bot only</a>
-                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
+                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=2 redirect_to=bot.work_model %}"
                                class="btn btn-warning col-12">Delete bot with cancel all orders</a>
-                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"
+                            <a type="button" href="{% url 'delete_bot' bot_id=bot.pk event_number=3 redirect_to=bot.work_model %}"
                                class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
                                 Market
                             </a>
