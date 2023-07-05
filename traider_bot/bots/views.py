@@ -4,9 +4,11 @@ import time
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+
+from api_v5 import get_list
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders, \
     stop_bot_with_cancel_orders_and_drop_positions
-from .bot_logic import set_takes, get_update_symbols
+from .bot_logic import set_takes, get_update_symbols, create_bb_and_avg_obj
 from .forms import BotForm
 from .models import Bot
 from django.contrib import messages
@@ -22,8 +24,10 @@ def bb_create_bot(request):
             bot.work_model = 'bb'
             bot.owner = request.user
             bot.save()
+            bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+
             connections.close_all()
-            bot_process = multiprocessing.Process(target=set_takes, args=(bot, ))
+            bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
             bot.process_id = str(bot_process.pid)
             bot.save()

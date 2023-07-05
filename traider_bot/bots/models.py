@@ -78,6 +78,10 @@ class Bot(models.Model):
     dfm = models.IntegerField(default=30)
     chw = models.IntegerField(default=2)
     max_margin = models.IntegerField(null=True, blank=True)
+    time_sleep = models.IntegerField(default=5, null=True, blank=True)
+
+    # def save(self, *args, **kwargs):
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
         return self.symbol.name

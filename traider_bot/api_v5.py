@@ -5,8 +5,6 @@ import time
 import hashlib
 import hmac
 
-from main.models import Account
-
 httpClient = requests.Session()
 recv_window = str(5000)
 
@@ -75,8 +73,10 @@ def get_list(account, category, symbol):
     method = "GET"
     params = f"category={category}&symbol={symbol.name}"
     response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
-    # print(response["result"]["list"][0])
-    return response["result"]["list"][0]
+    try:
+        return response["result"]["list"][0]
+    except:
+        print(response)
 
 
 def get_order_book(account, category, symbol):
@@ -100,6 +100,8 @@ def get_instruments_info(account, category, symbol=None):
 
 
 def get_symbol_set():
+    from main.models import Account
+
     account_data = {
         "name": "John Doe",
         "API_TOKEN": "35cvb1aYDNlbIe7bZd",
@@ -116,11 +118,23 @@ def get_symbol_set():
         url=account_data["url"]
     )
 
-    data_set = get_instruments_info(account, category="linear")
-    symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
-                   i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
-                   i['lotSizeFilter']['minOrderQty']) for i in data_set['result']['list'] if
-                  i['symbol'].endswith('USDT')]
+    print(get_order_status(account, category="linear", orderLinkId='94e91348840b4e6794b356737d32bbcb'))
 
-    return symbol_set
+    # data_set = get_instruments_info(account, category="linear")
+    # symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
+    #                i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
+    #                i['lotSizeFilter']['minOrderQty']) for i in data_set['result']['list'] if
+    #               i['symbol'].endswith('USDT')]
+    #
+    # return symbol_set
+
+
+def get_order_status(account, category, orderLinkId):
+    endpoint = "/v5/order/realtime"
+    method = "GET"
+    params = f"category={category}&symbol=BTCUSDT&orderLinkId={orderLinkId}"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    return response
+
+
 

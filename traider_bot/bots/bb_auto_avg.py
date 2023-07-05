@@ -1,5 +1,5 @@
 from api_v5 import get_current_price
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 
 from orders.models import Order
 
@@ -28,15 +28,15 @@ class BBAutoAverage:
         if self.psn_side == 'Buy' and self.bb_obj.ml <= self.psn_price:
             if self.channel_width_check(current_price):
                 if self.dfm_check(current_price, self.bb_obj.bl):
-                    if self.margin_limit_check(current_price):
-                        self.to_average()
+                    if self.margin_limit_check():
+                        self.to_average(current_price)
                         return True
             return False
 
         elif self.psn_side == 'Sell' and self.bb_obj.ml >= self.psn_price:
             if self.channel_width_check(current_price):
                 if self.dfm_check(current_price, self.bb_obj.tl):
-                    if self.margin_limit_check(current_price):
+                    if self.margin_limit_check():
                         self.to_average()
                         return True
             return False
@@ -53,23 +53,30 @@ class BBAutoAverage:
         else:
             return False
 
-    def margin_limit_check(self, current_price):
-        qty_avg = self.psn_qty * self.avg_percent / 100
-        USDT_value_before_avg = get_USDT_from_qty(self.psn_qty, self.psn_price)
-        USDT_value_avg = get_USDT_from_qty(qty_avg, current_price)
-        USDT_value = USDT_value_avg + USDT_value_before_avg
+    def margin_limit_check(self):
+        psn_currency_amount = self.psn_price * self.psn_qty
+        avg_currency_amount = psn_currency_amount * self.bot.bb_avg_percent / 100
 
-        if USDT_value < self.max_margin:
-            return True
-        else:
+        if psn_currency_amount + avg_currency_amount > self.max_margin:
             return False
+        else:
+            return True
 
-    def to_average(self):
+    def to_average(self, current_price):
+        psn_currency_amount = self.psn_price * self.psn_qty
+        avg_currency_amount = Decimal(psn_currency_amount * self.bot.bb_avg_percent / 100)
+        qty = get_quantity_from_price(avg_currency_amount, current_price, self.bot.minOrderQty)
+
         avg_order = Order.objects.create(
             bot=self.bot,
             category=self.category,
             symbol=self.symbol.name,
+            isLeverage=self.bot.isLeverage,
             side=self.psn_side,
             orderType="Market",
-            qty=self.psn_qty * self.avg_percent / 100
+            qty=qty
         )
+
+
+def get_quantity_from_price(qty_USDT, price, minOrderQty):
+    return (Decimal(str(qty_USDT)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)

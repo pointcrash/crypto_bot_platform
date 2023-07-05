@@ -12,6 +12,7 @@ class Order(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='orders', blank=True, null=True)
     category = models.CharField(default="linear")
     symbol = models.CharField(max_length=10)
+    isLeverage = models.IntegerField(default=10)
     side = models.CharField()
     positionIdx = models.IntegerField(blank=True, null=True, default=0)
     orderType = models.CharField()
@@ -29,6 +30,7 @@ class Order(models.Model):
         params = {
             'category': self.category,
             'symbol': self.symbol,
+            'isLeverage': self.isLeverage,
             'side': self.side,
             'positionIdx': self.positionIdx,
             'orderType': self.orderType,

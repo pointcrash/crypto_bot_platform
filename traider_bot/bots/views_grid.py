@@ -3,8 +3,8 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process
-from .bot_logic import get_update_symbols
-from .forms import BotForm
+from .bot_logic import get_update_symbols, create_bb_and_avg_obj
+from .forms import BotForm, GridBotForm
 from .bot_logic_grid import set_takes_for_grid_bot
 from .models import Bot
 from django.contrib import messages
@@ -32,21 +32,24 @@ def grid_bots_list(request):
 def grid_create_bot(request):
     title = 'Grid Bot'
     if request.method == 'POST':
-        form = BotForm(request.POST)
+        form = GridBotForm(request.POST)
         if form.is_valid():
             bot = form.save(commit=False)
             bot.work_model = 'grid'
             bot.owner = request.user
             bot.save()
+
+            bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+
             connections.close_all()
-            bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, ))
+            bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
             bot.process_id = str(bot_process.pid)
             bot.save()
 
             return redirect('grid_bots_list')
     else:
-        form = BotForm()
+        form = GridBotForm()
 
     return render(request, 'create_bot.html', {'form': form, 'title': title})
 
@@ -59,7 +62,7 @@ def grid_bot_detail(request, bot_id):
         message.append(error_message)
     bot = Bot.objects.get(pk=bot_id)
     if request.method == 'POST':
-        form = BotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
+        form = GridBotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
             if get_status_process(bot.process_id):
@@ -70,7 +73,7 @@ def grid_bot_detail(request, bot_id):
             bot.save()
             return redirect('grid_bots_list')
     else:
-        form = BotForm(instance=bot)  # Передаем экземпляр модели в форму
+        form = GridBotForm(instance=bot)  # Передаем экземпляр модели в форму
 
     return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'message': message})
 
