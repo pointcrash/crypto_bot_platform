@@ -1,9 +1,15 @@
 from decimal import Decimal
 from django import forms
+
+from main.models import Account
 from .models import Bot
 
 
 class BotForm(forms.ModelForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['account'].queryset = Account.objects.filter(owner=user)
+
     class Meta:
         model = Bot
         fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
@@ -69,10 +75,11 @@ class BotForm(forms.ModelForm):
         if order_type == 'Market' and side == 'Auto':
             raise forms.ValidationError("Invalid combination: orderType - 'Market' cannot have side - 'Auto'.")
 
-        if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
-            raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
+        if deviation_from_lines:
+            if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
+                raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
 
-        if qty < symbol.minPrice or qty > symbol.maxPrice:
+        if qty < Decimal(symbol.minPrice) or qty > Decimal(symbol.maxPrice):
             raise forms.ValidationError(
                 f"Invalid '1st order investments' value: \nmin value = {symbol.minPrice},\n max value = {symbol.maxPrice}")
 
@@ -80,6 +87,10 @@ class BotForm(forms.ModelForm):
 
 
 class GridBotForm(forms.ModelForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['account'].queryset = Account.objects.filter(owner=user)
+
     class Meta:
         model = Bot
         fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',

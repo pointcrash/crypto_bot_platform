@@ -1,13 +1,9 @@
 from django.contrib import admin
 
-from main.models import Log, Account
+from main.models import Account
 
 
 # Register your models here.
-@admin.register(Log)
-class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content',)
-    list_display_links = ('id', 'content',)
 
 
 @admin.register(Account)

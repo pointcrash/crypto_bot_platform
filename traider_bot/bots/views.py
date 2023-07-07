@@ -1,14 +1,15 @@
-import math
 import multiprocessing
-import time
+
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api_v5 import get_list
+from api_v5 import get_order_status
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders, \
     stop_bot_with_cancel_orders_and_drop_positions
-from .bot_logic import set_takes, get_update_symbols, create_bb_and_avg_obj
+from orders.models import Order
+from .bot_logic import create_bb_and_avg_obj, logging
+from .bb_set_takes import set_takes
 from .forms import BotForm
 from .models import Bot
 from django.contrib import messages
@@ -18,13 +19,14 @@ from django.contrib import messages
 def bb_create_bot(request):
     title = 'Bollinger Bands Bot'
     if request.method == 'POST':
-        form = BotForm(request.POST)
+        form = BotForm(user=request.user, data=request.POST)
         if form.is_valid():
             bot = form.save(commit=False)
             bot.work_model = 'bb'
             bot.owner = request.user
             bot.save()
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+            logging(bot, 'started work in')
 
             connections.close_all()
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
@@ -34,7 +36,7 @@ def bb_create_bot(request):
 
             return redirect('bb_bots_list')
     else:
-        form = BotForm()
+        form = BotForm(user=request.user)
 
     return render(request, 'create_bot.html', {'form': form, 'title': title})
 
@@ -70,13 +72,13 @@ def bb_bot_detail(request, bot_id):
             bot = form.save()
             if get_status_process(bot.process_id):
                 terminate_process_by_pid(bot.process_id)
-            bot_process = multiprocessing.Process(target=set_takes, args=(bot, ))
+            bot_process = multiprocessing.Process(target=set_takes, args=(bot,))
             bot_process.start()
             bot.process_id = str(bot_process.pid)
             bot.save()
             return redirect('bb_bots_list')
     else:
-        form = BotForm(instance=bot)  # Передаем экземпляр модели в форму
+        form = BotForm(user=request.user, instance=bot)  # Передаем экземпляр модели в форму
 
     return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'message': message})
 
@@ -115,3 +117,9 @@ def delete_bot(request, bot_id, event_number, redirect_to):
         return redirect('grid_bots_list')
     else:
         return redirect('bb_bots_list')
+
+
+def view_order_status(request, bot_id, order_id):
+    bot = Bot.objects.get(pk=bot_id)
+    order = Order.objects.get(pk=order_id)
+    status = get_order_status(bot.account, bot.category, bot.symbol, order.orderLinkId)

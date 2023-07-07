@@ -4,7 +4,6 @@ import signal
 import psutil
 
 from api_v5 import cancel_all, get_list, get_side, get_qty
-from main.models import Log
 from orders.models import Order
 
 
@@ -51,11 +50,9 @@ def drop_position(bot):
 def stop_bot_with_cancel_orders(bot):
     terminate_process_by_pid(bot.process_id)
     cancel_all(bot.account, bot.category, bot.symbol)
-    Log.objects.create(content="Bot stopped and cancel all orders is success")
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
     terminate_process_by_pid(bot.process_id)
     cancel_all(bot.account, bot.category, bot.symbol)
     drop_position(bot)
-    Log.objects.create(content="Bot stopped, cancel all orders and drop position is success")

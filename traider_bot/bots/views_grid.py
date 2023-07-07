@@ -32,7 +32,7 @@ def grid_bots_list(request):
 def grid_create_bot(request):
     title = 'Grid Bot'
     if request.method == 'POST':
-        form = GridBotForm(request.POST)
+        form = GridBotForm(user=request.user, data=request.POST)
         if form.is_valid():
             bot = form.save(commit=False)
             bot.work_model = 'grid'
@@ -49,7 +49,7 @@ def grid_create_bot(request):
 
             return redirect('grid_bots_list')
     else:
-        form = GridBotForm()
+        form = GridBotForm(user=request.user)
 
     return render(request, 'create_bot.html', {'form': form, 'title': title})
 
@@ -73,7 +73,7 @@ def grid_bot_detail(request, bot_id):
             bot.save()
             return redirect('grid_bots_list')
     else:
-        form = GridBotForm(instance=bot)  # Передаем экземпляр модели в форму
+        form = GridBotForm(user=request.user, instance=bot)  # Передаем экземпляр модели в форму
 
     return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'message': message})
 

@@ -2,10 +2,6 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class Log(models.Model):
-    content = models.CharField()
-
-
 class Account(models.Model):
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     name = models.CharField()

@@ -1,9 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+
+from bots.models import Log
 from .forms import RegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
-from main.models import Log, Account
+from main.models import Account
 
 
 @login_required
@@ -23,7 +25,8 @@ def create_account(request):
     if request.method == 'POST':
         form = AccountForm(request.POST)
         if form.is_valid():
-            form.save(commit=False)
+            acc = form.save(commit=False)
+            acc.owner = request.user
             form.save()
 
             return redirect('account_list')
@@ -39,7 +42,7 @@ def edit_account(request, acc_id):
     if request.method == 'POST':
         form = AccountForm(request.POST, instance=account)
         if form.is_valid():
-            form.save(commit=False)
+            acc = form.save(commit=False)
             form.save()
 
             return redirect('account_list')
@@ -76,7 +79,7 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('bots_list')
+                return redirect('bb_bots_list')
             else:
                 form.add_error(None, 'Invalid username or password.')
     else:

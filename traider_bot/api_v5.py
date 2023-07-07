@@ -118,23 +118,19 @@ def get_symbol_set():
         url=account_data["url"]
     )
 
-    print(get_order_status(account, category="linear", orderLinkId='94e91348840b4e6794b356737d32bbcb'))
+    data_set = get_instruments_info(account, category="linear")
+    symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
+                   i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
+                   i['lotSizeFilter']['minOrderQty']) for i in data_set['result']['list'] if
+                  i['symbol'].endswith('USDT')]
 
-    # data_set = get_instruments_info(account, category="linear")
-    # symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
-    #                i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
-    #                i['lotSizeFilter']['minOrderQty']) for i in data_set['result']['list'] if
-    #               i['symbol'].endswith('USDT')]
-    #
-    # return symbol_set
+    return symbol_set
 
 
-def get_order_status(account, category, orderLinkId):
+def get_order_status(account, category, symbol, orderLinkId):
     endpoint = "/v5/order/realtime"
     method = "GET"
-    params = f"category={category}&symbol=BTCUSDT&orderLinkId={orderLinkId}"
+    params = f"category={category}&symbol={symbol}&orderLinkId={orderLinkId}"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
-    return response
-
-
+    return response['result']['list'][0]['orderStatus']
 

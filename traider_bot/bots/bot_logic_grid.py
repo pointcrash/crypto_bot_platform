@@ -1,6 +1,6 @@
 import math
 import time
-from decimal import Decimal, ROUND_DOWN
+from decimal import Decimal
 
 import os
 import django
@@ -95,3 +95,5 @@ def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
                     is_take=True,
                 )
             set_takes_qty = psn_qty
+
+

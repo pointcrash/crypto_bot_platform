@@ -5,7 +5,6 @@ from django.db import models
 
 from api_v5 import *
 from bots.models import Bot
-from main.models import Log
 
 
 class Order(models.Model):

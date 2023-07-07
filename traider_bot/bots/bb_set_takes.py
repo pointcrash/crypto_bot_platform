@@ -1,0 +1,100 @@
+import time
+
+from decimal import Decimal
+
+from api_v5 import get_current_price, cancel_all
+from bots.bot_logic import count_decimal_places, calculation_entry_point
+from orders.models import Order
+
+
+def set_takes(bot, bb_obj, bb_avg_obj):
+    # fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
+    # round_number = int(bot.symbol.priceScale)
+    firs_take_is_done = False
+
+    while True:
+        # current_price = get_current_price(bot.account, bot.category, bot.symbol)
+
+        # set position
+        psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj,
+                                                                            bb_avg_obj=bb_avg_obj)
+
+        tl = bb_obj.tl
+        bl = bb_obj.bl
+
+        if first_cycle:  # Not first cycle (-_-)
+            time.sleep(bot.time_sleep)
+
+        if not first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
+            cancel_all(bot.account, bot.category, bot.symbol)
+
+            side = "Buy" if psn_side == "Sell" else "Sell"
+
+            # set QTY to for takes
+            qty = psn_qty
+            if bot.take_on_ml:
+                qty_ml = (Decimal(psn_qty * bot.take_on_ml_percent / 100)).quantize(Decimal(bot.symbol.minOrderQty))
+
+            # set price for ml and exit_line takes
+            if side == "Buy":
+                ml = bb_obj.ml
+                if bot.is_percent_deviation_from_lines:
+                    exit_line = bl - bl * bot.deviation_from_lines / 100
+                else:
+                    exit_line = bl - bot.deviation_from_lines
+            else:
+                ml = bb_obj.ml
+                if bot.is_percent_deviation_from_lines:
+                    exit_line = tl + tl * bot.deviation_from_lines / 100
+                else:
+                    exit_line = tl + bot.deviation_from_lines
+
+            if bot.take_on_ml:
+                if firs_take_is_done:
+                    take2 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        isLeverage=bot.isLeverage,
+                        side=side,
+                        orderType='Limit',
+                        qty=qty,
+                        price=exit_line,
+                        is_take=True,
+                    )
+                else:
+                    take1 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        isLeverage=bot.isLeverage,
+                        side=side,
+                        orderType='Limit',
+                        qty=qty_ml,
+                        price=ml,
+                        is_take=True,
+                    )
+
+                    take2 = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        isLeverage=bot.isLeverage,
+                        side=side,
+                        orderType='Limit',
+                        qty=qty - qty_ml,
+                        price=exit_line,
+                        is_take=True,
+                    )
+            else:
+                take2 = Order.objects.create(
+                    bot=bot,
+                    category=bot.category,
+                    symbol=bot.symbol.name,
+                    isLeverage=bot.isLeverage,
+                    side=side,
+                    orderType='Limit',
+                    qty=qty,
+                    price=exit_line,
+                    is_take=True,
+                )
