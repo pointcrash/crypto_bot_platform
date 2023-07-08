@@ -60,7 +60,7 @@ class Bot(models.Model):
     side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='Auto')
     orderType = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='Limit')
     qty = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=5, blank=True, null=True)
     margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS')
     qty_kline = models.IntegerField(blank=True, null=True, default=20)
     interval = models.CharField(max_length=3, choices=KLINE_INTERVAL_CHOICES, default='15')
@@ -74,12 +74,20 @@ class Bot(models.Model):
     grid_avg_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
     grid_profit_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
     is_percent_deviation_from_lines = models.BooleanField(default=False)
-    deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True, default=0)
+    deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0)
     dfm = models.IntegerField(default=30)
     chw = models.IntegerField(default=2)
     max_margin = models.IntegerField(null=True, blank=True)
     time_sleep = models.IntegerField(default=5, null=True, blank=True)
     firs_take_is_done = models.BooleanField(default=False)
+
+    entry_order_sell = models.CharField(blank=True, null=True)
+    entry_order_by = models.CharField(blank=True, null=True)
+    take1 = models.CharField(blank=True, null=True)
+    take2 = models.CharField(blank=True, null=True)
+    pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
+
+    repeat = models.BooleanField(default=False)
 
     # def save(self, *args, **kwargs):
     #     super().save(*args, **kwargs)

@@ -134,3 +134,10 @@ def get_order_status(account, category, symbol, orderLinkId):
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     return response['result']['list'][0]['orderStatus']
 
+
+def get_pnl(account, category, symbol):
+    endpoint = "/v5/position/closed-pnl"
+    method = "GET"
+    params = f"category={category}&symbol={symbol}"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    return response['result']['list'][0]['closedPnl']

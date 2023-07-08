@@ -3,17 +3,20 @@ import time
 from decimal import Decimal
 
 from api_v5 import get_current_price, cancel_all
-from bots.bot_logic import count_decimal_places, calculation_entry_point
+from bots.bot_logic import count_decimal_places, calculation_entry_point, take1_status_check, logging, \
+    take2_status_check
 from orders.models import Order
 
 
 def set_takes(bot, bb_obj, bb_avg_obj):
     # fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     # round_number = int(bot.symbol.priceScale)
-    firs_take_is_done = False
 
     while True:
-        # current_price = get_current_price(bot.account, bot.category, bot.symbol)
+        if take2_status_check(bot):
+            if not bot.repeat:
+                logging(bot, f'bot finished work. P&L: {bot.pnl}')
+                break
 
         # set position
         psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj,
@@ -50,7 +53,7 @@ def set_takes(bot, bb_obj, bb_avg_obj):
                     exit_line = tl + bot.deviation_from_lines
 
             if bot.take_on_ml:
-                if firs_take_is_done:
+                if take1_status_check(bot):
                     take2 = Order.objects.create(
                         bot=bot,
                         category=bot.category,
@@ -62,6 +65,11 @@ def set_takes(bot, bb_obj, bb_avg_obj):
                         price=exit_line,
                         is_take=True,
                     )
+
+                    logging(bot, f'open take2 order. Price: {exit_line}')
+                    bot.take2 = take2.orderLinkId
+                    bot.save()
+
                 else:
                     take1 = Order.objects.create(
                         bot=bot,
@@ -86,6 +94,10 @@ def set_takes(bot, bb_obj, bb_avg_obj):
                         price=exit_line,
                         is_take=True,
                     )
+
+                    logging(bot, f'open take1, take2 order. Price: {ml}, {exit_line}')
+                    bot.take1, bot.take2 = take1.orderLinkId, take2.orderLinkId
+                    bot.save()
             else:
                 take2 = Order.objects.create(
                     bot=bot,

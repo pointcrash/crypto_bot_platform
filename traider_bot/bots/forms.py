@@ -16,7 +16,7 @@ class BotForm(forms.ModelForm):
                   'qty_kline', 'd', 'auto_avg', 'bb_avg_percent',
                   'deviation_from_lines',
                   'is_percent_deviation_from_lines', 'dfm',
-                  'chw', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', ]
+                  'chw', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
@@ -58,6 +58,7 @@ class BotForm(forms.ModelForm):
             'chw': 'ChW',
             'max_margin': 'Max Margin',
             'time_sleep': 'Request Rate (sec)',
+            'repeat': 'Repeat Cycle',
         }
 
     def clean(self):
@@ -96,7 +97,7 @@ class GridBotForm(forms.ModelForm):
         fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
                   'auto_avg', 'grid_avg_value', 'grid_profit_value', 'bb_avg_percent',
                   'deviation_from_lines', 'is_percent_deviation_from_lines', 'max_margin', 'qty_kline', 'd',
-                  'time_sleep', ]
+                  'time_sleep',  'repeat', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
@@ -135,6 +136,7 @@ class GridBotForm(forms.ModelForm):
             'd': 'Deviation',
             'max_margin': 'Max Margin',
             'time_sleep': 'Request Rate (sec)',
+            'repeat': 'Repeat Cycle',
         }
 
     def clean(self):

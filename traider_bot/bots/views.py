@@ -26,9 +26,9 @@ def bb_create_bot(request):
             bot.owner = request.user
             bot.save()
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+            connections.close_all()
             logging(bot, 'started work in')
 
-            connections.close_all()
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
             bot.process_id = str(bot_process.pid)
