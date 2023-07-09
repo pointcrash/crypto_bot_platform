@@ -73,6 +73,7 @@ class Bot(models.Model):
     bb_avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     grid_avg_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
     grid_profit_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
+    grid_take_count = models.IntegerField(default=2)
     is_percent_deviation_from_lines = models.BooleanField(default=False)
     deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0)
     dfm = models.IntegerField(default=30)

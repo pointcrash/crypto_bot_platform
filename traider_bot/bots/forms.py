@@ -97,7 +97,7 @@ class GridBotForm(forms.ModelForm):
         fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
                   'auto_avg', 'grid_avg_value', 'grid_profit_value', 'bb_avg_percent',
                   'deviation_from_lines', 'is_percent_deviation_from_lines', 'max_margin', 'qty_kline', 'd',
-                  'time_sleep',  'repeat', ]
+                  'time_sleep',  'repeat',   'grid_take_count', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
@@ -113,6 +113,7 @@ class GridBotForm(forms.ModelForm):
             'bb_avg_percent': forms.NumberInput(attrs={'class': 'form-control'}),
             'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
             'grid_profit_value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'grid_take_count': forms.NumberInput(attrs={'class': 'form-control'}),
             'deviation_from_lines': forms.NumberInput(attrs={'class': 'form-control'}),
             'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
             'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -129,6 +130,7 @@ class GridBotForm(forms.ModelForm):
             'auto_avg': 'Auto Average',
             'grid_avg_value': 'Grid Average Value (%)',
             'grid_profit_value': 'Grid Profit Value (%)',
+            'grid_take_count': 'Takes Count',
             'bb_avg_percent': 'Average Percent',
             'deviation_from_lines': '± BB Deviation',
             'is_percent_deviation_from_lines': '%',

@@ -45,6 +45,7 @@ class Order(models.Model):
         # Log.objects.create(content='отправили запрос на создание ордера, все ОК')
         # print(params)
         print(response)
+        print(self.qty)
 
     def save(self, *args, **kwargs):
         # Log.objects.create(content='Сохраняем объект ордера')

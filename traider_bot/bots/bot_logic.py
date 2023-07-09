@@ -96,7 +96,7 @@ def set_entry_point(bot, tl, bl):
         set_sell_entry_point(bot, tl)
 
 
-def calculation_entry_point(bot, bb_obj, bb_avg_obj):
+def calculation_entry_point(bot, bb_obj, bb_avg_obj, grid_take_list=None):
     first_cycle = True
 
     while True:
@@ -109,14 +109,17 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
             if entry_order_status_check(bot):
                 logging(bot, f'position opened. Margin: {psn_qty * psn_price}')
 
-            bb_avg_obj.psn_price = psn_price
-            bb_avg_obj.psn_side = psn_side
-            bb_avg_obj.psn_qty = psn_qty
+            if bb_avg_obj:
+                bb_avg_obj.psn_price = psn_price
+                bb_avg_obj.psn_side = psn_side
+                bb_avg_obj.psn_qty = psn_qty
 
             if bot.auto_avg:
                 if bot.work_model == "grid" and to_avg_by_grid(bot, psn_side, psn_price, psn_qty):
                     symbol_list = get_list(bot.account, bot.category, bot.symbol)
                     logging(bot, f'average. New margin: {get_qty(symbol_list) * get_position_price(symbol_list)}')
+                    if grid_take_list:
+                        grid_take_list = ['' for _ in grid_take_list]
                     first_cycle = False
                     continue
                 elif bot.work_model == "bb" and bb_avg_obj is not None:
@@ -129,7 +132,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                             bot.save()
                         continue
 
-            return psn_qty, psn_side, psn_price, first_cycle
+            return psn_qty, psn_side, psn_price, first_cycle, grid_take_list
 
         if bot.orderType == "Market":
             set_entry_point_by_market(bot)
