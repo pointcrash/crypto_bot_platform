@@ -16,8 +16,8 @@ from api_v5 import cancel_all, get_qty, get_list, get_side, get_position_price, 
 from orders.models import Order
 
 
-def get_quantity_from_price(qty_USDT, price, minOrderQty):
-    return (Decimal(str(qty_USDT)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
+def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
+    return (Decimal(str(qty_USDT * leverage)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
 
 
 def set_entry_point_by_market(bot):
@@ -30,7 +30,7 @@ def set_entry_point_by_market(bot):
         orderType=bot.orderType,
         qty=get_quantity_from_price(bot.qty,
                                     get_current_price(bot.account, bot.category, bot.symbol),
-                                    bot.symbol.minOrderQty)
+                                    bot.symbol.minOrderQty, bot.isLeverage)
     )
 
     logging(bot, f'create order by market')
