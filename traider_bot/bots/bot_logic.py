@@ -55,7 +55,7 @@ def set_buy_entry_point(bot, bl):
         # isLeverage=bot.isLeverage,
         side="Buy",
         orderType=bot.orderType,
-        qty=get_quantity_from_price(bot.qty, bl - Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty),
+        qty=get_quantity_from_price(bot.qty, bl - Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty, bot.isLeverage),
         price=price,
     )
 
@@ -77,7 +77,7 @@ def set_sell_entry_point(bot, tl):
         # isLeverage=bot.isLeverage,
         side="Sell",
         orderType=bot.orderType,
-        qty=get_quantity_from_price(bot.qty, tl + Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty),
+        qty=get_quantity_from_price(bot.qty, tl + Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty, bot.isLeverage),
         price=price,
     )
 

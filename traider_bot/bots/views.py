@@ -4,9 +4,10 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api_v5 import get_order_status
+from api_v5 import get_order_status, get_balance
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders, \
     stop_bot_with_cancel_orders_and_drop_positions
+from main.models import Account
 from orders.models import Order
 from .bot_logic import create_bb_and_avg_obj, logging
 from .bb_set_takes import set_takes
@@ -123,3 +124,9 @@ def view_order_status(request, bot_id, order_id):
     bot = Bot.objects.get(pk=bot_id)
     order = Order.objects.get(pk=order_id)
     status = get_order_status(bot.account, bot.category, bot.symbol, order.orderLinkId)
+
+
+def get_balance_views(request, acc_id):
+    acc = Account.objects.get(pk=acc_id)
+    balance = get_balance(acc)
+    return render(request, 'balance.html', {'balance': balance})

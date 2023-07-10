@@ -25,7 +25,7 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
         response = httpClient.request(method, account.url + endPoint, headers=headers, data=payload)
     else:
         response = httpClient.request(method, account.url + endPoint + "?" + payload, headers=headers)
-    # print(response.text)
+    print(response.text)
     # print(Info + " Elapsed Time : " + str(response.elapsed))
     return response.text
 
@@ -155,3 +155,12 @@ def set_leverage(account, category, symbol, leverage):
     params = json.dumps(params)
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     print(response)
+
+
+def get_balance(account):
+    endpoint = "/v5/account/wallet-balance"
+    method = "GET"
+    params = f"accountType=CONTRACT"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    return response
+
