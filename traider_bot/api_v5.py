@@ -141,3 +141,17 @@ def get_pnl(account, category, symbol):
     params = f"category={category}&symbol={symbol}"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     return response['result']['list'][0]['closedPnl']
+
+
+def set_leverage(account, category, symbol, leverage):
+    endpoint = "/v5/position/set-leverage"
+    method = "POST"
+    params = {
+        'category': category,
+        'symbol': symbol.name,
+        'buyLeverage': str(leverage),
+        'sellLeverage': str(leverage),
+    }
+    params = json.dumps(params)
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    print(response)
