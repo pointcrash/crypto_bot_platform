@@ -34,17 +34,32 @@ def get_status_process(pid):
 def drop_position(bot):
     symbol_list = get_list(bot.account, bot.category, bot.symbol)
     psn_qty, psn_side = get_qty(symbol_list), get_side(symbol_list)
-    side = "Buy" if psn_side == "Sell" else "Sell"
+    if type([]) == type(psn_qty):
+        for qty, side in psn_qty, psn_side:
+            if qty:
+                side = "Buy" if side == "Sell" else "Sell"
 
-    drop_order = Order.objects.create(
-        bot=bot,
-        category=bot.category,
-        symbol=bot.symbol.name,
-        side=side,
-        orderType='Market',
-        qty=psn_qty,
-        is_take=True,
-    )
+                drop_order = Order.objects.create(
+                    bot=bot,
+                    category=bot.category,
+                    symbol=bot.symbol.name,
+                    side=side,
+                    orderType='Market',
+                    qty=qty,
+                    is_take=True,
+                )
+    else:
+        side = "Buy" if psn_side == "Sell" else "Sell"
+
+        drop_order = Order.objects.create(
+            bot=bot,
+            category=bot.category,
+            symbol=bot.symbol.name,
+            side=side,
+            orderType='Market',
+            qty=psn_qty,
+            is_take=True,
+        )
 
 
 def stop_bot_with_cancel_orders(bot):

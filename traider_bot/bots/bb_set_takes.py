@@ -19,8 +19,8 @@ def set_takes(bot, bb_obj, bb_avg_obj):
                 break
 
         # set position
-        psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj,
-                                                                            bb_avg_obj=bb_avg_obj)
+        psn_qty, psn_side, psn_price, first_cycle, _ = calculation_entry_point(bot=bot, bb_obj=bb_obj,
+                                                                               bb_avg_obj=bb_avg_obj)
 
         tl = bb_obj.tl
         bl = bb_obj.bl

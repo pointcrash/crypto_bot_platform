@@ -28,9 +28,8 @@ class Order(models.Model):
         params = {
             'category': self.category,
             'symbol': self.symbol,
-            # 'isLeverage': self.isLeverage,
             'side': self.side,
-            # 'positionIdx': self.positionIdx,
+            'positionIdx': self.positionIdx,
             'orderType': self.orderType,
             'qty': str(self.qty),
             'price': str(self.price),
@@ -43,6 +42,11 @@ class Order(models.Model):
         print(params)
 
     def save(self, *args, **kwargs):
+        if self.category == 'inverse':
+            if self.side == 'Buy':
+                self.positionIdx = 1
+            else:
+                self.positionIdx = 2
         if not self.orderLinkId:
             self.orderLinkId = uuid.uuid4().hex
         super().save(*args, **kwargs)

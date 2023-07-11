@@ -94,7 +94,7 @@ class GridBotForm(forms.ModelForm):
 
     class Meta:
         model = Bot
-        fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
+        fields = ['account', 'category', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
                   'auto_avg', 'grid_avg_value', 'grid_profit_value', 'bb_avg_percent',
                   'deviation_from_lines', 'is_percent_deviation_from_lines', 'max_margin', 'qty_kline', 'd',
                   'time_sleep',  'repeat',   'grid_take_count', ]
@@ -102,6 +102,7 @@ class GridBotForm(forms.ModelForm):
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
             'account': forms.Select(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
             'symbol': forms.Select(attrs={'class': 'form-control'}),
             'side': forms.Select(attrs={'class': 'form-control'}),
             'orderType': forms.Select(attrs={'class': 'form-control'}),
@@ -121,6 +122,7 @@ class GridBotForm(forms.ModelForm):
         labels = {
             'qty': '1st order investments $',
             'account': 'Account',
+            'category': 'Category',
             'symbol': 'Symbol',
             'side': 'Side',
             'margin_type': 'Margin',

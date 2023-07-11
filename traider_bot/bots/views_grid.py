@@ -38,7 +38,6 @@ def grid_create_bot(request):
             bot.work_model = 'grid'
             bot.owner = request.user
             bot.save()
-
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
 
             connections.close_all()

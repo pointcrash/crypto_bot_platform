@@ -57,15 +57,24 @@ def get_current_price(account, category, symbol):
 
 
 def get_position_price(symbol_list):
-    return Decimal(symbol_list["avgPrice"])
+    if len(symbol_list) == 1:
+        return Decimal(symbol_list[0]["avgPrice"])
+    else:
+        return [i['avgPrice'] for i in symbol_list]
 
 
 def get_qty(symbol_list):
-    return Decimal(symbol_list["size"])
+    if len(symbol_list) == 1:
+        return Decimal(symbol_list[0]["size"])
+    else:
+        return [qty['size'] for qty in symbol_list]
 
 
 def get_side(symbol_list):
-    return symbol_list["side"]
+    if len(symbol_list) == 1:
+        return symbol_list[0]["side"]
+    else:
+        return [i['side'] for i in symbol_list]
 
 
 def get_list(account, category, symbol):
@@ -73,10 +82,7 @@ def get_list(account, category, symbol):
     method = "GET"
     params = f"category={category}&symbol={symbol.name}"
     response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
-    try:
-        return response["result"]["list"][0]
-    except:
-        print(response)
+    return response['result']['list']
 
 
 def get_order_book(account, category, symbol):
@@ -164,3 +170,18 @@ def get_balance(account):
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     return response
 
+
+def switch_position_mode(bot):
+    endpoint = "/v5/position/switch-mode"
+    method = "POST"
+    mode = 0
+    if bot.category == 'inverse':
+        mode = 3
+
+    params = {
+        'category': bot.category,
+        'symbol': bot.symbol.name,
+        'mode': mode,
+    }
+    params = json.dumps(params)
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))

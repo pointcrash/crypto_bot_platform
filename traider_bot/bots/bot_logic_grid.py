@@ -8,12 +8,13 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
-from api_v5 import cancel_all, get_order_status, get_pnl, set_leverage
+from api_v5 import cancel_all, get_order_status, get_pnl, set_leverage, switch_position_mode
 from bots.bot_logic import calculation_entry_point, count_decimal_places, logging
 from orders.models import Order
 
 
 def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
+    switch_position_mode(bot)
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     round_number = int(bot.symbol.priceScale)
