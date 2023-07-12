@@ -3,10 +3,10 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process
-from .bot_logic import get_update_symbols, create_bb_and_avg_obj
+from .bot_logic import get_update_symbols, create_bb_and_avg_obj, logging
 from .forms import BotForm, GridBotForm
 from .bot_logic_grid import set_takes_for_grid_bot
-from .models import Bot
+from .models import Bot, Process
 from django.contrib import messages
 
 
@@ -19,8 +19,9 @@ def grid_bots_list(request):
         bots = Bot.objects.filter(owner=user, work_model='grid')
     is_alive_list = []
     for bot in bots:
-        if bot.process_id is not None:
-            is_alive_list.append(get_status_process(bot.process_id))
+        pid = bot.process.pid
+        if pid is not None:
+            is_alive_list.append(get_status_process(pid))
         else:
             is_alive_list.append(None)
 
@@ -43,9 +44,7 @@ def grid_create_bot(request):
             connections.close_all()
             bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
-            bot.process_id = str(bot_process.pid)
-            bot.save()
-
+            Process.objects.create(pid=str(bot_process.pid), bot=bot)
             return redirect('grid_bots_list')
     else:
         form = GridBotForm(user=request.user)
@@ -64,12 +63,11 @@ def grid_bot_detail(request, bot_id):
         form = GridBotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
-            if get_status_process(bot.process_id):
-                terminate_process_by_pid(bot.process_id)
+            if get_status_process(bot.process.pid):
+                terminate_process_by_pid(bot.process.pid)
             bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, ))
             bot_process.start()
-            bot.process_id = str(bot_process.pid)
-            bot.save()
+            Process.objects.create(pid=str(bot_process.pid), bot=bot)
             return redirect('grid_bots_list')
     else:
         form = GridBotForm(user=request.user, instance=bot)  # Передаем экземпляр модели в форму

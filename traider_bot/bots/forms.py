@@ -152,6 +152,11 @@ class GridBotForm(forms.ModelForm):
         symbol = cleaned_data.get('symbol')
         qty = cleaned_data.get('qty')
         orderType = cleaned_data.get('orderType')
+        auto_avg = cleaned_data.get('auto_avg')
+        margin = cleaned_data.get('max_margin')
+
+        if not margin and auto_avg:
+            raise forms.ValidationError("Invalid 'Max Margin' value")
 
         if qty is None:
             raise forms.ValidationError("Invalid '1st order investments' value. Only whole numbers")

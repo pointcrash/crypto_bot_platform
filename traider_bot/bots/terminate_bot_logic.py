@@ -63,11 +63,11 @@ def drop_position(bot):
 
 
 def stop_bot_with_cancel_orders(bot):
-    terminate_process_by_pid(bot.process_id)
+    terminate_process_by_pid(bot.process.pid)
     cancel_all(bot.account, bot.category, bot.symbol)
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
-    terminate_process_by_pid(bot.process_id)
+    terminate_process_by_pid(bot.process.pid)
     cancel_all(bot.account, bot.category, bot.symbol)
     drop_position(bot)

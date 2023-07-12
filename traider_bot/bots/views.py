@@ -12,7 +12,7 @@ from orders.models import Order
 from .bot_logic import create_bb_and_avg_obj, logging
 from .bb_set_takes import set_takes
 from .forms import BotForm
-from .models import Bot
+from .models import Bot, Process
 from django.contrib import messages
 
 
@@ -87,9 +87,11 @@ def bb_bot_detail(request, bot_id):
 @login_required
 def terminate_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
+    process = Process.objects.get(bot=bot)
+    pid = process.pid
 
     if event_number == 1:
-        terminate_process_by_pid(bot.process_id)
+        terminate_process_by_pid(pid)
 
     elif event_number == 2:
         stop_bot_with_cancel_orders(bot)
@@ -97,8 +99,8 @@ def terminate_bot(request, bot_id, event_number):
     elif event_number == 3:
         stop_bot_with_cancel_orders_and_drop_positions(bot)
 
-    bot.process_id = None
-    bot.save()
+    process.pid = None
+    process.save()
     return redirect('bb_bots_list')
 
 

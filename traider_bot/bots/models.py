@@ -105,3 +105,8 @@ class Bot(models.Model):
 class Log(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
     content = models.CharField()
+
+
+class Process(models.Model):
+    pid = models.CharField(blank=True, null=True, default=None)
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE)
