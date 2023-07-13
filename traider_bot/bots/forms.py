@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django import forms
 
+from api_v5 import get_query_account_coins_balance
 from main.models import Account
 from .models import Bot
 
@@ -9,6 +10,17 @@ class BotForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['account'].queryset = Account.objects.filter(owner=user)
+        self.fields['account'].label_from_instance = self.label_from_instance
+
+    @staticmethod
+    def label_from_instance(obj):
+        balance = get_query_account_coins_balance(obj)
+        try:
+            for elem in balance:
+                if elem['coin'] == 'USDT':
+                    return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
+        except:
+            return f"{obj.name} error"
 
     class Meta:
         model = Bot
@@ -91,13 +103,24 @@ class GridBotForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['account'].queryset = Account.objects.filter(owner=user)
+        self.fields['account'].label_from_instance = self.label_from_instance
+
+    @staticmethod
+    def label_from_instance(obj):
+        balance = get_query_account_coins_balance(obj)
+        try:
+            for elem in balance:
+                if elem['coin'] == 'USDT':
+                    return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
+        except:
+            return f"{obj.name} error"
 
     class Meta:
         model = Bot
         fields = ['account', 'category', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
                   'auto_avg', 'grid_avg_value', 'grid_profit_value', 'bb_avg_percent',
                   'deviation_from_lines', 'is_percent_deviation_from_lines', 'max_margin', 'qty_kline', 'd',
-                  'time_sleep',  'repeat',   'grid_take_count', ]
+                  'time_sleep', 'repeat', 'grid_take_count', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
