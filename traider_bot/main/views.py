@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+from api_v5 import get_query_account_coins_balance
 from bots.models import Log
 from .forms import RegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login, logout
@@ -16,8 +17,24 @@ def logs_list(request):
 
 @login_required
 def account_list(request):
-    accounts = Account.objects.all()
-    return render(request, 'account/accounts_list.html', {'accounts': accounts})
+    acc_list = []
+    user = request.user
+    if user.is_superuser:
+        accounts = Account.objects.all()
+    else:
+        accounts = Account.objects.filter(owner=request.user)
+    for account in accounts:
+        balance = get_query_account_coins_balance(account)
+        try:
+            for elem in balance:
+                if elem['coin'] == 'USDT':
+                    acc_list.append([account, elem['walletBalance'], elem['transferBalance']])
+        except:
+            acc_list.append([account, 'error', 'error'])
+    return render(request, 'account/accounts_list.html', {
+        'acc_list': acc_list,
+    }
+                  )
 
 
 @login_required

@@ -171,6 +171,16 @@ def get_balance(account):
     return response
 
 
+def get_query_account_coins_balance(account):
+    endpoint = "/v5/asset/transfer/query-account-coins-balance"
+    method = "GET"
+    params = f"accountType=CONTRACT"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    try:
+        return response['result']['balance']
+    except:
+        return None
+
 def switch_position_mode(bot):
     endpoint = "/v5/position/switch-mode"
     method = "POST"

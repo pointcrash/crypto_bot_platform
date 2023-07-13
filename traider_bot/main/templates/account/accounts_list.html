@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-12">
             <h1 class="text-center">Accounts</h1>
-                <a href="{% url 'create_account' %}" class="btn btn-success">Add new account</a>
+            <a href="{% url 'create_account' %}" class="btn btn-success">Add new account</a>
             <div class="card mt-2 mt-2 border-0 shadow p-3">
                 <table class="table">
                     <thead>
@@ -13,19 +13,25 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Is mainnet</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
+                        <th>Wallet Balance</th>
+                        <th>Transfer Balance</th>
+                        <th style="color: orange">Edit</th>
+                        <th style="color: red">Delete</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for account in accounts %}
+                    {% for account, wb, tb in acc_list %}
                     <tr class=" text-center">
                         <td>{{ account.pk }}</td>
                         <td>{{ account.name }}</td>
-                        <td>{{ account.is_mainnet }}</td>
-                        <td><a class="btn btn-sm btn-warning" href="{% url 'edit_account' acc_id=account.pk %}">Edit</a></td>
+                        <td>{% if account.is_mainnet %}<i class="fa-solid fa-check"></i>{% else %}<i
+                                class="fa-solid fa-xmark"></i>{% endif %}
+                        </td>
+                        <td class="border">{{ wb }}</td>
+                        <td class="border">{{ tb }}</td>
+                        <td><a class="btn btn-sm btn-warning" href="{% url 'edit_account' acc_id=account.pk %}">Edit</a>
+                        </td>
                         <td>{% include 'account/delete_account_modal.html' %}</td>
-                        <td><a href="{% url 'balance' acc_id=account.pk %}">balance</a></td>
                     </tr>
                     {% endfor %}
                     </tbody>
