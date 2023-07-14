@@ -155,18 +155,20 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj, grid_take_list=None):
 
 def get_update_symbols():
     symbol_set = get_symbol_set()
-    Symbol.objects.all().delete()
     for symbol in symbol_set:
-        Symbol.objects.create(
-            name=symbol[0],
-            priceScale=symbol[1],
-            minLeverage=symbol[2],
-            maxLeverage=symbol[3],
-            leverageStep=symbol[4],
-            minPrice=symbol[5],
-            maxPrice=symbol[6],
-            minOrderQty=symbol[7],
-        )
+        try:
+            coin = Symbol.objects.get(name=symbol[0])
+        except Symbol.DoesNotExist:
+            Symbol.objects.create(
+                name=symbol[0],
+                priceScale=symbol[1],
+                minLeverage=symbol[2],
+                maxLeverage=symbol[3],
+                leverageStep=symbol[4],
+                minPrice=symbol[5],
+                maxPrice=symbol[6],
+                minOrderQty=symbol[7],
+            )
 
 
 def count_decimal_places(number):
@@ -282,3 +284,5 @@ def take2_status_check(bot):
             bot.take2 = ''
             bot.save()
             return True
+
+

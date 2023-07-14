@@ -5,6 +5,8 @@
     <div class="col-11 mx-auto">
             <h1 class="text-center">BB Bots</h1>
         <a class="btn btn-success" href="{% url 'bb_create_bot' %}">Add new bot</a>
+        <a class="btn btn-warning" href="{% url 'update_symbols_set' %}">Refresh coins</a>
+        {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
         <div class="card mt-2 border-0 shadow p-3">
             <table class="table">
                 <thead>

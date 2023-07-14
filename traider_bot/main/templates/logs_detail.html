@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row px-3">
+    {% for bot in bots %}
+    <div class="col-2">
+        <a style="text-decoration: none; outline: none; color: inherit;" href="{% url 'logs_detail' bot_id=bot.pk %}" class="card shadow">
+            <div class="card-header">
+                <h5 class="my-auto">Bot {{ bot.pk}} - {{ bot.symbol.name }}</h5>
+            </div>
+            <div class="card-body">
+                <strong class="text-muted">Account: </strong>{{ bot.account }}<br>
+                <strong class="text-muted">Category: </strong>{{ bot.category }}<br>
+                <strong class="text-muted">Side: </strong>{{ bot.side }}<br>
+                <strong class="text-muted">Model: </strong>{{ bot.work_model }}<br>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

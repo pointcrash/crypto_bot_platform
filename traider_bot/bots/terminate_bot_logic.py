@@ -4,6 +4,7 @@ import signal
 import psutil
 
 from api_v5 import cancel_all, get_list, get_side, get_qty
+from bots.bot_logic import logging
 from orders.models import Order
 
 
@@ -13,9 +14,9 @@ def terminate_process_by_pid(pid):
         if get_status_process(pid):
             try:
                 os.kill(pid, signal.SIGTERM)
-                print(f"Process with PID {pid} terminated successfully.")
+                return "Bot terminated successfully."
             except OSError as e:
-                print(f"Error terminating process with PID {pid}: {e}")
+                return f"Error terminating process with PID {pid}: {e}"
 
 
 def get_status_process(pid):
@@ -63,11 +64,14 @@ def drop_position(bot):
 
 
 def stop_bot_with_cancel_orders(bot):
-    terminate_process_by_pid(bot.process.pid)
-    cancel_all(bot.account, bot.category, bot.symbol)
+    logging(bot, terminate_process_by_pid(bot.process.pid))
+    logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
+                                            'retMsg'] == 'OK' else 'error when canceling orders')
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
-    terminate_process_by_pid(bot.process.pid)
-    cancel_all(bot.account, bot.category, bot.symbol)
+    logging(bot, terminate_process_by_pid(bot.process.pid))
+    logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
+                                            'retMsg'] == 'OK' else 'error when canceling orders')
     drop_position(bot)
+    logging(bot, 'drop position')

@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from api_v5 import get_query_account_coins_balance
-from bots.models import Log
+from bots.models import Log, Bot
 from .forms import RegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
@@ -10,9 +10,15 @@ from main.models import Account
 
 
 @login_required
-def logs_list(request):
-    logs = Log.objects.all()
+def logs_list(request, bot_id):
+    logs = Log.objects.filter(bot=bot_id)
     return render(request, 'logs.html', {'logs': logs})
+
+
+def logs_view(request):
+    user = request.user
+    bots = Bot.objects.filter(owner=user)
+    return render(request, 'logs_detail.html', {'bots': bots})
 
 
 @login_required
@@ -108,3 +114,6 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+
+

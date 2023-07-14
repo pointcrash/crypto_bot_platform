@@ -79,5 +79,10 @@ def get_update_symbols_set(request, bot_type):
     get_update_symbols()
     if bot_type == 'grid':
         return redirect('grid_create_bot')
-    else:
+    elif bot_type == 'bb':
         return redirect('bb_create_bot')
+
+
+def update_symbols_set(request):
+    get_update_symbols()
+    return redirect(request.META.get('HTTP_REFERER'))

@@ -91,7 +91,7 @@ def terminate_bot(request, bot_id, event_number):
     pid = process.pid
 
     if event_number == 1:
-        terminate_process_by_pid(pid)
+        logging(bot, terminate_process_by_pid(pid))
 
     elif event_number == 2:
         stop_bot_with_cancel_orders(bot)

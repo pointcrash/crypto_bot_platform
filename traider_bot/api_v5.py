@@ -45,7 +45,8 @@ def cancel_all(account, category, symbol):
         'symbol': symbol.name,
     }
     params = json.dumps(params)
-    HTTP_Request(account, endpoint, method, params, "CancelAll")
+    response = json.loads(HTTP_Request(account, endpoint, method, params, "CancelAll"))
+    return response
 
 
 def get_current_price(account, category, symbol):
