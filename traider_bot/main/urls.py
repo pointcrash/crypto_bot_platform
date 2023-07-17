@@ -1,6 +1,6 @@
 from django.urls import path
 
-from bots.one_way.views_bb import get_balance_views
+from bots.views import get_balance_views
 from main.views import *
 
 urlpatterns = [

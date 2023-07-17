@@ -202,9 +202,11 @@ class GridBotForm(forms.ModelForm):
 
 
 class HedgeGridBotForm(forms.ModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        self.fields['account'].queryset = Account.objects.filter(owner=user)
+        if self.request:
+            self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
         self.fields['account'].label_from_instance = self.label_from_instance
 
     @staticmethod

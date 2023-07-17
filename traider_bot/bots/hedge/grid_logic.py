@@ -28,8 +28,8 @@ def set_takes_for_hedge_grid_bot(bot):
         qty_list = get_qty(symbol_list)
         if price_list[0] or price_list[1]:
             current_price = get_current_price(bot.account, bot.category, bot.symbol)
-            if qty_list[0] * current_price * 2 >= bot.max_margin or qty_list[1] * current_price * 2 >= bot.max_margin:
-                logging(bot, 'MARGIN LIMIT')
+            if qty_list[0] * current_price * 2 / bot.isLeverage >= bot.max_margin or qty_list[1] * current_price * 2 / bot.isLeverage >= bot.max_margin:
+                logging(bot, f'MARGIN LIMIT')
                 break
             else:
                 if current_price < price_list[0] * (1 - bot.grid_profit_value / 100):

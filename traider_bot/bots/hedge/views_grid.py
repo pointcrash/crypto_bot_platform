@@ -35,7 +35,7 @@ def hedge_grid_create_bot(request):
     title = 'Hedge Grid Bot'
 
     if request.method == 'POST':
-        form = HedgeGridBotForm(user=request.user, data=request.POST)
+        form = HedgeGridBotForm(request=request, data=request.POST)
         if form.is_valid():
             bot = form.save(commit=False)
             bot.work_model = 'grid'
@@ -51,7 +51,7 @@ def hedge_grid_create_bot(request):
 
             return redirect('hedge_grid_list')
     else:
-        form = HedgeGridBotForm(user=request.user)
+        form = HedgeGridBotForm(request=request)
 
     return render(request, 'hedge/grid/bot_create.html', {'form': form, 'title': title})
 
@@ -71,9 +71,10 @@ def hedge_grid_bot_detail(request, bot_id):
                 terminate_process_by_pid(bot.process.pid)
             bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
             bot_process.start()
-            Process.objects.create(pid=str(bot_process.pid), bot=bot)
+            bot.process.pid = str(bot_process.pid)
+            bot.process.save()
             return redirect('hedge_grid_list')
     else:
-        form = HedgeGridBotForm(user=request.user, instance=bot)  # Передаем экземпляр модели в форму
+        form = HedgeGridBotForm(request=request, instance=bot)  # Передаем экземпляр модели в форму
 
     return render(request, 'hedge/grid/bots_detail.html', {'form': form, 'bot': bot, 'message': message})

@@ -34,29 +34,31 @@ def get_status_process(pid):
 
 def drop_position(bot):
     symbol_list = get_list(bot.account, bot.category, bot.symbol)
-    psn_qty, psn_side = get_qty(symbol_list), get_side(symbol_list)
+    psn_qty = get_qty(symbol_list)
+    psn_side = get_side(symbol_list)
+
     if type([]) == type(psn_qty):
-        for qty, side in psn_qty, psn_side:
+        for qty, side in zip(psn_qty, psn_side):
             if qty:
-                side = "Buy" if side == "Sell" else "Sell"
+                order_side = "Buy" if side == "Sell" else "Sell"
 
                 drop_order = Order.objects.create(
                     bot=bot,
                     category=bot.category,
                     symbol=bot.symbol.name,
-                    side=side,
+                    side=order_side,
                     orderType='Market',
                     qty=qty,
                     is_take=True,
                 )
     else:
-        side = "Buy" if psn_side == "Sell" else "Sell"
+        order_side = "Buy" if psn_side == "Sell" else "Sell"
 
         drop_order = Order.objects.create(
             bot=bot,
             category=bot.category,
             symbol=bot.symbol.name,
-            side=side,
+            side=order_side,
             orderType='Market',
             qty=psn_qty,
             is_take=True,

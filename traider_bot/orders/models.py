@@ -42,10 +42,10 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if self.category == 'inverse':
-            if self.side == 'Buy':
-                self.positionIdx = 1
+            if self.is_take:
+                self.positionIdx = 2 if self.side == 'Buy' else 1
             else:
-                self.positionIdx = 2
+                self.positionIdx = 1 if self.side == 'Buy' else 2
         if not self.orderLinkId:
             self.orderLinkId = uuid.uuid4().hex
         super().save(*args, **kwargs)

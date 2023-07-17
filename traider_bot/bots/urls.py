@@ -1,8 +1,7 @@
 from django.urls import path, include
 
 from bots.one_way.views_grid import update_symbols_set
-from bots.one_way.views_bb import terminate_bot, delete_bot
-from bots.views import views_bots_type_choice
+from bots.views import views_bots_type_choice, terminate_bot, delete_bot
 
 urlpatterns = [
     path('<str:mode>', views_bots_type_choice, name='mode_choice'),
