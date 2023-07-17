@@ -9,6 +9,10 @@ from main.forms import AccountForm
 from main.models import Account
 
 
+def view_home(request):
+    return render(request, 'home.html')
+
+
 @login_required
 def logs_list(request, bot_id):
     logs = Log.objects.filter(bot=bot_id)
@@ -94,6 +98,9 @@ def registration_view(request):
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():

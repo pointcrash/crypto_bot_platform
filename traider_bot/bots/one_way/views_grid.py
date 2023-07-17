@@ -2,21 +2,23 @@ import multiprocessing
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+
 from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process
-from .bot_logic import get_update_symbols, create_bb_and_avg_obj, logging
-from .forms import BotForm, GridBotForm
-from .bot_logic_grid import set_takes_for_grid_bot
-from .models import Bot, Process
+from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
+from bots.forms import GridBotForm
+from bots.bot_logic_grid import set_takes_for_grid_bot
+from bots.models import Bot, Process
 from django.contrib import messages
 
 
 @login_required
-def grid_bots_list(request):
+def one_way_grid_bots_list(request):
+
     user = request.user
     if user.is_superuser:
-        bots = Bot.objects.filter(work_model='grid')
+        bots = Bot.objects.filter(work_model='grid', category='linear')
     else:
-        bots = Bot.objects.filter(owner=user, work_model='grid')
+        bots = Bot.objects.filter(owner=user, work_model='grid', category='linear')
     is_alive_list = []
     for bot in bots:
         pid = bot.process.pid
@@ -26,18 +28,20 @@ def grid_bots_list(request):
             is_alive_list.append(None)
 
     bots = zip(bots, is_alive_list)
-    return render(request, 'grid_bots_list.html', {'bots': bots})
+    return render(request, 'one_way/grid/grid_bots_list.html', {'bots': bots, })
 
 
 @login_required
-def grid_create_bot(request):
+def one_way_grid_create_bot(request):
     title = 'Grid Bot'
+
     if request.method == 'POST':
         form = GridBotForm(user=request.user, data=request.POST)
         if form.is_valid():
             bot = form.save(commit=False)
             bot.work_model = 'grid'
             bot.owner = request.user
+            bot.category = 'linear'
             bot.save()
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
 
@@ -49,11 +53,11 @@ def grid_create_bot(request):
     else:
         form = GridBotForm(user=request.user)
 
-    return render(request, 'create_bot.html', {'form': form, 'title': title})
+    return render(request, 'one_way/create_bot.html', {'form': form, 'title': title, })
 
 
 @login_required
-def grid_bot_detail(request, bot_id):
+def one_way_grid_bot_detail(request, bot_id):
     message = []
     error_message = messages.get_messages(request)
     if error_message:
@@ -65,22 +69,14 @@ def grid_bot_detail(request, bot_id):
             bot = form.save()
             if get_status_process(bot.process.pid):
                 terminate_process_by_pid(bot.process.pid)
-            bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, ))
+            bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot,))
             bot_process.start()
             Process.objects.create(pid=str(bot_process.pid), bot=bot)
             return redirect('grid_bots_list')
     else:
         form = GridBotForm(user=request.user, instance=bot)  # Передаем экземпляр модели в форму
 
-    return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'message': message})
-
-
-def get_update_symbols_set(request, bot_type):
-    get_update_symbols()
-    if bot_type == 'grid':
-        return redirect('grid_create_bot')
-    elif bot_type == 'bb':
-        return redirect('bb_create_bot')
+    return render(request, 'one_way/grid/bot_detail.html', {'form': form, 'bot': bot, 'message': message, })
 
 
 def update_symbols_set(request):

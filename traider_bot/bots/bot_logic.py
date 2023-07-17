@@ -25,7 +25,6 @@ def set_entry_point_by_market(bot):
         bot=bot,
         category=bot.category,
         symbol=bot.symbol.name,
-        # isLeverage=bot.isLeverage,
         side=bot.side,
         orderType=bot.orderType,
         qty=get_quantity_from_price(bot.qty,
@@ -102,7 +101,6 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj, grid_take_list=None):
     while True:
         symbol_list = get_list(bot.account, bot.category, bot.symbol)
 
-        # if bot.category == 'inverse':
         if get_qty(symbol_list):
             psn_qty = get_qty(symbol_list)
             psn_side = get_side(symbol_list)
@@ -144,7 +142,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj, grid_take_list=None):
         bl = bb_obj.bl
 
         if not first_cycle:
-            time.sleep(10)
+            time.sleep(bot.time_sleep)
 
         if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
             cancel_all(bot.account, bot.category, bot.symbol)

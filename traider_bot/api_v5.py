@@ -61,14 +61,14 @@ def get_position_price(symbol_list):
     if len(symbol_list) == 1:
         return Decimal(symbol_list[0]["avgPrice"])
     else:
-        return [i['avgPrice'] for i in symbol_list]
+        return [Decimal(i['avgPrice']) for i in symbol_list]
 
 
 def get_qty(symbol_list):
     if len(symbol_list) == 1:
         return Decimal(symbol_list[0]["size"])
     else:
-        return [qty['size'] for qty in symbol_list]
+        return [Decimal(qty['size']) for qty in symbol_list]
 
 
 def get_side(symbol_list):
@@ -161,7 +161,6 @@ def set_leverage(account, category, symbol, leverage):
     }
     params = json.dumps(params)
     response = json.loads(HTTP_Request(account, endpoint, method, params))
-    print(response)
 
 
 def get_balance(account):
@@ -182,6 +181,7 @@ def get_query_account_coins_balance(account):
     except:
         return None
 
+
 def switch_position_mode(bot):
     endpoint = "/v5/position/switch-mode"
     method = "POST"
@@ -196,3 +196,4 @@ def switch_position_mode(bot):
     }
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+

@@ -125,13 +125,13 @@
                         </div>
                         <div class="modal-footer">
                             <a type="button"
-                               href="{% url 'delete_bot' bot_id=bot.pk event_number=1 redirect_to=bot.work_model %}"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=1 redirect_to='one_way_bb' %}"
                                class="btn btn-warning col-12">Delete and stop bot only</a>
                             <a type="button"
-                               href="{% url 'delete_bot' bot_id=bot.pk event_number=2 redirect_to=bot.work_model %}"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=2 redirect_to='one_way_bb' %}"
                                class="btn btn-warning col-12">Delete bot with cancel all orders</a>
                             <a type="button"
-                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 redirect_to=bot.work_model %}"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 redirect_to='one_way_bb' %}"
                                class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
                                 Market
                             </a>

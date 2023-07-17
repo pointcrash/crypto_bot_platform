@@ -3,9 +3,11 @@
 {% block content %}
 <div class="row">
     <div class="col-11 mx-auto">
-            <h1 class="text-center">Grid Bots</h1>
-        <a class="btn btn-success" href="{% url 'grid_create_bot' %}">Add new bot</a>
+            <h1 class="text-center">BB Bots</h1>
+            <h6 class="text-center">One-Way mode</h6>
+        <a class="btn btn-success" href="{% url 'one_way_bb_create_bot' %}">Add new bot</a>
         <a class="btn btn-warning" href="{% url 'update_symbols_set' %}">Refresh coins</a>
+        {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
         <div class="card mt-2 border-0 shadow p-3">
             <table class="table">
                 <thead>
@@ -37,7 +39,7 @@
 <!--                    <td>{{ bot.price }}</td>-->
                     <td>{% if is_alive %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
                     {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}</td>
-                    <td><a class="btn btn-sm btn-warning" href="{% url 'grid_bot_detail' bot_id=bot.pk %}">Edit</a></td>
+                    <td><a class="btn btn-sm btn-warning" href="{% url 'one_way_bb_bot_detail' bot_id=bot.pk %}">Edit</a></td>
                     {% if is_alive %}<td>{% include 'modal_stop_bot.html' %}</td>
                     {% else %}<td><button class="btn btn-sm btn-danger" disabled>Stop</button></td>
                     {% endif %}

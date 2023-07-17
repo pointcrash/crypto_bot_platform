@@ -117,7 +117,7 @@ class GridBotForm(forms.ModelForm):
 
     class Meta:
         model = Bot
-        fields = ['account', 'category', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
+        fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
                   'auto_avg', 'grid_avg_value', 'grid_profit_value', 'bb_avg_percent',
                   'deviation_from_lines', 'is_percent_deviation_from_lines', 'max_margin', 'qty_kline', 'd',
                   'time_sleep', 'repeat', 'grid_take_count', ]
@@ -125,7 +125,7 @@ class GridBotForm(forms.ModelForm):
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
             'account': forms.Select(attrs={'class': 'form-control'}),
-            'category': forms.Select(attrs={'class': 'form-control'}),
+            # 'category': forms.Select(attrs={'class': 'form-control'}),
             'symbol': forms.Select(attrs={'class': 'form-control'}),
             'side': forms.Select(attrs={'class': 'form-control'}),
             'orderType': forms.Select(attrs={'class': 'form-control'}),
@@ -145,7 +145,7 @@ class GridBotForm(forms.ModelForm):
         labels = {
             'qty': '1st order investments $',
             'account': 'Account',
-            'category': 'Category',
+            # 'category': 'Category',
             'symbol': 'Symbol',
             'side': 'Side',
             'margin_type': 'Margin',
@@ -199,3 +199,46 @@ class GridBotForm(forms.ModelForm):
                 f"Invalid '1st order investments' value: min value = {symbol.minPrice}, max value = {symbol.maxPrice}")
 
         return cleaned_data
+
+
+class HedgeGridBotForm(forms.ModelForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['account'].queryset = Account.objects.filter(owner=user)
+        self.fields['account'].label_from_instance = self.label_from_instance
+
+    @staticmethod
+    def label_from_instance(obj):
+        balance = get_query_account_coins_balance(obj)
+        try:
+            for elem in balance:
+                if elem['coin'] == 'USDT':
+                    return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
+        except:
+            return f"{obj.name} error"
+
+    class Meta:
+        model = Bot
+        fields = ['account', 'symbol', 'isLeverage', 'qty', 'grid_avg_value', 'grid_profit_value', 'max_margin',
+                  'time_sleep', ]
+
+        widgets = {
+            'qty': forms.TextInput(attrs={'class': 'form-control'}),
+            'account': forms.Select(attrs={'class': 'form-control'}),
+            'symbol': forms.Select(attrs={'class': 'form-control'}),
+            'isLeverage': forms.NumberInput(attrs={'class': 'form-control'}),
+            'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'grid_profit_value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
+            'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'qty': '1st order investments $',
+            'account': 'Account',
+            'symbol': 'Symbol',
+            'isLeverage': 'Leverage',
+            'grid_avg_value': 'Grid Average Value (%)',
+            'grid_profit_value': 'Grid Profit Value (%)',
+            'max_margin': 'Max Margin',
+            'time_sleep': 'Request Rate (sec)',
+        }

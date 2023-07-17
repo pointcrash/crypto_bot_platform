@@ -20,6 +20,7 @@ class Order(models.Model):
     timeInForce = models.CharField(default='GTC')
     orderLinkId = models.CharField(max_length=32, unique=True)
     is_take = models.BooleanField(default=False)
+    takeProfit = models.CharField(max_length=32)
 
     def realize_order(self):
 
@@ -33,13 +34,11 @@ class Order(models.Model):
             'orderType': self.orderType,
             'qty': str(self.qty),
             'price': str(self.price),
-            # 'timeInForce': self.timeInForce,
-            'orderLinkId': self.orderLinkId
+            'orderLinkId': self.orderLinkId,
+            'takeProfit': self.takeProfit,
         }
         params = json.dumps(params)
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
-        print(response)
-        print(params)
 
     def save(self, *args, **kwargs):
         if self.category == 'inverse':

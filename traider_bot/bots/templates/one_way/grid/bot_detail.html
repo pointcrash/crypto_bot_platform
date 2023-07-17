@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-10 mx-auto">
+        <h2 class="text-center">Edit bot</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field_errors in form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="card shadow col-md-3 p-3 m-2">
+                    <h4 class="text-center">Settings</h4>
+
+                    {{ form.account.label_tag }}
+                    {{ form.account }}
+                    <br>
+                    {{ form.symbol.label_tag }}
+                    {{ form.symbol }}
+                    <br>
+                    {{ form.side.label_tag }}
+                    {{ form.side }}
+                    <br>
+                    {{ form.interval.label_tag }}
+                    {{ form.interval }}
+                    <br>
+                    {{ form.isLeverage.label_tag }}
+                    {{ form.isLeverage }}
+                    <br>
+                    {{ form.margin_type.label_tag }}
+                    {{ form.margin_type }}
+                    <br>
+                </div>
+                <div class="card shadow col-md-3 p-3 m-2">
+                    {{ form.orderType.label_tag }}
+                    {{ form.orderType }}
+                    <br>
+                    {{ form.qty.label_tag }}
+                    {{ form.qty }}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form.deviation_from_lines.label_tag }}
+                            {{ form.deviation_from_lines }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ form.is_percent_deviation_from_lines }}
+                            {{ form.is_percent_deviation_from_lines.label_tag }}
+                        </div>
+                    </div>
+                    <hr>
+                    <h4 class="text-center">Profit Orders</h4>
+                    <div class="d-inline">
+                        {{ form.take_on_ml.label_tag }}
+                        <div class="d-inline mx-1">{{ form.take_on_ml }}</div>
+                        {{ form.take_on_ml_percent.label_tag }}
+                        {{ form.take_on_ml_percent }}
+                    </div>
+                    {{ form.grid_profit_value.label_tag }}
+                    {{ form.grid_profit_value }}
+                    <hr>
+                    <h4 class="text-center">Bollinger Bands Settings</h4>
+                    {{ form.qty_kline.label_tag }}
+                    {{ form.qty_kline }}
+                    {{ form.d.label_tag }}
+                    {{ form.d }}
+                </div>
+                <div class="card shadow col-md-3 p-3 m-2">
+                    <h4 class="text-center">Average</h4>
+                    <br>
+                    <div class="d-inline">
+                        <p class="d-inline">{{ form.auto_avg.label_tag }}</p>
+                        {{ form.auto_avg }} %:
+                    </div>
+                    {{ form.bb_avg_percent }}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form.dfm.label_tag }}
+                            {{ form.dfm }}
+                        </div>
+                        <div class="col-6">
+                            {{ form.chw.label_tag }}
+                            {{ form.chw }}
+                        </div>
+                    </div>
+                    {{ form.max_margin.label_tag }}
+                    {{ form.max_margin }}
+                    {{ form.grid_avg_value.label_tag }}
+                    {{ form.grid_avg_value }}
+                    <br>
+                    <hr>
+                    <div class="col-6">
+                    {{ form.time_sleep.label_tag }}
+                    {{ form.time_sleep }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-3 mx-auto">
+            <button type="submit" class="col-7 btn btn-success mt-3">Save and Start Bot</button>
+            <!-- Button trigger modal -->
+            <button type="button" class="col-4 btn btn-danger mt-3" data-bs-toggle="modal"
+                    data-bs-target="#deleteBotModal">Delete Bot
+            </button>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="deleteBotModal" tabindex="-1" aria-labelledby="stopBotModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="deleteBotModalLabel">{{ bot.symbol }}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6>Choose way to delete:</h6>
+                        </div>
+                        <div class="modal-footer">
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=1 redirect_to='one_way_grid' %}"
+                               class="btn btn-warning col-12">Delete and stop bot only</a>
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=2 redirect_to='one_way_grid' %}"
+                               class="btn btn-warning col-12">Delete bot with cancel all orders</a>
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 redirect_to='one_way_grid' %}"
+                               class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
+                                Market
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
