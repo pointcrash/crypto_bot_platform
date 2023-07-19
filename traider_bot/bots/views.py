@@ -88,3 +88,5 @@ def get_balance_views(request, acc_id):
     acc = Account.objects.get(pk=acc_id)
     balance = get_query_account_coins_balance(acc)
     return render(request, 'balance.html', {'balance': balance})
+
+

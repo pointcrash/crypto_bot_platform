@@ -142,12 +142,12 @@ def get_order_status(account, category, symbol, orderLinkId):
     return response['result']['list'][0]['orderStatus']
 
 
-def get_pnl(account, category, symbol):
+def get_pnl(account, category, symbol, start_time=0):
     endpoint = "/v5/position/closed-pnl"
     method = "GET"
-    params = f"category={category}&symbol={symbol}"
+    params = f"category={category}&symbol={symbol}&startTime={start_time}"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
-    return response['result']['list'][0]['closedPnl']
+    return response['result']['list']
 
 
 def set_leverage(account, category, symbol, leverage):
@@ -196,4 +196,5 @@ def switch_position_mode(bot):
     }
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+
 

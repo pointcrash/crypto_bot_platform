@@ -5,6 +5,22 @@
     <div class="row">
         <div class="col-12">
             <h1 class="text-center">Logs</h1>
+            <h5 class="text-center text-muted">Bot {{ bot }}</h5>
+            {% if bot.category == 'linear' %}
+            {% if bot.work_model == 'bb' %}
+            <a href="{% url 'one_way_bb_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% endif %}
+            {% if bot.work_model == 'grid' %}
+            <a href="{% url 'one_way_grid_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% endif %}
+            {% elif bot.category == 'inverse' %}
+            {% if bot.work_model == 'bb' %}
+            <a href="#" class="btn btn-warning">Edit Bot</a>
+            {% endif %}
+            {% if bot.work_model == 'grid' %}
+            <a href="{% url 'hedge_grid_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% endif %}
+            {% endif %}
             <div class="card mt-4">
                 <table class="table">
                     <thead>
@@ -14,14 +30,17 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for log in logs %}
+                    {% for log_id, log in log_list|slice:'-1::-1' %}
                     <tr>
-                        <td>{{ log.pk }}</td>
+                        <td>{{ log_id }}</td>
                         <td>{{ log.content }}</td>
                     </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div class="col-2 ms-auto text-end">
+                <a href="{% url 'logs_delete' bot_id=bot.pk %}" class="btn btn-outline-danger mt-3">Clear history</a>
             </div>
         </div>
     </div>

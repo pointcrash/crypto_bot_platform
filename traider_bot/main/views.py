@@ -15,13 +15,27 @@ def view_home(request):
 
 @login_required
 def logs_list(request, bot_id):
+    log_list = []
+    bot = Bot.objects.get(id=bot_id)
     logs = Log.objects.filter(bot=bot_id)
-    return render(request, 'logs.html', {'logs': logs})
+    for i in range(1, len(logs)+1):
+        log_list.append([i, logs[i-1]])
+    return render(request, 'logs.html', {'log_list': log_list, 'bot': bot, })
+
+
+@login_required
+def view_logs_delete(request, bot_id):
+    logs = Log.objects.filter(bot=bot_id)
+    logs.delete()
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 def logs_view(request):
     user = request.user
-    bots = Bot.objects.filter(owner=user)
+    if user.is_superuser:
+        bots = Bot.objects.all()
+    else:
+        bots = Bot.objects.filter(owner=user)
     return render(request, 'logs_detail.html', {'bots': bots})
 
 

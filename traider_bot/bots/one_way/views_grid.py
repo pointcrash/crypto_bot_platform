@@ -49,7 +49,7 @@ def one_way_grid_create_bot(request):
             bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
             Process.objects.create(pid=str(bot_process.pid), bot=bot)
-            return redirect('grid_bots_list')
+            return redirect('one_way_grid_bots_list')
     else:
         form = GridBotForm(user=request.user)
 
@@ -72,7 +72,7 @@ def one_way_grid_bot_detail(request, bot_id):
             bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot,))
             bot_process.start()
             Process.objects.create(pid=str(bot_process.pid), bot=bot)
-            return redirect('grid_bots_list')
+            return redirect('one_way_grid_bots_list')
     else:
         form = GridBotForm(user=request.user, instance=bot)  # Передаем экземпляр модели в форму
 

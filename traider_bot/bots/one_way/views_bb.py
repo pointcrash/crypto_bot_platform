@@ -33,7 +33,7 @@ def one_way_bb_create_bot(request):
             bot.process_id = str(bot_process.pid)
             bot.save()
 
-            return redirect('bb_bots_list')
+            return redirect('one_way_bb_bots_list')
     else:
         form = BotForm(user=request.user)
 
@@ -75,7 +75,7 @@ def one_way_bb_bot_detail(request, bot_id):
             bot_process.start()
             bot.process_id = str(bot_process.pid)
             bot.save()
-            return redirect('bb_bots_list')
+            return redirect('one_way_bb_bots_list')
     else:
         form = BotForm(user=request.user, instance=bot)  # Передаем экземпляр модели в форму
 

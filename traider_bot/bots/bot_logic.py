@@ -283,4 +283,4 @@ def take2_status_check(bot):
             bot.save()
             return True
 
-
+# get_symbol_set()

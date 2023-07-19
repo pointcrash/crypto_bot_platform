@@ -21,10 +21,7 @@ def hedge_grid_bots_list(request):
     is_alive_list = []
     for bot in bots:
         pid = bot.process.pid
-        if pid is not None:
-            is_alive_list.append(get_status_process(pid))
-        else:
-            is_alive_list.append(None)
+        is_alive_list.append(get_status_process(pid))
 
     bots = zip(bots, is_alive_list)
     return render(request, 'hedge/grid/bots_list.html', {'bots': bots, 'bot_work_type': bot_work_type, })

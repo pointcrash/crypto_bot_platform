@@ -30,6 +30,7 @@
                 {% for bot, is_alive in bots %}
                 <tr class="text-center">
                     <td>{{ bot.pk }}</td>
+                    <td>{{ bot.process.pid }}</td>
                     <td>{{ bot.account }}</td>
                     <td>{{ bot.symbol }}</td>
                     <td>{{ bot.side }}</td>

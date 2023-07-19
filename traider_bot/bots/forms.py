@@ -222,7 +222,7 @@ class HedgeGridBotForm(forms.ModelForm):
     class Meta:
         model = Bot
         fields = ['account', 'symbol', 'isLeverage', 'qty', 'grid_avg_value', 'grid_profit_value', 'max_margin',
-                  'time_sleep', ]
+                  'time_sleep', 'bb_avg_percent', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
@@ -230,6 +230,7 @@ class HedgeGridBotForm(forms.ModelForm):
             'symbol': forms.Select(attrs={'class': 'form-control'}),
             'isLeverage': forms.NumberInput(attrs={'class': 'form-control'}),
             'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'bb_avg_percent': forms.NumberInput(attrs={'class': 'form-control'}),
             'grid_profit_value': forms.NumberInput(attrs={'class': 'form-control'}),
             'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
             'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -243,4 +244,5 @@ class HedgeGridBotForm(forms.ModelForm):
             'grid_profit_value': 'Grid Profit Value (%)',
             'max_margin': 'Max Margin',
             'time_sleep': 'Request Rate (sec)',
+            'bb_avg_percent': 'Average Percent',
         }
