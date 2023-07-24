@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-8">
+            <h1 class="text-center">Users</h1>
+            <div class="card mt-2 mt-2 border-0 shadow p-3">
+                <table class="table">
+                    <thead>
+                    <tr class="">
+                        <th>Username</th>
+                        <th>Is Active</th>
+                        {% if user.is_superuser %}<th style="color: black">Actions</th>{% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                    <tr class="">
+                        <td>{{ user.username }}</td>
+                        <td>{% if user.is_active %}<i class="fa-solid fa-check"></i>
+                        {% else %}<i class="fa-solid fa-xmark"></i>{% endif %}</td>
+                        <td>
+                            {% if user.is_active %}
+                            <a class="btn btn-sm btn-warning" href="{% url 'profile_mode_switching' profile_id=user.pk %}">Deactivate</a>
+                            {% else %}
+                            <a class="btn btn-sm btn-success" href="{% url 'profile_mode_switching' profile_id=user.pk %}">Activate</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

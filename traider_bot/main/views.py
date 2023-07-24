@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 
 from api_v5 import get_query_account_coins_balance
@@ -132,9 +133,32 @@ def login_view(request):
 
 
 @login_required
+def profile_list(request):
+    user = request.user
+    if user.is_superuser:
+        users = User.objects.all().exclude(is_superuser=True)
+    else:
+        users = [user, ]
+    return render(request, 'profile/profile_list.html', {'users': users})
+
+
+@login_required
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+
+@login_required
+def profile_mode_switching(request, profile_id):
+    if request.user.is_superuser:
+        profile = User.objects.get(pk=profile_id)
+        if profile.is_active:
+            profile.is_active = False
+        else:
+            profile.is_active = True
+        profile.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
 
 
 
