@@ -23,9 +23,9 @@ def bot_work_logic(bot):
             if take.is_filled:
                 logging(bot, f'take_{take.take_number} is filled.')
 
-        if not bot.repeat:
-            if all(take.is_filled for take in takes):
-                logging(bot, f'bot finished work. P&L: {bot.pnl}')
+        if all(take.is_filled for take in takes):
+            logging(bot, f'bot finished work. P&L: {bot.pnl}')
+            if not bot.repeat:
                 break
 
         psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes)

@@ -71,7 +71,6 @@ class BBAutoAverage:
             bot=self.bot,
             category=self.category,
             symbol=self.symbol.name,
-            isLeverage=self.bot.isLeverage,
             side=self.psn_side,
             orderType="Market",
             qty=qty

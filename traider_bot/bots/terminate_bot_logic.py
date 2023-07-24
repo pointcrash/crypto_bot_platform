@@ -69,7 +69,8 @@ def drop_position(bot):
 def stop_bot_with_cancel_orders(bot):
     avg_order = AvgOrder.objects.filter(bot=bot).first()
     takes = Take.objects.filter(bot=bot)
-    takes.delete()
+    if takes:
+        takes.delete()
     if avg_order:
         avg_order.delete()
     logging(bot, terminate_process_by_pid(bot.process.pid))

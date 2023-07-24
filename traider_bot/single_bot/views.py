@@ -74,7 +74,10 @@ def single_bot_detail(request, bot_id):
             bot = form.save()
             if get_status_process(bot.process.pid):
                 stop_bot_with_cancel_orders(bot)
-            bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
+            if bot.side == 'TS':
+                bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
+            else:
+                bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
             bot_process.start()
             bot.process.pid = str(bot_process.pid)
             bot.process.save()
