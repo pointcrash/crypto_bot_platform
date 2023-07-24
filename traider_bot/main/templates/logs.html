@@ -21,6 +21,7 @@
             <a href="{% url 'hedge_grid_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% endif %}
             {% endif %}
+            <a href="{% url 'logs_delete' bot_id=bot.pk %}" class="btn btn-outline-danger">Clear history</a>
             <div class="card mt-4">
                 <table class="table">
                     <thead>
@@ -38,9 +39,6 @@
                     {% endfor %}
                     </tbody>
                 </table>
-            </div>
-            <div class="col-2 ms-auto text-end">
-                <a href="{% url 'logs_delete' bot_id=bot.pk %}" class="btn btn-outline-danger mt-3">Clear history</a>
             </div>
         </div>
     </div>

@@ -7,9 +7,14 @@ from .models import Bot
 
 
 class BotForm(forms.ModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        self.fields['account'].queryset = Account.objects.filter(owner=user)
+        if self.request:
+            if self.request.user.is_superuser:
+                self.fields['account'].queryset = Account.objects.all()
+            else:
+                self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
         self.fields['account'].label_from_instance = self.label_from_instance
 
     @staticmethod
@@ -100,9 +105,14 @@ class BotForm(forms.ModelForm):
 
 
 class GridBotForm(forms.ModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        self.fields['account'].queryset = Account.objects.filter(owner=user)
+        if self.request:
+            if self.request.user.is_superuser:
+                self.fields['account'].queryset = Account.objects.all()
+            else:
+                self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
         self.fields['account'].label_from_instance = self.label_from_instance
 
     @staticmethod
@@ -206,7 +216,10 @@ class HedgeGridBotForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         if self.request:
-            self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
+            if self.request.user.is_superuser:
+                self.fields['account'].queryset = Account.objects.all()
+            else:
+                self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
         self.fields['account'].label_from_instance = self.label_from_instance
 
     @staticmethod

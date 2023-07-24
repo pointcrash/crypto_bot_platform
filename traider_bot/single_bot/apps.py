@@ -1,11 +1,6 @@
-import multiprocessing
-
 from django.apps import AppConfig
 
 
-class BotsConfig(AppConfig):
+class SingleBotConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'bots'
-
-
-
+    name = 'single_bot'

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Bot, Symbol, Log, Process
+from .models import Bot, Symbol, Log, Process, Take
 
 
 @admin.register(Bot)
@@ -26,3 +26,9 @@ class OrdersAdmin(admin.ModelAdmin):
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'pid', 'bot',)
     list_display_links = ('id', 'pid', 'bot',)
+
+
+@admin.register(Take)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'take_number', 'order_link_id', 'is_filled',)
+    list_display_links = ('id', 'take_number', 'order_link_id', )

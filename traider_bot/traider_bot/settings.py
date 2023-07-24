@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'orders',
     'main',
     'bots',
+    'single_bot',
 ]
 
 MIDDLEWARE = [

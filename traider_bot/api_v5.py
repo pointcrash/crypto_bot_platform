@@ -25,7 +25,7 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
         response = httpClient.request(method, account.url + endPoint, headers=headers, data=payload)
     else:
         response = httpClient.request(method, account.url + endPoint + "?" + payload, headers=headers)
-    print(response.text)
+    # print(response.text)
     # print(Info + " Elapsed Time : " + str(response.elapsed))
     return response.text
 
@@ -138,8 +138,14 @@ def get_order_status(account, category, symbol, orderLinkId):
     endpoint = "/v5/order/realtime"
     method = "GET"
     params = f"category={category}&symbol={symbol}&orderLinkId={orderLinkId}"
+    print(params)
     response = json.loads(HTTP_Request(account, endpoint, method, params))
-    return response['result']['list'][0]['orderStatus']
+    try:
+        print(response)
+        return response['result']['list'][0]['orderStatus']
+    except:
+        print(response)
+        return "Order does not exist"
 
 
 def get_pnl(account, category, symbol, start_time=0):

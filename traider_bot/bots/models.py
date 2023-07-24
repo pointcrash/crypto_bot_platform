@@ -21,7 +21,8 @@ class Bot(models.Model):
     SIDE_CHOICES = (
         ('Buy', 'Buy'),
         ('Sell', 'Sell'),
-        ('Auto', 'Auto'),
+        ('FB', 'First Band'),
+        ('TS', 'Two-Sided'),
     )
 
     CATEGORY_CHOICES = (
@@ -102,6 +103,13 @@ class Bot(models.Model):
         return self.symbol.name
 
 
+class Take(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    take_number = models.SmallIntegerField(blank=True, null=True)
+    order_link_id = models.CharField(default='')
+    is_filled = models.BooleanField(default=False)
+
+
 class Log(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
     content = models.CharField()
@@ -110,3 +118,9 @@ class Log(models.Model):
 class Process(models.Model):
     pid = models.CharField(blank=True, null=True, default=None)
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE)
+
+
+class AvgOrder(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    order_link_id = models.CharField(default='')
+    is_filled = models.BooleanField(default=False)

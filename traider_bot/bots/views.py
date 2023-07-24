@@ -68,14 +68,7 @@ def delete_bot(request, bot_id, event_number, redirect_to):
     elif event_number == 3:
         stop_bot_with_cancel_orders_and_drop_positions(bot)
     bot.delete()
-    if redirect_to == 'one_way_grid':
-        return redirect('one_way_grid_bots_list')
-    elif redirect_to == 'one_way_bb':
-        return redirect('one_way_bb_bots_list')
-    elif redirect_to == 'hedge_bb':
-        return redirect('bb_bots_list')
-    elif redirect_to == 'hedge_grid':
-        return redirect('hedge_grid_list')
+    return  redirect('single_bot_list')
 
 
 def view_order_status(request, bot_id, order_id):

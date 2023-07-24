@@ -2,28 +2,34 @@ import math
 import time
 from decimal import Decimal
 
-import os
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
-django.setup()
-
-from api_v5 import cancel_all, get_order_status, get_pnl, set_leverage, switch_position_mode
-from bots.bot_logic import calculation_entry_point, count_decimal_places, logging
+from api_v5 import switch_position_mode, set_leverage, cancel_all
+from bots.bot_logic import count_decimal_places, logging
+from bots.bot_logic_grid import take_status_check
+from bots.models import Take, AvgOrder
 from orders.models import Order
+from single_bot.logic.entry import entry_position
 
 
-def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
+def bot_work_logic(bot):
     new_cycle = True
     switch_position_mode(bot)
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     round_number = int(bot.symbol.priceScale)
-    take_list = ['' for _ in range(bot.grid_take_count)]
 
     while True:
-        psn_qty, psn_side, psn_price, first_cycle, take_list = calculation_entry_point(bot, bb_obj, bb_avg_obj,
-                                                                                       grid_take_list=take_list)
+        takes = get_takes(bot)
+        for take in takes:
+            print(take, take.is_filled, take.take_number, take.order_link_id)
+            if take.is_filled:
+                logging(bot, f'take_{take.take_number} is filled.')
+
+        if not bot.repeat:
+            if all(take.is_filled for take in takes):
+                logging(bot, f'bot finished work. P&L: {bot.pnl}')
+                break
+
+        psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes)
 
         if first_cycle and new_cycle is False:  # Not first cycle (-_-)
             time.sleep(bot.time_sleep)
@@ -38,16 +44,15 @@ def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
             for i in range(1, bot.grid_take_count + 1):
                 if side == "Buy":
                     price = round(psn_price - psn_price * bot.grid_profit_value * i / 100, round_number)
-                else:
+                elif side == "Sell":
                     price = round(psn_price + psn_price * bot.grid_profit_value * i / 100, round_number)
 
-                if not take_status_check(bot, take_list[i - 1]):
+                if not take_status_check(bot, takes[i-1]):
                     if i == bot.grid_take_count:
-                        take = Order.objects.create(
+                        order = Order.objects.create(
                             bot=bot,
                             category=bot.category,
                             symbol=bot.symbol.name,
-                            # isLeverage=bot.isLeverage,
                             side=side,
                             orderType='Limit',
                             qty=round(psn_qty, round_number),
@@ -55,40 +60,43 @@ def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
                             is_take=True,
                         )
 
-                        take_list[i-1] = take.orderLinkId
+                        takes[i-1].order_link_id = order.orderLinkId
                         logging(bot, f'created take_{i} Price:{price}')
 
                     else:
-                        take = Order.objects.create(
+                        order = Order.objects.create(
                             bot=bot,
                             category=bot.category,
                             symbol=bot.symbol.name,
-                            # isLeverage=bot.isLeverage,
                             side=side,
                             orderType='Limit',
                             qty=round(qty, round_number),
                             price=price,
                             is_take=True,
                         )
-                        take_list[i-1] = take.orderLinkId
+                        takes[i-1].order_link_id = order.orderLinkId
                         logging(bot, f'created take_{i} Price:{price}')
 
                         psn_qty = psn_qty - qty
 
                 else:
-                    logging(bot, f'take_{i} is filled.')
-                    take_list[i - 1] = 'Filled'
+                    takes[i - 1].is_filled = True
+
+            print(takes)
+            Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
+            if avg_order is not None and type(avg_order) == Order:
+                avg_order.save()
+                AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
 
 
-def take_status_check(bot, take):
-    if take:
-        if take.is_filled:
-            return True
-        if take.order_link_id:
-            status = get_order_status(bot.account, bot.category, bot.symbol, take.order_link_id)
-            print(status)
-            if status == 'Filled':
-                pnl = round(Decimal(get_pnl(bot.account, bot.category, bot.symbol)[0]["closedPnl"]), 2)
-                bot.pnl = bot.pnl + Decimal(pnl)
-                bot.save()
-                return True
+def get_takes(bot):
+    takes = Take.objects.filter(bot=bot)
+
+    if not takes:
+        takes_to_create = [
+            Take(bot=bot, take_number=i) for i in range(bot.grid_take_count)
+        ]
+        Take.objects.bulk_create(takes_to_create)
+
+    return Take.objects.filter(bot=bot)
+

@@ -109,6 +109,11 @@ def take_status_check(bot, orderLinkId):
 
 
 def set_entry_point_by_market_for_hedge(bot):
+    symbol_list = get_list(bot.account, bot.category, bot.symbol)
+    qty_list = get_qty(symbol_list)
+    if qty_list[0] or qty_list[1]:
+        return None
+
     round_number = int(bot.symbol.priceScale)
     current_price = get_current_price(bot.account, bot.category, bot.symbol)
     for side in ['Buy', 'Sell']:

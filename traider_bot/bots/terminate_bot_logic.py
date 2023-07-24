@@ -5,6 +5,7 @@ import psutil
 
 from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging
+from bots.models import Take, AvgOrder
 from orders.models import Order
 
 
@@ -66,14 +67,20 @@ def drop_position(bot):
 
 
 def stop_bot_with_cancel_orders(bot):
+    avg_order = AvgOrder.objects.filter(bot=bot).first()
+    takes = Take.objects.filter(bot=bot)
+    takes.delete()
+    if avg_order:
+        avg_order.delete()
     logging(bot, terminate_process_by_pid(bot.process.pid))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
-    logging(bot, terminate_process_by_pid(bot.process.pid))
-    logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
-                                            'retMsg'] == 'OK' else 'error when canceling orders')
+    stop_bot_with_cancel_orders(bot)
+    # logging(bot, terminate_process_by_pid(bot.process.pid))
+    # logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
+    #                                         'retMsg'] == 'OK' else 'error when canceling orders')
     drop_position(bot)
     logging(bot, 'drop position')
