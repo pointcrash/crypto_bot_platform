@@ -57,7 +57,7 @@ def terminate_bot(request, bot_id, event_number):
 
 
 @login_required
-def delete_bot(request, bot_id, event_number, redirect_to):
+def delete_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
     if event_number == 1:
         terminate_process_by_pid(bot.process_id)

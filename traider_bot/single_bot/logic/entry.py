@@ -10,7 +10,8 @@ from single_bot.logic.avg import to_avg_by_grid, get_status_avg_order, set_avg_o
 def entry_position(bot, takes):
     first_cycle = True
     position_idx = 0 if bot.side == 'Buy' else 1
-    # bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
+    bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
+    avg_order = None
 
     while True:
         symbol_list = get_list(bot.account, bot.category, bot.symbol)

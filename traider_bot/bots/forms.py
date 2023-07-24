@@ -90,12 +90,12 @@ class BotForm(forms.ModelForm):
         if qty is None:
             raise forms.ValidationError("Invalid '1st order investments' value. Only whole numbers")
 
-        if order_type == 'Market' and side == 'Auto':
-            raise forms.ValidationError("Invalid combination: orderType - 'Market' cannot have side - 'Auto'.")
+        if order_type == 'Market' and side == 'FB':
+            raise forms.ValidationError("Invalid combination: orderType - 'Market' cannot have side - 'First Band'.")
 
-        if deviation_from_lines:
-            if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
-                raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
+        # if deviation_from_lines:
+        #     if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
+        #         raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
 
         if qty < Decimal(symbol.minPrice) or qty > Decimal(symbol.maxPrice):
             raise forms.ValidationError(
@@ -197,12 +197,12 @@ class GridBotForm(forms.ModelForm):
         if order_type == 'Market' and side == 'Auto':
             raise forms.ValidationError("Invalid combination: orderType - 'Market' cannot have side - 'Auto'.")
 
-        if deviation_from_lines:
-            if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
-                raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
+        # if deviation_from_lines:
+        #     if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
+        #         raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
 
-        elif not deviation_from_lines and orderType == "Limit":
-            raise forms.ValidationError("If 'Order Type' - Limit, '± BB Deviation' must be filled")
+        # elif not deviation_from_lines and orderType == "Limit":
+        #     raise forms.ValidationError("If 'Order Type' - Limit, '± BB Deviation' must be filled")
 
         if qty < Decimal(symbol.minPrice) or qty > Decimal(symbol.maxPrice):
             raise forms.ValidationError(

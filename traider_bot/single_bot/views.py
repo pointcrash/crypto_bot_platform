@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
 from bots.hedge.grid_logic import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process
+from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders
 from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
 from bots.forms import GridBotForm
 from bots.bot_logic_grid import set_takes_for_grid_bot
@@ -42,10 +42,7 @@ def single_bot_create(request):
         form = GridBotForm(request=request, data=request.POST)
         if form.is_valid():
             bot = form.save(commit=False)
-            if form.cleaned_data['orderType'] == 'Limit':
-                bot.work_model = 'bb'
-            else:
-                bot.work_model = 'grid'
+            bot.work_model = 'grid'
             bot.owner = request.user
             bot.category = 'inverse'
             bot.save()
@@ -53,10 +50,6 @@ def single_bot_create(request):
             connections.close_all()
             if bot.side == 'TS':
                 bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
-            elif bot.work_model == 'bb':
-                position_idx = 0 if bot.side == 'Buy' else 1
-                bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
-                bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
             else:
                 bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
             bot_process.start()
@@ -80,7 +73,7 @@ def single_bot_detail(request, bot_id):
         if form.is_valid():
             bot = form.save()
             if get_status_process(bot.process.pid):
-                terminate_process_by_pid(bot.process.pid)
+                stop_bot_with_cancel_orders(bot)
             bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
             bot_process.start()
             bot.process.pid = str(bot_process.pid)

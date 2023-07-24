@@ -20,7 +20,6 @@ def bot_work_logic(bot):
     while True:
         takes = get_takes(bot)
         for take in takes:
-            print(take, take.is_filled, take.take_number, take.order_link_id)
             if take.is_filled:
                 logging(bot, f'take_{take.take_number} is filled.')
 
@@ -82,7 +81,6 @@ def bot_work_logic(bot):
                 else:
                     takes[i - 1].is_filled = True
 
-            print(takes)
             Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
             if avg_order is not None and type(avg_order) == Order:
                 avg_order.save()
