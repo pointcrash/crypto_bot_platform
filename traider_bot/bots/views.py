@@ -68,7 +68,7 @@ def delete_bot(request, bot_id, event_number, redirect_to):
     elif event_number == 3:
         stop_bot_with_cancel_orders_and_drop_positions(bot)
     bot.delete()
-    return  redirect('single_bot_list')
+    return redirect('single_bot_list')
 
 
 def view_order_status(request, bot_id, order_id):
