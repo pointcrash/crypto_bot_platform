@@ -72,8 +72,12 @@ def single_bot_detail(request, bot_id):
         form = GridBotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
+            connections.close_all()
+
             if get_status_process(bot.process.pid):
                 stop_bot_with_cancel_orders(bot)
+            connections.close_all()
+
             if bot.side == 'TS':
                 bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
@@ -90,6 +94,8 @@ def single_bot_detail(request, bot_id):
 
 def bot_start(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
+    connections.close_all()
+
     if bot.side == 'TS':
         bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
     elif bot.work_model == 'bb':
