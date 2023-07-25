@@ -2,6 +2,7 @@ import os
 import signal
 
 import psutil
+from django.db import connections
 
 from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging
@@ -15,8 +16,10 @@ def terminate_process_by_pid(pid):
         if get_status_process(pid):
             try:
                 os.kill(pid, signal.SIGTERM)
+                connections.close_all()
                 return "Bot terminated successfully."
             except OSError as e:
+                connections.close_all()
                 return f"Error terminating process with PID {pid}: {e}"
 
 
@@ -73,6 +76,8 @@ def stop_bot_with_cancel_orders(bot):
         takes.delete()
     if avg_order:
         avg_order.delete()
+    connections.close_all()
+
     logging(bot, terminate_process_by_pid(bot.process.pid))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')
