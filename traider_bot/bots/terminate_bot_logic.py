@@ -8,32 +8,55 @@ from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging
 from bots.models import Take, AvgOrder, SingleBot
 from orders.models import Order
+from single_bot.logic.global_variables import lock, global_list_threads
 
 
-def terminate_process_by_pid(pid):
-    if pid is not None:
-        pid = int(pid)
-        if get_status_process(pid):
-            try:
-                os.kill(pid, signal.SIGTERM)
-                connections.close_all()
-                return "Bot terminated successfully."
-            except OSError as e:
-                connections.close_all()
-                return f"Error terminating process with PID {pid}: {e}"
+def terminate_process_by_pid(bot_id):
+    lock.acquire()
+    try:
+        c = 0
+        while bot_id in global_list_threads:
+            c += 1
+            global_list_threads.remove(bot_id)
+            return f"Terminate successful. Bot-id in list = {c}"
+    except:
+        return "terminate error"
+    finally:
+        lock.release()
+
+    # if pid is not None:
+    #     pid = int(pid)
+    #     if get_status_process(pid):
+    #         try:
+    #             os.kill(pid, signal.SIGTERM)
+    #             connections.close_all()
+    #             return "Bot terminated successfully."
+    #         except OSError as e:
+    #             connections.close_all()
+    #             return f"Error terminating process with PID {pid}: {e}"
 
 
-def get_status_process(pid):
-    if pid is not None:
-        try:
-            process = psutil.Process(int(pid))
-            if process.is_running():
-                return True
-            else:
-                return False
-        except:
+# def get_status_process(pid):
+#     if pid is not None:
+#         try:
+#             process = psutil.Process(int(pid))
+#             if process.is_running():
+#                 return True
+#             else:
+#                 return False
+#         except:
+#             return False
+#     return False
+
+def check_thread_alive(bot_id):
+    lock.acquire()
+    try:
+        if bot_id in global_list_threads:
+            return True
+        else:
             return False
-    return False
+    finally:
+        lock.release()
 
 
 def drop_position(bot):
@@ -78,7 +101,7 @@ def stop_bot_with_cancel_orders(bot):
         avg_order.delete()
     connections.close_all()
 
-    logging(bot, terminate_process_by_pid(bot.process.pid))
+    logging(bot, terminate_process_by_pid(bot.pk))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')
 

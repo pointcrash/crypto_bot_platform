@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.hedge.grid_logic import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import get_status_process, terminate_process_by_pid
+from bots.terminate_bot_logic import terminate_process_by_pid
 from bots.forms import HedgeGridBotForm
 from bots.models import Bot, Process
 from django.contrib import messages
@@ -18,12 +18,12 @@ def hedge_grid_bots_list(request):
         bots = Bot.objects.filter(work_model='grid', category='inverse')
     else:
         bots = Bot.objects.filter(owner=user, work_model='grid', category='inverse')
-    is_alive_list = []
-    for bot in bots:
-        pid = bot.process.pid
-        is_alive_list.append(get_status_process(pid))
+    # is_alive_list = []
+    # for bot in bots:
+    #     pid = bot.process.pid
+    #     is_alive_list.append(get_status_process(pid))
 
-    bots = zip(bots, is_alive_list)
+    # bots = zip(bots, is_alive_list)
     return render(request, 'hedge/grid/bots_list.html', {'bots': bots, 'bot_work_type': bot_work_type, })
 
 
@@ -64,8 +64,8 @@ def hedge_grid_bot_detail(request, bot_id):
         form = HedgeGridBotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
-            if get_status_process(bot.process.pid):
-                terminate_process_by_pid(bot.process.pid)
+            # if get_status_process(bot.process.pid):
+            #     terminate_process_by_pid(bot.process.pid)
             bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
             bot_process.start()
             bot.process.pid = str(bot_process.pid)

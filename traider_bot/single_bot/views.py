@@ -1,17 +1,19 @@
-import multiprocessing
+import threading
+
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
 from bots.hedge.grid_logic import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process, stop_bot_with_cancel_orders
+from bots.terminate_bot_logic import terminate_process_by_pid, stop_bot_with_cancel_orders, check_thread_alive
 from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
 from bots.forms import GridBotForm
 from bots.bot_logic_grid import set_takes_for_grid_bot
 from bots.models import Bot, Process, AvgOrder, Take, SingleBot
 from django.contrib import messages
 
+from single_bot.logic.global_variables import lock, global_list_threads
 from single_bot.logic.work import bot_work_logic
 
 
@@ -19,16 +21,22 @@ from single_bot.logic.work import bot_work_logic
 def single_bot_list(request):
     user = request.user
     if user.is_superuser:
-        bots = Bot.objects.filter()
+        bots = Bot.objects.all()
+        all_bots_pks = Bot.objects.values_list('pk', flat=True)
     else:
         bots = Bot.objects.filter(owner=user)
+        all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True)
     is_alive_list = []
-    for bot in bots:
-        pid = bot.process.pid
-        if pid is not None:
-            is_alive_list.append(get_status_process(pid))
-        else:
-            is_alive_list.append(None)
+
+    lock.acquire()
+    try:
+        for bot_id in all_bots_pks:
+            if bot_id in global_list_threads:
+                is_alive_list.append(True)
+            else:
+                is_alive_list.append(False)
+    finally:
+        lock.release()
 
     bots = zip(bots, is_alive_list)
     return render(request, 'bot_list.html', {'bots': bots, })
@@ -49,11 +57,20 @@ def single_bot_create(request):
 
             connections.close_all()
             if bot.side == 'TS':
-                bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
-                bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
-            bot_process.start()
-            Process.objects.create(pid=str(bot_process.pid), bot=bot)
+                bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+            bot_thread.start()
+            bot_pk = bot.pk
+
+            lock.acquire()
+            try:
+                if bot_pk not in global_list_threads:
+                    global_list_threads.append(bot_pk)
+            finally:
+                lock.release()
+
+            # Process.objects.create(pid=str(bot_process.pid), bot=bot)
             return redirect('single_bot_list')
     else:
         form = GridBotForm(request=request)
@@ -64,12 +81,12 @@ def single_bot_create(request):
 @login_required
 def single_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
-    process = Process.objects.get(bot=bot)
+    # process = Process.objects.get(bot=bot)
     if request.method == 'POST':
         form = GridBotForm(request.POST, request=request, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
-            SingleBot.objects.create(bot=bot, single=True)
+            # SingleBot.objects.create(bot=bot, single=True)
 
             avg_order = AvgOrder.objects.filter(bot=bot).first()
             takes = Take.objects.filter(bot=bot)
@@ -79,16 +96,31 @@ def single_bot_detail(request, bot_id):
                 avg_order.delete()
             connections.close_all()
 
-            if get_status_process(bot.process.pid):
+            if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
 
             if bot.side == 'TS':
-                bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
-                bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
-            bot_process.start()
-            process.pid = str(bot_process.pid)
-            process.save()
+                bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+            bot_thread.start()
+
+            # if bot.side == 'TS':
+            #     bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
+            # else:
+            #     bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
+            # bot_process.start()
+
+            bot_pk = bot.pk
+            lock.acquire()
+            try:
+                if bot_pk not in global_list_threads:
+                    global_list_threads.append(bot_pk)
+            finally:
+                lock.release()
+
+            # process.pid = str(bot_process.pid)
+            # process.save()
             return redirect('single_bot_list')
     else:
         form = GridBotForm(request=request, instance=bot)  # Передаем экземпляр модели в форму
@@ -98,8 +130,8 @@ def single_bot_detail(request, bot_id):
 
 def bot_start(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
-    process = Process.objects.get(bot=bot)
-    SingleBot.objects.create(bot=bot, single=True)
+    # process = Process.objects.get(bot=bot)
+    # SingleBot.objects.create(bot=bot, single=True)
     avg_order = AvgOrder.objects.filter(bot=bot).first()
     takes = Take.objects.filter(bot=bot)
     if takes:
@@ -108,17 +140,27 @@ def bot_start(request, bot_id):
         avg_order.delete()
     connections.close_all()
 
+    if check_thread_alive(bot.pk):
+        stop_bot_with_cancel_orders(bot)
+
     if bot.side == 'TS':
-        bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
+        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
     elif bot.work_model == 'bb':
         position_idx = 0 if bot.side == 'Buy' else 1
         bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
-        bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
+        bot_thread = threading.Thread(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
     else:
-        bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
-    bot_process.start()
-    process.pid = str(bot_process.pid)
-    process.save()
+        bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+    bot_thread.start()
+    bot_pk = bot.pk
+
+    lock.acquire()
+    try:
+        if bot_pk not in global_list_threads:
+            global_list_threads.append(bot_pk)
+    finally:
+        lock.release()
+
     return redirect('single_bot_list')
 
 

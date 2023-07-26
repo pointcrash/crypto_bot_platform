@@ -39,43 +39,41 @@ def views_bots_type_choice(request, mode):
 @login_required
 def terminate_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
-    process = Process.objects.get(bot=bot)
-    pid = process.pid
+    # bot_id = bot.pk
+    # process = Process.objects.get(bot=bot)
+    # pid = process.pid
     single_bot = SingleBot.objects.filter(bot=bot)
     single_bot.delete()
 
-    try:
-        if event_number == 1:
-            logging(bot, terminate_process_by_pid(pid))
+    if event_number == 1:
+        logging(bot, terminate_process_by_pid(bot.pk))
 
-        elif event_number == 2:
-            stop_bot_with_cancel_orders(bot)
+    elif event_number == 2:
+        stop_bot_with_cancel_orders(bot)
 
-        elif event_number == 3:
-            stop_bot_with_cancel_orders_and_drop_positions(bot)
+    elif event_number == 3:
+        stop_bot_with_cancel_orders_and_drop_positions(bot)
 
-        process.pid = None
-        process.save()
-    except Exception as e:
-        print("Произошла ошибка:", e)
+        # process.pid = None
+        # process.save()
+
     return redirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
 def delete_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
-    try:
-        if event_number == 1:
-            terminate_process_by_pid(bot.process_id)
 
-        elif event_number == 2:
-            stop_bot_with_cancel_orders(bot)
+    if event_number == 1:
+        terminate_process_by_pid(bot.pk)
 
-        elif event_number == 3:
-            stop_bot_with_cancel_orders_and_drop_positions(bot)
-        bot.delete()
-    except Exception as e:
-        print("Произошла ошибка:", e)
+    elif event_number == 2:
+        stop_bot_with_cancel_orders(bot)
+
+    elif event_number == 3:
+        stop_bot_with_cancel_orders_and_drop_positions(bot)
+    bot.delete()
+
     return redirect('single_bot_list')
 
 

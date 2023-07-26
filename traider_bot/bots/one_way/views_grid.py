@@ -3,7 +3,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process
+from bots.terminate_bot_logic import terminate_process_by_pid
 from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
 from bots.forms import GridBotForm
 from bots.bot_logic_grid import set_takes_for_grid_bot
@@ -20,12 +20,12 @@ def one_way_grid_bots_list(request):
     else:
         bots = Bot.objects.filter(owner=user, work_model='grid')
     is_alive_list = []
-    for bot in bots:
-        pid = bot.process.pid
-        if pid is not None:
-            is_alive_list.append(get_status_process(pid))
-        else:
-            is_alive_list.append(None)
+    # for bot in bots:
+    #     pid = bot.process.pid
+    #     if pid is not None:
+    #         is_alive_list.append(get_status_process(pid))
+    #     else:
+    #         is_alive_list.append(None)
 
     bots = zip(bots, is_alive_list)
     return render(request, 'one_way/grid/grid_bots_list.html', {'bots': bots, })
@@ -67,8 +67,8 @@ def one_way_grid_bot_detail(request, bot_id):
         form = GridBotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
-            if get_status_process(bot.process.pid):
-                terminate_process_by_pid(bot.process.pid)
+            # if get_status_process(bot.process.pid):
+            #     terminate_process_by_pid(bot.process.pid)
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
             bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()

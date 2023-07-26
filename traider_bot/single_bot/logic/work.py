@@ -8,17 +8,22 @@ from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder, SingleBot, Process
 from orders.models import Order
 from single_bot.logic.entry import entry_position
+from single_bot.logic.global_variables import global_list_threads, lock
 
 
 def bot_work_logic(bot):
-    try:
-        new_cycle = True
-        switch_position_mode(bot)
-        set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
-        fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
-        round_number = int(bot.symbol.priceScale)
+    bot_id = bot.pk
+    new_cycle = True
+    switch_position_mode(bot)
+    set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
+    fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
+    round_number = int(bot.symbol.priceScale)
 
-        while SingleBot.objects.filter(bot=bot):
+    lock.acquire()
+    try:
+        while bot_id in global_list_threads:
+            lock.release()
+
             takes = get_takes(bot)
             if not new_cycle:
                 for take in takes:
@@ -90,13 +95,9 @@ def bot_work_logic(bot):
                 if avg_order is not None and type(avg_order) == Order:
                     avg_order.save()
                     AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
-    except:
-        print('EROOR')
-        single_bot = SingleBot.objects.filter(bot=bot)
-        process = Process.objects.get(bot=bot)
-        process.pid = None
-        process.save()
-        single_bot.delete()
+            lock.acquire()
+    finally:
+        lock.release()
 
 
 def get_takes(bot):

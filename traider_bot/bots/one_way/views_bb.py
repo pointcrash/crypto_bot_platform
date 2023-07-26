@@ -4,7 +4,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from bots.terminate_bot_logic import terminate_process_by_pid, get_status_process
+from bots.terminate_bot_logic import terminate_process_by_pid
 from bots.bot_logic import create_bb_and_avg_obj, logging
 from bots.bb_set_takes import set_takes
 from bots.forms import BotForm
@@ -48,11 +48,11 @@ def one_way_bb_bots_list(request):
     else:
         bots = Bot.objects.filter(owner=user, work_model='bb', category='linear')
     is_alive_list = []
-    for bot in bots:
-        if bot.process_id is not None:
-            is_alive_list.append(get_status_process(bot.process_id))
-        else:
-            is_alive_list.append(None)
+    # for bot in bots:
+    #     if bot.process_id is not None:
+    #         is_alive_list.append(get_status_process(bot.process_id))
+    #     else:
+    #         is_alive_list.append(None)
 
     bots = zip(bots, is_alive_list)
     return render(request, 'one_way/bb/bb_bots_list.html', {'bots': bots})
@@ -69,8 +69,8 @@ def one_way_bb_bot_detail(request, bot_id):
         form = BotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
-            if get_status_process(bot.process_id):
-                terminate_process_by_pid(bot.process_id)
+            # if get_status_process(bot.process_id):
+            #     terminate_process_by_pid(bot.process_id)
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
