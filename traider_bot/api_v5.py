@@ -22,9 +22,9 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
         'Content-Type': 'application/json'
     }
     if (method == "POST"):
-        response = httpClient.request(method, account.url + endPoint, headers=headers, data=payload)
+        response = httpClient.request(method, account.url + endPoint, headers=headers, data=payload, verify=False)
     else:
-        response = httpClient.request(method, account.url + endPoint + "?" + payload, headers=headers)
+        response = httpClient.request(method, account.url + endPoint + "?" + payload, headers=headers, verify=False)
     # print(response.text)
     # print(Info + " Elapsed Time : " + str(response.elapsed))
     return response.text
