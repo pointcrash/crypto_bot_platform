@@ -18,7 +18,7 @@ def bot_work_logic(bot):
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     round_number = int(bot.symbol.priceScale)
 
-    while True:
+    while SingleBot.objects.filter(bot=bot):
         takes = get_takes(bot)
         if not new_cycle:
             for take in takes:
