@@ -9,7 +9,7 @@ from bots.terminate_bot_logic import terminate_process_by_pid, get_status_proces
 from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
 from bots.forms import GridBotForm
 from bots.bot_logic_grid import set_takes_for_grid_bot
-from bots.models import Bot, Process, AvgOrder, Take
+from bots.models import Bot, Process, AvgOrder, Take, SingleBot
 from django.contrib import messages
 
 from single_bot.logic.work import bot_work_logic
@@ -69,6 +69,8 @@ def single_bot_detail(request, bot_id):
         form = GridBotForm(request.POST, request=request, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
+            SingleBot.objects.create(bot=bot, single=True)
+
             avg_order = AvgOrder.objects.filter(bot=bot).first()
             takes = Take.objects.filter(bot=bot)
             if takes:
@@ -97,6 +99,7 @@ def single_bot_detail(request, bot_id):
 def bot_start(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
     process = Process.objects.get(bot=bot)
+    SingleBot.objects.create(bot=bot, single=True)
     avg_order = AvgOrder.objects.filter(bot=bot).first()
     takes = Take.objects.filter(bot=bot)
     if takes:

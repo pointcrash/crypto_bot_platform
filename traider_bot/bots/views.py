@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 
 from api_v5 import get_order_status, get_query_account_coins_balance
 from bots.bot_logic import logging
-from bots.models import Bot, Process
+from bots.models import Bot, Process, SingleBot
 from bots.terminate_bot_logic import terminate_process_by_pid, stop_bot_with_cancel_orders, \
     stop_bot_with_cancel_orders_and_drop_positions
 from main.models import Account
@@ -41,6 +41,8 @@ def terminate_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
     process = Process.objects.get(bot=bot)
     pid = process.pid
+    single_bot = SingleBot.objects.filter(bot=bot)
+    single_bot.delete()
 
     try:
         if event_number == 1:
