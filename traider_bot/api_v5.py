@@ -5,6 +5,8 @@ import time
 import hashlib
 import hmac
 
+from requests import RequestException
+
 httpClient = requests.Session()
 recv_window = str(5000)
 
@@ -21,13 +23,21 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
         'X-BAPI-RECV-WINDOW': recv_window,
         'Content-Type': 'application/json'
     }
-    if (method == "POST"):
-        response = httpClient.request(method, account.url + endPoint, headers=headers, data=payload, verify=False)
-    else:
-        response = httpClient.request(method, account.url + endPoint + "?" + payload, headers=headers, verify=False)
-    # print(response.text)
-    # print(Info + " Elapsed Time : " + str(response.elapsed))
-    return response.text
+    try:
+        if method == "POST":
+            response = requests.post(account.url + endPoint, headers=headers, data=payload)
+        else:
+            response = requests.get(account.url + endPoint + "?" + payload, headers=headers)
+        response.raise_for_status()  # Проверка наличия ошибки в ответе
+        return response.text
+    except RequestException as e:
+        # Обработка ошибки при отправке запроса или получении ответа
+        print("An error occurred during the request:", e)
+        return None
+    except Exception as e:
+        # Обработка других неожиданных ошибок
+        print("An unexpected error occurred:", e)
+        return None
 
 
 def genSignature(secret_key, api_key, payload):
@@ -199,5 +209,3 @@ def switch_position_mode(bot):
     }
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-
-
