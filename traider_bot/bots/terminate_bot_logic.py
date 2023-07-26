@@ -18,10 +18,10 @@ def terminate_process_by_pid(bot):
             try:
                 SingleBot.objects.get(bot=bot).delete()
                 os.kill(pid, signal.SIGTERM)
-                # connections.close_all()
+                connections.close_all()
                 return "Bot terminated successfully."
             except OSError as e:
-                # connections.close_all()
+                connections.close_all()
                 return f"Error terminating process with PID {pid}: {e}"
 
 
@@ -78,7 +78,7 @@ def stop_bot_with_cancel_orders(bot):
         takes.delete()
     if avg_order:
         avg_order.delete()
-    # connections.close_all()
+    connections.close_all()
 
     logging(bot, terminate_process_by_pid(bot))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[

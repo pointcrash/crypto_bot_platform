@@ -100,7 +100,7 @@ def one_way_grid_create_bot(request):
             bot.save()
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
 
-            # connections.close_all()
+            connections.close_all()
             bot_process = multiprocessing.Process(target=set_takes_for_grid_bot, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
             Process.objects.create(pid=str(bot_process.pid), bot=bot)

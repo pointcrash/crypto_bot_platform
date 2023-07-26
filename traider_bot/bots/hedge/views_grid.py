@@ -41,7 +41,7 @@ def hedge_grid_create_bot(request):
             bot.orderType = 'Market'
             bot.save()
 
-            # connections.close_all()
+            connections.close_all()
             bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot, ))
             bot_process.start()
             Process.objects.create(pid=str(bot_process.pid), bot=bot)
