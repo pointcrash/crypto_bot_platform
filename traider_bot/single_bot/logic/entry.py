@@ -28,11 +28,6 @@ def entry_position(bot, takes):
             if entry_order_status_check(bot):
                 logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
 
-            # if bb_avg_obj:
-            #     bb_avg_obj.psn_price = psn_price
-            #     bb_avg_obj.psn_side = psn_side
-            #     bb_avg_obj.psn_qty = psn_qty
-
             if bot.auto_avg:
                 if bot.work_model == 'grid':
                     avg_order = AvgOrder.objects.filter(bot=bot).first()
@@ -50,16 +45,6 @@ def entry_position(bot, takes):
                             Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
                             first_cycle = False
                             continue
-
-                # elif bot.work_model == "bb" and bb_avg_obj is not None:
-                #     if bb_avg_obj.auto_avg():
-                #         symbol_list = get_list(bot.account, bot.category, bot.symbol)
-                #         logging(bot, f'average. New margin: {round(get_qty(symbol_list)[position_idx] * get_position_price(symbol_list)[position_idx] / bot.isLeverage, 2)}')
-                #         first_cycle = False
-                #         if bot.take1:
-                #             bot.take1 = ''
-                #             bot.save()
-                #         continue
 
             return psn_qty, psn_side, psn_price, first_cycle, avg_order
 

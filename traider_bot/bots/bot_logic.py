@@ -169,10 +169,11 @@ def count_decimal_places(number):
 
 
 def create_bb_and_avg_obj(bot, position_idx):
-    symbol_list = get_list(bot.account, bot.category, bot.symbol)
-    psn_qty = get_qty(symbol_list)[position_idx]
-    psn_side = get_side(symbol_list)[position_idx]
-    psn_price = get_position_price(symbol_list)[position_idx]
+    if bot.work_model == 'bb':
+        symbol_list = get_list(bot.account, bot.category, bot.symbol)
+        psn_qty = get_qty(symbol_list)[position_idx]
+        psn_side = get_side(symbol_list)[position_idx]
+        psn_price = get_position_price(symbol_list)[position_idx]
 
     if bot.work_model == 'grid' and bot.orderType == 'Market':
         bb_obj = None
@@ -181,7 +182,7 @@ def create_bb_and_avg_obj(bot, position_idx):
                                 symbol_priceScale=bot.symbol.priceScale, interval=bot.interval,
                                 qty_cline=bot.qty_kline, d=bot.d)
 
-    if bot.work_model != 'grid' and bot.auto_avg:
+    if bot.work_model == 'bb' and bot.auto_avg:
         bb_avg_obj = BBAutoAverage(bot=bot, psn_price=psn_price, psn_side=psn_side, psn_qty=psn_qty,
                                    bb_obj=bb_obj)
     else:
