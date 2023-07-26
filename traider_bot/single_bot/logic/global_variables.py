@@ -2,4 +2,4 @@ import threading
 
 
 lock = threading.Lock()
-global_list_threads = []
+global_list_threads = set()

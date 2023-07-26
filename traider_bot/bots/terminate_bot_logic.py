@@ -14,11 +14,9 @@ from single_bot.logic.global_variables import lock, global_list_threads
 def terminate_process_by_pid(bot_id):
     lock.acquire()
     try:
-        c = 0
-        while bot_id in global_list_threads:
-            c += 1
+        if bot_id in global_list_threads:
             global_list_threads.remove(bot_id)
-            return f"Terminate successful. Bot-id in list = {c}"
+            return f"Terminate successful"
     except:
         return "terminate error"
     finally:

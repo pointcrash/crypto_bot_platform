@@ -13,6 +13,17 @@ from single_bot.logic.global_variables import global_list_threads, lock
 
 def bot_work_logic(bot):
     bot_id = bot.pk
+
+    lock.acquire()
+    try:
+        if bot_id not in global_list_threads:
+            global_list_threads.add(bot_id)
+        else:
+            global_list_threads.remove(bot_id)
+            raise Exception("Duplicate bot")
+    finally:
+        lock.release()
+
     new_cycle = True
     switch_position_mode(bot)
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)

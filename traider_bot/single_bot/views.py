@@ -56,19 +56,18 @@ def single_bot_create(request):
             bot.save()
 
             connections.close_all()
+            # bot_pk = bot.pk
+            # lock.acquire()
+            # try:
+            #     if bot_pk not in global_list_threads:
+            #         global_list_threads.add(bot_pk)
+            # finally:
+            #     lock.release()
             if bot.side == 'TS':
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
                 bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
             bot_thread.start()
-            bot_pk = bot.pk
-
-            lock.acquire()
-            try:
-                if bot_pk not in global_list_threads:
-                    global_list_threads.append(bot_pk)
-            finally:
-                lock.release()
 
             # Process.objects.create(pid=str(bot_process.pid), bot=bot)
             return redirect('single_bot_list')
@@ -111,13 +110,13 @@ def single_bot_detail(request, bot_id):
             #     bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
             # bot_process.start()
 
-            bot_pk = bot.pk
-            lock.acquire()
-            try:
-                if bot_pk not in global_list_threads:
-                    global_list_threads.append(bot_pk)
-            finally:
-                lock.release()
+            # bot_pk = bot.pk
+            # lock.acquire()
+            # try:
+            #     if bot_pk not in global_list_threads:
+            #         global_list_threads.add(bot_pk)
+            # finally:
+            #     lock.release()
 
             # process.pid = str(bot_process.pid)
             # process.save()
@@ -152,14 +151,14 @@ def bot_start(request, bot_id):
     else:
         bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
     bot_thread.start()
-    bot_pk = bot.pk
 
-    lock.acquire()
-    try:
-        if bot_pk not in global_list_threads:
-            global_list_threads.append(bot_pk)
-    finally:
-        lock.release()
+    # bot_pk = bot.pk
+    # lock.acquire()
+    # try:
+    #     if bot_pk not in global_list_threads:
+    #         global_list_threads.add(bot_pk)
+    # finally:
+    #     lock.release()
 
     return redirect('single_bot_list')
 
