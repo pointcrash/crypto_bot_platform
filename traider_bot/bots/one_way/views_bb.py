@@ -25,7 +25,7 @@ def one_way_bb_create_bot(request):
             bot.category = 'linear'
             bot.save()
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
-            connections.close_all()
+            # connections.close_all()
             logging(bot, 'started work in')
 
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
@@ -100,7 +100,7 @@ def single_bb_bot_create(request):
             bot.category = 'inverse'
             bot.save()
 
-            connections.close_all()
+            # connections.close_all()
             position_idx = 0 if bot.side == 'Buy' else 1
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))

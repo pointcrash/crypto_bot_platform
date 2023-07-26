@@ -17,7 +17,6 @@ def bot_work_logic(bot):
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     round_number = int(bot.symbol.priceScale)
-    #hello
 
     while SingleBot.objects.filter(bot=bot):
         takes = get_takes(bot)

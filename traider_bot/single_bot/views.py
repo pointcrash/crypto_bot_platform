@@ -47,7 +47,7 @@ def single_bot_create(request):
             bot.category = 'inverse'
             bot.save()
 
-            connections.close_all()
+            # connections.close_all()
             if bot.side == 'TS':
                 bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
@@ -75,7 +75,7 @@ def single_bot_detail(request, bot_id):
                 takes.delete()
             if avg_order:
                 avg_order.delete()
-            connections.close_all()
+            # connections.close_all()
 
             if get_status_process(bot.process.pid):
                 stop_bot_with_cancel_orders(bot)
@@ -103,7 +103,7 @@ def bot_start(request, bot_id):
         takes.delete()
     if avg_order:
         avg_order.delete()
-    connections.close_all()
+    # connections.close_all()
 
     if bot.side == 'TS':
         bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
