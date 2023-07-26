@@ -124,3 +124,8 @@ class AvgOrder(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
     order_link_id = models.CharField(default='', blank=True, null=True)
     is_filled = models.BooleanField(default=False, blank=True, null=True)
+
+
+class SingleBot(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    single = models.BooleanField(default=False)

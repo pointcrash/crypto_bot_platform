@@ -5,12 +5,13 @@ from decimal import Decimal
 from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging
 from bots.bot_logic_grid import take_status_check
-from bots.models import Take, AvgOrder
+from bots.models import Take, AvgOrder, SingleBot
 from orders.models import Order
 from single_bot.logic.entry import entry_position
 
 
 def bot_work_logic(bot):
+    SingleBot.objects.create(bot=bot, single=True)
     new_cycle = True
     switch_position_mode(bot)
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)

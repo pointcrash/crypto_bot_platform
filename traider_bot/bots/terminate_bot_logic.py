@@ -6,15 +6,17 @@ from django.db import connections
 
 from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging
-from bots.models import Take, AvgOrder
+from bots.models import Take, AvgOrder, SingleBot
 from orders.models import Order
 
 
-def terminate_process_by_pid(pid):
+def terminate_process_by_pid(bot):
+    pid = bot.process.pid
     if pid is not None:
         pid = int(pid)
         if get_status_process(pid):
             try:
+                SingleBot.objects.get(bot=bot).delete()
                 os.kill(pid, signal.SIGTERM)
                 connections.close_all()
                 return "Bot terminated successfully."
@@ -78,7 +80,7 @@ def stop_bot_with_cancel_orders(bot):
         avg_order.delete()
     connections.close_all()
 
-    logging(bot, terminate_process_by_pid(bot.process.pid))
+    logging(bot, terminate_process_by_pid(bot))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')
 
