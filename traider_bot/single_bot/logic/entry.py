@@ -9,14 +9,19 @@ from single_bot.logic.avg import to_avg_by_grid, get_status_avg_order, set_avg_o
 
 def entry_position(bot, takes):
     first_cycle = True
-    position_idx = 0 if bot.side == 'Buy' else 1
+    if bot.side == 'FB':
+        position_idx = None
+    else:
+        position_idx = 0 if bot.side == 'Buy' else 1
     bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
     avg_order = None
 
     while True:
         symbol_list = get_list(bot.account, bot.category, bot.symbol)
+        if position_idx is None:
+            position_idx = get_position_idx(symbol_list)
 
-        if get_qty(symbol_list)[position_idx]:
+        if position_idx is not None and get_qty(symbol_list)[position_idx]:
             psn_qty = get_qty(symbol_list)[position_idx]
             psn_side = get_side(symbol_list)[position_idx]
             psn_price = get_position_price(symbol_list)[position_idx]
@@ -58,19 +63,28 @@ def entry_position(bot, takes):
 
             return psn_qty, psn_side, psn_price, first_cycle, avg_order
 
+        if not first_cycle:
+            time.sleep(bot.time_sleep)
+
         if bot.orderType == "Market":
             set_entry_point_by_market(bot)
             first_cycle = False
+            time.sleep(1)
             continue
 
         tl = bb_obj.tl
         bl = bb_obj.bl
 
-        if not first_cycle:
-            time.sleep(bot.time_sleep)
-
         if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
             cancel_all(bot.account, bot.category, bot.symbol)
             set_entry_point(bot, tl, bl)
 
+        time.sleep(1)
         first_cycle = False
+
+
+def get_position_idx(symbol_list):
+    for i in range(2):
+        if get_qty(symbol_list)[i]:
+            return i
+    return None

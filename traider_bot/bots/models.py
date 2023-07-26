@@ -106,13 +106,13 @@ class Bot(models.Model):
 class Take(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
     take_number = models.SmallIntegerField(blank=True, null=True)
-    order_link_id = models.CharField(default='')
-    is_filled = models.BooleanField(default=False)
+    order_link_id = models.CharField(default='', blank=True, null=True)
+    is_filled = models.BooleanField(default=False, blank=True, null=True)
 
 
 class Log(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    content = models.CharField()
+    content = models.CharField(blank=True, null=True)
 
 
 class Process(models.Model):
@@ -122,5 +122,5 @@ class Process(models.Model):
 
 class AvgOrder(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    order_link_id = models.CharField(default='')
-    is_filled = models.BooleanField(default=False)
+    order_link_id = models.CharField(default='', blank=True, null=True)
+    is_filled = models.BooleanField(default=False, blank=True, null=True)

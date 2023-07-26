@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import os
 import django
+from django.db import connections
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
@@ -81,14 +82,13 @@ def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
 
 
 def take_status_check(bot, take):
-    if take:
-        if take.is_filled:
+    if take.is_filled:
+        return True
+    if take.order_link_id:
+        status = get_order_status(bot.account, bot.category, bot.symbol, take.order_link_id)
+        if status == 'Filled':
+            pnl = round(Decimal(get_pnl(bot.account, bot.category, bot.symbol)[0]["closedPnl"]), 2)
+            bot.pnl = bot.pnl + Decimal(pnl)
+            bot.save()
             return True
-        if take.order_link_id:
-            status = get_order_status(bot.account, bot.category, bot.symbol, take.order_link_id)
-            print(status)
-            if status == 'Filled':
-                pnl = round(Decimal(get_pnl(bot.account, bot.category, bot.symbol)[0]["closedPnl"]), 2)
-                bot.pnl = bot.pnl + Decimal(pnl)
-                bot.save()
-                return True
+    return False

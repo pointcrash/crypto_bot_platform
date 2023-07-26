@@ -138,13 +138,10 @@ def get_order_status(account, category, symbol, orderLinkId):
     endpoint = "/v5/order/realtime"
     method = "GET"
     params = f"category={category}&symbol={symbol}&orderLinkId={orderLinkId}"
-    print(params)
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     try:
-        print(response)
         return response['result']['list'][0]['orderStatus']
     except:
-        print(response)
         return "Order does not exist"
 
 

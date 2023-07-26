@@ -19,14 +19,19 @@ def bot_work_logic(bot):
 
     while True:
         takes = get_takes(bot)
-        for take in takes:
-            if take.is_filled:
-                logging(bot, f'take_{take.take_number} is filled.')
+        if not new_cycle:
+            for take in takes:
+                if not take.is_filled:
+                    take_status = take_status_check(bot, take)
+                    take.is_filled = take_status
+                    if take_status:
+                        logging(bot, f'take_{take.take_number} is filled.')
+            Take.objects.bulk_update(takes, ['is_filled'])
 
-        if all(take.is_filled for take in takes):
-            logging(bot, f'bot finished work. P&L: {bot.pnl}')
-            if not bot.repeat:
-                break
+            if all(take.is_filled for take in takes):
+                logging(bot, f'bot finished work. P&L: {bot.pnl}')
+                if not bot.repeat:
+                    break
 
         psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes)
 
@@ -39,14 +44,14 @@ def bot_work_logic(bot):
 
             side = "Buy" if psn_side == "Sell" else "Sell"
             qty = Decimal(math.floor((psn_qty / bot.grid_take_count) * 10 ** fraction_length) / 10 ** fraction_length)
+            oli_list = []
 
             for i in range(1, bot.grid_take_count + 1):
                 if side == "Buy":
                     price = round(psn_price - psn_price * bot.grid_profit_value * i / 100, round_number)
                 elif side == "Sell":
                     price = round(psn_price + psn_price * bot.grid_profit_value * i / 100, round_number)
-
-                if not take_status_check(bot, takes[i-1]):
+                if not takes[i-1].is_filled:
                     if i == bot.grid_take_count:
                         order = Order.objects.create(
                             bot=bot,
@@ -58,8 +63,7 @@ def bot_work_logic(bot):
                             price=price,
                             is_take=True,
                         )
-
-                        takes[i-1].order_link_id = order.orderLinkId
+                        oli_list.append(order.orderLinkId)
                         logging(bot, f'created take_{i} Price:{price}')
 
                     else:
@@ -73,15 +77,15 @@ def bot_work_logic(bot):
                             price=price,
                             is_take=True,
                         )
-                        takes[i-1].order_link_id = order.orderLinkId
+
+                        oli_list.append(order.orderLinkId)
                         logging(bot, f'created take_{i} Price:{price}')
 
                         psn_qty = psn_qty - qty
 
-                else:
-                    takes[i - 1].is_filled = True
-
-            Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
+            for take, oli in zip(takes, oli_list):
+                take.order_link_id = oli
+            Take.objects.bulk_update(takes, ['order_link_id'])
             if avg_order is not None and type(avg_order) == Order:
                 avg_order.save()
                 AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
@@ -92,7 +96,7 @@ def get_takes(bot):
 
     if not takes:
         takes_to_create = [
-            Take(bot=bot, take_number=i) for i in range(bot.grid_take_count)
+            Take(bot=bot, take_number=i+1) for i in range(bot.grid_take_count)
         ]
         Take.objects.bulk_create(takes_to_create)
 

@@ -27,7 +27,7 @@ def set_entry_point_by_market(bot):
         category=bot.category,
         symbol=bot.symbol.name,
         side=bot.side,
-        orderType=bot.orderType,
+        orderType="Market",
         qty=get_quantity_from_price(bot.qty,
                                     get_current_price(bot.account, bot.category, bot.symbol),
                                     bot.symbol.minOrderQty, bot.isLeverage)

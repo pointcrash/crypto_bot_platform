@@ -42,44 +42,50 @@ def terminate_bot(request, bot_id, event_number):
     process = Process.objects.get(bot=bot)
     pid = process.pid
 
-    if event_number == 1:
-        logging(bot, terminate_process_by_pid(pid))
+    try:
+        if event_number == 1:
+            logging(bot, terminate_process_by_pid(pid))
 
-    elif event_number == 2:
-        stop_bot_with_cancel_orders(bot)
+        elif event_number == 2:
+            stop_bot_with_cancel_orders(bot)
 
-    elif event_number == 3:
-        stop_bot_with_cancel_orders_and_drop_positions(bot)
+        elif event_number == 3:
+            stop_bot_with_cancel_orders_and_drop_positions(bot)
 
-    process.pid = None
-    process.save()
+        process.pid = None
+        process.save()
+    except Exception as e:
+        print("Произошла ошибка:", e)
     return redirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
 def delete_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
-    if event_number == 1:
-        terminate_process_by_pid(bot.process_id)
+    try:
+        if event_number == 1:
+            terminate_process_by_pid(bot.process_id)
 
-    elif event_number == 2:
-        stop_bot_with_cancel_orders(bot)
+        elif event_number == 2:
+            stop_bot_with_cancel_orders(bot)
 
-    elif event_number == 3:
-        stop_bot_with_cancel_orders_and_drop_positions(bot)
-    bot.delete()
+        elif event_number == 3:
+            stop_bot_with_cancel_orders_and_drop_positions(bot)
+        bot.delete()
+    except Exception as e:
+        print("Произошла ошибка:", e)
     return redirect('single_bot_list')
 
 
-def view_order_status(request, bot_id, order_id):
-    bot = Bot.objects.get(pk=bot_id)
-    order = Order.objects.get(pk=order_id)
-    status = get_order_status(bot.account, bot.category, bot.symbol, order.orderLinkId)
-
-
-def get_balance_views(request, acc_id):
-    acc = Account.objects.get(pk=acc_id)
-    balance = get_query_account_coins_balance(acc)
-    return render(request, 'balance.html', {'balance': balance})
+# def view_order_status(request, bot_id, order_id):
+#     bot = Bot.objects.get(pk=bot_id)
+#     order = Order.objects.get(pk=order_id)
+#     status = get_order_status(bot.account, bot.category, bot.symbol, order.orderLinkId)
+#
+#
+# def get_balance_views(request, acc_id):
+#     acc = Account.objects.get(pk=acc_id)
+#     balance = get_query_account_coins_balance(acc)
+#     return render(request, 'balance.html', {'balance': balance})
 
 

@@ -55,7 +55,6 @@ def to_avg_by_grid(bot, side, psn_price, psn_qty):
 
 
 def get_status_avg_order(bot, order):
-    print(order, order.order_link_id)
     status = get_order_status(bot.account, bot.category, bot.symbol, order.order_link_id)
     if status == 'Filled':
         return True
