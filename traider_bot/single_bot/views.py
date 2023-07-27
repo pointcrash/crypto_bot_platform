@@ -80,19 +80,12 @@ def single_bot_create(request):
 @login_required
 def single_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
-    # process = Process.objects.get(bot=bot)
     if request.method == 'POST':
-        form = GridBotForm(request.POST, request=request, instance=bot)  # Передаем экземпляр модели в форму
+        form = GridBotForm(request.POST, request=request, instance=bot)
         if form.is_valid():
+            bot.delete()
             bot = form.save()
-            # SingleBot.objects.create(bot=bot, single=True)
 
-            avg_order = AvgOrder.objects.filter(bot=bot).first()
-            takes = Take.objects.filter(bot=bot)
-            if takes:
-                takes.delete()
-            if avg_order:
-                avg_order.delete()
             connections.close_all()
 
             if check_thread_alive(bot.pk):
@@ -104,33 +97,15 @@ def single_bot_detail(request, bot_id):
                 bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
             bot_thread.start()
 
-            # if bot.side == 'TS':
-            #     bot_process = multiprocessing.Process(target=set_takes_for_hedge_grid_bot, args=(bot,))
-            # else:
-            #     bot_process = multiprocessing.Process(target=bot_work_logic, args=(bot,))
-            # bot_process.start()
-
-            # bot_pk = bot.pk
-            # lock.acquire()
-            # try:
-            #     if bot_pk not in global_list_threads:
-            #         global_list_threads.add(bot_pk)
-            # finally:
-            #     lock.release()
-
-            # process.pid = str(bot_process.pid)
-            # process.save()
             return redirect('single_bot_list')
     else:
-        form = GridBotForm(request=request, instance=bot)  # Передаем экземпляр модели в форму
+        form = GridBotForm(request=request, instance=bot)
 
     return render(request, 'bot_detail.html', {'form': form, 'bot': bot, })
 
 
 def bot_start(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
-    # process = Process.objects.get(bot=bot)
-    # SingleBot.objects.create(bot=bot, single=True)
     avg_order = AvgOrder.objects.filter(bot=bot).first()
     takes = Take.objects.filter(bot=bot)
     if takes:
@@ -151,14 +126,6 @@ def bot_start(request, bot_id):
     else:
         bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
     bot_thread.start()
-
-    # bot_pk = bot.pk
-    # lock.acquire()
-    # try:
-    #     if bot_pk not in global_list_threads:
-    #         global_list_threads.add(bot_pk)
-    # finally:
-    #     lock.release()
 
     return redirect('single_bot_list')
 
