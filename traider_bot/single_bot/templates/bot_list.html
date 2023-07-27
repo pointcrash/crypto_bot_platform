@@ -53,10 +53,10 @@
                     <a class="btn  btn-secondary" href="{% url 'logs_detail' bot_id=bot.id %}"><i
                             class="fa-regular fa-clock"></i></a>
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                    data-bs-target="#deleteBotModal"><i class="fa-solid fa-trash"></i>
+                    data-bs-target="#deleteBotModal{{bot.pk}}"><i class="fa-solid fa-trash"></i>
                     </button>
                     <!-- Modal -->
-                    <div class="modal fade" id="deleteBotModal" tabindex="-1" aria-labelledby="stopBotModalLabel"
+                    <div class="modal fade" id="deleteBotModal{{bot.pk}}" tabindex="-1" aria-labelledby="deleteBotModalLabel"
                          aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">

@@ -21,11 +21,11 @@ from single_bot.logic.work import bot_work_logic
 def single_bot_list(request):
     user = request.user
     if user.is_superuser:
-        bots = Bot.objects.all()
-        all_bots_pks = Bot.objects.values_list('pk', flat=True)
+        bots = Bot.objects.all().order_by('pk')
+        all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
     else:
-        bots = Bot.objects.filter(owner=user)
-        all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True)
+        bots = Bot.objects.filter(owner=user).order_by('pk')
+        all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
     is_alive_list = []
 
     lock.acquire()
@@ -39,6 +39,7 @@ def single_bot_list(request):
         lock.release()
 
     bots = zip(bots, is_alive_list)
+
     return render(request, 'bot_list.html', {'bots': bots, })
 
 

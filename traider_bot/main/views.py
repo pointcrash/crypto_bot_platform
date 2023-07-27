@@ -18,7 +18,7 @@ def view_home(request):
 def logs_list(request, bot_id):
     log_list = []
     bot = Bot.objects.get(id=bot_id)
-    logs = Log.objects.filter(bot=bot_id)
+    logs = Log.objects.filter(bot=bot_id).order_by('pk')
     for i in range(1, len(logs)+1):
         log_list.append([i, logs[i-1]])
     return render(request, 'logs.html', {'log_list': log_list, 'bot': bot, })
@@ -40,25 +40,6 @@ def logs_view(request):
     return render(request, 'logs_detail.html', {'bots': bots})
 
 
-# @login_required
-# def account_list(request):
-#     acc_list = []
-#     user = request.user
-#     if user.is_superuser:
-#         accounts = Account.objects.all()
-#     else:
-#         accounts = Account.objects.filter(owner=request.user)
-#     for account in accounts:
-#         balance = get_query_account_coins_balance(account)
-#         try:
-#             for elem in balance:
-#                 if elem['coin'] == 'USDT':
-#                     acc_list.append([account, elem['walletBalance'], elem['transferBalance']])
-#         except:
-#             acc_list.append([account, 'error', 'error'])
-#     return render(request, 'account/accounts_list.html', {'acc_list': acc_list, })
-
-
 @login_required
 def account_list(request):
     acc_list = []
@@ -67,14 +48,6 @@ def account_list(request):
         accounts = Account.objects.all()
     else:
         accounts = Account.objects.filter(owner=request.user)
-    # for account in accounts:
-    #     balance = get_query_account_coins_balance(account)
-    #     try:
-    #         for elem in balance:
-    #             if elem['coin'] == 'USDT':
-    #                 acc_list.append([account, elem['walletBalance'], elem['transferBalance']])
-    #     except:
-    #         acc_list.append([account, 'error', 'error'])
     return render(request, 'account/accounts_list.html', {'accounts': accounts, })
 
 
