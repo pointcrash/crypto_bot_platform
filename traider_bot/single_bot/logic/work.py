@@ -40,8 +40,8 @@ def bot_work_logic(bot):
                 for take in takes:
                     if not take.is_filled:
                         take_status = take_status_check(bot, take)
-                        take.is_filled = take_status
                         if take_status:
+                            take.is_filled = take_status
                             logging(bot, f'take_{take.take_number} is filled.')
                 Take.objects.bulk_update(takes, ['is_filled'])
 
@@ -50,7 +50,11 @@ def bot_work_logic(bot):
                     if not bot.repeat:
                         break
 
+            takes = get_takes(bot)
+
             psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes)
+
+            takes = get_takes(bot)
 
             if first_cycle and new_cycle is False:  # Not first cycle (-_-)
                 time.sleep(bot.time_sleep)
@@ -63,12 +67,13 @@ def bot_work_logic(bot):
                 qty = Decimal(math.floor((psn_qty / bot.grid_take_count) * 10 ** fraction_length) / 10 ** fraction_length)
                 oli_list = []
 
-                for i in range(1, bot.grid_take_count + 1):
+                for i, take in enumerate(takes, start=1):
                     if side == "Buy":
                         price = round(psn_price - psn_price * bot.grid_profit_value * i / 100, round_number)
                     elif side == "Sell":
                         price = round(psn_price + psn_price * bot.grid_profit_value * i / 100, round_number)
-                    if not takes[i-1].is_filled:
+
+                    if not take.is_filled:
                         if i == bot.grid_take_count:
                             order = Order.objects.create(
                                 bot=bot,
@@ -119,6 +124,7 @@ def get_takes(bot):
             Take(bot=bot, take_number=i+1) for i in range(bot.grid_take_count)
         ]
         Take.objects.bulk_create(takes_to_create)
-
-    return Take.objects.filter(bot=bot)
+        return Take.objects.filter(bot=bot)
+    else:
+        return takes
 

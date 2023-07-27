@@ -30,8 +30,8 @@ class OrdersAdmin(admin.ModelAdmin):
 
 @admin.register(Take)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'take_number', 'order_link_id', 'is_filled',)
-    list_display_links = ('id', 'take_number', 'order_link_id', )
+    list_display = ('id', 'bot', 'take_number', 'order_link_id', 'is_filled',)
+    list_display_links = ('id', 'bot', 'order_link_id', )
 
 
 @admin.register(AvgOrder)

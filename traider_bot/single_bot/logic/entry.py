@@ -35,7 +35,7 @@ def entry_position(bot, takes):
                         avg_order = set_avg_order(bot, psn_side, psn_price, psn_qty)
                         first_cycle = False
                     else:
-                        if get_status_avg_order(bot, bot.avgorder):
+                        if get_status_avg_order(bot, avg_order):
                             logging(bot,
                                     f'Position AVG. New Margin -> {round(psn_qty * psn_price / bot.isLeverage, 2)}')
                             avg_order.delete()

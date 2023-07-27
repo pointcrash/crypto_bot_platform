@@ -22,29 +22,6 @@ def terminate_process_by_pid(bot_id):
     finally:
         lock.release()
 
-    # if pid is not None:
-    #     pid = int(pid)
-    #     if get_status_process(pid):
-    #         try:
-    #             os.kill(pid, signal.SIGTERM)
-    #             connections.close_all()
-    #             return "Bot terminated successfully."
-    #         except OSError as e:
-    #             connections.close_all()
-    #             return f"Error terminating process with PID {pid}: {e}"
-
-
-# def get_status_process(pid):
-#     if pid is not None:
-#         try:
-#             process = psutil.Process(int(pid))
-#             if process.is_running():
-#                 return True
-#             else:
-#                 return False
-#         except:
-#             return False
-#     return False
 
 def check_thread_alive(bot_id):
     lock.acquire()
@@ -105,9 +82,6 @@ def stop_bot_with_cancel_orders(bot):
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
-    stop_bot_with_cancel_orders(bot)
-    # logging(bot, terminate_process_by_pid(bot.process.pid))
-    # logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
-    #                                         'retMsg'] == 'OK' else 'error when canceling orders')
     drop_position(bot)
+    stop_bot_with_cancel_orders(bot)
     logging(bot, 'drop position')
