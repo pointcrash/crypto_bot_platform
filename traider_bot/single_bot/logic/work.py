@@ -105,7 +105,7 @@ def bot_work_logic(bot):
                 for take, oli in zip(takes, oli_list):
                     take.order_link_id = oli
                 Take.objects.bulk_update(takes, ['order_link_id'])
-                if type(avg_order) == Order:
+                if avg_order is not None and type(avg_order) == Order:
                     avg_order.save()
                     AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
                 else:
