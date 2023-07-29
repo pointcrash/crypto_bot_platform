@@ -128,7 +128,6 @@ def bot_work_logic(bot):
             lock.acquire()
     finally:
         lock.release()
-        terminate_thread(bot.pk)
 
 
 def get_takes(bot):

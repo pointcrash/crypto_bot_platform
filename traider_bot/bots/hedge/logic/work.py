@@ -125,7 +125,6 @@ def set_takes_for_hedge_grid_bot(bot):
             lock.acquire()
     finally:
         lock.release()
-        terminate_thread(bot.pk)
 
 
 def take_status_check(bot, orderLinkId):
