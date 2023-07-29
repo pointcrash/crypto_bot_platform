@@ -4,7 +4,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from bots.terminate_bot_logic import terminate_process_by_pid
+from bots.terminate_bot_logic import terminate_thread
 from bots.bot_logic import create_bb_and_avg_obj, logging
 from bots.bb_set_takes import set_takes
 from bots.forms import BotForm

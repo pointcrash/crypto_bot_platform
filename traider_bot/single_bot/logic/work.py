@@ -6,14 +6,15 @@ from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging
 from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder, SingleBot, Process
-from bots.terminate_bot_logic import stop_bot_with_cancel_orders
+from bots.terminate_bot_logic import stop_bot_with_cancel_orders, terminate_thread
 from orders.models import Order
 from single_bot.logic.entry import entry_position
-from single_bot.logic.global_variables import global_list_threads, lock
+from single_bot.logic.global_variables import global_list_bot_id, lock
 
 
 def bot_work_logic(bot):
     bot_id = bot.pk
+    main_price = 0
     is_ts_bot = True if bot.side == 'TS' else False
 
     position_idx = get_position_idx(bot.side)
@@ -28,7 +29,7 @@ def bot_work_logic(bot):
 
     lock.acquire()
     try:
-        while bot_id in global_list_threads:
+        while bot_id in global_list_bot_id:
             lock.release()
 
             takes = get_takes(bot)
@@ -49,9 +50,15 @@ def bot_work_logic(bot):
 
             takes = get_takes(bot)
 
+            '''Функция открытия позиций, установление точки входа. А так же усредняющая функция'''
             psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes, position_idx)
+            '''-------------------------------------------------------------------------------------------'''
 
             takes = get_takes(bot)
+            main_price, is_back = check_change_psn_price(bot, main_price, psn_price)
+            if is_back:
+                lock.acquire()
+                continue
 
             if first_cycle and new_cycle is False:  # Not first cycle (-_-)
                 time.sleep(bot.time_sleep)
@@ -59,6 +66,14 @@ def bot_work_logic(bot):
             if not first_cycle or new_cycle is True:
                 new_cycle = False
                 cancel_all(bot.account, bot.category, bot.symbol)
+
+                if type(avg_order) == Order:
+                    avg_order.save()
+                    print(avg_order, avg_order.orderLinkId)
+                    avg_order = AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
+                    print(avg_order, avg_order.bot, avg_order.order_link_id)
+                else:
+                    print(type(avg_order), avg_order)
 
                 side = "Buy" if psn_side == "Sell" else "Sell"
                 qty = Decimal(math.floor((psn_qty / bot.grid_take_count) * 10 ** fraction_length) / 10 ** fraction_length)
@@ -105,14 +120,15 @@ def bot_work_logic(bot):
                 for take, oli in zip(takes, oli_list):
                     take.order_link_id = oli
                 Take.objects.bulk_update(takes, ['order_link_id'])
-                if avg_order is not None and type(avg_order) == Order:
-                    avg_order.save()
-                    AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
-                else:
-                    print(type(avg_order), avg_order)
+                # if avg_order is not None and type(avg_order) == Order:
+                #     avg_order.save()
+                #     AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
+                # else:
+                #     print(type(avg_order), avg_order)
             lock.acquire()
     finally:
         lock.release()
+        terminate_thread(bot.pk)
 
 
 def get_takes(bot):
@@ -140,8 +156,8 @@ def get_position_idx(side):
 def append_thread_or_check_duplicate(bot_id, is_ts_bot):
     lock.acquire()
     try:
-        if bot_id not in global_list_threads:
-            global_list_threads.add(bot_id)
+        if bot_id not in global_list_bot_id:
+            global_list_bot_id.add(bot_id)
         elif is_ts_bot:
             pass
         else:
@@ -149,3 +165,14 @@ def append_thread_or_check_duplicate(bot_id, is_ts_bot):
             raise Exception("Duplicate bot")
     finally:
         lock.release()
+
+
+def check_change_psn_price(bot, main_price, psn_price):
+    is_back = False
+    if main_price != psn_price:
+        main_price = psn_price
+        avg_order = AvgOrder.objects.filter(bot=bot).first()
+        if avg_order:
+            avg_order.delete()
+            is_back = True
+    return main_price, is_back

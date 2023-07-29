@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from api_v5 import get_order_status, get_query_account_coins_balance
 from bots.bot_logic import logging
 from bots.models import Bot, Process, SingleBot
-from bots.terminate_bot_logic import terminate_process_by_pid, stop_bot_with_cancel_orders, \
+from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, \
     stop_bot_with_cancel_orders_and_drop_positions
 from main.models import Account
 from orders.models import Order
@@ -46,7 +46,7 @@ def terminate_bot(request, bot_id, event_number):
     single_bot.delete()
 
     if event_number == 1:
-        logging(bot, terminate_process_by_pid(bot.pk))
+        logging(bot, terminate_thread(bot.pk))
 
     elif event_number == 2:
         stop_bot_with_cancel_orders(bot)
@@ -65,7 +65,7 @@ def delete_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
 
     if event_number == 1:
-        terminate_process_by_pid(bot.pk)
+        terminate_thread(bot.pk)
 
     elif event_number == 2:
         stop_bot_with_cancel_orders(bot)

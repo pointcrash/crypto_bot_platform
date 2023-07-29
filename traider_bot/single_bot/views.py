@@ -6,14 +6,14 @@ from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import terminate_process_by_pid, stop_bot_with_cancel_orders, check_thread_alive
+from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, check_thread_alive
 from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
 from bots.forms import GridBotForm
 from bots.bot_logic_grid import set_takes_for_grid_bot
 from bots.models import Bot, Process, AvgOrder, Take, SingleBot
 from django.contrib import messages
 
-from single_bot.logic.global_variables import lock, global_list_threads
+from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import bot_work_logic
 
 
@@ -31,7 +31,7 @@ def single_bot_list(request):
     lock.acquire()
     try:
         for bot_id in all_bots_pks:
-            if bot_id in global_list_threads:
+            if bot_id in global_list_bot_id:
                 is_alive_list.append(True)
             else:
                 is_alive_list.append(False)
@@ -63,6 +63,9 @@ def single_bot_create(request):
             else:
                 bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
             bot_thread.start()
+            lock.acquire()
+            global_list_threads[bot.pk] = bot_thread
+            lock.release()
 
             # Process.objects.create(pid=str(bot_process.pid), bot=bot)
             return redirect('single_bot_list')
@@ -91,7 +94,9 @@ def single_bot_detail(request, bot_id):
             else:
                 bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
             bot_thread.start()
-
+            lock.acquire()
+            global_list_threads[bot.pk] = bot_thread
+            lock.release()
             return redirect('single_bot_list')
     else:
         form = GridBotForm(request=request, instance=bot)
@@ -121,7 +126,9 @@ def bot_start(request, bot_id):
     else:
         bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
     bot_thread.start()
-
+    lock.acquire()
+    global_list_threads[bot.pk] = bot_thread
+    lock.release()
     return redirect('single_bot_list')
 
 

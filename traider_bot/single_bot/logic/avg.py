@@ -77,7 +77,6 @@ def set_avg_order(bot, side, psn_price, psn_qty):
         if 'MARGIN LIMIT!' not in last_log.content:
             logging(bot,
                     f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
-
     else:
         order = Order(
             bot=bot,
@@ -86,7 +85,7 @@ def set_avg_order(bot, side, psn_price, psn_qty):
             side=side,
             orderType='Limit',
             qty=get_quantity_from_price(avg_currency_amount, avg_price, bot.symbol.minOrderQty, bot.isLeverage),
-            price=avg_price,
+            price=round(avg_price, int(bot.symbol.priceScale)),
         )
 
         return order

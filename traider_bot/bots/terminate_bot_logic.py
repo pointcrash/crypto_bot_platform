@@ -8,17 +8,23 @@ from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging
 from bots.models import Take, AvgOrder, SingleBot
 from orders.models import Order
-from single_bot.logic.global_variables import lock, global_list_threads
+from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 
 
-def terminate_process_by_pid(bot_id):
+def terminate_thread(bot_id):
     lock.acquire()
     try:
-        if bot_id in global_list_threads:
-            global_list_threads.remove(bot_id)
-            return f"Terminate successful"
-    except:
-        return "terminate error"
+        if bot_id in global_list_bot_id:
+            global_list_bot_id.remove(bot_id)
+            if bot_id not in global_list_bot_id:
+                thread = global_list_threads[bot_id]
+                lock.release()
+                thread.join()
+                lock.acquire()
+                del global_list_threads[bot_id]
+                return f"Terminate successful"
+    except Exception as e:
+        return f"Terminate error: {e}"
     finally:
         lock.release()
 
@@ -26,7 +32,7 @@ def terminate_process_by_pid(bot_id):
 def check_thread_alive(bot_id):
     lock.acquire()
     try:
-        if bot_id in global_list_threads:
+        if bot_id in global_list_bot_id:
             return True
         else:
             return False
@@ -76,7 +82,7 @@ def stop_bot_with_cancel_orders(bot):
         avg_order.delete()
     connections.close_all()
 
-    logging(bot, terminate_process_by_pid(bot.pk))
+    logging(bot, terminate_thread(bot.pk))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')
 

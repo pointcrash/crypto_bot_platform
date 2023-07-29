@@ -5,7 +5,8 @@ import os
 import django
 
 from bots.hedge.logic.entry import set_entry_point_by_market_for_hedge
-from single_bot.logic.global_variables import lock, global_list_threads
+from bots.terminate_bot_logic import terminate_thread
+from single_bot.logic.global_variables import lock, global_list_bot_id
 from single_bot.logic.work import bot_work_logic
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
@@ -23,10 +24,10 @@ def set_takes_for_hedge_grid_bot(bot):
 
     lock.acquire()
     try:
-        if bot_id not in global_list_threads:
-            global_list_threads.add(bot_id)
+        if bot_id not in global_list_bot_id:
+            global_list_bot_id.add(bot_id)
         else:
-            global_list_threads.remove(bot_id)
+            global_list_bot_id.remove(bot_id)
             raise Exception("Duplicate bot")
     finally:
         lock.release()
@@ -45,7 +46,7 @@ def set_takes_for_hedge_grid_bot(bot):
 
     lock.acquire()
     try:
-        while bot_id in global_list_threads:
+        while bot_id in global_list_bot_id:
             lock.release()
 
             if flag:
@@ -63,9 +64,9 @@ def set_takes_for_hedge_grid_bot(bot):
                 logging(bot, f'TP IS SUCCESS. Side: {new_pnl_list[0]["side"]} PNL: {round(Decimal(new_pnl_list[0]["closedPnl"]), 2)}')
                 start_pnl_list = new_pnl_list
 
-            if not qty_list[0] and not qty_list[1]:
-                logging(bot, f'Bot finished work. Total PNL: {total_pnl}')
-                break
+            # if not qty_list[0] and not qty_list[1]:
+            #     logging(bot, f'Bot finished work. Total PNL: {total_pnl}')
+            #     break
 
             current_price = get_current_price(bot.account, bot.category, bot.symbol)
             if qty_list[0]:
@@ -77,7 +78,6 @@ def set_takes_for_hedge_grid_bot(bot):
                         ml0 = 1
                 else:
                     if not qty_list[1]:
-                    # if current_price <= tp_list[1]:
                         qty = get_quantity_from_price(qty_list[0] * price_list[0] / bot.isLeverage, current_price,
                                                       bot.symbol.minOrderQty, bot.isLeverage) * bot.bb_avg_percent / 100
                         avg_price = (qty_list[0] * price_list[0] + qty * current_price) / (qty_list[0] + qty)
@@ -105,7 +105,6 @@ def set_takes_for_hedge_grid_bot(bot):
                         ml1 = 1
                 else:
                     if not qty_list[0]:
-                    # if current_price >= tp_list[0]:
                         qty = get_quantity_from_price(qty_list[1] * price_list[1] / bot.isLeverage, current_price,
                                                       bot.symbol.minOrderQty, bot.isLeverage) * bot.bb_avg_percent / 100
                         avg_price = (qty_list[1] * price_list[1] + qty * current_price) / (qty_list[1] + qty)
@@ -126,6 +125,7 @@ def set_takes_for_hedge_grid_bot(bot):
             lock.acquire()
     finally:
         lock.release()
+        terminate_thread(bot.pk)
 
 
 def take_status_check(bot, orderLinkId):

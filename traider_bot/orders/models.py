@@ -39,6 +39,8 @@ class Order(models.Model):
         }
         params = json.dumps(params)
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
+        print(response)
+        print(self.price)
 
     def save(self, *args, **kwargs):
         if self.category == 'inverse':
