@@ -69,22 +69,14 @@ def one_way_bb_bot_detail(request, bot_id):
         form = BotForm(request.POST, instance=bot)  # Передаем экземпляр модели в форму
         if form.is_valid():
             bot = form.save()
-            # if get_status_process(bot.process_id):
-            #     terminate_process_by_pid(bot.process_id)
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
             bot_process = multiprocessing.Process(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
             bot_process.start()
-            bot.process_id = str(bot_process.pid)
-            bot.save()
             return redirect('one_way_bb_bots_list')
     else:
         form = BotForm(request=request, instance=bot)  # Передаем экземпляр модели в форму
 
     return render(request, 'one_way/bb/bot_detail.html', {'form': form, 'bot': bot, 'message': message})
-
-
-
-
 
 
 @login_required

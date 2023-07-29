@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
-from bots.hedge.grid_logic import set_takes_for_hedge_grid_bot
+from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import terminate_process_by_pid, stop_bot_with_cancel_orders, check_thread_alive
 from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
 from bots.forms import GridBotForm

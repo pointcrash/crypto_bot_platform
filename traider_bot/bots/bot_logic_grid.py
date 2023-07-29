@@ -88,7 +88,7 @@ def take_status_check(bot, take):
         status = get_order_status(bot.account, bot.category, bot.symbol, take.order_link_id)
         if status == 'Filled':
             pnl = round(Decimal(get_pnl(bot.account, bot.category, bot.symbol)[0]["closedPnl"]), 2)
-            bot.pnl = bot.pnl + Decimal(pnl)
+            bot.pnl = bot.pnl + pnl
             bot.save()
             return True
     return False

@@ -45,14 +45,14 @@
                     {% if is_alive %}
                     {% include 'modal_stop_bot.html' %}
                     {% else %}
-                        <a href="{% url 'single_bot_start' bot_id=bot.pk %}" class="btn btn-success"><i class="fa-solid fa-play"></i></a>
+                        <a href="{% url 'single_bot_start' bot_id=bot.pk %}" class="btn btn-success btn-shadow"><i class="fa-solid fa-play"></i></a>
                     {% endif %}
 
-                    <a class="btn btn-primary" href="{% url 'single_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
 
-                    <a class="btn  btn-secondary" href="{% url 'logs_detail' bot_id=bot.id %}"><i
+                    <a class="btn  btn-secondary btn-shadow" href="{% url 'logs_detail' bot_id=bot.id %}"><i
                             class="fa-regular fa-clock"></i></a>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                    <button type="button" class="btn btn-danger btn-shadow" data-bs-toggle="modal"
                     data-bs-target="#deleteBotModal{{bot.pk}}"><i class="fa-solid fa-trash"></i>
                     </button>
                     <!-- Modal -->

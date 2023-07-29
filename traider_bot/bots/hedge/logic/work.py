@@ -1,11 +1,12 @@
-import math
 import time
 from decimal import Decimal
 
 import os
 import django
 
+from bots.hedge.logic.entry import set_entry_point_by_market_for_hedge
 from single_bot.logic.global_variables import lock, global_list_threads
+from single_bot.logic.work import bot_work_logic
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
@@ -18,6 +19,7 @@ from orders.models import Order
 
 def set_takes_for_hedge_grid_bot(bot):
     bot_id = bot.pk
+    flag = False
 
     lock.acquire()
     try:
@@ -33,7 +35,7 @@ def set_takes_for_hedge_grid_bot(bot):
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     round_number = int(bot.symbol.priceScale)
-    set_entry_point_by_market_for_hedge(bot)
+    tp_list = set_entry_point_by_market_for_hedge(bot)
 
     start_time = int(time.time()) * 1000
     start_pnl_list = []
@@ -45,6 +47,10 @@ def set_takes_for_hedge_grid_bot(bot):
     try:
         while bot_id in global_list_threads:
             lock.release()
+
+            if flag:
+                bot_work_logic(bot)
+                break
 
             time.sleep(bot.time_sleep)
             symbol_list = get_list(bot.account, bot.category, bot.symbol)
@@ -61,8 +67,8 @@ def set_takes_for_hedge_grid_bot(bot):
                 logging(bot, f'Bot finished work. Total PNL: {total_pnl}')
                 break
 
+            current_price = get_current_price(bot.account, bot.category, bot.symbol)
             if qty_list[0]:
-                current_price = get_current_price(bot.account, bot.category, bot.symbol)
                 margin_after_avg = qty_list[0] * price_list[0] / bot.isLeverage * (1 + bot.bb_avg_percent / 100)
 
                 if margin_after_avg > bot.max_margin:
@@ -70,7 +76,8 @@ def set_takes_for_hedge_grid_bot(bot):
                         logging(bot, f'MARGIN LIMIT -> {bot.max_margin}, margin after avg -> {round(margin_after_avg, 2)}')
                         ml0 = 1
                 else:
-                    if current_price < price_list[0] * (1 - bot.grid_profit_value / 100):
+                    if not qty_list[1]:
+                    # if current_price <= tp_list[1]:
                         qty = get_quantity_from_price(qty_list[0] * price_list[0] / bot.isLeverage, current_price,
                                                       bot.symbol.minOrderQty, bot.isLeverage) * bot.bb_avg_percent / 100
                         avg_price = (qty_list[0] * price_list[0] + qty * current_price) / (qty_list[0] + qty)
@@ -85,10 +92,11 @@ def set_takes_for_hedge_grid_bot(bot):
 
                         )
                         logging(bot,
-                                f'create AVG order. Side: "Buy". Margin: {round(qty_list[0] * price_list[0] / bot.isLeverage * (1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * (1 + bot.grid_profit_value / 100), round_number)}')
+                                f'position AVG. Side: "Buy". Margin: {round(qty_list[0] * price_list[0] / bot.isLeverage * (1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * (1 + bot.grid_profit_value / 100), round_number)}')
+
+                        flag = True
 
             if qty_list[1]:
-                current_price = get_current_price(bot.account, bot.category, bot.symbol)
                 margin_after_avg = qty_list[1] * price_list[1] / bot.isLeverage * (1 + bot.bb_avg_percent / 100)
 
                 if margin_after_avg > bot.max_margin:
@@ -96,7 +104,8 @@ def set_takes_for_hedge_grid_bot(bot):
                         logging(bot, f'MARGIN LIMIT -> {bot.max_margin}, margin after avg -> {margin_after_avg}')
                         ml1 = 1
                 else:
-                    if current_price > price_list[1] * (1 + bot.grid_profit_value / 100):
+                    if not qty_list[0]:
+                    # if current_price >= tp_list[0]:
                         qty = get_quantity_from_price(qty_list[1] * price_list[1] / bot.isLeverage, current_price,
                                                       bot.symbol.minOrderQty, bot.isLeverage) * bot.bb_avg_percent / 100
                         avg_price = (qty_list[1] * price_list[1] + qty * current_price) / (qty_list[1] + qty)
@@ -111,7 +120,9 @@ def set_takes_for_hedge_grid_bot(bot):
 
                         )
                         logging(bot,
-                                f'create AVG order. Side: "Sell". Margin: {round(qty_list[1] * price_list[1] / bot.isLeverage * (1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * (1 - bot.grid_profit_value / 100), round_number)}')
+                                f'position AVG. Side: "Sell". Margin: {round(qty_list[1] * price_list[1] / bot.isLeverage * (1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * (1 - bot.grid_profit_value / 100), round_number)}')
+
+                        flag = True
             lock.acquire()
     finally:
         lock.release()
@@ -129,38 +140,3 @@ def take_status_check(bot, orderLinkId):
             return 'Filled'
 
 
-def set_entry_point_by_market_for_hedge(bot):
-    symbol_list = get_list(bot.account, bot.category, bot.symbol)
-    qty_list = get_qty(symbol_list)
-    if qty_list[0] or qty_list[1]:
-        return None
-
-    round_number = int(bot.symbol.priceScale)
-    current_price = get_current_price(bot.account, bot.category, bot.symbol)
-    for side in ['Buy', 'Sell']:
-        if side == 'Buy':
-            tp_limit_price = round(current_price * (1 + bot.grid_profit_value / 100), round_number)
-        else:
-            tp_limit_price = round(current_price * (1 - bot.grid_profit_value / 100), round_number)
-
-        order = Order.objects.create(
-            bot=bot,
-            category=bot.category,
-            symbol=bot.symbol.name,
-            side=side,
-            orderType='Market',
-            qty=get_quantity_from_price(bot.qty, current_price, bot.symbol.minOrderQty, bot.isLeverage),
-            takeProfit=str(tp_limit_price),
-        )
-
-        logging(bot, f'create order by market. Side: "{side}". Margin: {bot.qty}. TP: {tp_limit_price}')
-        if bot.side == 'Sell':
-            bot.entry_order_sell = order.orderLinkId
-            bot.save()
-        else:
-            bot.entry_order_by = order.orderLinkId
-            bot.save()
-
-
-def calculation_entry_point_by_hedge(bot):
-    set_entry_point_by_market_for_hedge(bot)

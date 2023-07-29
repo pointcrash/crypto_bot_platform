@@ -3,8 +3,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from bots.hedge.grid_logic import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import terminate_process_by_pid
+from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.forms import HedgeGridBotForm
 from bots.models import Bot, Process
 from django.contrib import messages

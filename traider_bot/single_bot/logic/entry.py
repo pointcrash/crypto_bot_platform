@@ -7,12 +7,9 @@ from bots.models import Take, AvgOrder
 from single_bot.logic.avg import to_avg_by_grid, get_status_avg_order, set_avg_order
 
 
-def entry_position(bot, takes):
+def entry_position(bot, takes, position_idx):
     first_cycle = True
-    if bot.side == 'FB':
-        position_idx = None
-    else:
-        position_idx = 0 if bot.side == 'Buy' else 1
+
     bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
     avg_order = None
 
@@ -34,6 +31,7 @@ def entry_position(bot, takes):
                     if not avg_order:
                         avg_order = set_avg_order(bot, psn_side, psn_price, psn_qty)
                         first_cycle = False
+                        print('if not avg_order')
                     else:
                         if get_status_avg_order(bot, avg_order):
                             logging(bot,
@@ -44,12 +42,10 @@ def entry_position(bot, takes):
                                 take.is_filled = False
                             Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
                             first_cycle = False
+                            print('if get_status_avg_order(bot, avg_order)')
                             continue
 
             return psn_qty, psn_side, psn_price, first_cycle, avg_order
-
-        if not first_cycle:
-            time.sleep(bot.time_sleep)
 
         if bot.orderType == "Market":
             set_entry_point_by_market(bot)
@@ -59,6 +55,9 @@ def entry_position(bot, takes):
 
         tl = bb_obj.tl
         bl = bb_obj.bl
+
+        if not first_cycle:
+            time.sleep(bot.time_sleep)
 
         if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
             cancel_all(bot.account, bot.category, bot.symbol)

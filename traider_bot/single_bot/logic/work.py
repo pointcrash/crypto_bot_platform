@@ -6,6 +6,7 @@ from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging
 from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder, SingleBot, Process
+from bots.terminate_bot_logic import stop_bot_with_cancel_orders
 from orders.models import Order
 from single_bot.logic.entry import entry_position
 from single_bot.logic.global_variables import global_list_threads, lock
@@ -13,20 +14,15 @@ from single_bot.logic.global_variables import global_list_threads, lock
 
 def bot_work_logic(bot):
     bot_id = bot.pk
+    is_ts_bot = True if bot.side == 'TS' else False
 
-    lock.acquire()
-    try:
-        if bot_id not in global_list_threads:
-            global_list_threads.add(bot_id)
-        else:
-            global_list_threads.remove(bot_id)
-            raise Exception("Duplicate bot")
-    finally:
-        lock.release()
+    position_idx = get_position_idx(bot.side)
+    append_thread_or_check_duplicate(bot_id, is_ts_bot)
 
     new_cycle = True
-    switch_position_mode(bot)
-    set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
+    if not is_ts_bot:
+        switch_position_mode(bot)
+        set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     round_number = int(bot.symbol.priceScale)
 
@@ -46,13 +42,14 @@ def bot_work_logic(bot):
                 Take.objects.bulk_update(takes, ['is_filled'])
 
                 if all(take.is_filled for take in takes):
-                    logging(bot, f'bot finished work. P&L: {bot.pnl}')
+                    logging(bot, f'bot finished cycle. P&L: {bot.pnl}')
                     if not bot.repeat:
+                        stop_bot_with_cancel_orders(bot)
                         break
 
             takes = get_takes(bot)
 
-            psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes)
+            psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes, position_idx)
 
             takes = get_takes(bot)
 
@@ -108,9 +105,11 @@ def bot_work_logic(bot):
                 for take, oli in zip(takes, oli_list):
                     take.order_link_id = oli
                 Take.objects.bulk_update(takes, ['order_link_id'])
-                if avg_order is not None and type(avg_order) == Order:
+                if type(avg_order) == Order:
                     avg_order.save()
                     AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
+                else:
+                    print(type(avg_order), avg_order)
             lock.acquire()
     finally:
         lock.release()
@@ -128,3 +127,25 @@ def get_takes(bot):
     else:
         return takes
 
+
+def get_position_idx(side):
+    if side == 'FB' or side == 'TS':
+        position_idx = None
+    else:
+        position_idx = 0 if side == 'Buy' else 1
+
+    return position_idx
+
+
+def append_thread_or_check_duplicate(bot_id, is_ts_bot):
+    lock.acquire()
+    try:
+        if bot_id not in global_list_threads:
+            global_list_threads.add(bot_id)
+        elif is_ts_bot:
+            pass
+        else:
+            # global_list_threads.remove(bot_id)
+            raise Exception("Duplicate bot")
+    finally:
+        lock.release()
