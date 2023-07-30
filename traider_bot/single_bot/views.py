@@ -126,7 +126,9 @@ def bot_start(request, bot_id):
         bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
     bot_thread.start()
     lock.acquire()
+    print(global_list_threads)
     global_list_threads[bot.pk] = bot_thread
+    print(global_list_threads)
     lock.release()
     return redirect('single_bot_list')
 
