@@ -9,7 +9,25 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
 
-def on_starting(server):
+# def on_starting(server):
+#     time.sleep(10)
+#     lock.acquire()
+#     try:
+#         for thread in global_list_threads.values():
+#             thread.start()
+#     finally:
+#         lock.release()
+#
+#
+# def on_exit(server):
+#     lock.acquire()
+#     try:
+#         global_list_bot_id.clear()
+#     finally:
+#         lock.release()
+
+
+def when_ready(server):
     time.sleep(10)
     lock.acquire()
     try:
@@ -17,19 +35,14 @@ def on_starting(server):
             thread.start()
     finally:
         lock.release()
+    server.log.info("Gunicorn is ready to accept requests.")
 
 
-def on_exit(server):
+def worker_exit(server, worker):
     lock.acquire()
     try:
-        global_list_bot_id.clear()
+        if global_list_bot_id:
+            global_list_bot_id.clear()
     finally:
         lock.release()
-
-
-# def when_ready(server):
-#     pass
-#
-#
-# def worker_exit(server, worker):
-#     pass
+    server.log.info(f"Worker {worker.pid} has exited.")
