@@ -16,7 +16,7 @@ def entry_position(bot, takes, position_idx):
     while True:
         symbol_list = get_list(bot.account, bot.category, bot.symbol)
         if position_idx is None:
-            position_idx = get_position_idx(symbol_list)
+            position_idx = get_position_idx_by_range(symbol_list)
 
         if position_idx is not None and get_qty(symbol_list)[position_idx]:
             psn_qty = get_qty(symbol_list)[position_idx]
@@ -67,7 +67,7 @@ def entry_position(bot, takes, position_idx):
         first_cycle = False
 
 
-def get_position_idx(symbol_list):
+def get_position_idx_by_range(symbol_list):
     for i in range(2):
         if get_qty(symbol_list)[i]:
             return i

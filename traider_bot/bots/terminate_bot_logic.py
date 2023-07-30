@@ -1,12 +1,8 @@
-import os
-import signal
-
-import psutil
 from django.db import connections
 
 from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging
-from bots.models import Take, AvgOrder, SingleBot
+from bots.models import Take, AvgOrder
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 

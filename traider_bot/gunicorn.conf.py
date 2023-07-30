@@ -1,4 +1,6 @@
 import os
+import time
+
 import django
 
 from single_bot.logic.global_variables import *
@@ -8,6 +10,7 @@ django.setup()
 
 
 def on_starting(server):
+    time.sleep(10)
     lock.acquire()
     try:
         for thread in global_list_threads.values():
@@ -16,10 +19,14 @@ def on_starting(server):
         lock.release()
 
 
-# def on_exit(server):
-#     pass
-#
-#
+def on_exit(server):
+    lock.acquire()
+    try:
+        global_list_bot_id.clear()
+    finally:
+        lock.release()
+
+
 # def when_ready(server):
 #     pass
 #

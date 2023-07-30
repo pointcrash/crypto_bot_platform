@@ -6,6 +6,8 @@ from decimal import Decimal, ROUND_DOWN
 import os
 import django
 
+from single_bot.logic.global_variables import lock, global_list_bot_id
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
@@ -19,6 +21,22 @@ from orders.models import Order
 
 def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
     return (Decimal(str(qty_USDT * leverage)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
+
+
+def get_position_idx_by_range(symbol_list):
+    for i in range(2):
+        if get_qty(symbol_list)[i]:
+            return i
+    return None
+
+
+def get_position_idx(side):
+    if side == 'FB' or side == 'TS':
+        position_idx = None
+    else:
+        position_idx = 0 if side == 'Buy' else 1
+
+    return position_idx
 
 
 def set_entry_point_by_market(bot):
@@ -94,54 +112,67 @@ def set_entry_point(bot, tl, bl):
         set_sell_entry_point(bot, tl)
 
 
-def calculation_entry_point(bot, bb_obj, bb_avg_obj, grid_take_list=None):
+def calculation_entry_point(bot, bb_obj, bb_avg_obj):
+    bot_id = bot.pk
     first_cycle = True
-    position_idx = 0 if bot.side == 'Buy' else 1
+    position_idx = get_position_idx(bot.side)
 
-    while True:
-        symbol_list = get_list(bot.account, bot.category, bot.symbol)
+    lock.acquire()
+    try:
+        while bot_id in global_list_bot_id:
+            lock.release()
 
-        if get_qty(symbol_list)[position_idx]:
-            psn_qty = get_qty(symbol_list)[position_idx]
-            psn_side = get_side(symbol_list)[position_idx]
-            psn_price = get_position_price(symbol_list)[position_idx]
-            if entry_order_status_check(bot):
-                logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
+            symbol_list = get_list(bot.account, bot.category, bot.symbol)
 
-            if bb_avg_obj:
-                bb_avg_obj.psn_price = psn_price
-                bb_avg_obj.psn_side = psn_side
-                bb_avg_obj.psn_qty = psn_qty
+            if position_idx is None:
+                position_idx = get_position_idx_by_range(symbol_list)
 
-            if bot.auto_avg:
-                if bot.work_model == "bb" and bb_avg_obj is not None:
-                    if bb_avg_obj.auto_avg():
-                        symbol_list = get_list(bot.account, bot.category, bot.symbol)
-                        logging(bot, f'average. New margin: {get_qty(symbol_list)[position_idx] * get_position_price(symbol_list)[position_idx] / bot.isLeverage}')
-                        first_cycle = False
-                        if bot.take1:
-                            bot.take1 = ''
-                            bot.save()
-                        continue
+            if position_idx is not None and get_qty(symbol_list)[position_idx]:
+                psn_qty = get_qty(symbol_list)[position_idx]
+                psn_side = get_side(symbol_list)[position_idx]
+                psn_price = get_position_price(symbol_list)[position_idx]
+                if entry_order_status_check(bot):
+                    logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
 
-            return psn_qty, psn_side, psn_price, first_cycle, grid_take_list
+                if bb_avg_obj:
+                    bb_avg_obj.psn_price = psn_price
+                    bb_avg_obj.psn_side = psn_side
+                    bb_avg_obj.psn_qty = psn_qty
 
-        if bot.orderType == "Market":
-            set_entry_point_by_market(bot)
+                if bot.auto_avg:
+                    if bot.work_model == "bb" and bb_avg_obj is not None:
+                        if bb_avg_obj.auto_avg():
+                            symbol_list = get_list(bot.account, bot.category, bot.symbol)
+                            logging(bot,
+                                    f'average. New margin: {get_qty(symbol_list)[position_idx] * get_position_price(symbol_list)[position_idx] / bot.isLeverage}')
+                            first_cycle = False
+                            if bot.take1:
+                                bot.take1 = ''
+                                bot.save()
+                            continue
+
+                return psn_qty, psn_side, psn_price, first_cycle
+
+            if bot.orderType == "Market":
+                set_entry_point_by_market(bot)
+                first_cycle = False
+                continue
+
+            tl = bb_obj.tl
+            bl = bb_obj.bl
+
+            if not first_cycle:
+                time.sleep(bot.time_sleep)
+
+            if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
+                cancel_all(bot.account, bot.category, bot.symbol)
+                set_entry_point(bot, tl, bl)
+
             first_cycle = False
-            continue
+            lock.acquire()
+    finally:
+        lock.release()
 
-        tl = bb_obj.tl
-        bl = bb_obj.bl
-
-        if not first_cycle:
-            time.sleep(bot.time_sleep)
-
-        if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
-            cancel_all(bot.account, bot.category, bot.symbol)
-            set_entry_point(bot, tl, bl)
-
-        first_cycle = False
 
 
 def get_update_symbols():
@@ -168,12 +199,16 @@ def count_decimal_places(number):
     return decimal_places
 
 
-def create_bb_and_avg_obj(bot, position_idx):
+def create_bb_and_avg_obj(bot, position_idx=0):
     if bot.work_model == 'bb':
         symbol_list = get_list(bot.account, bot.category, bot.symbol)
+        print(symbol_list)
         psn_qty = get_qty(symbol_list)[position_idx]
+        print(psn_qty)
         psn_side = get_side(symbol_list)[position_idx]
+        print(psn_side)
         psn_price = get_position_price(symbol_list)[position_idx]
+        print(psn_price)
 
     if bot.work_model == 'grid' and bot.orderType == 'Market':
         bb_obj = None
@@ -239,6 +274,4 @@ def take2_status_check(bot):
             bot.save()
             return True
 
-
 # get_symbol_set()
-

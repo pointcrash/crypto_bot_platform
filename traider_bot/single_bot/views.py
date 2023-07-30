@@ -67,7 +67,6 @@ def single_bot_create(request):
             global_list_threads[bot.pk] = bot_thread
             lock.release()
 
-            # Process.objects.create(pid=str(bot_process.pid), bot=bot)
             return redirect('single_bot_list')
     else:
         form = GridBotForm(request=request)

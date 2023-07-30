@@ -37,7 +37,7 @@ class BBAutoAverage:
             if self.channel_width_check(current_price):
                 if self.dfm_check(current_price, self.bb_obj.tl):
                     if self.margin_limit_check():
-                        self.to_average()
+                        self.to_average(current_price)
                         return True
             return False
 

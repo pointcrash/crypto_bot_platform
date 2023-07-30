@@ -5,11 +5,10 @@ from decimal import Decimal
 from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging
 from bots.bot_logic_grid import take_status_check
-from bots.models import Take, AvgOrder, SingleBot, Process
-from bots.terminate_bot_logic import stop_bot_with_cancel_orders, terminate_thread
+from bots.models import Take, AvgOrder
 from orders.models import Order
 from single_bot.logic.entry import entry_position
-from single_bot.logic.global_variables import global_list_bot_id, lock
+from single_bot.logic.global_variables import global_list_bot_id, lock, global_list_threads
 
 
 def bot_work_logic(bot):
@@ -45,7 +44,13 @@ def bot_work_logic(bot):
                 if all(take.is_filled for take in takes):
                     logging(bot, f'bot finished cycle. P&L: {bot.pnl}')
                     if not bot.repeat:
-                        stop_bot_with_cancel_orders(bot)
+                        lock.acquire()
+                        try:
+                            global_list_bot_id.remove(bot_id)
+                            if bot_id not in global_list_bot_id:
+                                del global_list_threads[bot_id]
+                        finally:
+                            lock.release()
                         break
 
             takes = get_takes(bot)
@@ -120,11 +125,7 @@ def bot_work_logic(bot):
                 for take, oli in zip(takes, oli_list):
                     take.order_link_id = oli
                 Take.objects.bulk_update(takes, ['order_link_id'])
-                # if avg_order is not None and type(avg_order) == Order:
-                #     avg_order.save()
-                #     AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
-                # else:
-                #     print(type(avg_order), avg_order)
+
             lock.acquire()
     finally:
         lock.release()
