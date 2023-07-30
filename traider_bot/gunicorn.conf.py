@@ -31,10 +31,11 @@ def when_ready(server):
     time.sleep(10)
     lock.acquire()
     try:
-        print(global_list_threads.values())
-        for thread in global_list_threads.values():
-            thread.start()
-            print(thread)
+        server.log.info(global_list_threads.values())
+        if global_list_threads.values():
+            for thread in global_list_threads.values():
+                thread.start()
+                server.log.info(thread)
     finally:
         lock.release()
     server.log.info("Gunicorn is ready to accept requests.")
@@ -43,7 +44,7 @@ def when_ready(server):
 def worker_exit(server, worker):
     lock.acquire()
     try:
-        print(global_list_bot_id)
+        server.log.info(global_list_bot_id)
         if global_list_bot_id:
             global_list_bot_id.clear()
     finally:
