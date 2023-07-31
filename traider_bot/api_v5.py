@@ -138,7 +138,7 @@ def get_symbol_set():
     data_set = get_instruments_info(account, category="linear")
     symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
                    i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
-                   i['lotSizeFilter']['minOrderQty']) for i in data_set['result']['list'] if
+                   i['lotSizeFilter']['minOrderQty'], i['lotSizeFilter']['maxOrderQty']) for i in data_set['result']['list'] if
                   i['symbol'].endswith('USDT')]
 
     return symbol_set

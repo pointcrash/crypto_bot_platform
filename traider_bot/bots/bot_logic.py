@@ -174,7 +174,6 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
         lock.release()
 
 
-
 def get_update_symbols():
     symbol_set = get_symbol_set()
     for symbol in symbol_set:
@@ -190,6 +189,7 @@ def get_update_symbols():
                 minPrice=symbol[5],
                 maxPrice=symbol[6],
                 minOrderQty=symbol[7],
+                maxOrderQty=symbol[8],
             )
 
 

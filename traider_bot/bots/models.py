@@ -12,6 +12,7 @@ class Symbol(models.Model):
     minPrice = models.CharField(max_length=20, null=True)
     maxPrice = models.CharField(max_length=20, null=True)
     minOrderQty = models.CharField(max_length=20, null=True)
+    maxOrderQty = models.CharField(max_length=20, null=True)
 
     def __str__(self):
         return self.name

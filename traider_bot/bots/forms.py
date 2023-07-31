@@ -99,7 +99,7 @@ class BotForm(forms.ModelForm):
 
         if qty < Decimal(symbol.minPrice) or qty > Decimal(symbol.maxPrice):
             raise forms.ValidationError(
-                f"Invalid '1st order investments' value: \nmin value = {symbol.minPrice},\n max value = {symbol.maxPrice}")
+                f"Invalid '1st order investments' value: \nmin value = {symbol.minOrderQty},\n max value = {symbol.maxOrderQty}")
 
         return cleaned_data
 
@@ -206,7 +206,7 @@ class GridBotForm(forms.ModelForm):
 
         if qty < Decimal(symbol.minPrice) or qty > Decimal(symbol.maxPrice):
             raise forms.ValidationError(
-                f"Invalid '1st order investments' value: min value = {symbol.minPrice}, max value = {symbol.maxPrice}")
+                f"Invalid '1st order investments' value: min value = {symbol.minOrderQty}, max value = {symbol.maxOrderQty}")
 
         return cleaned_data
 
