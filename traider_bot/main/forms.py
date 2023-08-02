@@ -11,8 +11,8 @@ class AccountForm(forms.ModelForm):
         fields = ['name', 'API_TOKEN', 'SECRET_KEY', 'is_mainnet', ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'API_TOKEN': forms.TextInput(attrs={'class': 'form-control', 'type': 'password'}),
-            'SECRET_KEY': forms.TextInput(attrs={'class': 'form-control', 'type': 'password'}),
+            'API_TOKEN': forms.TextInput(attrs={'class': 'form-control'}),
+            'SECRET_KEY': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'name': 'Name',

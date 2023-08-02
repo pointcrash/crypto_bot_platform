@@ -190,7 +190,7 @@ def get_balance(account):
 def get_query_account_coins_balance(account):
     endpoint = "/v5/asset/transfer/query-account-coins-balance"
     method = "GET"
-    params = f"accountType=CONTRACT"
+    params = f"accountType=CONTRACT&coin=USDT"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     try:
         return response['result']['balance']

@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 
 from api_v5 import get_query_account_coins_balance
 from bots.models import Log, Bot
@@ -42,7 +43,6 @@ def logs_view(request):
 
 @login_required
 def account_list(request):
-    acc_list = []
     user = request.user
     if user.is_superuser:
         accounts = Account.objects.all()
@@ -149,5 +149,12 @@ def profile_mode_switching(request, profile_id):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+def get_balance(request, acc_id):
+    acc = Account.objects.get(pk=acc_id)
+    balance = get_query_account_coins_balance(acc)[0]
+    wb = balance['walletBalance']
+    tb = balance['transferBalance']
+    name = acc.name
 
+    return JsonResponse({"wb": wb, "tb": tb, "name": name})
 
