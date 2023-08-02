@@ -49,6 +49,7 @@ def bot_work_logic(bot):
                             global_list_bot_id.remove(bot_id)
                             if bot_id not in global_list_bot_id:
                                 del global_list_threads[bot_id]
+                                cancel_all(bot.account, bot.category, bot.symbol)
                         finally:
                             lock.release()
                         break

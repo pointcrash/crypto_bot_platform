@@ -88,7 +88,7 @@ def set_takes_for_hedge_grid_bot(bot):
                             side='Buy',
                             orderType='Market',
                             qty=qty,
-                            takeProfit=str(round(avg_price * (1 + bot.grid_profit_value / 100), round_number)),
+                            # takeProfit=str(round(avg_price * (1 + bot.grid_profit_value / 100), round_number)),
 
                         )
                         logging(bot,
@@ -115,7 +115,7 @@ def set_takes_for_hedge_grid_bot(bot):
                             side='Sell',
                             orderType='Market',
                             qty=qty,
-                            takeProfit=str(round(avg_price * (1 - bot.grid_profit_value / 100), round_number)),
+                            # takeProfit=str(round(avg_price * (1 - bot.grid_profit_value / 100), round_number)),
 
                         )
                         logging(bot,

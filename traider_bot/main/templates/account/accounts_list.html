@@ -1,19 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
 <div class="container">
-    <div class="row">
-        <div class="col-12">
+    <div class="row text-end">
+        <div class="col-10 mx-auto">
             <h1 class="text-center">Accounts</h1>
-            <a href="{% url 'create_account' %}" class="btn btn-success">Add new account</a>
+            <a href="{% url 'create_account' %}" class="btn btn-primary btn-shadow">Add new account</a>
             <div class="card mt-2 mt-2 border-0 shadow p-3">
-                <table class="table">
+                <table class="table" style="vertical-align: middle">
                     <thead>
                     <tr class=" text-center">
                         <th>Name</th>
                         <th>Is mainnet</th>
-<!--                        <th>Wallet Balance</th>-->
-<!--                        <th>Transfer Balance</th>-->
+                        <th>Balance</th>
                         <th style="color: orange">Edit</th>
                         <th style="color: red">Delete</th>
                     </tr>
@@ -25,9 +31,24 @@
                         <td>{% if account.is_mainnet %}<i class="fa-solid fa-check"></i>{% else %}<i
                                 class="fa-solid fa-xmark"></i>{% endif %}
                         </td>
-<!--                        <td class="border">{{ wb }}</td>-->
+                        <td><button id="{{ account.pk }}" class="get-balance-button btn btn-sm btn-secondary px-3 btn-shadow">Balance</button></td>
+
+                        <!-- Модальное окно для отображения баланса аккаунта -->
+                        <div class="modal" id="balanceModal" tabindex="-1" role="dialog">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title mx-auto">Баланс аккаунта "<span id="accountPkPlaceholder"></span>"</h5>
+                              </div>
+                              <div class="modal-body text-center">
+                                <p id="balanceInfo">Загрузка...</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
 <!--                        <td class="border">{{ tb }}</td>-->
-                        <td><a class="btn btn-sm btn-warning" href="{% url 'edit_account' acc_id=account.pk %}">Edit</a>
+                        <td><a class="btn btn-sm btn-warning px-3 btn-shadow" href="{% url 'edit_account' acc_id=account.pk %}">Edit</a>
                         </td>
                         <td>{% include 'account/delete_account_modal.html' %}</td>
                     </tr>
@@ -38,4 +59,28 @@
         </div>
     </div>
 </div>
+
+
+<script>
+  const buttons = document.querySelectorAll('.get-balance-button');
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      const accountId = button.id;
+      fetch(`/accounts/get_balance/${accountId}/`)
+        .then(response => response.json())
+        .then(data => {
+          const modalTitle = document.getElementById('accountPkPlaceholder');
+          const balanceInfo = document.getElementById('balanceInfo');
+          const accountName = data.name;
+          modalTitle.textContent = accountName;
+          balanceInfo.innerHTML = `Баланс кошелька: <strong>${data.wb}</strong> USDT<br>Доступный баланс: <strong>${data.tb}</strong> USDT`;
+          const balanceModal = new bootstrap.Modal(document.getElementById('balanceModal'));
+          balanceModal.show();
+        })
+        .catch(error => {
+          console.error("Ошибка при получении баланса:", error);
+        });
+    });
+  });
+</script>
 {% endblock %}
