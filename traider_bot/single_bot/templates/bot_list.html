@@ -24,6 +24,7 @@
                     <th>Bot ID</th>
                     <th>Account</th>
                     <th>Symbol</th>
+                    <th>Strategy</th>
                     <th>Side</th>
                     <th>USDT$</th>
                     <th>Is alive</th>
@@ -36,6 +37,7 @@
                     <td>{{ bot.pk }}</td>
                     <td>{{ bot.account }}</td>
                     <td>{{ bot.symbol }}</td>
+                    <td>{{ bot.work_model }}</td>
                     <td>{{ bot.side }}</td>
                     <td>{{ bot.qty }}</td>
                     <td>{% if is_alive %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>

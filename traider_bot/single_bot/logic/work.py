@@ -51,7 +51,8 @@ def bot_work_logic(bot):
                                 del global_list_threads[bot_id]
                                 cancel_all(bot.account, bot.category, bot.symbol)
                         finally:
-                            lock.release()
+                            if lock.locked():
+                                lock.release()
                         break
 
             takes = get_takes(bot)
@@ -75,9 +76,7 @@ def bot_work_logic(bot):
 
                 if type(avg_order) == Order:
                     avg_order.save()
-                    print(avg_order, avg_order.orderLinkId)
                     avg_order = AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
-                    print(avg_order, avg_order.bot, avg_order.order_link_id)
                 else:
                     print(type(avg_order), avg_order)
 
@@ -104,7 +103,6 @@ def bot_work_logic(bot):
                                 is_take=True,
                             )
                             oli_list.append(order.orderLinkId)
-                            logging(bot, f'created take_{i} Price:{price}')
 
                         else:
                             order = Order.objects.create(
@@ -119,7 +117,6 @@ def bot_work_logic(bot):
                             )
 
                             oli_list.append(order.orderLinkId)
-                            logging(bot, f'created take_{i} Price:{price}')
 
                             psn_qty = psn_qty - qty
 
@@ -129,7 +126,8 @@ def bot_work_logic(bot):
 
             lock.acquire()
     finally:
-        lock.release()
+        if lock.locked():
+            lock.release()
 
 
 def get_takes(bot):
