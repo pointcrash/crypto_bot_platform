@@ -120,7 +120,8 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
     lock.acquire()
     try:
         while bot_id in global_list_bot_id:
-            lock.release()
+            if lock.locked():
+                lock.release()
 
             symbol_list = get_list(bot.account, bot.category, bot.symbol)
 
@@ -171,7 +172,8 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
             first_cycle = False
             lock.acquire()
     finally:
-        lock.release()
+        if lock.locked():
+            lock.release()
 
 
 def get_update_symbols():
@@ -202,13 +204,9 @@ def count_decimal_places(number):
 def create_bb_and_avg_obj(bot, position_idx=0):
     if bot.work_model == 'bb':
         symbol_list = get_list(bot.account, bot.category, bot.symbol)
-        print(symbol_list)
         psn_qty = get_qty(symbol_list)[position_idx]
-        print(psn_qty)
         psn_side = get_side(symbol_list)[position_idx]
-        print(psn_side)
         psn_price = get_position_price(symbol_list)[position_idx]
-        print(psn_price)
 
     if bot.work_model == 'grid' and bot.orderType == 'Market':
         bb_obj = None
@@ -255,7 +253,7 @@ def take1_status_check(bot):
     if bot.take1:
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.take1)
         if status == 'Filled':
-            pnl = get_pnl(bot.account, bot.category, bot.symbol)
+            pnl = get_pnl(bot.account, bot.category, bot.symbol)[0]['closedPnl']
             bot.pnl += Decimal(pnl)
             logging(bot, f'take1 filled. P&L: {pnl}')
             bot.take1 = 'Filled'

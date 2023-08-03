@@ -26,7 +26,8 @@ def set_takes(bot, bb_obj, bb_avg_obj):
     lock.acquire()
     try:
         while bot_id in global_list_bot_id:
-            lock.release()
+            if lock.locked():
+                lock.release()
 
             if take2_status_check(bot):
                 if not bot.repeat:
@@ -132,7 +133,18 @@ def set_takes(bot, bb_obj, bb_avg_obj):
                     )
 
             lock.acquire()
+    # except Exception as e:
+    #     print(f'Error {e}')
+    #     lock.acquire()
+    #     try:
+    #         if bot_id in global_list_bot_id:
+    #             global_list_bot_id.remove(bot_id)
+    #             del global_list_threads[bot_id]
+    #     finally:
+    #         if lock.locked():
+    #             lock.release()
     finally:
-        lock.release()
+        if lock.locked():
+            lock.release()
 
 

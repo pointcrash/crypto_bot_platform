@@ -89,11 +89,14 @@ def get_side(symbol_list):
 
 
 def get_list(account, category, symbol):
-    endpoint = "/v5/position/list"
-    method = "GET"
-    params = f"category={category}&symbol={symbol.name}"
-    response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
-    return response['result']['list']
+    try:
+        endpoint = "/v5/position/list"
+        method = "GET"
+        params = f"category={category}&symbol={symbol.name}"
+        response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+        return response['result']['list']
+    except Exception as e:
+        print(e)
 
 
 def get_order_book(account, category, symbol):

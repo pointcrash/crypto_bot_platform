@@ -33,7 +33,8 @@ class BotForm(forms.ModelForm):
                   'qty_kline', 'd', 'auto_avg', 'bb_avg_percent',
                   'deviation_from_lines',
                   'is_percent_deviation_from_lines', 'dfm',
-                  'chw', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat', ]
+                  'chw', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
+                  'grid_avg_value', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
@@ -53,6 +54,7 @@ class BotForm(forms.ModelForm):
             'chw': forms.NumberInput(attrs={'class': 'form-control'}),
             'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
             'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
+            'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'qty': '1st order investments $',
@@ -76,6 +78,7 @@ class BotForm(forms.ModelForm):
             'max_margin': 'Max Margin',
             'time_sleep': 'Request Rate (sec)',
             'repeat': 'Repeat Cycle',
+            'grid_avg_value': 'Two-Sided mode: Profit/Avg Value (%)',
         }
 
     def clean(self):

@@ -130,3 +130,8 @@ class AvgOrder(models.Model):
 class SingleBot(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
     single = models.BooleanField(default=False)
+
+
+class IsTSStart(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    TS = models.BooleanField(default=False)

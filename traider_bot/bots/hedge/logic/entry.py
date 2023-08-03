@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from api_v5 import get_list, get_qty, get_current_price
 from bots.bot_logic import get_quantity_from_price, logging
 from orders.models import Order
@@ -15,10 +17,10 @@ def set_entry_point_by_market_for_hedge(bot):
 
     for side in ['Buy', 'Sell']:
         if side == 'Buy':
-            tp_limit_price = round(current_price * (1 + bot.grid_profit_value / 100), round_number)
+            tp_limit_price = round(current_price * Decimal(1 + bot.grid_avg_value / 100), round_number)
             tp_list.append(tp_limit_price)
         else:
-            tp_limit_price = round(current_price * (1 - bot.grid_profit_value / 100), round_number)
+            tp_limit_price = round(current_price * Decimal(1 - bot.grid_avg_value / 100), round_number)
             tp_list.append(tp_limit_price)
 
         order = Order.objects.create(

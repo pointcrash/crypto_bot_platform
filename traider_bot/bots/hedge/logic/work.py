@@ -4,9 +4,11 @@ from decimal import Decimal
 import os
 import django
 
+from bots.bb_set_takes import set_takes
 from bots.hedge.logic.entry import set_entry_point_by_market_for_hedge
+from bots.models import IsTSStart
 from bots.terminate_bot_logic import terminate_thread
-from single_bot.logic.global_variables import lock, global_list_bot_id
+from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import bot_work_logic
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
@@ -14,7 +16,7 @@ django.setup()
 
 from api_v5 import get_order_status, get_pnl, set_leverage, switch_position_mode, get_list, get_qty, \
     get_position_price, get_current_price
-from bots.bot_logic import count_decimal_places, logging, get_quantity_from_price
+from bots.bot_logic import count_decimal_places, logging, get_quantity_from_price, create_bb_and_avg_obj
 from orders.models import Order
 
 
@@ -39,7 +41,7 @@ def set_takes_for_hedge_grid_bot(bot):
     tp_list = set_entry_point_by_market_for_hedge(bot)
 
     start_time = int(time.time()) * 1000
-    start_pnl_list = []
+    start_pnl_list = get_pnl(bot.account, bot.category, bot.symbol.name, start_time)
     total_pnl = 0
     ml0 = 0
     ml1 = 0
@@ -47,10 +49,21 @@ def set_takes_for_hedge_grid_bot(bot):
     lock.acquire()
     try:
         while bot_id in global_list_bot_id:
-            lock.release()
+            if lock.locked():
+                lock.release()
 
             if flag:
-                bot_work_logic(bot)
+                if bot.work_model == 'bb':
+                    IsTSStart.objects.create(bot=bot, TS=True)
+                    bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+                    set_takes(bot, bb_obj, bb_avg_obj)
+
+                elif bot.work_model == 'grid':
+                    IsTSStart.objects.create(bot=bot, TS=True)
+                    bot_work_logic(bot)
+
+                else:
+                    raise Exception('Ошибка при переходе в односторонний режим')
                 break
 
             time.sleep(bot.time_sleep)
@@ -64,10 +77,6 @@ def set_takes_for_hedge_grid_bot(bot):
                 logging(bot, f'TP IS SUCCESS. Side: {new_pnl_list[0]["side"]} PNL: {round(Decimal(new_pnl_list[0]["closedPnl"]), 2)}')
                 start_pnl_list = new_pnl_list
 
-            # if not qty_list[0] and not qty_list[1]:
-            #     logging(bot, f'Bot finished work. Total PNL: {total_pnl}')
-            #     break
-
             current_price = get_current_price(bot.account, bot.category, bot.symbol)
             if qty_list[0]:
                 margin_after_avg = qty_list[0] * price_list[0] / bot.isLeverage * (1 + bot.bb_avg_percent / 100)
@@ -80,7 +89,7 @@ def set_takes_for_hedge_grid_bot(bot):
                     if not qty_list[1]:
                         qty = get_quantity_from_price(qty_list[0] * price_list[0] / bot.isLeverage, current_price,
                                                       bot.symbol.minOrderQty, bot.isLeverage) * bot.bb_avg_percent / 100
-                        avg_price = (qty_list[0] * price_list[0] + qty * current_price) / (qty_list[0] + qty)
+                        avg_price = Decimal(qty_list[0] * price_list[0] + qty * current_price) / (qty_list[0] + qty)
                         Order.objects.create(
                             bot=bot,
                             category=bot.category,
@@ -92,7 +101,7 @@ def set_takes_for_hedge_grid_bot(bot):
 
                         )
                         logging(bot,
-                                f'position AVG. Side: "Buy". Margin: {round(qty_list[0] * price_list[0] / bot.isLeverage * (1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * (1 + bot.grid_profit_value / 100), round_number)}')
+                                f'position AVG. Side: "Buy". Margin: {round(qty_list[0] * price_list[0] / bot.isLeverage * Decimal(1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * Decimal(1 + bot.grid_profit_value / 100), round_number)}')
 
                         flag = True
 
@@ -107,7 +116,7 @@ def set_takes_for_hedge_grid_bot(bot):
                     if not qty_list[0]:
                         qty = get_quantity_from_price(qty_list[1] * price_list[1] / bot.isLeverage, current_price,
                                                       bot.symbol.minOrderQty, bot.isLeverage) * bot.bb_avg_percent / 100
-                        avg_price = (qty_list[1] * price_list[1] + qty * current_price) / (qty_list[1] + qty)
+                        avg_price = Decimal(qty_list[1] * price_list[1] + qty * current_price) / (qty_list[1] + qty)
                         Order.objects.create(
                             bot=bot,
                             category=bot.category,
@@ -119,12 +128,23 @@ def set_takes_for_hedge_grid_bot(bot):
 
                         )
                         logging(bot,
-                                f'position AVG. Side: "Sell". Margin: {round(qty_list[1] * price_list[1] / bot.isLeverage * (1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * (1 - bot.grid_profit_value / 100), round_number)}')
+                                f'position AVG. Side: "Sell". Margin: {round(qty_list[1] * price_list[1] / bot.isLeverage * Decimal(1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * Decimal(1 - bot.grid_profit_value / 100), round_number)}')
 
                         flag = True
             lock.acquire()
+    # except Exception as e:
+    #     print(f'Error {e}')
+    #     lock.acquire()
+    #     try:
+    #         if bot_id in global_list_bot_id:
+    #             global_list_bot_id.remove(bot_id)
+    #             del global_list_threads[bot_id]
+    #     finally:
+    #         if lock.locked():
+    #             lock.release()
     finally:
-        lock.release()
+        if lock.locked():
+            lock.release()
 
 
 def take_status_check(bot, orderLinkId):
