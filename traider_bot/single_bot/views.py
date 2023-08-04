@@ -126,8 +126,8 @@ def bot_start(request, bot_id):
             else:
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
         else:
-            bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
-            bot_thread = threading.Thread(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
+            # bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+            bot_thread = threading.Thread(target=set_takes, args=(bot,))
     elif bot.work_model == 'grid':
         if bot.side == 'TS':
             if is_ts_start:

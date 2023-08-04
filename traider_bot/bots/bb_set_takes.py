@@ -4,14 +4,14 @@ from decimal import Decimal
 
 from api_v5 import get_current_price, cancel_all, switch_position_mode, set_leverage
 from bots.bot_logic import count_decimal_places, calculation_entry_point, take1_status_check, logging, \
-    take2_status_check
+    take2_status_check, create_bb_and_avg_obj
 from bots.terminate_bot_logic import terminate_thread
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
 
 
-def set_takes(bot, bb_obj, bb_avg_obj):
+def set_takes(bot):
     bot_id = bot.pk
     is_ts_bot = True if bot.side == 'TS' else False
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
@@ -19,6 +19,8 @@ def set_takes(bot, bb_obj, bb_avg_obj):
     if not is_ts_bot:
         switch_position_mode(bot)
         set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
+
+    bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
 
     # fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     # round_number = int(bot.symbol.priceScale)
