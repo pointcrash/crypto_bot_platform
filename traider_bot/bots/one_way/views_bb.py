@@ -67,7 +67,6 @@ def single_bb_bot_detail(request, bot_id):
             if bot.side == 'TS':
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
-                # bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
                 bot_thread = threading.Thread(target=set_takes, args=(bot,))
             bot_thread.start()
 

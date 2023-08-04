@@ -25,6 +25,8 @@ class BBAutoAverage:
 
     def auto_avg(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
+        print(current_price)
+        print(self.bb_obj.ml, self.psn_price)
         if self.psn_side == 'Buy' and self.bb_obj.ml <= self.psn_price:
             if self.channel_width_check(current_price):
                 if self.dfm_check(current_price, self.bb_obj.bl):
@@ -42,12 +44,16 @@ class BBAutoAverage:
             return False
 
     def channel_width_check(self, current_price):
+        print(self.bb_obj.tl - self.bb_obj.bl)
+        print(current_price * Decimal(self.chw) / 100)
         if self.bb_obj.tl - self.bb_obj.bl >= current_price * Decimal(self.chw) / 100:
             return True
         else:
             return False
 
     def dfm_check(self, current_price, bb):
+        print(abs(current_price - self.bb_obj.ml))
+        print(abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100)
         if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
             return True
         else:

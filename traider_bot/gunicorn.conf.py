@@ -13,7 +13,7 @@ from single_bot.logic.work import bot_work_logic
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
-from bots.models import Bot
+from bots.models import Bot, IsTSStart
 
 
 def when_ready(server):
@@ -26,19 +26,29 @@ def when_ready(server):
             for bot_id in bot_id_list:
                 bot = Bot.objects.filter(pk=bot_id).first()
                 if bot:
-                    if bot.side == 'TS':
-                        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-                    elif bot.work_model == 'bb':
-                        position_idx = 0 if bot.side == 'Buy' else 1
-                        bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
-                        bot_thread = threading.Thread(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
-                    else:
-                        bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-                    bot_thread.start()
-
-                    lock.acquire()
-                    global_list_threads[bot_id] = bot_thread
-                    lock.release()
+                    bot_thread = None
+                    is_ts_start = IsTSStart.objects.filter(bot=bot)
+                    if bot.work_model == 'bb':
+                        if bot.side == 'TS':
+                            if is_ts_start:
+                                bot_thread = threading.Thread(target=set_takes, args=(bot,))
+                            else:
+                                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                        else:
+                            bot_thread = threading.Thread(target=set_takes, args=(bot,))
+                    elif bot.work_model == 'grid':
+                        if bot.side == 'TS':
+                            if is_ts_start:
+                                bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+                            else:
+                                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                        else:
+                            bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+                    if bot_thread is not None:
+                        bot_thread.start()
+                        lock.acquire()
+                        global_list_threads[bot_id] = bot_thread
+                        lock.release()
     except Exception as e:
         server.log.info(f"Error starting threads - {e}")
 

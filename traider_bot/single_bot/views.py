@@ -121,8 +121,7 @@ def bot_start(request, bot_id):
     if bot.work_model == 'bb':
         if bot.side == 'TS':
             if is_ts_start:
-                bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
-                bot_thread = threading.Thread(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
+                bot_thread = threading.Thread(target=set_takes, args=(bot,))
             else:
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
         else:
@@ -131,11 +130,11 @@ def bot_start(request, bot_id):
     elif bot.work_model == 'grid':
         if bot.side == 'TS':
             if is_ts_start:
-                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
             else:
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
         else:
-            bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+            bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
 
     if bot_thread is not None:
         bot_thread.start()
