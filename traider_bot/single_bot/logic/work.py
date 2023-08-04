@@ -14,6 +14,7 @@ from single_bot.logic.global_variables import global_list_bot_id, lock, global_l
 def bot_work_logic(bot):
     bot_id = bot.pk
     main_price = 0
+    p = 0
     is_ts_bot = True if bot.side == 'TS' else False
 
     position_idx = get_position_idx(bot.side)
@@ -78,10 +79,13 @@ def bot_work_logic(bot):
                     avg_order.save()
                     avg_order = AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
                 else:
-                    print(type(avg_order), avg_order)
+                    p += 1
+                    if p > 5:
+                        raise Exception("None-type object in AVG_ORDER")
 
                 side = "Buy" if psn_side == "Sell" else "Sell"
-                qty = Decimal(math.floor((psn_qty / bot.grid_take_count) * 10 ** fraction_length) / 10 ** fraction_length)
+                qty = Decimal(
+                    math.floor((psn_qty / bot.grid_take_count) * 10 ** fraction_length) / 10 ** fraction_length)
                 oli_list = []
 
                 for i, take in enumerate(takes, start=1):
@@ -145,7 +149,7 @@ def get_takes(bot):
 
     if not takes:
         takes_to_create = [
-            Take(bot=bot, take_number=i+1) for i in range(bot.grid_take_count)
+            Take(bot=bot, take_number=i + 1) for i in range(bot.grid_take_count)
         ]
         Take.objects.bulk_create(takes_to_create)
         return Take.objects.filter(bot=bot)

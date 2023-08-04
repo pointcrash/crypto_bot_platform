@@ -63,9 +63,12 @@
                         <div class="d-inline mx-1">{{ form.take_on_ml }}</div>
                         {{ form.take_on_ml_percent.label_tag }}
                         {{ form.take_on_ml_percent }}
+                        {{ form.grid_take_count.label_tag }}
+                        {{ form.grid_take_count }}
                     </div>
-                    {{ form.grid_profit_value.label_tag }}
-                    {{ form.grid_profit_value }}
+                    <br>
+                    {{ form.grid_avg_value.label_tag }}
+                    {{ form.grid_avg_value }}
                     <hr>
                     <h4 class="text-center">Bollinger Bands Settings</h4>
                     {{ form.qty_kline.label_tag }}
@@ -94,8 +97,6 @@
                     </div>
                     {{ form.max_margin.label_tag }}
                     {{ form.max_margin }}
-                    {{ form.grid_avg_value.label_tag }}
-                    {{ form.grid_avg_value }}
                     <br>
                     <hr>
                     <div class="col-6">
@@ -127,13 +128,13 @@
                         </div>
                         <div class="modal-footer">
                             <a type="button"
-                               href="{% url 'delete_bot' bot_id=bot.pk event_number=1 redirect_to='one_way_bb' %}"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=1 %}"
                                class="btn btn-warning col-12">Delete and stop bot only</a>
                             <a type="button"
-                               href="{% url 'delete_bot' bot_id=bot.pk event_number=2 redirect_to='one_way_bb' %}"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
                                class="btn btn-warning col-12">Delete bot with cancel all orders</a>
                             <a type="button"
-                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 redirect_to='one_way_bb' %}"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"
                                class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
                                 Market
                             </a>

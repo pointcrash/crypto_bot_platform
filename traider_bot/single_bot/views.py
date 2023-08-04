@@ -10,7 +10,7 @@ from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orde
 from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
 from bots.forms import GridBotForm
 from bots.bot_logic_grid import set_takes_for_grid_bot
-from bots.models import Bot, Process, AvgOrder, Take, SingleBot
+from bots.models import Bot, Process, AvgOrder, Take, SingleBot, IsTSStart
 from django.contrib import messages
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
@@ -107,6 +107,8 @@ def bot_start(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
     avg_order = AvgOrder.objects.filter(bot=bot).first()
     takes = Take.objects.filter(bot=bot)
+    bot_thread = None
+    is_ts_start = IsTSStart.objects.filter(bot=bot)
     if takes:
         takes.delete()
     if avg_order:
@@ -116,18 +118,30 @@ def bot_start(request, bot_id):
     if check_thread_alive(bot.pk):
         stop_bot_with_cancel_orders(bot)
 
-    if bot.side == 'TS':
-        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-    elif bot.work_model == 'bb':
-        position_idx = 0 if bot.side == 'Buy' else 1
-        bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
-        bot_thread = threading.Thread(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
-    else:
-        bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-    bot_thread.start()
-    lock.acquire()
-    global_list_threads[bot.pk] = bot_thread
-    lock.release()
+    if bot.work_model == 'bb':
+        if bot.side == 'TS':
+            if is_ts_start:
+                bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+                bot_thread = threading.Thread(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
+            else:
+                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+        else:
+            bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+            bot_thread = threading.Thread(target=set_takes, args=(bot, bb_obj, bb_avg_obj))
+    elif bot.work_model == 'grid':
+        if bot.side == 'TS':
+            if is_ts_start:
+                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+            else:
+                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+        else:
+            bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+
+    if bot_thread is not None:
+        bot_thread.start()
+        lock.acquire()
+        global_list_threads[bot.pk] = bot_thread
+        lock.release()
     return redirect('single_bot_list')
 
 
