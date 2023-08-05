@@ -1,6 +1,7 @@
 from api_v5 import get_current_price
 from decimal import Decimal, ROUND_DOWN
 
+from bots.bot_logic import logging
 from orders.models import Order
 
 
@@ -25,12 +26,14 @@ class BBAutoAverage:
 
     def auto_avg(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
-        print(current_price)
-        print(self.bb_obj.ml, self.psn_price)
         if self.psn_side == 'Buy' and self.bb_obj.ml <= self.psn_price:
+            logging(self.bot, 'Проверка усреднения этап 1')
             if self.channel_width_check(current_price):
+                logging(self.bot, 'Проверка усреднения этап 2')
                 if self.dfm_check(current_price, self.bb_obj.bl):
+                    logging(self.bot, 'Проверка усреднения этап 3')
                     if self.margin_limit_check():
+                        logging(self.bot, 'Проверка усреднения этап 4')
                         self.to_average(current_price)
                         return True
             return False
@@ -44,16 +47,14 @@ class BBAutoAverage:
             return False
 
     def channel_width_check(self, current_price):
-        print(self.bb_obj.tl - self.bb_obj.bl)
-        print(current_price * Decimal(self.chw) / 100)
+        logging(self.bot, f'channel_width_check: {self.bb_obj.tl - self.bb_obj.bl} >= {current_price * Decimal(self.chw) / 100}')
         if self.bb_obj.tl - self.bb_obj.bl >= current_price * Decimal(self.chw) / 100:
             return True
         else:
             return False
 
     def dfm_check(self, current_price, bb):
-        print(abs(current_price - self.bb_obj.ml))
-        print(abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100)
+        logging(self.bot, f'dfm_check: {abs(current_price - self.bb_obj.ml)} >= {abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100}')
         if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
             return True
         else:
@@ -71,7 +72,7 @@ class BBAutoAverage:
     def to_average(self, current_price):
         psn_currency_amount = self.psn_price * self.psn_qty
         avg_currency_amount = Decimal(psn_currency_amount * self.bot.bb_avg_percent / 100)
-        qty = get_quantity_from_price(avg_currency_amount, current_price, self.bot.minOrderQty)
+        qty = get_quantity_from_price(avg_currency_amount, current_price, self.bot.minOrderQty, self.bot.isLeverage)
 
         avg_order = Order.objects.create(
             bot=self.bot,
@@ -81,7 +82,8 @@ class BBAutoAverage:
             orderType="Market",
             qty=qty
         )
+        logging(self.bot, 'Ордер резмещен')
 
 
-def get_quantity_from_price(qty_USDT, price, minOrderQty):
-    return (Decimal(str(qty_USDT)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
+def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
+    return (Decimal(str(qty_USDT * leverage)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)

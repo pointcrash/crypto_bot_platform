@@ -3,7 +3,7 @@ import time
 from decimal import Decimal
 
 from api_v5 import switch_position_mode, set_leverage, cancel_all
-from bots.bot_logic import count_decimal_places, logging
+from bots.bot_logic import count_decimal_places, logging, bot_stats_clear
 from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder
 from orders.models import Order
@@ -34,27 +34,11 @@ def bot_work_logic(bot):
 
             takes = get_takes(bot)
             if not new_cycle:
-                for take in takes:
-                    if not take.is_filled:
-                        take_status = take_status_check(bot, take)
-                        if take_status:
-                            take.is_filled = take_status
-                            logging(bot, f'take_{take.take_number} is filled.')
-                Take.objects.bulk_update(takes, ['is_filled'])
+                check_takes_is_filled(bot, takes)
 
                 if all(take.is_filled for take in takes):
-                    logging(bot, f'bot finished cycle. P&L: {bot.pnl}')
-                    if not bot.repeat:
-                        lock.acquire()
-                        try:
-                            global_list_bot_id.remove(bot_id)
-                            if bot_id not in global_list_bot_id:
-                                del global_list_threads[bot_id]
-                                cancel_all(bot.account, bot.category, bot.symbol)
-                        finally:
-                            if lock.locked():
-                                lock.release()
-                        break
+                    actions_after_end_cycle(bot)
+                    continue
 
             takes = get_takes(bot)
 
@@ -131,6 +115,7 @@ def bot_work_logic(bot):
             lock.acquire()
     except Exception as e:
         print(f'Error {e}')
+        logging(bot, f'Error {e}')
         lock.acquire()
         try:
             if bot_id in global_list_bot_id:
@@ -189,3 +174,41 @@ def check_change_psn_price(bot, main_price, psn_price):
             avg_order.delete()
             is_back = True
     return main_price, is_back
+
+
+def actions_after_end_cycle(bot):
+    bot_id = bot.pk
+    logging(bot, f'bot finished cycle. P&L: {bot.pnl}')
+    if not bot.repeat:
+        lock.acquire()
+        try:
+            global_list_bot_id.remove(bot_id)
+            if bot_id not in global_list_bot_id:
+                del global_list_threads[bot_id]
+                cancel_all(bot.account, bot.category, bot.symbol)
+        finally:
+            if lock.locked():
+                lock.release()
+        return False
+    else:
+        cancel_all(bot.account, bot.category, bot.symbol)
+        takes = get_takes(bot)
+        avg_order = AvgOrder.objects.filter(bot=bot).first()
+        for take in takes:
+            take.order_link_id = ''
+            take.is_filled = False
+        Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
+        avg_order.delete()
+        bot_stats_clear(bot)
+        logging(bot, 'New cycle start')
+        return True
+
+
+def check_takes_is_filled(bot, takes):
+    for take in takes:
+        if not take.is_filled:
+            take_status = take_status_check(bot, take)
+            if take_status:
+                take.is_filled = take_status
+                logging(bot, f'take_{take.take_number} is filled.')
+    Take.objects.bulk_update(takes, ['is_filled'])

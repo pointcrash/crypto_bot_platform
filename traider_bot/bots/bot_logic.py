@@ -136,20 +136,12 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                     logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
 
                 if bb_avg_obj:
-                    print('price', bb_avg_obj.psn_price)
-                    print('side', bb_avg_obj.psn_side)
-                    print('qty', bb_avg_obj.psn_qty)
                     bb_avg_obj.psn_price = psn_price
                     bb_avg_obj.psn_side = psn_side
                     bb_avg_obj.psn_qty = psn_qty
-                    print('price', bb_avg_obj.psn_price)
-                    print('side', bb_avg_obj.psn_side)
-                    print('qty', bb_avg_obj.psn_qty)
 
                 if bot.auto_avg:
-                    print(bot.auto_avg)
                     if bot.work_model == "bb" and bb_avg_obj is not None:
-                        print(bb_avg_obj)
                         if bb_avg_obj.auto_avg():
                             symbol_list = get_list(bot.account, bot.category, bot.symbol)
                             logging(bot,
@@ -273,11 +265,18 @@ def take2_status_check(bot):
     if bot.take2:
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.take2)
         if status == 'Filled':
-            pnl = get_pnl(bot.account, bot.category, bot.symbol)
+            pnl = get_pnl(bot.account, bot.category, bot.symbol)[0]['closedPnl']
             bot.pnl += Decimal(pnl)
             logging(bot, f'take2 filled. P&L: {pnl}')
-            bot.take2 = ''
+            bot.take2 = 'Filled'
             bot.save()
             return True
 
-# get_symbol_set()
+
+def bot_stats_clear(bot):
+    bot.take1 = ''
+    bot.take2 = ''
+    bot.entry_order_by = ''
+    bot.entry_order_sell = ''
+    bot.pnl = 0
+    bot.save()

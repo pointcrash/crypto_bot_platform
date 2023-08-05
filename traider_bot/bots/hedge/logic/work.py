@@ -132,16 +132,17 @@ def set_takes_for_hedge_grid_bot(bot):
 
                         flag = True
             lock.acquire()
-    # except Exception as e:
-    #     print(f'Error {e}')
-    #     lock.acquire()
-    #     try:
-    #         if bot_id in global_list_bot_id:
-    #             global_list_bot_id.remove(bot_id)
-    #             del global_list_threads[bot_id]
-    #     finally:
-    #         if lock.locked():
-    #             lock.release()
+    except Exception as e:
+        print(f'Error {e}')
+        logging(bot, f'Error {e}')
+        lock.acquire()
+        try:
+            if bot_id in global_list_bot_id:
+                global_list_bot_id.remove(bot_id)
+                del global_list_threads[bot_id]
+        finally:
+            if lock.locked():
+                lock.release()
     finally:
         if lock.locked():
             lock.release()

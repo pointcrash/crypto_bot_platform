@@ -99,6 +99,8 @@ class Bot(models.Model):
 
     # def save(self, *args, **kwargs):
     #     super().save(*args, **kwargs)
+    class Meta:
+        unique_together = ['account', 'symbol']
 
     def __str__(self):
         return self.symbol.name
