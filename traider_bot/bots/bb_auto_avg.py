@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from api_v5 import get_current_price
 from decimal import Decimal, ROUND_DOWN
 
-from bots.bot_logic import logging
+from bots.models import Log
 from orders.models import Order
 
 
@@ -87,3 +89,10 @@ class BBAutoAverage:
 
 def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
     return (Decimal(str(qty_USDT * leverage)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
+
+
+def logging(bot, text):
+    bot_info = f'Bot {bot.pk} {bot.symbol.name} {bot.side} {bot.interval}'
+    date = datetime.now().replace(microsecond=0)
+    in_time = f'{date.time()} {date.date()}'
+    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time}')

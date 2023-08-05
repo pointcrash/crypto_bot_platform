@@ -74,7 +74,7 @@ def single_bb_bot_detail(request, bot_id):
             global_list_threads[bot.pk] = bot_thread
             lock.release()
 
-            return redirect('one_way_bb_bots_list')
+            return redirect('single_bot_list')
     else:
         form = BotForm(request=request, instance=bot)  # Передаем экземпляр модели в форму
 

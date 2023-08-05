@@ -167,6 +167,8 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
 
             if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)
+                tl = bb_obj.tl
+                bl = bb_obj.bl
                 set_entry_point(bot, tl, bl)
 
             first_cycle = False

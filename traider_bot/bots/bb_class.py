@@ -37,23 +37,23 @@ class BollingerBands:
     @property
     def closePrice_list(self):
         closePrice_list = []
-        for i in self.get_kline():
+        klines = self.get_kline()
+        for i in klines:
             closePrice_list.append(Decimal(i[4]))
         return closePrice_list
 
     @property
     def ml(self):
-        return round(Decimal(sum(self.closePrice_list) / len(self.closePrice_list)), self.priceScale)
+        return round(Decimal(str(sum(self.closePrice_list) / len(self.closePrice_list))), self.priceScale)
 
     @property
     def std_dev(self):
-        return Decimal(statistics.stdev(self.closePrice_list))
+        return Decimal(str(statistics.stdev(self.closePrice_list)))
 
     @property
     def tl(self):
-
-        return round(Decimal(self.ml + (self.d * self.std_dev)), self.priceScale)
+        return round(Decimal(str(self.ml + (self.d * self.std_dev))), self.priceScale)
 
     @property
     def bl(self):
-        return round(Decimal(self.ml - (self.d * self.std_dev)), self.priceScale)
+        return round(Decimal(str(self.ml - (self.d * self.std_dev))), self.priceScale)

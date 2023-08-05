@@ -44,6 +44,8 @@ def set_takes(bot):
             if not first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)
 
+                tl = bb_obj.tl
+                bl = bb_obj.bl
                 side = "Buy" if psn_side == "Sell" else "Sell"
 
                 qty = psn_qty
