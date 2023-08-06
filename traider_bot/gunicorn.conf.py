@@ -57,6 +57,15 @@ def when_ready(server):
 
 
 def worker_exit(server, worker):
+    try:
+        os.remove("bot_id.pkl")
+        print("Файл успешно удален.")
+    except FileNotFoundError:
+        print("Файл не найден.")
+    except PermissionError:
+        print("Отсутствуют права доступа для удаления файла.")
+    except Exception as e:
+        print(f"Ошибка при удалении файла: {e}")
     lock.acquire()
     try:
         if global_list_threads:

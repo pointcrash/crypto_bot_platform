@@ -89,6 +89,7 @@ class BotForm(forms.ModelForm):
         is_percent_deviation_from_lines = cleaned_data.get('is_percent_deviation_from_lines')
         symbol = cleaned_data.get('symbol')
         qty = cleaned_data.get('qty')
+        leverage = cleaned_data.get('isLeverage')
 
         if qty is None:
             raise forms.ValidationError("Invalid '1st order investments' value. Only whole numbers")
@@ -100,9 +101,13 @@ class BotForm(forms.ModelForm):
         #     if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
         #         raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
 
-        if qty < Decimal(symbol.minPrice) or qty > Decimal(symbol.maxPrice):
+        if qty < Decimal(symbol.minOrderQty) or qty > Decimal(symbol.maxOrderQty):
             raise forms.ValidationError(
-                f"Invalid '1st order investments' value: \nmin value = {symbol.minOrderQty},\n max value = {symbol.maxOrderQty}")
+                f"Допустимые значения '1st order investment': min = {symbol.minOrderQty}, max = {symbol.maxOrderQty}")
+
+        if leverage > symbol.maxLeverage or leverage < symbol.minLeverage:
+            raise forms.ValidationError(
+                f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
 
         return cleaned_data
 
@@ -190,12 +195,13 @@ class GridBotForm(forms.ModelForm):
         orderType = cleaned_data.get('orderType')
         auto_avg = cleaned_data.get('auto_avg')
         margin = cleaned_data.get('max_margin')
+        leverage = cleaned_data.get('isLeverage')
 
         if not margin and auto_avg:
-            raise forms.ValidationError("Invalid 'Max Margin' value")
+            raise forms.ValidationError("Значение 'Max Margin' не может быть пустым")
 
         if qty is None:
-            raise forms.ValidationError("Invalid '1st order investments' value. Only whole numbers")
+            raise forms.ValidationError("Значение '1st order investments' неверно. Поле не может быть пустым или иметь дробные значения")
 
         if order_type == 'Market' and side == 'Auto':
             raise forms.ValidationError("Invalid combination: orderType - 'Market' cannot have side - 'Auto'.")
@@ -207,9 +213,13 @@ class GridBotForm(forms.ModelForm):
         # elif not deviation_from_lines and orderType == "Limit":
         #     raise forms.ValidationError("If 'Order Type' - Limit, '± BB Deviation' must be filled")
 
-        if qty < Decimal(symbol.minPrice) or qty > Decimal(symbol.maxPrice):
+        if qty < Decimal(symbol.minOrderQty) or qty > Decimal(symbol.maxOrderQty):
             raise forms.ValidationError(
-                f"Invalid '1st order investments' value: min value = {symbol.minOrderQty}, max value = {symbol.maxOrderQty}")
+                f"Допустимые значения '1st order investment': min = {symbol.minOrderQty}, max = {symbol.maxOrderQty}")
+
+        if leverage > symbol.maxLeverage or leverage < symbol.minLeverage:
+            raise forms.ValidationError(
+                f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
 
         return cleaned_data
 

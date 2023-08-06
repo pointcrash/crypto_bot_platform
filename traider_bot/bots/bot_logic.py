@@ -181,9 +181,18 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
 def get_update_symbols():
     symbol_set = get_symbol_set()
     for symbol in symbol_set:
-        try:
-            coin = Symbol.objects.get(name=symbol[0])
-        except Symbol.DoesNotExist:
+        coin = Symbol.objects.filter(name=symbol[0]).first()
+        if coin:
+            coin.priceScale = symbol[1]
+            coin.minLeverage = symbol[2]
+            coin.maxLeverage = symbol[3]
+            coin.leverageStep = symbol[4]
+            coin.minPrice = symbol[5]
+            coin.maxPrice = symbol[6]
+            coin.minOrderQty = symbol[7]
+            coin.maxOrderQty = symbol[8]
+            coin.save()
+        else:
             Symbol.objects.create(
                 name=symbol[0],
                 priceScale=symbol[1],
