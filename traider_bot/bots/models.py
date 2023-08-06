@@ -90,9 +90,12 @@ class Bot(models.Model):
     firs_take_is_done = models.BooleanField(default=False)
 
     entry_order_sell = models.CharField(blank=True, null=True)
+    entry_order_sell_amount = models.DecimalField(max_digits=10, decimal_places=10, blank=True, null=True)
     entry_order_by = models.CharField(blank=True, null=True)
+    entry_order_by_amount = models.DecimalField(max_digits=10, decimal_places=10, blank=True, null=True)
     take1 = models.CharField(blank=True, null=True)
     take2 = models.CharField(blank=True, null=True)
+    take2_amount = models.DecimalField(max_digits=10, decimal_places=10, blank=True, null=True)
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
 
     repeat = models.BooleanField(default=False)
@@ -137,3 +140,4 @@ class SingleBot(models.Model):
 class IsTSStart(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
     TS = models.BooleanField(default=False)
+

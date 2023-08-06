@@ -105,7 +105,7 @@ class BotForm(forms.ModelForm):
             raise forms.ValidationError(
                 f"Допустимые значения '1st order investment': min = {symbol.minOrderQty}, max = {symbol.maxOrderQty}")
 
-        if leverage > symbol.maxLeverage or leverage < symbol.minLeverage:
+        if leverage > Decimal(symbol.maxLeverage) or leverage < Decimal(symbol.minLeverage):
             raise forms.ValidationError(
                 f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
 
@@ -217,7 +217,7 @@ class GridBotForm(forms.ModelForm):
             raise forms.ValidationError(
                 f"Допустимые значения '1st order investment': min = {symbol.minOrderQty}, max = {symbol.maxOrderQty}")
 
-        if leverage > symbol.maxLeverage or leverage < symbol.minLeverage:
+        if leverage > Decimal(symbol.maxLeverage) or leverage < Decimal(symbol.minLeverage):
             raise forms.ValidationError(
                 f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
 

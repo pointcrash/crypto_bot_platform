@@ -158,6 +158,18 @@ def get_order_status(account, category, symbol, orderLinkId):
         return "Order does not exist"
 
 
+def get_order_leaves_qty(account, category, symbol, orderLinkId):
+    endpoint = "/v5/order/realtime"
+    method = "GET"
+    params = f"category={category}&symbol={symbol}&orderLinkId={orderLinkId}"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    try:
+        print(response['result']['list'][0]['leavesQty'])
+        return response['result']['list'][0]['leavesQty']
+    except:
+        return "Order does not exist"
+
+
 def get_pnl(account, category, symbol, start_time=0):
     endpoint = "/v5/position/closed-pnl"
     method = "GET"
@@ -179,7 +191,7 @@ def set_leverage(account, category, symbol, leverage):
         'sellLeverage': str(leverage),
     }
     params = json.dumps(params)
-    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    json.loads(HTTP_Request(account, endpoint, method, params))
 
 
 def get_balance(account):

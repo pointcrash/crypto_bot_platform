@@ -75,7 +75,7 @@ class BBAutoAverage:
     def to_average(self, current_price):
         psn_currency_amount = self.psn_price * self.psn_qty
         avg_currency_amount = Decimal(psn_currency_amount * self.bot.bb_avg_percent / 100)
-        qty = get_quantity_from_price(avg_currency_amount, current_price, self.bot.minOrderQty, self.bot.isLeverage)
+        qty = get_quantity_from_price(avg_currency_amount, current_price, self.bot.symbol.minOrderQty, self.bot.isLeverage)
 
         avg_order = Order.objects.create(
             bot=self.bot,

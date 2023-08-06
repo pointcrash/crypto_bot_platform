@@ -15,7 +15,7 @@ from bots.bb_auto_avg import BBAutoAverage
 from bots.bb_class import BollingerBands
 from bots.models import Symbol, Log, AvgOrder
 from api_v5 import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
-    get_symbol_set, get_order_status, get_pnl, switch_position_mode, set_leverage
+    get_symbol_set, get_order_status, get_pnl, switch_position_mode, set_leverage, get_order_leaves_qty
 from orders.models import Order
 
 
@@ -132,8 +132,15 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 psn_qty = get_qty(symbol_list)[position_idx]
                 psn_side = get_side(symbol_list)[position_idx]
                 psn_price = get_position_price(symbol_list)[position_idx]
+
                 if entry_order_status_check(bot):
                     logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
+                else:
+                    entry_order_buy_in_addition(bot)
+
+                bot.entry_order_by = ''
+                bot.entry_order_sell = ''
+                bot.save()
 
                 if bb_avg_obj:
                     bb_avg_obj.psn_price = psn_price
@@ -246,16 +253,43 @@ def entry_order_status_check(bot):
     if bot.entry_order_by:
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_by)
         if status == 'Filled':
-            bot.entry_order_by = ''
-            bot.save()
             return True
 
     if bot.entry_order_sell:
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_sell)
         if status == 'Filled':
-            bot.entry_order_sell = ''
-            bot.save()
             return True
+
+
+def entry_order_buy_in_addition(bot):
+    if bot.entry_order_by:
+        status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_by)
+        if status == 'PartiallyFilled':
+            entry_order_by_amount = Decimal(get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_by))
+            order = Order.objects.create(
+                bot=bot,
+                category=bot.category,
+                symbol=bot.symbol.name,
+                side='Buy',
+                orderType="Market",
+                qty=entry_order_by_amount
+            )
+            logging(bot, f'Позиция докупилась на {entry_order_by_amount}')
+
+    if bot.entry_order_sell:
+        status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_sell)
+        if status == 'PartiallyFilled':
+            entry_order_sell_amount = Decimal(get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_sell))
+            order = Order.objects.create(
+                bot=bot,
+                category=bot.category,
+                symbol=bot.symbol.name,
+                side='Sell',
+                orderType="Market",
+                qty=entry_order_sell_amount
+            )
+            logging(bot, f'Позиция докупилась на {entry_order_sell_amount}')
+
 
 
 def take1_status_check(bot):
@@ -268,6 +302,15 @@ def take1_status_check(bot):
             bot.pnl += Decimal(pnl)
             logging(bot, f'take1 filled. P&L: {pnl}')
             bot.take1 = 'Filled'
+            bot.save()
+            return True
+
+
+def take1_leaves_qty_check(bot):
+    if bot.take1 and bot.take1 != 'Filled':
+        status = get_order_status(bot.account, bot.category, bot.symbol, bot.take1)
+        if status == 'PartiallyFilled':
+            bot.take2_amount = Decimal(get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.take1))
             bot.save()
             return True
 

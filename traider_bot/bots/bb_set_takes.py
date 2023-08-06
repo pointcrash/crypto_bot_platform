@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from api_v5 import cancel_all, switch_position_mode, set_leverage
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
-    take2_status_check, create_bb_and_avg_obj, bot_stats_clear
+    take2_status_check, create_bb_and_avg_obj, bot_stats_clear, take1_leaves_qty_check
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
@@ -83,6 +83,8 @@ def set_takes(bot):
                         bot.save()
 
                     else:
+                        if take1_leaves_qty_check(bot):
+                            qty_ml = bot.take2_amount
                         take1 = Order.objects.create(
                             bot=bot,
                             category=bot.category,
