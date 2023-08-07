@@ -29,13 +29,13 @@ class BBAutoAverage:
     def auto_avg(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
         if self.psn_side == 'Buy' and self.bb_obj.ml <= self.psn_price:
-            logging(self.bot, 'Проверка усреднения этап 1')
+            # logging(self.bot, 'Проверка усреднения этап 1')
             if self.channel_width_check(current_price):
-                logging(self.bot, 'Проверка усреднения этап 2')
+                # logging(self.bot, 'Проверка усреднения этап 2')
                 if self.dfm_check(current_price, self.bb_obj.bl):
-                    logging(self.bot, 'Проверка усреднения этап 3')
+                    # logging(self.bot, 'Проверка усреднения этап 3')
                     if self.margin_limit_check():
-                        logging(self.bot, 'Проверка усреднения этап 4')
+                        # logging(self.bot, 'Проверка усреднения этап 4')
                         self.to_average(current_price)
                         return True
             return False
@@ -49,14 +49,14 @@ class BBAutoAverage:
             return False
 
     def channel_width_check(self, current_price):
-        logging(self.bot, f'channel_width_check: {self.bb_obj.tl - self.bb_obj.bl} >= {current_price * Decimal(self.chw) / 100}')
+        # logging(self.bot, f'channel_width_check: {self.bb_obj.tl - self.bb_obj.bl} >= {current_price * Decimal(self.chw) / 100}')
         if self.bb_obj.tl - self.bb_obj.bl >= current_price * Decimal(self.chw) / 100:
             return True
         else:
             return False
 
     def dfm_check(self, current_price, bb):
-        logging(self.bot, f'dfm_check: {abs(current_price - self.bb_obj.ml)} >= {abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100}')
+        # logging(self.bot, f'dfm_check: {abs(current_price - self.bb_obj.ml)} >= {abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100}')
         if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
             return True
         else:
