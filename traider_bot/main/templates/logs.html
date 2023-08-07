@@ -7,7 +7,7 @@
             <h1 class="text-center">Logs</h1>
             <h5 class="text-center text-muted">Bot {{ bot }}</h5>
             {% if bot.work_model == 'bb' %}
-            <a href="#" class="btn btn-warning">Edit Bot</a>
+            <a href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% else %}
             <a href="{% url 'single_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% endif %}

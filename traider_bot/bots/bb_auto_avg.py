@@ -63,11 +63,11 @@ class BBAutoAverage:
             return False
 
     def margin_limit_check(self):
-        psn_currency_amount = self.psn_price * self.psn_qty
+        psn_currency_amount = self.psn_price * self.psn_qty / self.bot.isLeverage
         avg_currency_amount = psn_currency_amount * self.bot.bb_avg_percent / 100
 
         if psn_currency_amount + avg_currency_amount > self.max_margin:
-            logging(self.bot,f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}')
+            logging(self.bot, f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {psn_currency_amount + avg_currency_amount}')
             return False
         else:
             return True
@@ -85,7 +85,7 @@ class BBAutoAverage:
             orderType="Market",
             qty=qty
         )
-        logging(self.bot, 'Ордер резмещен')
+        logging(self.bot, 'Усредняющий ордер резмещен')
 
 
 def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
