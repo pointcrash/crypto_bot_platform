@@ -43,7 +43,7 @@ def set_takes(bot):
                 if not all(order_placement_verification(bot, order_id) for order_id in
                            [bot.take1, bot.take2]) or not all(check_order_placement_time(bot, order_id) for order_id in
                                                               [bot.take1, bot.take2]):
-                    if bot.take1 != 'Filled':
+                    if not take1_status_check(bot):
                         bot.take1, bot.take2 = '', ''
                         bot.save()
                     else:

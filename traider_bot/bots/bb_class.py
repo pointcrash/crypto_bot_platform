@@ -29,7 +29,7 @@ class BollingerBands:
             return self.kline_list
         endpoint = "/v5/market/kline"
         method = "GET"
-        params = f"category={self.category}&symbol={self.symbol}&interval={self.interval}&limit={self.qty_cline}"
+        params = f"category={self.category}&symbol={self.symbol}&interval={self.interval}&limit={self.qty_cline+1}"
         response = json.loads(HTTP_Request(self.account, endpoint, method, params, "Cline"))
         self.kline_list = response["result"]["list"]
         return response["result"]["list"]
@@ -38,13 +38,13 @@ class BollingerBands:
     def closePrice_list(self):
         closePrice_list = []
         klines = self.get_kline()
-        for i in klines:
+        for i in klines[:-1]:
             closePrice_list.append(Decimal(i[4]))
         return closePrice_list
 
     @property
     def ml(self):
-        return round(Decimal(str(sum(self.closePrice_list) / len(self.closePrice_list))), self.priceScale)
+        return round(Decimal(str(sum(self.closePrice_list) / self.qty_cline)), self.priceScale)
 
     @property
     def std_dev(self):

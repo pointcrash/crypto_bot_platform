@@ -96,7 +96,7 @@ def get_list(account, category, symbol):
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
         return response['result']['list']
     except Exception as e:
-        print(e)
+        return None
 
 
 def get_order_book(account, category, symbol):
