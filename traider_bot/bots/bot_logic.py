@@ -369,6 +369,8 @@ def bot_stats_clear(bot):
 
 
 def order_placement_verification(bot, order_id):
+    if order_id == 'Filled':
+        return True
     status = get_order_status(bot.account, bot.category, bot.symbol, order_id)
     if status == "Order not found":
         return False
