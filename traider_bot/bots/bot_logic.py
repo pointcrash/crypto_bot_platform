@@ -15,7 +15,8 @@ from bots.bb_auto_avg import BBAutoAverage
 from bots.bb_class import BollingerBands
 from bots.models import Symbol, Log, AvgOrder, Bot
 from api_v5 import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
-    get_symbol_set, get_order_status, get_pnl, switch_position_mode, set_leverage, get_order_leaves_qty
+    get_symbol_set, get_order_status, get_pnl, switch_position_mode, set_leverage, get_order_leaves_qty, \
+    get_order_created_time
 from orders.models import Order
 
 
@@ -171,19 +172,21 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
 
             if bot.side == 'FB':
                 if not all(order_placement_verification(bot, order_id) for order_id in
-                           [bot.entry_order_by, bot.entry_order_sell]):
+                           [bot.entry_order_by, bot.entry_order_sell]) or not all(
+                            check_order_placement_time(bot, order_id) for order_id in
+                            [bot.entry_order_by, bot.entry_order_sell]):
                     bot.entry_order_by, bot.entry_order_sell = '', ''
                     bot.save()
                     first_cycle = True
             elif bot.side == 'Sell':
                 order_id = bot.entry_order_sell
-                if not order_placement_verification(bot, order_id):
+                if not order_placement_verification(bot, order_id) or not check_order_placement_time(bot, order_id):
                     bot.entry_order_sell = ''
                     bot.save()
                     first_cycle = True
             elif bot.side == 'Buy':
                 order_id = bot.entry_order_by
-                if not order_placement_verification(bot, order_id):
+                if not order_placement_verification(bot, order_id) or not check_order_placement_time(bot, order_id):
                     bot.entry_order_by = ''
                     bot.save()
                     first_cycle = True
@@ -364,6 +367,20 @@ def order_placement_verification(bot, order_id):
         return True
 
 
+def check_order_placement_time(bot, order_id):
+    order_time_create = get_order_created_time(bot.account, bot.category, bot.symbol, order_id)
+    if order_time_create == "Order not found":
+        return False
+    else:
+        order_time_create = datetime.fromtimestamp(int(order_time_create) // 1000)
+        current_time = datetime.now()
+        time_difference = current_time - order_time_create
+        time_difference_in_minutes = time_difference.total_seconds() / 60
+
+        if int(time_difference_in_minutes) <= int(bot.interval):
+            return True
+
+
 def clean_and_return_bot_object(bot_id):
     bot_values_dict = Bot.objects.filter(pk=bot_id).values().first()
     bot = Bot(
@@ -397,6 +414,3 @@ def clean_and_return_bot_object(bot_id):
     )
 
     return bot
-
-
-

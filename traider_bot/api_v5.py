@@ -158,6 +158,17 @@ def get_order_status(account, category, symbol, orderLinkId):
         return "Order not found"
 
 
+def get_order_created_time(account, category, symbol, orderLinkId):
+    endpoint = "/v5/order/realtime"
+    method = "GET"
+    params = f"category={category}&symbol={symbol}&orderLinkId={orderLinkId}"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    try:
+        return response['result']['list'][0]['createdTime']
+    except:
+        return "Order not found"
+
+
 def get_order_leaves_qty(account, category, symbol, orderLinkId):
     endpoint = "/v5/order/realtime"
     method = "GET"
