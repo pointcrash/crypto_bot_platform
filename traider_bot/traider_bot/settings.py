@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'main',
     'bots',
     'single_bot',
+    'tg_bot',
 ]
 
 MIDDLEWARE = [

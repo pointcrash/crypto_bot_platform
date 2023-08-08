@@ -43,8 +43,12 @@ def set_takes(bot):
                 if not all(order_placement_verification(bot, order_id) for order_id in
                            [bot.take1, bot.take2]) or not all(check_order_placement_time(bot, order_id) for order_id in
                                                               [bot.take1, bot.take2]):
-                    bot.take1, bot.take2 = '', ''
-                    bot.save()
+                    if bot.take1 != 'Filled':
+                        bot.take1, bot.take2 = '', ''
+                        bot.save()
+                    else:
+                        bot.take2 = ''
+                        bot.save()
                     first_cycle = False
             else:
                 if not order_placement_verification(bot, bot.take2) or not check_order_placement_time(bot, bot.take2):
@@ -68,16 +72,10 @@ def set_takes(bot):
 
                 if side == "Buy":
                     ml = bb_obj.ml
-                    if bot.is_percent_deviation_from_lines:
-                        exit_line = bl - bl * bot.deviation_from_lines / 100
-                    else:
-                        exit_line = bl - bot.deviation_from_lines
+                    exit_line = bl
                 else:
                     ml = bb_obj.ml
-                    if bot.is_percent_deviation_from_lines:
-                        exit_line = tl + tl * bot.deviation_from_lines / 100
-                    else:
-                        exit_line = tl + bot.deviation_from_lines
+                    exit_line = tl
 
                 if bot.take_on_ml:
                     if take1_status_check(bot):
