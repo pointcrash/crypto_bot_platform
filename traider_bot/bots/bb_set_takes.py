@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from api_v5 import cancel_all, switch_position_mode, set_leverage
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
-    take2_status_check, create_bb_and_avg_obj, bot_stats_clear, take1_leaves_qty_check
+    take2_status_check, create_bb_and_avg_obj, bot_stats_clear, take1_leaves_qty_check, order_placement_verification
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
@@ -37,6 +37,18 @@ def set_takes(bot):
 
             tl = bb_obj.tl
             bl = bb_obj.bl
+
+            if bot.take_on_ml:
+                if not all(order_placement_verification(bot, order_id) for order_id in
+                           [bot.take1, bot.take2]):
+                    bot.take1, bot.take2 = '', ''
+                    bot.save()
+                    first_cycle = False
+            else:
+                if not order_placement_verification(bot, bot.take2):
+                    bot.take2 = ''
+                    bot.save()
+                    first_cycle = False
 
             if first_cycle:  # Not first cycle (-_-)
                 time.sleep(bot.time_sleep)

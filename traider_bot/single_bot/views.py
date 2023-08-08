@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, check_thread_alive
-from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj
+from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj, clean_and_return_bot_object
 from bots.forms import GridBotForm
 from bots.bot_logic_grid import set_takes_for_grid_bot
 from bots.models import Bot, Process, AvgOrder, Take, SingleBot, IsTSStart
@@ -80,9 +80,11 @@ def single_bot_detail(request, bot_id):
     if request.method == 'POST':
         form = GridBotForm(request.POST, request=request, instance=bot)
         if form.is_valid():
-            bot.delete()
             bot = form.save()
-
+            new_bot = clean_and_return_bot_object(bot.pk)
+            bot.delete()
+            bot = new_bot
+            bot.save()
             connections.close_all()
 
             if check_thread_alive(bot.pk):
@@ -105,14 +107,18 @@ def single_bot_detail(request, bot_id):
 
 def bot_start(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
-    avg_order = AvgOrder.objects.filter(bot=bot).first()
-    takes = Take.objects.filter(bot=bot)
+    # avg_order = AvgOrder.objects.filter(bot=bot).first()
+    # takes = Take.objects.filter(bot=bot)
     bot_thread = None
     is_ts_start = IsTSStart.objects.filter(bot=bot)
-    if takes:
-        takes.delete()
-    if avg_order:
-        avg_order.delete()
+    # if takes:
+    #     takes.delete()
+    # if avg_order:
+    #     avg_order.delete()
+    new_bot = clean_and_return_bot_object(bot_id)
+    bot.delete()
+    bot = new_bot
+    bot.save()
     connections.close_all()
 
     if check_thread_alive(bot.pk):
@@ -125,7 +131,6 @@ def bot_start(request, bot_id):
             else:
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
         else:
-            # bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
             bot_thread = threading.Thread(target=set_takes, args=(bot,))
     elif bot.work_model == 'grid':
         if bot.side == 'TS':

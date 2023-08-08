@@ -5,7 +5,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from bots.bot_logic import create_bb_and_avg_obj
+from bots.bot_logic import create_bb_and_avg_obj, clean_and_return_bot_object
 from bots.bb_set_takes import set_takes
 from bots.forms import BotForm
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
@@ -56,9 +56,11 @@ def single_bb_bot_detail(request, bot_id):
     if request.method == 'POST':
         form = BotForm(request.POST, request=request, instance=bot)
         if form.is_valid():
-            bot.delete()
             bot = form.save()
-
+            new_bot = clean_and_return_bot_object(bot.pk)
+            bot.delete()
+            bot = new_bot
+            bot.save()
             connections.close_all()
 
             if check_thread_alive(bot.pk):

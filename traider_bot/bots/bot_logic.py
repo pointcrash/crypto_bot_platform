@@ -13,7 +13,7 @@ django.setup()
 
 from bots.bb_auto_avg import BBAutoAverage
 from bots.bb_class import BollingerBands
-from bots.models import Symbol, Log, AvgOrder
+from bots.models import Symbol, Log, AvgOrder, Bot
 from api_v5 import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
     get_symbol_set, get_order_status, get_pnl, switch_position_mode, set_leverage, get_order_leaves_qty
 from orders.models import Order
@@ -169,6 +169,25 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
             tl = bb_obj.tl
             bl = bb_obj.bl
 
+            if bot.side == 'FB':
+                if not all(order_placement_verification(bot, order_id) for order_id in
+                           [bot.entry_order_by, bot.entry_order_sell]):
+                    bot.entry_order_by, bot.entry_order_sell = '', ''
+                    bot.save()
+                    first_cycle = True
+            elif bot.side == 'Sell':
+                order_id = bot.entry_order_sell
+                if not order_placement_verification(bot, order_id):
+                    bot.entry_order_sell = ''
+                    bot.save()
+                    first_cycle = True
+            elif bot.side == 'Buy':
+                order_id = bot.entry_order_by
+                if not order_placement_verification(bot, order_id):
+                    bot.entry_order_by = ''
+                    bot.save()
+                    first_cycle = True
+
             if not first_cycle:
                 time.sleep(bot.time_sleep)
 
@@ -265,7 +284,8 @@ def entry_order_buy_in_addition(bot):
     if bot.entry_order_by:
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_by)
         if status == 'PartiallyFilled':
-            entry_order_by_amount = Decimal(get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_by))
+            entry_order_by_amount = Decimal(
+                get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_by))
             order = Order.objects.create(
                 bot=bot,
                 category=bot.category,
@@ -279,7 +299,8 @@ def entry_order_buy_in_addition(bot):
     if bot.entry_order_sell:
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_sell)
         if status == 'PartiallyFilled':
-            entry_order_sell_amount = Decimal(get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_sell))
+            entry_order_sell_amount = Decimal(
+                get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_sell))
             order = Order.objects.create(
                 bot=bot,
                 category=bot.category,
@@ -289,7 +310,6 @@ def entry_order_buy_in_addition(bot):
                 qty=entry_order_sell_amount
             )
             logging(bot, f'Позиция докупилась на {entry_order_sell_amount}')
-
 
 
 def take1_status_check(bot):
@@ -334,3 +354,49 @@ def bot_stats_clear(bot):
     bot.entry_order_sell = ''
     bot.pnl = 0
     bot.save()
+
+
+def order_placement_verification(bot, order_id):
+    status = get_order_status(bot.account, bot.category, bot.symbol, order_id)
+    if status == "Order not found":
+        return False
+    else:
+        return True
+
+
+def clean_and_return_bot_object(bot_id):
+    bot_values_dict = Bot.objects.filter(pk=bot_id).values().first()
+    bot = Bot(
+        owner_id=bot_values_dict['owner_id'],
+        account_id=bot_values_dict['account_id'],
+        category=bot_values_dict['category'],
+        symbol_id=bot_values_dict['symbol_id'],
+        isLeverage=bot_values_dict['isLeverage'],
+        side=bot_values_dict['side'],
+        orderType=bot_values_dict['orderType'],
+        qty=bot_values_dict['qty'],
+        margin_type=bot_values_dict['margin_type'],
+        qty_kline=bot_values_dict['qty_kline'],
+        interval=bot_values_dict['interval'],
+        d=bot_values_dict['d'],
+        work_model=bot_values_dict['work_model'],
+        take_on_ml=bot_values_dict['take_on_ml'],
+        take_on_ml_percent=bot_values_dict['take_on_ml_percent'],
+        auto_avg=bot_values_dict['auto_avg'],
+        bb_avg_percent=bot_values_dict['bb_avg_percent'],
+        grid_avg_value=bot_values_dict['grid_avg_value'],
+        grid_profit_value=bot_values_dict['grid_profit_value'],
+        grid_take_count=bot_values_dict['grid_take_count'],
+        is_percent_deviation_from_lines=bot_values_dict['is_percent_deviation_from_lines'],
+        deviation_from_lines=bot_values_dict['deviation_from_lines'],
+        dfm=bot_values_dict['dfm'],
+        chw=bot_values_dict['chw'],
+        max_margin=bot_values_dict['max_margin'],
+        time_sleep=bot_values_dict['time_sleep'],
+        repeat=bot_values_dict['repeat'],
+    )
+
+    return bot
+
+
+

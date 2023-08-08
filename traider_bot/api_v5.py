@@ -32,7 +32,7 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
         return response.text
     except RequestException as e:
         # Обработка ошибки при отправке запроса или получении ответа
-        print("An error occurred during the request:", e)
+        print("Ошибки при отправке запроса или получении ответа:", e)
         return None
     except Exception as e:
         # Обработка других неожиданных ошибок
@@ -155,7 +155,7 @@ def get_order_status(account, category, symbol, orderLinkId):
     try:
         return response['result']['list'][0]['orderStatus']
     except:
-        return "Order does not exist"
+        return "Order not found"
 
 
 def get_order_leaves_qty(account, category, symbol, orderLinkId):
