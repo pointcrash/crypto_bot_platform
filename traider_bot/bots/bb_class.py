@@ -38,7 +38,7 @@ class BollingerBands:
     def closePrice_list(self):
         closePrice_list = []
         klines = self.get_kline()
-        for i in klines[:-1]:
+        for i in klines[1:]:
             closePrice_list.append(Decimal(i[4]))
         return closePrice_list
 

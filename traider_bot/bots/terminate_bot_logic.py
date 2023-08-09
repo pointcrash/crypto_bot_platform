@@ -14,7 +14,8 @@ def terminate_thread(bot_id):
             global_list_bot_id.remove(bot_id)
             if bot_id not in global_list_bot_id:
                 thread = global_list_threads[bot_id]
-                lock.release()
+                if lock.locked():
+                    lock.release()
                 thread.join()
                 lock.acquire()
                 del global_list_threads[bot_id]
@@ -22,7 +23,8 @@ def terminate_thread(bot_id):
     except Exception as e:
         return f"Terminate error: {e}"
     finally:
-        lock.release()
+        if lock.locked():
+            lock.release()
 
 
 def check_thread_alive(bot_id):
@@ -33,7 +35,8 @@ def check_thread_alive(bot_id):
         else:
             return False
     finally:
-        lock.release()
+        if lock.locked():
+            lock.release()
 
 
 def drop_position(bot):
@@ -70,14 +73,6 @@ def drop_position(bot):
 
 
 def stop_bot_with_cancel_orders(bot):
-    avg_order = AvgOrder.objects.filter(bot=bot).first()
-    takes = Take.objects.filter(bot=bot)
-    if takes:
-        takes.delete()
-    if avg_order:
-        avg_order.delete()
-    connections.close_all()
-
     logging(bot, terminate_thread(bot.pk))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')

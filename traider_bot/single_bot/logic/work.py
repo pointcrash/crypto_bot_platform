@@ -159,10 +159,10 @@ def append_thread_or_check_duplicate(bot_id, is_ts_bot):
         elif is_ts_bot:
             pass
         else:
-            # global_list_threads.remove(bot_id)
             raise Exception("Duplicate bot")
     finally:
-        lock.release()
+        if lock.locked():
+            lock.release()
 
 
 def check_change_psn_price(bot, main_price, psn_price):

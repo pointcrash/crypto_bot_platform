@@ -33,8 +33,14 @@ def set_takes(bot):
                 continue
 
             '''  Функция установки точек входа и усреднения  '''
-            psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj,
-                                                                                bb_avg_obj=bb_avg_obj)
+            try:
+                psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj, bb_avg_obj=bb_avg_obj)
+            except Exception as e:
+                if e is TypeError:
+                    lock.acquire()
+                    continue
+                else:
+                    raise f'Ошибка в блоке calculation_entry_point: {e}'
 
             tl = bb_obj.tl
             bl = bb_obj.bl
@@ -135,17 +141,17 @@ def set_takes(bot):
                     )
 
             lock.acquire()
-    except Exception as e:
-        print(f'Error {e}')
-        logging(bot, f'Error {e}')
-        lock.acquire()
-        try:
-            if bot_id in global_list_bot_id:
-                global_list_bot_id.remove(bot_id)
-                del global_list_threads[bot_id]
-        finally:
-            if lock.locked():
-                lock.release()
+    # except Exception as e:
+    #     print(f'Error {e}')
+    #     logging(bot, f'Error {e}')
+    #     lock.acquire()
+    #     try:
+    #         if bot_id in global_list_bot_id:
+    #             global_list_bot_id.remove(bot_id)
+    #             del global_list_threads[bot_id]
+    #     finally:
+    #         if lock.locked():
+    #             lock.release()
     finally:
         if lock.locked():
             lock.release()
