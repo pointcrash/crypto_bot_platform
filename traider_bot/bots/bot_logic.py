@@ -62,10 +62,11 @@ def set_entry_point_by_market(bot):
 
 
 def set_buy_entry_point(bot, bl):
+    round_number = int(bot.symbol.priceScale)
     if bot.is_percent_deviation_from_lines:
-        price = bl - bl * bot.deviation_from_lines / 100
+        price = round(bl - bl * bot.deviation_from_lines / 100, round_number)
     else:
-        price = bl - bot.deviation_from_lines
+        price = round(bl - bot.deviation_from_lines, round_number)
 
     buy_order = Order.objects.create(
         bot=bot,
@@ -83,10 +84,11 @@ def set_buy_entry_point(bot, bl):
 
 
 def set_sell_entry_point(bot, tl):
+    round_number = int(bot.symbol.priceScale)
     if bot.is_percent_deviation_from_lines:
-        price = tl + tl * bot.deviation_from_lines / 100
+        price = round(tl + tl * bot.deviation_from_lines / 100, round_number)
     else:
-        price = tl + bot.deviation_from_lines
+        price = round(tl + bot.deviation_from_lines, round_number)
 
     sell_order = Order.objects.create(
         bot=bot,
