@@ -377,7 +377,7 @@ def order_placement_verification(bot, order_id):
     if order_id == 'Filled' or not order_id:
         return True
     status = get_order_status(bot.account, bot.category, bot.symbol, order_id)
-    logging(bot, f'Order- {order_id} status: {status}')
+    # logging(bot, f'Order- {order_id} status: {status}')
     if status == "Order not found":
         return False
     else:
@@ -388,7 +388,7 @@ def check_order_placement_time(bot, order_id):
     if order_id == 'Filled' or not order_id:
         return True
     order_time_create = get_order_created_time(bot.account, bot.category, bot.symbol, order_id)
-    logging(bot, f'Order- {order_id} time create: {order_time_create}')
+    # logging(bot, f'Order- {order_id} time create: {order_time_create}')
 
     if order_time_create == "Order not found":
         return False
