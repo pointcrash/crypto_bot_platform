@@ -36,8 +36,10 @@ def set_takes_for_hedge_grid_bot(bot):
     finally:
         lock.release()
 
-    chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
-    send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} started working')
+    tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+    if tg:
+        chat_id = tg.chat_id
+        send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} started work')
 
     switch_position_mode(bot)
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
@@ -149,8 +151,10 @@ def set_takes_for_hedge_grid_bot(bot):
             if lock.locked():
                 lock.release()
     finally:
-        chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
-        send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} stopped working')
+        tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+        if tg:
+            chat_id = tg.chat_id
+            send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} finished work')
         if lock.locked():
             lock.release()
 
