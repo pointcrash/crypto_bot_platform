@@ -1,10 +1,10 @@
-import math
 import uuid
+from datetime import datetime
 
 from django.db import models
 
 from api_v5 import *
-from bots.models import Bot
+from bots.models import Bot, Log
 
 
 class Order(models.Model):
@@ -39,6 +39,8 @@ class Order(models.Model):
         }
         params = json.dumps(params)
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
+        bot = Bot.objects.get(pk=self.bot.pk)
+        logging(bot, f'{response}')
         # print(response)
         # print(self.price)
 
@@ -55,3 +57,10 @@ class Order(models.Model):
 
     def __str__(self):
         return self.orderLinkId
+
+
+def logging(bot, text):
+    bot_info = f'Bot {bot.pk} {bot.symbol.name} {bot.side} {bot.interval}'
+    date = datetime.now().replace(microsecond=0)
+    in_time = f'{date.time()} {date.date()}'
+    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time}')

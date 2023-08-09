@@ -15,7 +15,7 @@ from bots.bb_auto_avg import BBAutoAverage
 from bots.bb_class import BollingerBands
 from bots.models import Symbol, Log, AvgOrder, Bot, Take, IsTSStart
 from api_v5 import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
-    get_symbol_set, get_order_status, get_pnl, switch_position_mode, set_leverage, get_order_leaves_qty, \
+    get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
 from orders.models import Order
 

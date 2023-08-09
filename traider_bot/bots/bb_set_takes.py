@@ -43,11 +43,11 @@ def set_takes(bot):
             try:
                 psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj, bb_avg_obj=bb_avg_obj)
             except Exception as e:
-                if e is TypeError:
+                if isinstance(e, TypeError):
                     lock.acquire()
                     continue
                 else:
-                    raise f'Ошибка в блоке calculation_entry_point: {e}'
+                    raise ValueError(f'Ошибка в блоке calculation_entry_point: {e}')
 
             tl = bb_obj.tl
             bl = bb_obj.bl
