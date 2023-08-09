@@ -14,6 +14,7 @@ from tg_bot.send_message import send_telegram_message
 
 
 def set_takes(bot):
+    new_cycle = True
     bot_id = bot.pk
     is_ts_bot = True if bot.side == 'TS' else False
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
@@ -51,22 +52,23 @@ def set_takes(bot):
             tl = bb_obj.tl
             bl = bb_obj.bl
 
-            if bot.take_on_ml:
-                if not all(order_placement_verification(bot, order_id) for order_id in
-                           [bot.take1, bot.take2]) or not all(check_order_placement_time(bot, order_id) for order_id in
-                                                              [bot.take1, bot.take2]):
-                    if bot.take1 != 'Filled':
-                        bot.take1, bot.take2 = '', ''
-                        bot.save()
-                    else:
+            if not new_cycle:
+                if bot.take_on_ml:
+                    if not all(order_placement_verification(bot, order_id) for order_id in
+                               [bot.take1, bot.take2]) or not all(check_order_placement_time(bot, order_id) for order_id in
+                                                                  [bot.take1, bot.take2]):
+                        if bot.take1 != 'Filled':
+                            bot.take1, bot.take2 = '', ''
+                            bot.save()
+                        else:
+                            bot.take2 = ''
+                            bot.save()
+                        first_cycle = False
+                else:
+                    if not order_placement_verification(bot, bot.take2) or not check_order_placement_time(bot, bot.take2):
                         bot.take2 = ''
                         bot.save()
-                    first_cycle = False
-            else:
-                if not order_placement_verification(bot, bot.take2) or not check_order_placement_time(bot, bot.take2):
-                    bot.take2 = ''
-                    bot.save()
-                    first_cycle = False
+                        first_cycle = False
 
             if first_cycle:  # Not first cycle (-_-)
                 time.sleep(bot.time_sleep)
@@ -146,6 +148,7 @@ def set_takes(bot):
                         is_take=True,
                     )
 
+            new_cycle = False
             lock.acquire()
     except Exception as e:
         print(f'Error {e}')
