@@ -41,6 +41,7 @@ class Order(models.Model):
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
         bot = Bot.objects.get(pk=self.bot.pk)
         logging(bot, f'{response}')
+        logging(bot, f'{self.price}')
         # print(response)
         # print(self.price)
 
