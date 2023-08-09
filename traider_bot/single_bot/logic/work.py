@@ -5,10 +5,12 @@ from decimal import Decimal
 from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging, bot_stats_clear
 from bots.bot_logic_grid import take_status_check
-from bots.models import Take, AvgOrder
+from bots.models import Take, AvgOrder, Bot
 from orders.models import Order
 from single_bot.logic.entry import entry_position
 from single_bot.logic.global_variables import global_list_bot_id, lock, global_list_threads
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 
 
 def bot_work_logic(bot):
@@ -22,6 +24,8 @@ def bot_work_logic(bot):
 
     new_cycle = True
     if not is_ts_bot:
+        chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
+        send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} started working')
         switch_position_mode(bot)
         set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
@@ -125,6 +129,8 @@ def bot_work_logic(bot):
             if lock.locked():
                 lock.release()
     finally:
+        chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
+        send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} stopped working')
         if lock.locked():
             lock.release()
 

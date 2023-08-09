@@ -1,20 +1,17 @@
 import requests
+from .connect_tg_bot import bot_token
 
 
-def send_telegram_message(bot_token, chat_id, message):
+def send_telegram_message(chat_id, message):
+    c = 0
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     data = {"chat_id": chat_id, "text": message}
-    response = requests.post(url, json=data)
+    while c < 10:
+        c += 1
+        response = requests.post(url, json=data)
 
-    if response.status_code == 200:
-        print("Сообщение отправлено успешно")
-    else:
-        print("Ошибка при отправке сообщения")
+        if response.status_code == 200:
+            break
+        else:
+            continue
 
-
-# Замените на свой токен и чат-идентификатор
-bot_token = "ВАШ_ТОКЕН"
-chat_id = "ВАШ_ЧАТ_ИДЕНТИФИКАТОР"
-message_text = "Привет, это ваше уведомление из Python!"
-
-send_telegram_message(bot_token, chat_id, message_text)

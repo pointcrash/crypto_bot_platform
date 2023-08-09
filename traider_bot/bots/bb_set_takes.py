@@ -9,6 +9,8 @@ from bots.bot_logic import calculation_entry_point, take1_status_check, logging,
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 
 
 def set_takes(bot):
@@ -17,6 +19,8 @@ def set_takes(bot):
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
 
     if not is_ts_bot:
+        chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
+        send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} started work')
         switch_position_mode(bot)
         set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
 
@@ -141,18 +145,20 @@ def set_takes(bot):
                     )
 
             lock.acquire()
-    # except Exception as e:
-    #     print(f'Error {e}')
-    #     logging(bot, f'Error {e}')
-    #     lock.acquire()
-    #     try:
-    #         if bot_id in global_list_bot_id:
-    #             global_list_bot_id.remove(bot_id)
-    #             del global_list_threads[bot_id]
-    #     finally:
-    #         if lock.locked():
-    #             lock.release()
+    except Exception as e:
+        print(f'Error {e}')
+        logging(bot, f'Error {e}')
+        lock.acquire()
+        try:
+            if bot_id in global_list_bot_id:
+                global_list_bot_id.remove(bot_id)
+                del global_list_threads[bot_id]
+        finally:
+            if lock.locked():
+                lock.release()
     finally:
+        chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
+        send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} stopped working')
         if lock.locked():
             lock.release()
 

@@ -10,6 +10,8 @@ from bots.models import IsTSStart
 from bots.terminate_bot_logic import terminate_thread
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import bot_work_logic
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
@@ -33,6 +35,9 @@ def set_takes_for_hedge_grid_bot(bot):
             raise Exception("Duplicate bot")
     finally:
         lock.release()
+
+    chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
+    send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} started working')
 
     switch_position_mode(bot)
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
@@ -144,6 +149,8 @@ def set_takes_for_hedge_grid_bot(bot):
             if lock.locked():
                 lock.release()
     finally:
+        chat_id = TelegramAccount.objects.filter(owner=bot.owner).first().chat_id
+        send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} stopped working')
         if lock.locked():
             lock.release()
 

@@ -37,7 +37,8 @@ def single_bb_bot_create(request):
 
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread
-            lock.release()
+            if lock.locked():
+                lock.release()
 
             return redirect('single_bot_list')
     else:

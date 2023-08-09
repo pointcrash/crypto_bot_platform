@@ -12,6 +12,7 @@ urlpatterns = [
     path('bots1/', include('bots.urls')),
     path('accounts/', include('main.urls')),
     path('bots/', include('single_bot.urls')),
+    path('telegram/', include('tg_bot.urls')),
     path('register/', registration_view, name='register'),
     path('', login_view, name='login'),
     path('home/', view_home, name='home'),

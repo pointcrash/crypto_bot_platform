@@ -48,7 +48,8 @@ def when_ready(server):
                         bot_thread.start()
                         lock.acquire()
                         global_list_threads[bot_id] = bot_thread
-                        lock.release()
+                        if lock.locked():
+                            lock.release()
     except Exception as e:
         server.log.info(f"Error starting threads - {e}")
 

@@ -1,7 +1,5 @@
 import requests
 
-from tg_bot.models import TelegramAccount
-
 bot_token = '5855519015:AAFNqrfuqav-Mti1uTkgCrq4WdO2BVC3Cl0'
 
 
@@ -21,7 +19,7 @@ def data_username_check(username):
         data_username = chat_data['message']['chat']['username']
         if data_username == username:
             return chat_data['message']['chat']
-    raise 'Username not found'
+    raise ValueError('Username not found')
 
 
 def get_chat_id(username):

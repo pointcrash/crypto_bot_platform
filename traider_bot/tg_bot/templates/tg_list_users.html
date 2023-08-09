@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+<div class="row">
+    <div class="col-12 mx-auto">
+        <p>Напиши мне сообщение чтобы я мог найти тебя</p>
+        <a class="btn btn-success btn-shadow" href="https://t.me/bybit_assistant_bot">Написать (ссылка на телеграм)</a>
+    </div>
+    <div class="col-12 mx-auto">
+        {% if status %}
+        <a href="{% url 'delete_tg_acc' %}" class="btn btn-danger btn-shadow mt-5">Отключить телеграм бота</a>
+        <a href="{% url 'say_hello' %}" class="btn btn-secondary btn-shadow">Поздороваться</a>
+        {% else %}
+        <a href="{% url 'telegram_add_account' %}" class="btn btn-primary btn-shadow mt-5">Подключить телеграм бота</a>
+        {% endif %}
+        <p>Ваш статус: {% if status %}Подключен{% else %}Не подключен{% endif %}</p>
+    </div>
+</div>
+{% endblock %}

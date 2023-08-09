@@ -1,4 +1,4 @@
-from bots import forms
+from django import forms
 from tg_bot.models import TelegramAccount
 
 
@@ -10,5 +10,5 @@ class TelegramAccountForm(forms.ModelForm):
             'telegram_username': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'telegram_username': 'Name',
+            'telegram_username': 'Enter username in telegram',
         }
