@@ -14,8 +14,8 @@ from tg_bot.send_message import send_telegram_message
 
 
 def set_takes(bot):
-    new_cycle = True
     bot_id = bot.pk
+    first_start = True
     round_number = int(bot.symbol.priceScale)
     is_ts_bot = True if bot.side == 'TS' else False
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
@@ -29,6 +29,9 @@ def set_takes(bot):
         set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
 
     bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
+
+    tl = bb_obj.tl
+    bl = bb_obj.bl
 
     lock.acquire()
     try:
@@ -49,40 +52,44 @@ def set_takes(bot):
                     continue
                 else:
                     raise ValueError(f'Ошибка в блоке calculation_entry_point: {e}')
+            if first_start:
+                first_cycle = False
+                first_start = False
 
-            tl = bb_obj.tl
-            bl = bb_obj.bl
-
-            if not new_cycle:
-                if bot.take_on_ml:
-                    if not all(order_placement_verification(bot, order_id) for order_id in
-                               [bot.take1, bot.take2]) or not all(check_order_placement_time(bot, order_id) for order_id in
-                                                                  [bot.take1, bot.take2]):
-                        if bot.take1 != 'Filled':
-                            bot.take1, bot.take2 = '', ''
-                            bot.save()
-                        else:
-                            bot.take2 = ''
-                            bot.save()
-                        first_cycle = False
-                else:
-                    if not order_placement_verification(bot, bot.take2) or not check_order_placement_time(bot, bot.take2):
+            if bot.take_on_ml:
+                if not all(order_placement_verification(bot, order_id) for order_id in
+                           [bot.take1, bot.take2]) or not all(check_order_placement_time(bot, order_id) for order_id in
+                                                              [bot.take1, bot.take2]):
+                    if bot.take1 != 'Filled':
+                        bot.take1, bot.take2 = '', ''
+                        bot.save()
+                    else:
                         bot.take2 = ''
                         bot.save()
-                        first_cycle = False
+                    first_cycle = False
+            else:
+                if not order_placement_verification(bot, bot.take2) or not check_order_placement_time(bot, bot.take2):
+                    bot.take2 = ''
+                    bot.save()
+                    first_cycle = False
 
             if first_cycle:  # Not first cycle (-_-)
                 flag = False
                 waiting_time = bot.time_sleep
                 seconds = 0
                 while seconds < waiting_time:
+                    lock.acquire()
                     if bot_id not in global_list_bot_id:
+                        if lock.locked():
+                            lock.release()
                         flag = True
                         break
                     time.sleep(1)
                     seconds += 1
                 if flag:
                     continue
+
+            # print(tl, bl, bb_obj.tl, bb_obj.bl)
 
             if not first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)
@@ -98,10 +105,10 @@ def set_takes(bot):
                 if side == "Buy":
                     ml = bb_obj.ml
                     exit_line = bl
-                    if ml > psn_price * Decimal(str(0.0094)):
-                        ml = round(psn_price * Decimal(str(0.0094)), round_number)
-                    if exit_line > psn_price * Decimal(str(0.0088)):
-                        exit_line = round(psn_price * Decimal(str(0.0088)), round_number)
+                    if ml > psn_price * Decimal(str(0.9994)):
+                        ml = round(psn_price * Decimal(str(0.9994)), round_number)
+                    if exit_line > psn_price * Decimal(str(0.9988)):
+                        exit_line = round(psn_price * Decimal(str(0.9988)), round_number)
                 else:
                     ml = bb_obj.ml
                     exit_line = tl

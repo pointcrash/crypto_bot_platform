@@ -170,7 +170,6 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                                 bot.take1 = ''
                                 bot.save()
                             continue
-
                 return psn_qty, psn_side, psn_price, first_cycle
 
             if take2_status_check(bot):
@@ -185,27 +184,26 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
             tl = bb_obj.tl
             bl = bb_obj.bl
 
-            if not new_cycle:
-                if bot.side == 'FB':
-                    if not all(order_placement_verification(bot, order_id) for order_id in
-                               [bot.entry_order_by, bot.entry_order_sell]) or not all(
-                                check_order_placement_time(bot, order_id) for order_id in
-                                [bot.entry_order_by, bot.entry_order_sell]):
-                        bot.entry_order_by, bot.entry_order_sell = '', ''
-                        bot.save()
-                        first_cycle = True
-                elif bot.side == 'Sell':
-                    order_id = bot.entry_order_sell
-                    if not order_placement_verification(bot, order_id) or not check_order_placement_time(bot, order_id):
-                        bot.entry_order_sell = ''
-                        bot.save()
-                        first_cycle = True
-                elif bot.side == 'Buy':
-                    order_id = bot.entry_order_by
-                    if not order_placement_verification(bot, order_id) or not check_order_placement_time(bot, order_id):
-                        bot.entry_order_by = ''
-                        bot.save()
-                        first_cycle = True
+            if bot.side == 'FB':
+                if not all(order_placement_verification(bot, order_id) for order_id in
+                           [bot.entry_order_by, bot.entry_order_sell]) or not all(
+                            check_order_placement_time(bot, order_id) for order_id in
+                            [bot.entry_order_by, bot.entry_order_sell]):
+                    bot.entry_order_by, bot.entry_order_sell = '', ''
+                    bot.save()
+                    first_cycle = True
+            elif bot.side == 'Sell':
+                order_id = bot.entry_order_sell
+                if not order_placement_verification(bot, order_id) or not check_order_placement_time(bot, order_id):
+                    bot.entry_order_sell = ''
+                    bot.save()
+                    first_cycle = True
+            elif bot.side == 'Buy':
+                order_id = bot.entry_order_by
+                if not order_placement_verification(bot, order_id) or not check_order_placement_time(bot, order_id):
+                    bot.entry_order_by = ''
+                    bot.save()
+                    first_cycle = True
 
             if not first_cycle:
                 flag = False

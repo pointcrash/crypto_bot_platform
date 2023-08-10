@@ -29,6 +29,8 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
         else:
             response = requests.get(account.url + endPoint + "?" + payload, headers=headers)
         response.raise_for_status()  # Проверка наличия ошибки в ответе
+        # print(endPoint)
+        # print(response.text)
         return response.text
     except RequestException as e:
         # Обработка ошибки при отправке запроса или получении ответа
