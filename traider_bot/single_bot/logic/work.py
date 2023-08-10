@@ -3,9 +3,9 @@ import time
 from decimal import Decimal
 
 from api_v5 import switch_position_mode, set_leverage, cancel_all
-from bots.bot_logic import count_decimal_places, logging, bot_stats_clear
+from bots.bot_logic import count_decimal_places, logging, clear_data_bot
 from bots.bot_logic_grid import take_status_check
-from bots.models import Take, AvgOrder, Bot
+from bots.models import Take, AvgOrder
 from orders.models import Order
 from single_bot.logic.entry import entry_position
 from single_bot.logic.global_variables import global_list_bot_id, lock, global_list_threads
@@ -202,14 +202,14 @@ def actions_after_end_cycle(bot):
         return False
     else:
         cancel_all(bot.account, bot.category, bot.symbol)
-        takes = get_takes(bot)
-        avg_order = AvgOrder.objects.filter(bot=bot).first()
-        for take in takes:
-            take.order_link_id = ''
-            take.is_filled = False
-        Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
-        avg_order.delete()
-        bot_stats_clear(bot)
+        # takes = get_takes(bot)
+        # avg_order = AvgOrder.objects.filter(bot=bot).first()
+        # for take in takes:
+        #     take.order_link_id = ''
+        #     take.is_filled = False
+        # Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
+        # avg_order.delete()
+        clear_data_bot(bot)
         logging(bot, 'New cycle start')
         return True
 

@@ -10,11 +10,11 @@ def terminate_thread(bot_id):
         if bot_id in global_list_bot_id:
             global_list_bot_id.remove(bot_id)
             if bot_id not in global_list_bot_id:
-                # thread = global_list_threads[bot_id]
-                # if lock.locked():
-                #     lock.release()
-                # thread.join()
-                # lock.acquire()
+                thread = global_list_threads[bot_id]
+                if lock.locked():
+                    lock.release()
+                thread.join()
+                lock.acquire()
                 del global_list_threads[bot_id]
                 return f"Terminate successful"
     except Exception as e:

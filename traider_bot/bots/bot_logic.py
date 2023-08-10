@@ -6,7 +6,7 @@ from decimal import Decimal, ROUND_DOWN
 import os
 import django
 
-from single_bot.logic.global_variables import lock, global_list_bot_id
+from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
@@ -131,6 +131,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
             while not symbol_list and i < 10:
                 symbol_list = get_list(bot.account, bot.category, bot.symbol)
                 i += 1
+                time.sleep(1)
 
             if position_idx is None:
                 position_idx = get_position_idx_by_range(symbol_list)
@@ -161,6 +162,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                             while not symbol_list and i < 10:
                                 symbol_list = get_list(bot.account, bot.category, bot.symbol)
                                 i += 1
+                                time.sleep(1)
                             logging(bot,
                                     f'average. New margin: {get_qty(symbol_list)[position_idx] * get_position_price(symbol_list)[position_idx] / bot.isLeverage}')
                             first_cycle = False
@@ -170,6 +172,10 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                             continue
 
                 return psn_qty, psn_side, psn_price, first_cycle
+
+            if take2_status_check(bot):
+                actions_after_end_cycle(bot)
+                continue
 
             if bot.orderType == "Market":
                 set_entry_point_by_market(bot)
@@ -202,7 +208,17 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                         first_cycle = True
 
             if not first_cycle:
-                time.sleep(bot.time_sleep)
+                flag = False
+                waiting_time = bot.time_sleep
+                seconds = 0
+                while seconds < waiting_time:
+                    if bot_id not in global_list_bot_id:
+                        flag = True
+                        break
+                    time.sleep(1)
+                    seconds += 1
+                if flag:
+                    continue
 
             if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)
@@ -253,14 +269,14 @@ def count_decimal_places(number):
 
 
 def create_bb_and_avg_obj(bot, position_idx=0):
-    if bot.work_model == 'bb':
-        symbol_list, i = None, 0
-        while not symbol_list and i < 10:
-            symbol_list = get_list(bot.account, bot.category, bot.symbol)
-            i += 1
-        psn_qty = get_qty(symbol_list)[position_idx]
-        psn_side = get_side(symbol_list)[position_idx]
-        psn_price = get_position_price(symbol_list)[position_idx]
+    # if bot.work_model == 'bb':
+    #     symbol_list, i = None, 0
+    #     while not symbol_list and i < 10:
+    #         symbol_list = get_list(bot.account, bot.category, bot.symbol)
+    #         i += 1
+    #     psn_qty = get_qty(symbol_list)[position_idx]
+    #     psn_side = get_side(symbol_list)[position_idx]
+    #     psn_price = get_position_price(symbol_list)[position_idx]
 
     if bot.work_model == 'grid' and bot.orderType == 'Market':
         bb_obj = None
@@ -270,7 +286,7 @@ def create_bb_and_avg_obj(bot, position_idx=0):
                                 qty_cline=bot.qty_kline, d=bot.d)
 
     if bot.work_model == 'bb' and bot.auto_avg:
-        bb_avg_obj = BBAutoAverage(bot=bot, psn_price=psn_price, psn_side=psn_side, psn_qty=psn_qty,
+        bb_avg_obj = BBAutoAverage(bot=bot, psn_price=0, psn_side=0, psn_qty=0,
                                    bb_obj=bb_obj)
     else:
         bb_avg_obj = None
@@ -336,7 +352,7 @@ def take1_status_check(bot):
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.take1)
         if status == 'Filled':
             pnl = get_pnl(bot.account, bot.category, bot.symbol)[0]['closedPnl']
-            bot.pnl += Decimal(pnl)
+            bot.pnl = bot.pnl + round(Decimal(pnl), 2)
             logging(bot, f'take1 filled. P&L: {pnl}')
             bot.take1 = 'Filled'
             bot.save()
@@ -353,24 +369,23 @@ def take1_leaves_qty_check(bot):
 
 
 def take2_status_check(bot):
-    if bot.take2:
-        status = get_order_status(bot.account, bot.category, bot.symbol, bot.take2)
-        if status == 'Filled':
-            pnl = get_pnl(bot.account, bot.category, bot.symbol)[0]['closedPnl']
-            bot.pnl += Decimal(pnl)
-            logging(bot, f'take2 filled. P&L: {pnl}')
-            bot.take2 = 'Filled'
-            bot.save()
-            return True
+    status = get_order_status(bot.account, bot.category, bot.symbol, bot.take2)
+    if status == 'Filled':
+        pnl = get_pnl(bot.account, bot.category, bot.symbol)[0]['closedPnl']
+        bot.pnl = bot.pnl + round(Decimal(pnl), 2)
+        logging(bot, f'take2 filled. P&L: {pnl}')
+        bot.take2 = 'Filled'
+        bot.save()
+        return True
 
 
-def bot_stats_clear(bot):
-    bot.take1 = ''
-    bot.take2 = ''
-    bot.entry_order_by = ''
-    bot.entry_order_sell = ''
-    bot.pnl = 0
-    bot.save()
+# def bot_stats_clear(bot):
+#     bot.take1 = ''
+#     bot.take2 = ''
+#     bot.entry_order_by = ''
+#     bot.entry_order_sell = ''
+#     bot.pnl = 0
+#     bot.save()
 
 
 def order_placement_verification(bot, order_id):
@@ -447,6 +462,7 @@ def clear_data_bot(bot):
     bot.take1 = ''
     bot.take2 = ''
     bot.take2_amount = None
+    bot.pnl = 0
 
     avg_order = AvgOrder.objects.filter(bot=bot).first()
     takes = Take.objects.filter(bot=bot)
@@ -461,3 +477,20 @@ def clear_data_bot(bot):
 
     bot.save()
     connections.close_all()
+
+
+def actions_after_end_cycle(bot):
+    bot_id = bot.pk
+    logging(bot, f'bot finished work. P&L: {bot.pnl}')
+    if not bot.repeat:
+        lock.acquire()
+        try:
+            global_list_bot_id.remove(bot_id)
+            if bot_id not in global_list_bot_id:
+                del global_list_threads[bot_id]
+        finally:
+            if lock.locked():
+                lock.release()
+    else:
+        clear_data_bot(bot)
+        logging(bot, 'Bot start new cycle')

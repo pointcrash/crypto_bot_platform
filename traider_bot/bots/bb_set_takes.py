@@ -2,10 +2,10 @@ import time
 
 from decimal import Decimal
 
-from api_v5 import cancel_all, switch_position_mode, set_leverage
+from api_v5 import cancel_all, switch_position_mode, set_leverage, get_current_price
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
-    take2_status_check, create_bb_and_avg_obj, bot_stats_clear, take1_leaves_qty_check, order_placement_verification, \
-    check_order_placement_time
+    take2_status_check, create_bb_and_avg_obj, take1_leaves_qty_check, order_placement_verification, \
+    check_order_placement_time, actions_after_end_cycle
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
@@ -71,7 +71,17 @@ def set_takes(bot):
                         first_cycle = False
 
             if first_cycle:  # Not first cycle (-_-)
-                time.sleep(bot.time_sleep)
+                flag = False
+                waiting_time = bot.time_sleep
+                seconds = 0
+                while seconds < waiting_time:
+                    if bot_id not in global_list_bot_id:
+                        flag = True
+                        break
+                    time.sleep(1)
+                    seconds += 1
+                if flag:
+                    continue
 
             if not first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)
@@ -87,9 +97,17 @@ def set_takes(bot):
                 if side == "Buy":
                     ml = bb_obj.ml
                     exit_line = bl
+                    if ml > psn_price * Decimal(str(0.94)):
+                        ml = psn_price * Decimal(str(0.94))
+                    if exit_line > psn_price * Decimal(str(0.88)):
+                        exit_line = psn_price * Decimal(str(0.88))
                 else:
                     ml = bb_obj.ml
                     exit_line = tl
+                    if ml < psn_price * Decimal(str(1.06)):
+                        ml = psn_price * Decimal(str(1.06))
+                    if exit_line < psn_price * Decimal(str(1.12)):
+                        exit_line = psn_price * Decimal(str(1.12))
 
                 if bot.take_on_ml:
                     if take1_status_check(bot):
@@ -170,17 +188,3 @@ def set_takes(bot):
             lock.release()
 
 
-def actions_after_end_cycle(bot):
-    bot_id = bot.pk
-    logging(bot, f'bot finished work. P&L: {bot.pnl}')
-    if not bot.repeat:
-        lock.acquire()
-        try:
-            global_list_bot_id.remove(bot_id)
-            if bot_id not in global_list_bot_id:
-                del global_list_threads[bot_id]
-        finally:
-            if lock.locked():
-                lock.release()
-    else:
-        bot_stats_clear(bot)

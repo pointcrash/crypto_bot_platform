@@ -165,8 +165,8 @@ def take_status_check(bot, orderLinkId):
     if orderLinkId:
         status = get_order_status(bot.account, bot.category, bot.symbol, orderLinkId)
         if status == 'Filled':
-            pnl = get_pnl(bot.account, bot.category, bot.symbol)
-            bot.pnl += Decimal(pnl)
+            pnl = round(Decimal(get_pnl(bot.account, bot.category, bot.symbol)[0]["closedPnl"]), 2)
+            bot.pnl = bot.pnl + pnl
             logging(bot, f'take filled. P&L: {pnl}')
             return 'Filled'
 
