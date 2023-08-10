@@ -51,10 +51,15 @@ class BBAutoAverage:
             return False
 
     def dfm_check(self, current_price, bb):
-        if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
-            return True
+        if self.psn_side == 'Buy':
+            if current_price < self.bb_obj.ml:
+                if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
+                    return True
         else:
-            return False
+            if current_price > self.bb_obj.ml:
+                if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
+                    return True
+
 
     def margin_limit_check(self):
         psn_currency_amount = self.psn_price * self.psn_qty / self.bot.isLeverage
