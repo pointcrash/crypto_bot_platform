@@ -98,17 +98,17 @@ def set_takes(bot):
                 if side == "Buy":
                     ml = bb_obj.ml
                     exit_line = bl
-                    if ml > psn_price * Decimal(str(0.94)):
-                        ml = round(psn_price * Decimal(str(0.94)), round_number)
-                    if exit_line > psn_price * Decimal(str(0.88)):
-                        exit_line = round(psn_price * Decimal(str(0.88)), round_number)
+                    if ml > psn_price * Decimal(str(0.0094)):
+                        ml = round(psn_price * Decimal(str(0.0094)), round_number)
+                    if exit_line > psn_price * Decimal(str(0.0088)):
+                        exit_line = round(psn_price * Decimal(str(0.0088)), round_number)
                 else:
                     ml = bb_obj.ml
                     exit_line = tl
-                    if ml < psn_price * Decimal(str(1.06)):
-                        ml = round(psn_price * Decimal(str(1.06)), round_number)
-                    if exit_line < psn_price * Decimal(str(1.12)):
-                        exit_line = round(psn_price * Decimal(str(1.12)), round_number)
+                    if ml < psn_price * Decimal(str(1.0006)):
+                        ml = round(psn_price * Decimal(str(1.0006)), round_number)
+                    if exit_line < psn_price * Decimal(str(1.0012)):
+                        exit_line = round(psn_price * Decimal(str(1.0012)), round_number)
 
                 if bot.take_on_ml:
                     if take1_status_check(bot):
