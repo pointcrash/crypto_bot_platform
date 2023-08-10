@@ -16,6 +16,7 @@ from tg_bot.send_message import send_telegram_message
 def set_takes(bot):
     new_cycle = True
     bot_id = bot.pk
+    round_number = int(bot.symbol.priceScale)
     is_ts_bot = True if bot.side == 'TS' else False
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
 
@@ -98,16 +99,16 @@ def set_takes(bot):
                     ml = bb_obj.ml
                     exit_line = bl
                     if ml > psn_price * Decimal(str(0.94)):
-                        ml = psn_price * Decimal(str(0.94))
+                        ml = round(psn_price * Decimal(str(0.94)), round_number)
                     if exit_line > psn_price * Decimal(str(0.88)):
-                        exit_line = psn_price * Decimal(str(0.88))
+                        exit_line = round(psn_price * Decimal(str(0.88)), round_number)
                 else:
                     ml = bb_obj.ml
                     exit_line = tl
                     if ml < psn_price * Decimal(str(1.06)):
-                        ml = psn_price * Decimal(str(1.06))
+                        ml = round(psn_price * Decimal(str(1.06)), round_number)
                     if exit_line < psn_price * Decimal(str(1.12)):
-                        exit_line = psn_price * Decimal(str(1.12))
+                        exit_line = round(psn_price * Decimal(str(1.12)), round_number)
 
                 if bot.take_on_ml:
                     if take1_status_check(bot):
