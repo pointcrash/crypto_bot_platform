@@ -73,19 +73,22 @@ def set_takes(bot):
                     bot.save()
                     first_cycle = False
 
-            if first_cycle:  # Not first cycle (-_-)
+            if first_cycle:
                 flag = False
                 waiting_time = bot.time_sleep
                 seconds = 0
                 while seconds < waiting_time:
                     lock.acquire()
-                    if bot_id not in global_list_bot_id:
+                    try:
+                        if bot_id not in global_list_bot_id:
+                            flag = True
+                            seconds = waiting_time
+                    finally:
                         if lock.locked():
                             lock.release()
-                        flag = True
-                        break
-                    time.sleep(1)
-                    seconds += 1
+                    if seconds < waiting_time:
+                        time.sleep(1)
+                        seconds += 1
                 if flag:
                     continue
 

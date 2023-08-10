@@ -116,10 +116,12 @@ def set_entry_point(bot, tl, bl):
 
 
 def calculation_entry_point(bot, bb_obj, bb_avg_obj):
-    new_cycle = True
     bot_id = bot.pk
     first_cycle = True
     position_idx = get_position_idx(bot.side)
+
+    tl = bb_obj.tl
+    bl = bb_obj.bl
 
     lock.acquire()
     try:
@@ -181,9 +183,6 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 first_cycle = False
                 continue
 
-            tl = bb_obj.tl
-            bl = bb_obj.bl
-
             if bot.side == 'FB':
                 if not all(order_placement_verification(bot, order_id) for order_id in
                            [bot.entry_order_by, bot.entry_order_sell]) or not all(
@@ -210,11 +209,17 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 waiting_time = bot.time_sleep
                 seconds = 0
                 while seconds < waiting_time:
-                    if bot_id not in global_list_bot_id:
-                        flag = True
-                        break
-                    time.sleep(1)
-                    seconds += 1
+                    lock.acquire()
+                    try:
+                        if bot_id not in global_list_bot_id:
+                            flag = True
+                            seconds = waiting_time
+                    finally:
+                        if lock.locked():
+                            lock.release()
+                    if seconds < waiting_time:
+                        time.sleep(1)
+                        seconds += 1
                 if flag:
                     continue
 
@@ -225,7 +230,6 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 set_entry_point(bot, tl, bl)
 
             first_cycle = False
-            new_cycle = False
             lock.acquire()
     finally:
         if lock.locked():

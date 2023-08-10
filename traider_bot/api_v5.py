@@ -12,34 +12,39 @@ recv_window = str(5000)
 
 
 def HTTP_Request(account, endPoint, method, payload, Info=' '):
-    global time_stamp
-    time_stamp = str(int(time.time() * 10 ** 3))
-    signature = genSignature(account.SECRET_KEY, account.API_TOKEN, payload)
-    headers = {
-        'X-BAPI-API-KEY': account.API_TOKEN,
-        'X-BAPI-SIGN': signature,
-        'X-BAPI-SIGN-TYPE': '2',
-        'X-BAPI-TIMESTAMP': time_stamp,
-        'X-BAPI-RECV-WINDOW': recv_window,
-        'Content-Type': 'application/json'
-    }
-    try:
-        if method == "POST":
-            response = requests.post(account.url + endPoint, headers=headers, data=payload)
-        else:
-            response = requests.get(account.url + endPoint + "?" + payload, headers=headers)
-        response.raise_for_status()  # Проверка наличия ошибки в ответе
-        # print(endPoint)
-        # print(response.text)
-        return response.text
-    except RequestException as e:
-        # Обработка ошибки при отправке запроса или получении ответа
-        print("Ошибки при отправке запроса или получении ответа:", e)
-        return None
-    except Exception as e:
-        # Обработка других неожиданных ошибок
-        print("An unexpected error occurred:", e)
-        return None
+    i = 0
+    while i < 4:
+        i += 1
+        global time_stamp
+        time_stamp = str(int(time.time() * 10 ** 3))
+        signature = genSignature(account.SECRET_KEY, account.API_TOKEN, payload)
+        headers = {
+            'X-BAPI-API-KEY': account.API_TOKEN,
+            'X-BAPI-SIGN': signature,
+            'X-BAPI-SIGN-TYPE': '2',
+            'X-BAPI-TIMESTAMP': time_stamp,
+            'X-BAPI-RECV-WINDOW': recv_window,
+            'Content-Type': 'application/json'
+        }
+        try:
+            if method == "POST":
+                response = requests.post(account.url + endPoint, headers=headers, data=payload)
+            else:
+                response = requests.get(account.url + endPoint + "?" + payload, headers=headers)
+            response.raise_for_status()  # Проверка наличия ошибки в ответе
+            # print(endPoint)
+            # print(response.text)
+            return response.text
+        except RequestException as e:
+            # Обработка ошибки при отправке запроса или получении ответа
+            print("Ошибки при отправке запроса или получении ответа:", e)
+            continue
+            # return None
+        except Exception as e:
+            # Обработка других неожиданных ошибок
+            print("An unexpected error occurred:", e)
+            continue
+            # return None
 
 
 def genSignature(secret_key, api_key, payload):
