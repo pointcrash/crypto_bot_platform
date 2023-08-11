@@ -25,6 +25,7 @@ from orders.models import Order
 def set_takes_for_hedge_grid_bot(bot):
     bot_id = bot.pk
     flag = False
+    first_start = True
 
     lock.acquire()
     try:
@@ -73,8 +74,30 @@ def set_takes_for_hedge_grid_bot(bot):
                     raise Exception('Ошибка при переходе в односторонний режим')
                 break
 
-            time.sleep(bot.time_sleep)
-            symbol_list = get_list(bot.account, bot.category, bot.symbol)
+            if not first_start:
+                flag1 = False
+                waiting_time = bot.time_sleep
+                seconds = 1
+                while seconds < waiting_time:
+                    lock.acquire()
+                    try:
+                        if bot_id not in global_list_bot_id:
+                            flag1 = True
+                            seconds = waiting_time
+                    finally:
+                        if lock.locked():
+                            lock.release()
+                    if seconds < waiting_time:
+                        time.sleep(2)
+                        seconds += 2
+                if flag1:
+                    continue
+
+            symbol_list, i = None, 0
+            while not symbol_list and i < 4:
+                symbol_list = get_list(bot.account, bot.category, bot.symbol)
+                i += 1
+                time.sleep(1)
             price_list = get_position_price(symbol_list)
             qty_list = get_qty(symbol_list)
 

@@ -130,7 +130,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 lock.release()
 
             symbol_list, i = None, 0
-            while not symbol_list and i < 10:
+            while not symbol_list and i < 4:
                 symbol_list = get_list(bot.account, bot.category, bot.symbol)
                 i += 1
                 time.sleep(1)
@@ -161,7 +161,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                     if bot.work_model == "bb" and bb_avg_obj is not None:
                         if bb_avg_obj.auto_avg():
                             symbol_list, i = None, 0
-                            while not symbol_list and i < 10:
+                            while not symbol_list and i < 4:
                                 symbol_list = get_list(bot.account, bot.category, bot.symbol)
                                 i += 1
                                 time.sleep(1)
