@@ -181,9 +181,12 @@ def append_thread_or_check_duplicate(bot_id, is_ts_bot):
     lock.acquire()
     try:
         if bot_id not in global_list_bot_id:
+            print('Добавил бота в список')
             global_list_bot_id.add(bot_id)
+            print(global_list_bot_id, 333333333)
         elif is_ts_bot:
-            pass
+            print('sdgdfsgdfgd', 333333333)
+            # pass
         else:
             raise Exception("Duplicate bot")
     finally:
