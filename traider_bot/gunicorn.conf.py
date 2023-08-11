@@ -51,10 +51,10 @@ def when_ready(server):
                         if lock.locked():
                             lock.release()
     except Exception as e:
-        server.log.info(f"Error starting threads - {e}")
+        server.log.info(f"Ошибка запуска потока - {e}")
 
     finally:
-        server.log.info("Gunicorn is ready to accept requests.")
+        server.log.info("Gunicorn готов принимать запросы.")
 
 
 def worker_exit(server, worker):
@@ -72,7 +72,19 @@ def worker_exit(server, worker):
         if global_list_threads:
             with open("bot_id.pkl", "wb") as file:
                 pickle.dump(list(global_list_threads.keys()), file)
-            global_list_threads.clear()
+
+        bots_id_list = global_list_bot_id
+        for bot_id in bots_id_list:
+            global_list_bot_id.remove(bot_id)
+            thread = global_list_threads[bot_id]
+            if lock.locked():
+                lock.release()
+            thread.join()
+            lock.acquire()
+            del global_list_threads[bot_id]
+            print(f"Удален из списка бот {bot_id}")
+
     finally:
-        lock.release()
-        server.log.info(f"Worker {worker.pid} has exited.")
+        if lock.locked():
+            lock.release()
+        server.log.info(f"Worker {worker.pid} остановлен.")
