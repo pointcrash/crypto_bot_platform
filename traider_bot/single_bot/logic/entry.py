@@ -15,8 +15,9 @@ def entry_position(bot, takes, position_idx):
     bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
     avg_order = None
 
-    tl = bb_obj.tl
-    bl = bb_obj.bl
+    if bb_obj:
+        tl = bb_obj.tl
+        bl = bb_obj.bl
 
     lock.acquire()
     try:

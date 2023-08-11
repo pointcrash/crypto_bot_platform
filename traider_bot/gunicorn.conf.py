@@ -96,3 +96,8 @@ def worker_exit(server, worker):
     for bot_id in all_bots_pks:
         print(terminate_thread(bot_id))
 
+
+def when_ready(server):
+    all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
+    for bot_id in all_bots_pks:
+        print(terminate_thread(bot_id))
