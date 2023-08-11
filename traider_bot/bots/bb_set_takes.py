@@ -76,7 +76,7 @@ def set_takes(bot):
             if first_cycle:
                 flag = False
                 waiting_time = bot.time_sleep
-                seconds = 0
+                seconds = 1
                 while seconds < waiting_time:
                     lock.acquire()
                     try:
@@ -87,8 +87,8 @@ def set_takes(bot):
                         if lock.locked():
                             lock.release()
                     if seconds < waiting_time:
-                        time.sleep(1)
-                        seconds += 1
+                        time.sleep(2)
+                        seconds += 2
                 if flag:
                     continue
 
