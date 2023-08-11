@@ -15,6 +15,9 @@ def entry_position(bot, takes, position_idx):
     bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot, position_idx)
     avg_order = None
 
+    tl = bb_obj.tl
+    bl = bb_obj.bl
+
     lock.acquire()
     try:
         while bot_id in global_list_bot_id:
@@ -37,7 +40,6 @@ def entry_position(bot, takes, position_idx):
                         if not avg_order:
                             avg_order = set_avg_order(bot, psn_side, psn_price, psn_qty)
                             first_cycle = False
-                            print('if not avg_order')
                         else:
                             if get_status_avg_order(bot, avg_order):
                                 logging(bot,
@@ -48,7 +50,6 @@ def entry_position(bot, takes, position_idx):
                                     take.is_filled = False
                                 Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
                                 first_cycle = False
-                                print('if get_status_avg_order(bot, avg_order)')
                                 continue
 
                 return psn_qty, psn_side, psn_price, first_cycle, avg_order
@@ -59,11 +60,24 @@ def entry_position(bot, takes, position_idx):
                 time.sleep(1)
                 continue
 
-            tl = bb_obj.tl
-            bl = bb_obj.bl
-
             if not first_cycle:
-                time.sleep(bot.time_sleep)
+                flag = False
+                waiting_time = bot.time_sleep
+                seconds = 0
+                while seconds < waiting_time:
+                    lock.acquire()
+                    try:
+                        if bot_id not in global_list_bot_id:
+                            flag = True
+                            seconds = waiting_time
+                    finally:
+                        if lock.locked():
+                            lock.release()
+                    if seconds < waiting_time:
+                        time.sleep(1)
+                        seconds += 1
+                if flag:
+                    continue
 
             if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)

@@ -58,8 +58,24 @@ def bot_work_logic(bot):
                 lock.acquire()
                 continue
 
-            if first_cycle and new_cycle is False:  # Not first cycle (-_-)
-                time.sleep(bot.time_sleep)
+            if first_cycle and new_cycle is False:
+                flag = False
+                waiting_time = bot.time_sleep
+                seconds = 0
+                while seconds < waiting_time:
+                    lock.acquire()
+                    try:
+                        if bot_id not in global_list_bot_id:
+                            flag = True
+                            seconds = waiting_time
+                    finally:
+                        if lock.locked():
+                            lock.release()
+                    if seconds < waiting_time:
+                        time.sleep(1)
+                        seconds += 1
+                if flag:
+                    continue
 
             if not first_cycle or new_cycle is True:
                 new_cycle = False
