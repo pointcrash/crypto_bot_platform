@@ -39,9 +39,10 @@ def set_takes(bot):
             if lock.locked():
                 lock.release()
 
-            if take2_status_check(bot):
-                actions_after_end_cycle(bot)
-                continue
+            # if take2_status_check(bot):
+            #     actions_after_end_cycle(bot)
+            #     lock.acquire()
+            #     continue
 
             '''  Функция установки точек входа и усреднения  '''
             try:
@@ -90,9 +91,13 @@ def set_takes(bot):
                         time.sleep(2)
                         seconds += 2
                 if flag:
+                    lock.acquire()
                     continue
 
-            # print(tl, bl, bb_obj.tl, bb_obj.bl)
+            if take2_status_check(bot):
+                actions_after_end_cycle(bot)
+                lock.acquire()
+                continue
 
             if not first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)

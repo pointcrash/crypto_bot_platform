@@ -91,6 +91,7 @@ def set_takes_for_hedge_grid_bot(bot):
                         time.sleep(2)
                         seconds += 2
                 if flag1:
+                    lock.acquire()
                     continue
 
             symbol_list, i = None, 0

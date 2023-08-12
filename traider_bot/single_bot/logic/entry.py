@@ -2,7 +2,7 @@ import time
 
 from api_v5 import get_list, get_qty, get_side, get_position_price, cancel_all
 from bots.bot_logic import set_entry_point_by_market, entry_order_status_check, logging, set_entry_point, \
-    create_bb_and_avg_obj
+    create_bb_and_avg_obj, entry_order_buy_in_addition, func_get_symbol_list
 from bots.models import Take, AvgOrder
 from single_bot.logic.avg import to_avg_by_grid, get_status_avg_order, set_avg_order
 from single_bot.logic.global_variables import lock, global_list_bot_id
@@ -18,13 +18,17 @@ def entry_position(bot, takes, position_idx):
     if bb_obj:
         tl = bb_obj.tl
         bl = bb_obj.bl
+    else:
+        tl, bl = None, None
 
     lock.acquire()
     try:
         while bot_id in global_list_bot_id:
             if lock.locked():
                 lock.release()
-            symbol_list = get_list(bot.account, bot.category, bot.symbol)
+
+            symbol_list = func_get_symbol_list(bot)
+
             if position_idx is None:
                 position_idx = get_position_idx_by_range(symbol_list)
 
@@ -32,8 +36,15 @@ def entry_position(bot, takes, position_idx):
                 psn_qty = get_qty(symbol_list)[position_idx]
                 psn_side = get_side(symbol_list)[position_idx]
                 psn_price = get_position_price(symbol_list)[position_idx]
+
                 if entry_order_status_check(bot):
                     logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
+                else:
+                    entry_order_buy_in_addition(bot)
+                    symbol_list = func_get_symbol_list(bot)
+                    psn_qty = get_qty(symbol_list)[position_idx]
+                    psn_side = get_side(symbol_list)[position_idx]
+                    psn_price = get_position_price(symbol_list)[position_idx]
 
                 if bot.auto_avg:
                     if bot.work_model == 'grid':
@@ -51,6 +62,7 @@ def entry_position(bot, takes, position_idx):
                                     take.is_filled = False
                                 Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
                                 first_cycle = False
+                                lock.acquire()
                                 continue
 
                 return psn_qty, psn_side, psn_price, first_cycle, avg_order
@@ -59,6 +71,7 @@ def entry_position(bot, takes, position_idx):
                 set_entry_point_by_market(bot)
                 first_cycle = False
                 time.sleep(1)
+                lock.acquire()
                 continue
 
             if not first_cycle:
@@ -78,13 +91,15 @@ def entry_position(bot, takes, position_idx):
                         time.sleep(2)
                         seconds += 2
                 if flag:
+                    lock.acquire()
                     continue
 
-            if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
-                cancel_all(bot.account, bot.category, bot.symbol)
-                tl = bb_obj.tl
-                bl = bb_obj.bl
-                set_entry_point(bot, tl, bl)
+            if tl and bl:
+                if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
+                    cancel_all(bot.account, bot.category, bot.symbol)
+                    tl = bb_obj.tl
+                    bl = bb_obj.bl
+                    set_entry_point(bot, tl, bl)
 
             time.sleep(1)
             first_cycle = False

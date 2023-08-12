@@ -129,11 +129,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
             if lock.locked():
                 lock.release()
 
-            symbol_list, i = None, 0
-            while not symbol_list and i < 4:
-                symbol_list = get_list(bot.account, bot.category, bot.symbol)
-                i += 1
-                time.sleep(1)
+            symbol_list = func_get_symbol_list(bot)
 
             if position_idx is None:
                 position_idx = get_position_idx_by_range(symbol_list)
@@ -147,6 +143,10 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                     logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
                 else:
                     entry_order_buy_in_addition(bot)
+                    symbol_list = func_get_symbol_list(bot)
+                    psn_qty = get_qty(symbol_list)[position_idx]
+                    psn_side = get_side(symbol_list)[position_idx]
+                    psn_price = get_position_price(symbol_list)[position_idx]
 
                 bot.entry_order_by = ''
                 bot.entry_order_sell = ''
@@ -171,16 +171,19 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                             if bot.take1:
                                 bot.take1 = ''
                                 bot.save()
+                            lock.acquire()
                             continue
                 return psn_qty, psn_side, psn_price, first_cycle
 
             if take2_status_check(bot):
                 actions_after_end_cycle(bot)
+                lock.acquire()
                 continue
 
             if bot.orderType == "Market":
                 set_entry_point_by_market(bot)
                 first_cycle = False
+                lock.acquire()
                 continue
 
             if bot.side == 'FB':
@@ -221,6 +224,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                         time.sleep(2)
                         seconds += 2
                 if flag:
+                    lock.acquire()
                     continue
 
             if first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
@@ -316,11 +320,15 @@ def entry_order_status_check(bot):
 
 
 def entry_order_buy_in_addition(bot):
+    # logging(bot, f'entry_order_by_id - {bot.entry_order_by}')
     if bot.entry_order_by:
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_by)
+        # logging(bot, f'status - {status}')
         if status == 'PartiallyFilled':
             entry_order_by_amount = Decimal(
                 get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_by))
+            # logging(bot, f'entry_order_by_amount - {entry_order_by_amount}')
+
             order = Order.objects.create(
                 bot=bot,
                 category=bot.category,
@@ -332,10 +340,13 @@ def entry_order_buy_in_addition(bot):
             logging(bot, f'Позиция докупилась на {entry_order_by_amount}')
 
     if bot.entry_order_sell:
+        # logging(bot, f'entry_order_sell_id - {bot.entry_order_sell}')
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.entry_order_sell)
+        # logging(bot, f'status - {status}')
         if status == 'PartiallyFilled':
             entry_order_sell_amount = Decimal(
                 get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_sell))
+            # logging(bot, f'entry_order_sell_amount - {entry_order_sell_amount}')
             order = Order.objects.create(
                 bot=bot,
                 category=bot.category,
@@ -461,7 +472,8 @@ def clear_data_bot(bot):
     bot.entry_order_by_amount = None
     bot.entry_order_sell = ''
     bot.entry_order_sell_amount = None
-    bot.take1 = ''
+    if bot.take1 != 'Filled' or bot.take2 == 'Filled':
+        bot.take1 = ''
     bot.take2 = ''
     bot.take2_amount = None
     bot.pnl = 0
@@ -496,3 +508,13 @@ def actions_after_end_cycle(bot):
     else:
         clear_data_bot(bot)
         logging(bot, 'Bot start new cycle')
+
+
+def func_get_symbol_list(bot):
+    symbol_list, i = None, 0
+    while not symbol_list and i < 4:
+        symbol_list = get_list(bot.account, bot.category, bot.symbol)
+        i += 1
+        time.sleep(1)
+    return symbol_list
+

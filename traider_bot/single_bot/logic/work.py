@@ -44,6 +44,7 @@ def bot_work_logic(bot):
 
                 if all(take.is_filled for take in takes):
                     actions_after_end_cycle(bot)
+                    lock.acquire()
                     continue
 
             takes = get_takes(bot)
@@ -75,6 +76,7 @@ def bot_work_logic(bot):
                         time.sleep(2)
                         seconds += 2
                 if flag:
+                    lock.acquire()
                     continue
 
             if not first_cycle or new_cycle is True:
@@ -181,12 +183,12 @@ def append_thread_or_check_duplicate(bot_id, is_ts_bot):
     lock.acquire()
     try:
         if bot_id not in global_list_bot_id:
-            print('Добавил бота в список')
+            # print('Добавил бота в список')
             global_list_bot_id.add(bot_id)
-            print(global_list_bot_id, 333333333)
+            # print(global_list_bot_id, 333333333)
         elif is_ts_bot:
-            print('sdgdfsgdfgd', 333333333)
-            # pass
+            # print('sdgdfsgdfgd', 333333333)
+            pass
         else:
             raise Exception("Duplicate bot")
     finally:

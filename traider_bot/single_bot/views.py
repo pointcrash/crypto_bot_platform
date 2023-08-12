@@ -30,10 +30,10 @@ def single_bot_list(request):
 
     lock.acquire()
     try:
-        print(global_list_bot_id)
-        print(global_list_bot_id)
-        print(global_list_bot_id)
-        print(global_list_bot_id)
+        # print(global_list_bot_id)
+        # print(global_list_bot_id)
+        # print(global_list_bot_id)
+        # print(global_list_bot_id)
         for bot_id in all_bots_pks:
             if bot_id in global_list_bot_id:
                 is_alive_list.append(True)
@@ -41,10 +41,10 @@ def single_bot_list(request):
                 is_alive_list.append(False)
     finally:
         lock.release()
-    print(is_alive_list)
-    print(is_alive_list)
-    print(is_alive_list)
-    print(is_alive_list)
+    # print(is_alive_list)
+    # print(is_alive_list)
+    # print(is_alive_list)
+    # print(is_alive_list)
     bots = zip(bots, is_alive_list)
 
     return render(request, 'bot_list.html', {'bots': bots, })
