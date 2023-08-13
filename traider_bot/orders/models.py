@@ -40,7 +40,7 @@ class Order(models.Model):
         params = json.dumps(params)
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
         bot = Bot.objects.get(pk=self.bot.pk)
-        logging(bot, f'{response}')
+        # logging(bot, f'{response}')
         # logging(bot, f'{self.price}')
         # print(response)
         # print(self.qty)

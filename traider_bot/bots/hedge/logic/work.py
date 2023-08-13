@@ -33,6 +33,8 @@ def set_takes_for_hedge_grid_bot(bot):
             global_list_bot_id.add(bot_id)
         else:
             global_list_bot_id.remove(bot_id)
+            bot.is_active = False
+            bot.save()
             raise Exception("Duplicate bot")
     finally:
         lock.release()
@@ -175,6 +177,8 @@ def set_takes_for_hedge_grid_bot(bot):
             if lock.locked():
                 lock.release()
     finally:
+        bot.is_active = False
+        bot.save()
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:
             chat_id = tg.chat_id

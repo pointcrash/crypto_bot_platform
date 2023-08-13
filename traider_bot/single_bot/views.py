@@ -97,7 +97,10 @@ def single_bot_detail(request, bot_id):
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
                 bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+
             bot_thread.start()
+            bot.is_active = True
+            bot.save()
 
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread
@@ -140,6 +143,8 @@ def bot_start(request, bot_id):
 
     if bot_thread is not None:
         bot_thread.start()
+        bot.is_active = True
+        bot.save()
         lock.acquire()
         global_list_threads[bot.pk] = bot_thread
         if lock.locked():

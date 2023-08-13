@@ -19,37 +19,38 @@ from bots.models import Bot, IsTSStart
 
 def bot_start_reboot(bot_id):
     bot = Bot.objects.get(pk=bot_id)
-    bot_thread = None
-    is_ts_start = IsTSStart.objects.filter(bot=bot)
+    if bot.is_active:
+        bot_thread = None
+        is_ts_start = IsTSStart.objects.filter(bot=bot)
 
-    if check_thread_alive(bot.pk):
-        stop_bot_with_cancel_orders(bot)
+        if check_thread_alive(bot.pk):
+            stop_bot_with_cancel_orders(bot)
 
-    clear_data_bot(bot)  # Очищаем данные ордеров и тейков которые использовал старый бот
+        clear_data_bot(bot)  # Очищаем данные ордеров и тейков которые использовал старый бот
 
-    if bot.work_model == 'bb':
-        if bot.side == 'TS':
-            if is_ts_start:
+        if bot.work_model == 'bb':
+            if bot.side == 'TS':
+                if is_ts_start:
+                    bot_thread = threading.Thread(target=set_takes, args=(bot,))
+                else:
+                    bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+            else:
                 bot_thread = threading.Thread(target=set_takes, args=(bot,))
+        elif bot.work_model == 'grid':
+            if bot.side == 'TS':
+                if is_ts_start:
+                    bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+                else:
+                    bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
-                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-        else:
-            bot_thread = threading.Thread(target=set_takes, args=(bot,))
-    elif bot.work_model == 'grid':
-        if bot.side == 'TS':
-            if is_ts_start:
                 bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-            else:
-                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-        else:
-            bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
 
-    if bot_thread is not None:
-        bot_thread.start()
-        lock.acquire()
-        global_list_threads[bot.pk] = bot_thread
-        if lock.locked():
-            lock.release()
+        if bot_thread is not None:
+            bot_thread.start()
+            lock.acquire()
+            global_list_threads[bot.pk] = bot_thread
+            if lock.locked():
+                lock.release()
 
 
 def worker_exit(server, worker):

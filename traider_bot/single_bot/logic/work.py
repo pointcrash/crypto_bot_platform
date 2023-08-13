@@ -149,6 +149,8 @@ def bot_work_logic(bot):
             if lock.locked():
                 lock.release()
     finally:
+        bot.is_active = False
+        bot.save()
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:
             chat_id = tg.chat_id
@@ -214,6 +216,8 @@ def actions_after_end_cycle(bot):
         lock.acquire()
         try:
             global_list_bot_id.remove(bot_id)
+            bot.is_active = False
+            bot.save()
             if bot_id not in global_list_bot_id:
                 del global_list_threads[bot_id]
                 cancel_all(bot.account, bot.category, bot.symbol)

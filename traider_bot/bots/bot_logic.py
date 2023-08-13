@@ -500,6 +500,8 @@ def actions_after_end_cycle(bot):
         lock.acquire()
         try:
             global_list_bot_id.remove(bot_id)
+            bot.is_active = False
+            bot.save()
             if bot_id not in global_list_bot_id:
                 del global_list_threads[bot_id]
         finally:

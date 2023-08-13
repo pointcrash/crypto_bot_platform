@@ -196,6 +196,8 @@ def set_takes(bot):
             if lock.locked():
                 lock.release()
     finally:
+        bot.is_active = False
+        bot.save()
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:
             chat_id = tg.chat_id

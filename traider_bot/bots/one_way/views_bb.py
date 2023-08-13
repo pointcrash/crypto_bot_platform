@@ -63,7 +63,10 @@ def single_bb_bot_detail(request, bot_id):
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
             else:
                 bot_thread = threading.Thread(target=set_takes, args=(bot,))
+
             bot_thread.start()
+            bot.is_active = True
+            bot.save()
 
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread

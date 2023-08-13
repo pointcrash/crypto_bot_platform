@@ -1,10 +1,12 @@
 from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging
+from bots.models import Bot
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 
 
 def terminate_thread(bot_id):
+    bot = Bot.objects.get(pk=bot_id)
     lock.acquire()
     try:
         if bot_id in global_list_bot_id:
@@ -20,6 +22,8 @@ def terminate_thread(bot_id):
     except Exception as e:
         return f"Terminate error: {e}"
     finally:
+        bot.is_active = False
+        bot.save()
         if lock.locked():
             lock.release()
 

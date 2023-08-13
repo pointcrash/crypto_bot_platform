@@ -99,6 +99,7 @@ class Bot(models.Model):
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
 
     repeat = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     # def save(self, *args, **kwargs):
     #     super().save(*args, **kwargs)
