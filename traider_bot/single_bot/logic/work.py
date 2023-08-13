@@ -145,12 +145,12 @@ def bot_work_logic(bot):
             if bot_id in global_list_bot_id:
                 global_list_bot_id.remove(bot_id)
                 del global_list_threads[bot_id]
+                bot.is_active = False
+                bot.save()
         finally:
             if lock.locked():
                 lock.release()
     finally:
-        bot.is_active = False
-        bot.save()
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:
             chat_id = tg.chat_id
