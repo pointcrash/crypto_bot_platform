@@ -19,6 +19,7 @@ def bot_start_reboot(bot_id):
     import threading
 
     bot = Bot.objects.get(pk=bot_id)
+    print(bot.is_active)
     if bot.is_active:
         bot_thread = None
         is_ts_start = IsTSStart.objects.filter(bot=bot)
@@ -85,6 +86,7 @@ def when_ready(server):
         all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
         lock.acquire()
         print(global_list_bot_id)
+        print(all_bots_pks)
         if lock.locked():
             lock.release()
         time.sleep(5)
