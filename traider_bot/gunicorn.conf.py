@@ -1,12 +1,11 @@
 import os
-import time
+import threading
 
 import django
 
 from bots.bb_set_takes import set_takes
 from bots.bot_logic import clear_data_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders
 from single_bot.logic.global_variables import *
 from single_bot.logic.work import bot_work_logic
 
@@ -17,6 +16,8 @@ from bots.models import Bot, IsTSStart
 
 
 def bot_start_reboot(bot_id):
+    import threading
+
     bot = Bot.objects.get(pk=bot_id)
     if bot.is_active:
         bot_thread = None
@@ -50,6 +51,8 @@ def bot_start_reboot(bot_id):
 
 
 def stop_bot(bot_id):
+    import threading
+
     lock.acquire()
     try:
         if bot_id in global_list_bot_id:
@@ -76,17 +79,19 @@ def worker_exit(server, worker):
 
 
 def when_ready(server):
+    import time
+
     try:
         all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
-        for bot_id in all_bots_pks:
-            print(stop_bot(bot_id))
-
+        lock.acquire()
+        print(global_list_bot_id)
+        if lock.locked():
+            lock.release()
         time.sleep(5)
 
         for bot_id in all_bots_pks:
             bot_start_reboot(bot_id=bot_id)
-
-        print('Запуск произведен')
+            print(f'Запуск произведен {bot_id}')
 
     except Exception as e:
         print(f'При старте воркера возникла ошибка {e}')
