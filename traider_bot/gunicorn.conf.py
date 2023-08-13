@@ -1,13 +1,12 @@
 import os
 import time
-import pickle
 
 import django
 
 from bots.bb_set_takes import set_takes
-from bots.bot_logic import create_bb_and_avg_obj, clear_data_bot
+from bots.bot_logic import clear_data_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import terminate_thread, check_thread_alive, stop_bot_with_cancel_orders
+from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders
 from single_bot.logic.global_variables import *
 from single_bot.logic.work import bot_work_logic
 
@@ -22,9 +21,6 @@ def bot_start_reboot(bot_id):
     if bot.is_active:
         bot_thread = None
         is_ts_start = IsTSStart.objects.filter(bot=bot)
-
-        if check_thread_alive(bot.pk):
-            stop_bot_with_cancel_orders(bot)
 
         clear_data_bot(bot)  # Очищаем данные ордеров и тейков которые использовал старый бот
 
@@ -53,17 +49,37 @@ def bot_start_reboot(bot_id):
                 lock.release()
 
 
+def stop_bot(bot_id):
+    lock.acquire()
+    try:
+        if bot_id in global_list_bot_id:
+            global_list_bot_id.remove(bot_id)
+            if bot_id not in global_list_bot_id:
+                thread = global_list_threads[bot_id]
+                if lock.locked():
+                    lock.release()
+                thread.join()
+                lock.acquire()
+                del global_list_threads[bot_id]
+                return f"Terminate successful"
+    except Exception as e:
+        return f"Terminate error: {e}"
+    finally:
+        if lock.locked():
+            lock.release()
+
+
 def worker_exit(server, worker):
     all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
     for bot_id in all_bots_pks:
-        print(terminate_thread(bot_id))
+        print(stop_bot(bot_id))
 
 
 def when_ready(server):
     try:
         all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
         for bot_id in all_bots_pks:
-            print(terminate_thread(bot_id))
+            print(stop_bot(bot_id))
 
         time.sleep(5)
 
