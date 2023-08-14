@@ -17,4 +17,6 @@ def worker_exit(server, worker):
 
 
 def when_ready(server):
-    pass
+    print('Готов вкалывать')
+    print('Готов вкалывать')
+    print('Готов вкалывать')

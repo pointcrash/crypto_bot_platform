@@ -18,7 +18,7 @@ def terminate_thread(bot_id):
                 thread.join()
                 lock.acquire()
                 del global_list_threads[bot_id]
-                return f"Terminate successful"
+                return f"Terminate successful {bot_id}"
     except Exception as e:
         return f"Terminate error: {e}"
     finally:
