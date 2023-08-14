@@ -1,5 +1,5 @@
 from api_v5 import cancel_all, get_list, get_side, get_qty
-from bots.bot_logic import logging
+from bots.bot_logic import logging, clear_data_bot
 from bots.models import Bot
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
@@ -77,6 +77,7 @@ def stop_bot_with_cancel_orders(bot):
     logging(bot, terminate_thread(bot.pk))
     logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')
+    clear_data_bot(bot)
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):

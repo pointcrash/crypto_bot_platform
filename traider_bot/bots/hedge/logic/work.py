@@ -165,19 +165,19 @@ def set_takes_for_hedge_grid_bot(bot):
 
                         flag = True
             lock.acquire()
-    except Exception as e:
-        print(f'Error {e}')
-        logging(bot, f'Error {e}')
-        lock.acquire()
-        try:
-            if bot_id in global_list_bot_id:
-                global_list_bot_id.remove(bot_id)
-                del global_list_threads[bot_id]
-                bot.is_active = False
-                bot.save()
-        finally:
-            if lock.locked():
-                lock.release()
+    # except Exception as e:
+    #     print(f'Error {e}')
+    #     logging(bot, f'Error {e}')
+    #     lock.acquire()
+    #     try:
+    #         if bot_id in global_list_bot_id:
+    #             global_list_bot_id.remove(bot_id)
+    #             del global_list_threads[bot_id]
+    #             bot.is_active = False
+    #             bot.save()
+    #     finally:
+    #         if lock.locked():
+    #             lock.release()
     finally:
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:

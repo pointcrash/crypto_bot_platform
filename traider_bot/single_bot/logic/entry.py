@@ -46,6 +46,10 @@ def entry_position(bot, takes, position_idx):
                     psn_side = get_side(symbol_list)[position_idx]
                     psn_price = get_position_price(symbol_list)[position_idx]
 
+                bot.entry_order_by = ''
+                bot.entry_order_sell = ''
+                bot.save()
+
                 if bot.auto_avg:
                     if bot.work_model == 'grid':
                         avg_order = AvgOrder.objects.filter(bot=bot).first()

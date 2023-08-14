@@ -86,6 +86,8 @@ def bot_work_logic(bot):
                 if type(avg_order) == Order:
                     avg_order.save()
                     avg_order = AvgOrder.objects.create(bot=bot, order_link_id=avg_order.orderLinkId)
+                elif avg_order == 'MARGIN LIMIT!':
+                    avg_order = AvgOrder.objects.create(bot=bot, order_link_id='margin-limit')
                 else:
                     p += 1
                     if p > 5:
@@ -137,19 +139,19 @@ def bot_work_logic(bot):
                 Take.objects.bulk_update(takes, ['order_link_id'])
 
             lock.acquire()
-    except Exception as e:
-        print(f'Error {e}')
-        logging(bot, f'Error {e}')
-        lock.acquire()
-        try:
-            if bot_id in global_list_bot_id:
-                global_list_bot_id.remove(bot_id)
-                del global_list_threads[bot_id]
-                bot.is_active = False
-                bot.save()
-        finally:
-            if lock.locked():
-                lock.release()
+    # except Exception as e:
+    #     print(f'Error {e}')
+    #     logging(bot, f'Error {e}')
+    #     lock.acquire()
+    #     try:
+    #         if bot_id in global_list_bot_id:
+    #             global_list_bot_id.remove(bot_id)
+    #             del global_list_threads[bot_id]
+    #             bot.is_active = False
+    #             bot.save()
+    #     finally:
+    #         if lock.locked():
+    #             lock.release()
     finally:
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:
@@ -244,6 +246,6 @@ def check_takes_is_filled(bot, takes):
         if not take.is_filled:
             take_status = take_status_check(bot, take)
             if take_status:
-                take.is_filled = take_status
+                take.is_filled = True
                 logging(bot, f'take_{take.take_number} is filled.')
     Take.objects.bulk_update(takes, ['is_filled'])

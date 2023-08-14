@@ -465,7 +465,7 @@ def clean_and_return_bot_object(bot_id):
     return bot
 
 
-def clear_data_bot(bot):
+def clear_data_bot(bot, clear_data=0):
     from django.db import connections
 
     bot.entry_order_by = ''
@@ -478,16 +478,17 @@ def clear_data_bot(bot):
     bot.take2_amount = None
     bot.pnl = 0
 
-    avg_order = AvgOrder.objects.filter(bot=bot).first()
-    takes = Take.objects.filter(bot=bot)
-    if bot.side != 'TS':
-        is_ts_start = IsTSStart.objects.filter(bot=bot).first()
-        if is_ts_start:
-            is_ts_start.delete()
-    if takes:
-        takes.delete()
-    if avg_order:
-        avg_order.delete()
+    if clear_data == 0:
+        avg_order = AvgOrder.objects.filter(bot=bot).first()
+        takes = Take.objects.filter(bot=bot)
+        if bot.side != 'TS':
+            is_ts_start = IsTSStart.objects.filter(bot=bot).first()
+            if is_ts_start:
+                is_ts_start.delete()
+        if takes:
+            takes.delete()
+        if avg_order:
+            avg_order.delete()
 
     bot.save()
     connections.close_all()

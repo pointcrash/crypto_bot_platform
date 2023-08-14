@@ -88,7 +88,7 @@ def single_bot_detail(request, bot_id):
         form = GridBotForm(request.POST, request=request, instance=bot)
         if form.is_valid():
             bot = form.save(commit=False)
-            clear_data_bot(bot)
+            clear_data_bot(bot=bot, clear_data=1)
 
             if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
