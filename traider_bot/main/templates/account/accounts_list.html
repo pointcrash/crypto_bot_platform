@@ -18,7 +18,7 @@
                     <thead>
                     <tr class=" text-center">
                         <th>Name</th>
-                        <th>Is mainnet</th>
+                        <th class="d-none d-sm-table-cell">Is mainnet</th>
                         <th>Balance</th>
                         <th style="color: orange">Edit</th>
                         <th style="color: red">Delete</th>
@@ -28,7 +28,7 @@
                     {% for account in accounts %}
                     <tr class=" text-center">
                         <td>{{ account.name }}</td>
-                        <td>{% if account.is_mainnet %}<i class="fa-solid fa-check"></i>{% else %}<i
+                        <td class="d-none d-sm-table-cell">{% if account.is_mainnet %}<i class="fa-solid fa-check"></i>{% else %}<i
                                 class="fa-solid fa-xmark"></i>{% endif %}
                         </td>
                         <td><button id="{{ account.pk }}" class="get-balance-button btn btn-sm btn-secondary px-3 btn-shadow">Balance</button></td>
