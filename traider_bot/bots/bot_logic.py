@@ -372,8 +372,8 @@ def take1_status_check(bot):
             return True
 
 
-def take1_leaves_qty_check(bot):
-    if bot.take1 and bot.take1 != 'Filled':
+def order_leaves_qty_check(bot, order_id):
+    if order_id and order_id != 'Filled':
         status = get_order_status(bot.account, bot.category, bot.symbol, bot.take1)
         if status == 'PartiallyFilled':
             bot.take2_amount = Decimal(get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.take1))
@@ -476,6 +476,7 @@ def clear_data_bot(bot, clear_data=0):
         bot.take1 = ''
     bot.take2 = ''
     bot.take2_amount = None
+    bot.bin_order_id = ''
     bot.pnl = 0
 
     if clear_data == 0:
@@ -520,4 +521,26 @@ def func_get_symbol_list(bot):
         i += 1
         time.sleep(1)
     return symbol_list
+
+
+def bin_order_buy_in_addition(bot, side):
+    status = get_order_status(bot.account, bot.category, bot.symbol, bot.bin_order_id)
+    if status == 'PartiallyFilled':
+        entry_order_by_amount = Decimal(
+            get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.bin_order_id))
+
+        order = Order.objects.create(
+            bot=bot,
+            category=bot.category,
+            symbol=bot.symbol.name,
+            side=side,
+            orderType="Market",
+            qty=entry_order_by_amount
+        )
+        logging(bot, 'BIN-order addition')
+        return True
+
+    elif status == 'Filled':
+        logging(bot, 'BIN-order is filled')
+        return True
 

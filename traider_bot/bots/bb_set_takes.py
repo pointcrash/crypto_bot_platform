@@ -4,8 +4,8 @@ from decimal import Decimal
 
 from api_v5 import cancel_all, switch_position_mode, set_leverage, get_current_price
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
-    take2_status_check, create_bb_and_avg_obj, take1_leaves_qty_check, order_placement_verification, \
-    check_order_placement_time, actions_after_end_cycle
+    take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
+    check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
@@ -99,6 +99,9 @@ def set_takes(bot):
                 lock.acquire()
                 continue
 
+            if bot.take1 != 'Filled' and take1_status_check(bot):
+                first_cycle = False
+
             if not first_cycle or tl != bb_obj.tl or bl != bb_obj.bl:
                 cancel_all(bot.account, bot.category, bot.symbol)
 
@@ -113,6 +116,8 @@ def set_takes(bot):
                 if side == "Buy":
                     ml = bb_obj.ml
                     exit_line = bl
+                    bin_line = tl
+                    bin_side = "Sell"
                     if ml > psn_price * Decimal(str(0.9994)):
                         ml = round(psn_price * Decimal(str(0.9994)), round_number)
                     if exit_line > psn_price * Decimal(str(0.9988)):
@@ -120,10 +125,21 @@ def set_takes(bot):
                 else:
                     ml = bb_obj.ml
                     exit_line = tl
+                    bin_line = bl
+                    bin_side = "Buy"
                     if ml < psn_price * Decimal(str(1.0006)):
                         ml = round(psn_price * Decimal(str(1.0006)), round_number)
                     if exit_line < psn_price * Decimal(str(1.0012)):
                         exit_line = round(psn_price * Decimal(str(1.0012)), round_number)
+
+                if bot.bin_order:
+                    if bot.bin_order_id:
+                        if bin_order_buy_in_addition(bot, bin_side):
+                            bot.bin_order_id = ''
+                            bot.take1 = ''
+                            bot.save()
+                            lock.acquire()
+                            continue
 
                 if bot.take_on_ml:
                     if take1_status_check(bot):
@@ -138,12 +154,25 @@ def set_takes(bot):
                             is_take=True,
                         )
 
+                        if bot.bin_order:
+                            bin_order = Order.objects.create(
+                                bot=bot,
+                                category=bot.category,
+                                symbol=bot.symbol.name,
+                                side=bin_side,
+                                orderType='Limit',
+                                qty=qty,
+                                price=bin_line,
+                            )
+                            bot.bin_order_id = bin_order.orderLinkId
+                            logging(bot, f'open BIN-order. Price: {exit_line}')
+
                         logging(bot, f'open take2 order. Price: {exit_line}')
                         bot.take2 = take2.orderLinkId
                         bot.save()
 
                     else:
-                        if take1_leaves_qty_check(bot):
+                        if order_leaves_qty_check(bot, bot.take1):
                             qty_ml = bot.take2_amount
                         take1 = Order.objects.create(
                             bot=bot,

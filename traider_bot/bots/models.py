@@ -96,6 +96,8 @@ class Bot(models.Model):
     take1 = models.CharField(blank=True, null=True)
     take2 = models.CharField(blank=True, null=True)
     take2_amount = models.DecimalField(max_digits=10, decimal_places=10, blank=True, null=True)
+    bin_order = models.BooleanField(default=True)
+    bin_order_id = models.CharField(blank=True, null=True)
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
 
     repeat = models.BooleanField(default=False)

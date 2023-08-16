@@ -88,7 +88,7 @@ def single_bot_detail(request, bot_id):
         form = GridBotForm(request.POST, request=request, instance=bot)
         if form.is_valid():
             bot = form.save(commit=False)
-            clear_data_bot(bot=bot, clear_data=1)
+            clear_data_bot(bot)
 
             if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
@@ -122,7 +122,7 @@ def bot_start(request, bot_id):
     if check_thread_alive(bot.pk):
         stop_bot_with_cancel_orders(bot)
 
-    clear_data_bot(bot)  # Очищаем данные ордеров и тейков которые использовал старый бот
+    clear_data_bot(bot, clear_data=1)  # Очищаем данные ордеров и тейков которые использовал старый бот
 
     if bot.work_model == 'bb':
         if bot.side == 'TS':

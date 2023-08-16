@@ -65,8 +65,7 @@ def set_takes_for_hedge_grid_bot(bot):
             if flag:
                 if bot.work_model == 'bb':
                     IsTSStart.objects.create(bot=bot, TS=True)
-                    bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
-                    set_takes(bot, bb_obj, bb_avg_obj)
+                    set_takes(bot)
 
                 elif bot.work_model == 'grid':
                     IsTSStart.objects.create(bot=bot, TS=True)
