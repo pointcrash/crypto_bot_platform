@@ -1,4 +1,3 @@
-import multiprocessing
 from datetime import datetime
 import time
 from decimal import Decimal, ROUND_DOWN
@@ -477,9 +476,9 @@ def clear_data_bot(bot, clear_data=0):
     bot.take2 = ''
     bot.take2_amount = None
     bot.bin_order_id = ''
-    bot.pnl = 0
 
     if clear_data == 0:
+        bot.pnl = 0
         avg_order = AvgOrder.objects.filter(bot=bot).first()
         takes = Take.objects.filter(bot=bot)
         if bot.side != 'TS':

@@ -6,12 +6,10 @@ from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, check_thread_alive
-from bots.bot_logic import get_update_symbols, create_bb_and_avg_obj, clean_and_return_bot_object, clear_data_bot
+from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
+from bots.bot_logic import get_update_symbols, clear_data_bot
 from bots.forms import GridBotForm
-from bots.bot_logic_grid import set_takes_for_grid_bot
-from bots.models import Bot, Process, AvgOrder, Take, SingleBot, IsTSStart
-from django.contrib import messages
+from bots.models import Bot, IsTSStart
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import bot_work_logic
@@ -30,10 +28,6 @@ def single_bot_list(request):
 
     lock.acquire()
     try:
-        # print(global_list_bot_id)
-        # print(global_list_bot_id)
-        # print(global_list_bot_id)
-        # print(global_list_bot_id)
         for bot_id in all_bots_pks:
             if bot_id in global_list_bot_id:
                 is_alive_list.append(True)
@@ -41,10 +35,6 @@ def single_bot_list(request):
                 is_alive_list.append(False)
     finally:
         lock.release()
-    # print(is_alive_list)
-    # print(is_alive_list)
-    # print(is_alive_list)
-    # print(is_alive_list)
     bots = zip(bots, is_alive_list)
 
     return render(request, 'bot_list.html', {'bots': bots, })

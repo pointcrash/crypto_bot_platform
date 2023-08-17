@@ -1,13 +1,16 @@
+import threading
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api_v5 import get_order_status, get_query_account_coins_balance
-from bots.bot_logic import logging
-from bots.models import Bot, Process, SingleBot
+from bots.bb_set_takes import set_takes
+from bots.bot_logic import logging, clear_data_bot
+from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
+from bots.models import Bot, SingleBot, IsTSStart
 from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, \
     stop_bot_with_cancel_orders_and_drop_positions
-from main.models import Account
-from orders.models import Order
+from single_bot.logic.global_variables import global_list_threads, lock
+from single_bot.logic.work import bot_work_logic
 
 
 def views_bots_type_choice(request, mode):
@@ -39,9 +42,6 @@ def views_bots_type_choice(request, mode):
 @login_required
 def terminate_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
-    # bot_id = bot.pk
-    # process = Process.objects.get(bot=bot)
-    # pid = process.pid
     single_bot = SingleBot.objects.filter(bot=bot)
     single_bot.delete()
 
@@ -53,9 +53,6 @@ def terminate_bot(request, bot_id, event_number):
 
     elif event_number == 3:
         stop_bot_with_cancel_orders_and_drop_positions(bot)
-
-        # process.pid = None
-        # process.save()
 
     return redirect(request.META.get('HTTP_REFERER'))
 
@@ -77,15 +74,39 @@ def delete_bot(request, bot_id, event_number):
     return redirect('single_bot_list')
 
 
-# def view_order_status(request, bot_id, order_id):
-#     bot = Bot.objects.get(pk=bot_id)
-#     order = Order.objects.get(pk=order_id)
-#     status = get_order_status(bot.account, bot.category, bot.symbol, order.orderLinkId)
-#
-#
-# def get_balance_views(request, acc_id):
-#     acc = Account.objects.get(pk=acc_id)
-#     balance = get_query_account_coins_balance(acc)
-#     return render(request, 'balance.html', {'balance': balance})
+def reboot_bots(request):
+    bots = Bot.objects.all()
+    for bot in bots:
+        if bot.is_active:
+            bot_thread = None
+            is_ts_start = IsTSStart.objects.filter(bot=bot)
 
+            clear_data_bot(bot, clear_data=1)  # Очищаем данные ордеров и тейков которые использовал старый бот
+
+            if bot.work_model == 'bb':
+                if bot.side == 'TS':
+                    if is_ts_start:
+                        bot_thread = threading.Thread(target=set_takes, args=(bot,))
+                    else:
+                        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                else:
+                    bot_thread = threading.Thread(target=set_takes, args=(bot,))
+            elif bot.work_model == 'grid':
+                if bot.side == 'TS':
+                    if is_ts_start:
+                        bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+                    else:
+                        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                else:
+                    bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+
+            if bot_thread is not None:
+                bot_thread.start()
+                bot.is_active = True
+                bot.save()
+                lock.acquire()
+                global_list_threads[bot.pk] = bot_thread
+                if lock.locked():
+                    lock.release()
+    return redirect('single_bot_list')
 
