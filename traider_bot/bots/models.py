@@ -85,6 +85,7 @@ class Bot(models.Model):
     deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0)
     dfm = models.DecimalField(max_digits=5, decimal_places=3, default=30)
     chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
+    dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     max_margin = models.IntegerField(null=True, blank=True)
     time_sleep = models.IntegerField(default=5, null=True, blank=True)
     firs_take_is_done = models.BooleanField(default=False)

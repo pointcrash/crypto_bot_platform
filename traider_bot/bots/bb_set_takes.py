@@ -111,7 +111,7 @@ def set_takes(bot):
 
                 qty = psn_qty
                 if bot.take_on_ml:
-                    qty_ml = (Decimal(psn_qty * bot.take_on_ml_percent / 100)).quantize(Decimal(bot.symbol.minOrderQty))
+                    qty_ml = Decimal(str(psn_qty * bot.take_on_ml_percent / 100)).quantize(Decimal(bot.symbol.minOrderQty))
 
                 if side == "Buy":
                     ml = bb_obj.ml
@@ -155,13 +155,15 @@ def set_takes(bot):
                         )
 
                         if bot.bin_order:
+                            bin_qty = Decimal(str((qty / (100 - bot.take_on_ml_percent)) * bot.take_on_ml_percent)).quantize(Decimal(bot.symbol.minOrderQty))
+
                             bin_order = Order.objects.create(
                                 bot=bot,
                                 category=bot.category,
                                 symbol=bot.symbol.name,
                                 side=bin_side,
                                 orderType='Limit',
-                                qty=qty,
+                                qty=bin_qty,
                                 price=bin_line,
                             )
                             bot.bin_order_id = bin_order.orderLinkId

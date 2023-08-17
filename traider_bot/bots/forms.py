@@ -33,7 +33,7 @@ class BotForm(forms.ModelForm):
                   'qty_kline', 'd', 'auto_avg', 'bb_avg_percent',
                   'deviation_from_lines',
                   'is_percent_deviation_from_lines', 'dfm',
-                  'chw', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
+                  'chw', 'dfep', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
                   'grid_avg_value', 'bin_order', ]
 
         widgets = {
@@ -52,6 +52,7 @@ class BotForm(forms.ModelForm):
             'deviation_from_lines': forms.NumberInput(attrs={'class': 'form-control'}),
             'dfm': forms.NumberInput(attrs={'class': 'form-control'}),
             'chw': forms.NumberInput(attrs={'class': 'form-control'}),
+            'dfep': forms.NumberInput(attrs={'class': 'form-control'}),
             'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
             'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
             'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -76,6 +77,7 @@ class BotForm(forms.ModelForm):
             'deviation_from_lines': '(± BB Deviation)',
             'dfm': 'DFM',
             'chw': 'ChW',
+            'dfep': 'DFEP',
             'max_margin': 'Max Margin',
             'time_sleep': 'Request Rate (sec)',
             'repeat': 'Repeat Cycle',
@@ -110,6 +112,9 @@ class BotForm(forms.ModelForm):
         if leverage > Decimal(symbol.maxLeverage) or leverage < Decimal(symbol.minLeverage):
             raise forms.ValidationError(
                 f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
+
+        if side == 'TS':
+            raise forms.ValidationError('Режим "TS" еще не реализован для стратегии Боллинджера')
 
         return cleaned_data
 
