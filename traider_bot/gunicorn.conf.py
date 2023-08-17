@@ -13,7 +13,7 @@ from bots.models import Bot
 def worker_exit(server, worker):
     all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
     for bot_id in all_bots_pks:
-        print(terminate_thread(bot_id))
+        print(terminate_thread(bot_id, keep_active=True))
 
 
 def when_ready(server):

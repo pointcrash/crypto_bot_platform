@@ -77,6 +77,7 @@ def delete_bot(request, bot_id, event_number):
 def reboot_bots(request):
     bots = Bot.objects.all()
     for bot in bots:
+        print(bot.is_active)
         if bot.is_active:
             bot_thread = None
             is_ts_start = IsTSStart.objects.filter(bot=bot)
@@ -100,6 +101,7 @@ def reboot_bots(request):
                 else:
                     bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
 
+            print(bot_thread)
             if bot_thread is not None:
                 bot_thread.start()
                 bot.is_active = True

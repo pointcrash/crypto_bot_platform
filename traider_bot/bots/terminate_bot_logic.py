@@ -5,7 +5,7 @@ from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 
 
-def terminate_thread(bot_id):
+def terminate_thread(bot_id, keep_active=False):
     bot = Bot.objects.get(pk=bot_id)
     lock.acquire()
     try:
@@ -22,8 +22,9 @@ def terminate_thread(bot_id):
     except Exception as e:
         return f"Terminate error: {e}"
     finally:
-        bot.is_active = False
-        bot.save()
+        if not keep_active:
+            bot.is_active = False
+            bot.save()
         if lock.locked():
             lock.release()
 
