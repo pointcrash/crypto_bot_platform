@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
-from bots.bot_logic import get_update_symbols, clear_data_bot
+from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm
 from bots.models import Bot, IsTSStart
 
@@ -74,6 +74,8 @@ def single_bot_create(request):
 @login_required
 def single_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
+    symbol_list = func_get_symbol_list(bot)
+    symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
     if request.method == 'POST':
         form = GridBotForm(request.POST, request=request, instance=bot)
         if form.is_valid():
@@ -101,7 +103,7 @@ def single_bot_detail(request, bot_id):
     else:
         form = GridBotForm(request=request, instance=bot)
 
-    return render(request, 'bot_detail.html', {'form': form, 'bot': bot, })
+    return render(request, 'bot_detail.html', {'form': form, 'bot': bot,'symbol_list': symbol_list, })
 
 
 def bot_start(request, bot_id):

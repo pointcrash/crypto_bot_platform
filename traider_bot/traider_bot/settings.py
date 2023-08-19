@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'bots',
     'single_bot',
     'tg_bot',
+    'timezone',
 ]
 
 MIDDLEWARE = [

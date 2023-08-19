@@ -4,6 +4,13 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
+            {% if timezone_form %}
+            <form method="post">
+                {% csrf_token %}
+                {{ timezone_form.as_p }}
+                <button type="submit" class="btn btn-primary btn-sm">Подтвердить</button>
+            </form>
+            {% endif %}
             <h1 class="text-center">Logs</h1>
             <h5 class="text-center text-muted">Bot {{ bot }}</h5>
             {% if bot.work_model == 'bb' %}

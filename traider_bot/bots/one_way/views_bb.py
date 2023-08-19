@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
-from bots.bot_logic import clear_data_bot
+from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import BotForm
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.models import Bot
@@ -50,6 +50,8 @@ def single_bb_bot_create(request):
 @login_required
 def single_bb_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
+    symbol_list = func_get_symbol_list(bot)
+    symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
     if request.method == 'POST':
         form = BotForm(request.POST, request=request, instance=bot)
         if form.is_valid():
@@ -77,7 +79,7 @@ def single_bb_bot_detail(request, bot_id):
     else:
         form = BotForm(request=request, instance=bot)
 
-    return render(request, 'one_way/bb/bot_detail.html', {'form': form, 'bot': bot, })
+    return render(request, 'one_way/bb/bot_detail.html', {'form': form, 'bot': bot, 'symbol_list': symbol_list, })
 
 
 

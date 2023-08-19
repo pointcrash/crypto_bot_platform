@@ -102,26 +102,26 @@
                     {{ form.max_margin }}
                     <br>
                     <div class="col-6">
-                    {{ form.bin_order.label_tag }}
-                    {{ form.bin_order }}
+                        {{ form.bin_order.label_tag }}
+                        {{ form.bin_order }}
                     </div>
                     <br>
                     <hr>
                     <div class="col-6">
-                    {{ form.time_sleep.label_tag }}
-                    {{ form.time_sleep }}
-                    {{ form.repeat.label_tag }}
-                    {{ form.repeat }}
+                        {{ form.time_sleep.label_tag }}
+                        {{ form.time_sleep }}
+                        {{ form.repeat.label_tag }}
+                        {{ form.repeat }}
                     </div>
                 </div>
             </div>
-                <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
-            <div class="row justify-content-center">
-            <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
-                    data-bs-target="#deleteBotModal">Delete Bot
-            </button>
+            <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
+                <div class="row justify-content-center">
+                    <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
+                            data-bs-target="#deleteBotModal">Delete Bot
+                    </button>
                 </div>
             </div>
             <!-- Modal -->
@@ -153,6 +153,42 @@
                 </div>
             </div>
         </form>
+        <div class="row mb-5">
+            {% if symbol_list.size != '0.0' %}
+            <table class="table" style="vertical-align: middle">
+                <thead>
+                <tr class="">
+                    <th>SIDE</th>
+                    <th>SYMBOL</th>
+                    <th class="d-none d-sm-table-cell">SIZE</th>
+                    <th class="d-none d-sm-table-cell">ENTRY PRICE</th>
+                    <th >MARK PRICE</th>
+                    <th >LIQ PRICE</th>
+                    <th class="d-none d-md-table-cell">MARGIN</th>
+                    <th >UNREALIZED PNL</th>
+                    <th class="d-none d-md-table-cell">CANCEL M-LINE</th>
+                    <th class="d-none d-md-table-cell">CLOSE POSITION</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr class="">
+                        <td>{{ symbol_list.side }}</td>
+                        <td>{{ symbol_list.symbol }}</td>
+                        <td>{{ symbol_list.size }}</td>
+                        <td class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
+                        <td >{{ symbol_list.markPrice }}</td>
+                        <td >{{ symbol_list.liqPrice }}</td>
+                        <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
+                        <td >{{ symbol_list.unrealisedPnl }}</td>
+                        <td class="d-none d-md-table-cell"><a href="#" class="btn btn-warning">Cancel M-line</a></td>
+                        <td class="d-none d-md-table-cell"><a href="#" class="btn btn-danger">Close position</a></td>
+                    </tr>
+                </tbody>
+            </table>
+            {% else %}
+            <h5 class="text-center">Позиция не открыта</h5>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

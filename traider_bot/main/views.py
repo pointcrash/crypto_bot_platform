@@ -2,9 +2,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+import re
+from datetime import datetime, timedelta
 
 from api_v5 import get_query_account_coins_balance
 from bots.models import Log, Bot
+from timezone.forms import TimeZoneForm
+from timezone.models import TimeZone
 from .forms import RegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
@@ -20,9 +24,46 @@ def logs_list(request, bot_id):
     log_list = []
     bot = Bot.objects.get(id=bot_id)
     logs = Log.objects.filter(bot=bot_id).order_by('pk')
+    user = request.user
+    gmt = 0
+    time_zone = None
+
+    if request.method == 'POST':
+        timezone_form = TimeZoneForm(request.POST)
+        if timezone_form.is_valid():
+            user_tz = TimeZone.objects.filter(users=user)
+            for tz in user_tz:
+                tz.users.remove(user)
+            time_zone = timezone_form.cleaned_data['time_zone']
+            time_zone.users.add(user)
+            gmt = int(time_zone.gmtOffset)
+    else:
+        time_zone = TimeZone.objects.filter(users=user).first()
+        timezone_form = TimeZoneForm()
+
+    if time_zone:
+        for i in range(2):
+            pattern = r'\d{2}:\d{2}:\d{2} \d{4}-\d{2}-\d{2}'
+            for log in logs:
+                content = log.content
+                time = re.search(pattern, content)
+                if time:
+                    matched_text = time.group()
+                    datetime_obj = datetime.strptime(matched_text, '%H:%M:%S %Y-%m-%d')
+
+                    if gmt < 0:
+                        new_datetime = datetime_obj - timedelta(seconds=gmt)
+                    else:
+                        new_datetime = datetime_obj + timedelta(seconds=gmt)
+
+                    in_time = f'{new_datetime.time()} {new_datetime.date()}'
+                    modified_content = re.sub(pattern, in_time, content)
+                    log.content = modified_content
+            Log.objects.bulk_update(logs, ['content'])
+
     for i in range(1, len(logs)+1):
         log_list.append([i, logs[i-1]])
-    return render(request, 'logs.html', {'log_list': log_list, 'bot': bot, })
+    return render(request, 'logs.html', {'log_list': log_list, 'bot': bot, 'timezone_form': timezone_form})
 
 
 @login_required
