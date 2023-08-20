@@ -4,15 +4,34 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
-            {% if timezone_form %}
-            <form method="post">
-                {% csrf_token %}
-                {{ timezone_form.as_p }}
-                <button type="submit" class="btn btn-primary btn-sm">Подтвердить</button>
-            </form>
-            {% endif %}
+            <div class="row">
+                <div class="col-4">
+                    {% if request.user.is_authenticated %}
+                    {% with timezone_for_user=request.user.timezone_set.first %}
+                    {% if timezone_for_user %}
+                        <h6 class="text-muted">Часовой пояс:</h6><h5 class="text-muted">{{ timezone_for_user }}</h5>
+                    {% else %}
+                        <p></p>
+                    {% endif %}
+                    {% endwith %}
+                    {% else %}
+                        <p>User is not logged in.</p>
+                    {% endif %}
+                </div>
+            <div class="col-4">
             <h1 class="text-center">Logs</h1>
             <h5 class="text-center text-muted">Bot {{ bot }}</h5>
+            </div>
+                <div class="col-4 text-end">
+            {% if timezone_form %}
+                <form method="post">
+                    {% csrf_token %}
+                    {{ timezone_form.as_p }}
+                    <button type="submit" class="btn btn-primary btn-sm">Подтвердить</button>
+                </form>
+            {% endif %}
+                </div>
+            </div>
             {% if bot.work_model == 'bb' %}
             <a href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% else %}

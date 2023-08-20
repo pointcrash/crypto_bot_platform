@@ -4,8 +4,10 @@ from decimal import Decimal, ROUND_DOWN
 
 import os
 import django
+import pytz
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
+from timezone.models import TimeZone
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
@@ -300,10 +302,29 @@ def create_bb_and_avg_obj(bot, position_idx=0):
 
 
 def logging(bot, text):
+    user = bot.owner
+    timezone = TimeZone.objects.filter(users=user).first()
+    gmt0 = pytz.timezone('GMT')
+    date = datetime.now(gmt0).replace(microsecond=0)
     bot_info = f'Bot {bot.pk} {bot.symbol.name} {bot.side} {bot.interval}'
-    date = datetime.now().replace(microsecond=0)
+    gmt = 0
+
+    if timezone:
+        gmt = int(timezone.gmtOffset)
+        if gmt > 0:
+            date = date + timedelta(seconds=gmt)
+        else:
+            date = date - timedelta(seconds=gmt)
+
+    if gmt > 0:
+        str_gmt = '+' + str(gmt / 3600)
+    elif gmt < 0:
+        str_gmt = '-' + str(gmt / 3600)
+    else:
+        str_gmt = str(gmt)
+
     in_time = f'{date.time()} {date.date()}'
-    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time}')
+    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time} (GMT {str_gmt})')
 
 
 def entry_order_status_check(bot):

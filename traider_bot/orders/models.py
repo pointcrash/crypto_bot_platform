@@ -1,10 +1,12 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
+import pytz
 from django.db import models
 
 from api_v5 import *
 from bots.models import Bot, Log
+from timezone.models import TimeZone
 
 
 class Order(models.Model):
@@ -62,7 +64,26 @@ class Order(models.Model):
 
 
 def logging(bot, text):
+    user = bot.owner
+    timezone = TimeZone.objects.filter(users=user).first()
+    gmt0 = pytz.timezone('GMT')
+    date = datetime.now(gmt0).replace(microsecond=0)
     bot_info = f'Bot {bot.pk} {bot.symbol.name} {bot.side} {bot.interval}'
-    date = datetime.now().replace(microsecond=0)
+    gmt = 0
+
+    if timezone:
+        gmt = int(timezone.gmtOffset)
+        if gmt > 0:
+            date = date + timedelta(seconds=gmt)
+        else:
+            date = date - timedelta(seconds=gmt)
+
+    if gmt > 0:
+        str_gmt = '+' + str(gmt / 3600)
+    elif gmt < 0:
+        str_gmt = '-' + str(gmt / 3600)
+    else:
+        str_gmt = str(gmt)
+
     in_time = f'{date.time()} {date.date()}'
-    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time}')
+    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time} (GMT {str_gmt})')

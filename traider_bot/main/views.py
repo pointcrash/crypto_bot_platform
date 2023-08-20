@@ -25,8 +25,8 @@ def logs_list(request, bot_id):
     bot = Bot.objects.get(id=bot_id)
     logs = Log.objects.filter(bot=bot_id).order_by('pk')
     user = request.user
-    gmt = 0
-    time_zone = None
+    # gmt = 0
+    # time_zone = None
 
     if request.method == 'POST':
         timezone_form = TimeZoneForm(request.POST)
@@ -36,30 +36,30 @@ def logs_list(request, bot_id):
                 tz.users.remove(user)
             time_zone = timezone_form.cleaned_data['time_zone']
             time_zone.users.add(user)
-            gmt = int(time_zone.gmtOffset)
+            # gmt = int(time_zone.gmtOffset)
     else:
-        time_zone = TimeZone.objects.filter(users=user).first()
+        # time_zone = TimeZone.objects.filter(users=user).first()
         timezone_form = TimeZoneForm()
 
-    if time_zone:
-        for i in range(2):
-            pattern = r'\d{2}:\d{2}:\d{2} \d{4}-\d{2}-\d{2}'
-            for log in logs:
-                content = log.content
-                time = re.search(pattern, content)
-                if time:
-                    matched_text = time.group()
-                    datetime_obj = datetime.strptime(matched_text, '%H:%M:%S %Y-%m-%d')
-
-                    if gmt < 0:
-                        new_datetime = datetime_obj - timedelta(seconds=gmt)
-                    else:
-                        new_datetime = datetime_obj + timedelta(seconds=gmt)
-
-                    in_time = f'{new_datetime.time()} {new_datetime.date()}'
-                    modified_content = re.sub(pattern, in_time, content)
-                    log.content = modified_content
-            Log.objects.bulk_update(logs, ['content'])
+    # if time_zone:
+    #     for i in range(2):
+    #         pattern = r'\d{2}:\d{2}:\d{2} \d{4}-\d{2}-\d{2}'
+    #         for log in logs:
+    #             content = log.content
+    #             time = re.search(pattern, content)
+    #             if time:
+    #                 matched_text = time.group()
+    #                 datetime_obj = datetime.strptime(matched_text, '%H:%M:%S %Y-%m-%d')
+    #
+    #                 if gmt < 0:
+    #                     new_datetime = datetime_obj - timedelta(seconds=gmt)
+    #                 else:
+    #                     new_datetime = datetime_obj + timedelta(seconds=gmt)
+    #
+    #                 in_time = f'{new_datetime.time()} {new_datetime.date()}'
+    #                 modified_content = re.sub(pattern, in_time, content)
+    #                 log.content = modified_content
+    #         Log.objects.bulk_update(logs, ['content'])
 
     for i in range(1, len(logs)+1):
         log_list.append([i, logs[i-1]])

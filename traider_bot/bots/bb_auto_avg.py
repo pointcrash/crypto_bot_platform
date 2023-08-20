@@ -1,10 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+
+import pytz
 
 from api_v5 import get_current_price
 from decimal import Decimal, ROUND_DOWN
 
 from bots.models import Log
 from orders.models import Order
+from timezone.models import TimeZone
 
 
 def get_USDT_from_qty(qty, price):
@@ -104,7 +107,26 @@ def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
 
 
 def logging(bot, text):
+    user = bot.owner
+    timezone = TimeZone.objects.filter(users=user).first()
+    gmt0 = pytz.timezone('GMT')
+    date = datetime.now(gmt0).replace(microsecond=0)
     bot_info = f'Bot {bot.pk} {bot.symbol.name} {bot.side} {bot.interval}'
-    date = datetime.now().replace(microsecond=0)
+    gmt = 0
+
+    if timezone:
+        gmt = int(timezone.gmtOffset)
+        if gmt > 0:
+            date = date + timedelta(seconds=gmt)
+        else:
+            date = date - timedelta(seconds=gmt)
+
+    if gmt > 0:
+        str_gmt = '+' + str(gmt / 3600)
+    elif gmt < 0:
+        str_gmt = '-' + str(gmt / 3600)
+    else:
+        str_gmt = str(gmt)
+
     in_time = f'{date.time()} {date.date()}'
-    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time}')
+    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time} (GMT {str_gmt})')
