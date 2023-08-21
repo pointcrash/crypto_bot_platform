@@ -3,11 +3,11 @@ from django.urls import path, include
 
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
     profile_list, profile_mode_switching
-from timezone.views import create_timezone
+# from timezone.views import create_timezone
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('set_timezones/', create_timezone, name='create_timezone'),
+    # path('set_timezones/', create_timezone, name='create_timezone'),
     path('logs/', logs_view, name='logs'),
     path('logs/<int:bot_id>/', logs_list, name='logs_detail'),
     path('logs/delete/<int:bot_id>/', view_logs_delete, name='logs_delete'),
