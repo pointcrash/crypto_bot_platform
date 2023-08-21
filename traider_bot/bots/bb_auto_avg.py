@@ -67,15 +67,18 @@ class BBAutoAverage:
                     return True
 
     def margin_limit_check(self):
-        psn_currency_amount = self.psn_price * self.psn_qty / self.bot.isLeverage
-        avg_currency_amount = psn_currency_amount * self.bot.bb_avg_percent / 100
-
-        if psn_currency_amount + avg_currency_amount > self.max_margin:
-            logging(self.bot,
-                    f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {psn_currency_amount + avg_currency_amount}')
-            return False
-        else:
+        if not self.max_margin:
             return True
+        else:
+            psn_currency_amount = self.psn_price * self.psn_qty / self.bot.isLeverage
+            avg_currency_amount = psn_currency_amount * self.bot.bb_avg_percent / 100
+
+            if psn_currency_amount + avg_currency_amount > self.max_margin:
+                logging(self.bot,
+                        f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {psn_currency_amount + avg_currency_amount}')
+                return False
+            else:
+                return True
 
     def dfep_check(self, current_price):
         if not self.dfep:
@@ -124,7 +127,7 @@ def logging(bot, text):
     if gmt > 0:
         str_gmt = '+' + str(gmt / 3600)
     elif gmt < 0:
-        str_gmt = '-' + str(gmt / 3600)
+        str_gmt = str(gmt / 3600)
     else:
         str_gmt = str(gmt)
 

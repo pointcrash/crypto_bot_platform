@@ -119,18 +119,34 @@ def set_takes(bot):
                     bin_line = tl
                     bin_side = "Sell"
                     if ml > psn_price * Decimal(str(0.9994)):
-                        ml = round(psn_price * Decimal(str(0.9994)), round_number)
+                        new_ml = round(psn_price * Decimal(str(0.9994)), round_number)
+                        if ml == new_ml:
+                            ml -= Decimal(bot.symbol.tickSize)
+                        else:
+                            ml = new_ml
                     if exit_line > psn_price * Decimal(str(0.9988)):
-                        exit_line = round(psn_price * Decimal(str(0.9988)), round_number)
+                        new_exit_line = round(psn_price * Decimal(str(0.9988)), round_number)
+                        if exit_line == new_exit_line:
+                            exit_line -= Decimal(bot.symbol.tickSize) * 2
+                        else:
+                            exit_line = new_exit_line
                 else:
                     ml = bb_obj.ml
                     exit_line = tl
                     bin_line = bl
                     bin_side = "Buy"
                     if ml < psn_price * Decimal(str(1.0006)):
-                        ml = round(psn_price * Decimal(str(1.0006)), round_number)
+                        new_ml = round(psn_price * Decimal(str(1.0006)), round_number)
+                        if ml == new_ml:
+                            ml += Decimal(bot.symbol.tickSize)
+                        else:
+                            ml = new_ml
                     if exit_line < psn_price * Decimal(str(1.0012)):
-                        exit_line = round(psn_price * Decimal(str(1.0012)), round_number)
+                        new_exit_line = round(psn_price * Decimal(str(1.0012)), round_number)
+                        if exit_line == new_exit_line:
+                            exit_line += Decimal(bot.symbol.tickSize) * 2
+                        else:
+                            exit_line = new_exit_line
 
                 if bot.bin_order:
                     if bot.bin_order_id:

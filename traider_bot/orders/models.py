@@ -81,7 +81,7 @@ def logging(bot, text):
     if gmt > 0:
         str_gmt = '+' + str(gmt / 3600)
     elif gmt < 0:
-        str_gmt = '-' + str(gmt / 3600)
+        str_gmt = str(gmt / 3600)
     else:
         str_gmt = str(gmt)
 

@@ -254,6 +254,7 @@ def get_update_symbols():
             coin.maxPrice = symbol[6]
             coin.minOrderQty = symbol[7]
             coin.maxOrderQty = symbol[8]
+            coin.tickSize = symbol[9]
             coin.save()
         else:
             Symbol.objects.create(
@@ -266,6 +267,7 @@ def get_update_symbols():
                 maxPrice=symbol[6],
                 minOrderQty=symbol[7],
                 maxOrderQty=symbol[8],
+                tickSize=symbol[9],
             )
 
 
@@ -319,7 +321,7 @@ def logging(bot, text):
     if gmt > 0:
         str_gmt = '+' + str(gmt / 3600)
     elif gmt < 0:
-        str_gmt = '-' + str(gmt / 3600)
+        str_gmt = str(gmt / 3600)
     else:
         str_gmt = str(gmt)
 

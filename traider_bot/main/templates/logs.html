@@ -37,7 +37,6 @@
             {% else %}
             <a href="{% url 'single_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% endif %}
-
             <a href="{% url 'logs_delete' bot_id=bot.pk %}" class="btn btn-outline-danger">Clear history</a>
             <div class="card mt-4">
                 <table class="table" style="vertical-align: middle">

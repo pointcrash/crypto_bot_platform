@@ -11,6 +11,7 @@ class Symbol(models.Model):
     leverageStep = models.CharField(max_length=20, null=True)
     minPrice = models.CharField(max_length=20, null=True)
     maxPrice = models.CharField(max_length=20, null=True)
+    tickSize = models.CharField(max_length=20, null=True)
     minOrderQty = models.CharField(max_length=20, null=True)
     maxOrderQty = models.CharField(max_length=20, null=True)
 
