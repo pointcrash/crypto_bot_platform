@@ -19,6 +19,7 @@
                     <tr class=" text-center">
                         <th>Name</th>
                         <th class="d-none d-sm-table-cell">Is mainnet</th>
+                        <th>Open positions</th>
                         <th>Balance</th>
                         <th style="color: orange">Edit</th>
                         <th style="color: red">Delete</th>
@@ -31,6 +32,7 @@
                         <td class="d-none d-sm-table-cell">{% if account.is_mainnet %}<i class="fa-solid fa-check"></i>{% else %}<i
                                 class="fa-solid fa-xmark"></i>{% endif %}
                         </td>
+                        <td><a href="{% url 'account_position_list' acc_id=account.pk %}" class="btn btn-sm btn-light px-3 btn-shadow">Positions</a></td>
                         <td><button id="{{ account.pk }}" class="get-balance-button btn btn-sm btn-secondary px-3 btn-shadow">Balance</button></td>
 
                         <!-- Модальное окно для отображения баланса аккаунта -->

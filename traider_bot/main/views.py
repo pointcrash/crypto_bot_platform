@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-import re
-from datetime import datetime, timedelta
+from django.core.paginator import Paginator
 
 from api_v5 import get_query_account_coins_balance
+from bots.bot_logic import func_get_symbol_list
 from bots.models import Log, Bot
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
@@ -25,8 +25,6 @@ def logs_list(request, bot_id):
     bot = Bot.objects.get(id=bot_id)
     logs = Log.objects.filter(bot=bot_id).order_by('pk')
     user = request.user
-    # gmt = 0
-    # time_zone = None
 
     if request.method == 'POST':
         timezone_form = TimeZoneForm(request.POST)
@@ -36,34 +34,17 @@ def logs_list(request, bot_id):
                 tz.users.remove(user)
             time_zone = timezone_form.cleaned_data['time_zone']
             time_zone.users.add(user)
-            # gmt = int(time_zone.gmtOffset)
     else:
-        # time_zone = TimeZone.objects.filter(users=user).first()
         timezone_form = TimeZoneForm()
-
-    # if time_zone:
-    #     for i in range(2):
-    #         pattern = r'\d{2}:\d{2}:\d{2} \d{4}-\d{2}-\d{2}'
-    #         for log in logs:
-    #             content = log.content
-    #             time = re.search(pattern, content)
-    #             if time:
-    #                 matched_text = time.group()
-    #                 datetime_obj = datetime.strptime(matched_text, '%H:%M:%S %Y-%m-%d')
-    #
-    #                 if gmt < 0:
-    #                     new_datetime = datetime_obj - timedelta(seconds=gmt)
-    #                 else:
-    #                     new_datetime = datetime_obj + timedelta(seconds=gmt)
-    #
-    #                 in_time = f'{new_datetime.time()} {new_datetime.date()}'
-    #                 modified_content = re.sub(pattern, in_time, content)
-    #                 log.content = modified_content
-    #         Log.objects.bulk_update(logs, ['content'])
 
     for i in range(1, len(logs)+1):
         log_list.append([i, logs[i-1]])
-    return render(request, 'logs.html', {'log_list': log_list, 'bot': bot, 'timezone_form': timezone_form})
+
+    logs_per_page = 1000  # Количество логов на странице
+    paginator = Paginator(log_list, logs_per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'logs.html', {'log_list': page_obj, 'bot': bot, 'timezone_form': timezone_form})
 
 
 @login_required
@@ -90,6 +71,18 @@ def account_list(request):
     else:
         accounts = Account.objects.filter(owner=request.user)
     return render(request, 'account/accounts_list.html', {'accounts': accounts, })
+
+
+def account_position_list(request, acc_id):
+    positions_list = []
+    account = Account.objects.get(pk=acc_id)
+    bots = Bot.objects.filter(account=account)
+    for bot in bots:
+        symbol_list = func_get_symbol_list(bot)
+        symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
+        if symbol_list['size'] != '0.0':
+            positions_list.append((bot, symbol_list))
+    return render(request, 'account/positions_list.html', {'positions_list': positions_list, 'current_acc': account})
 
 
 @login_required

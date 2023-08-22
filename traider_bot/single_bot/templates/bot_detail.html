@@ -174,7 +174,7 @@
                         <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
                         <td >{{ symbol_list.unrealisedPnl }}</td>
                         <td class="d-none d-md-table-cell"><a href="#" class="btn btn-warning">Cancel M-line</a></td>
-                        <td class="d-none d-md-table-cell"><a href="#" class="btn btn-danger">Close position</a></td>
+                        <td class="d-none d-md-table-cell"><a href="{% url 'terminate_bot' bot_id=bot.pk event_number=3 %}" class="btn btn-danger">Close position</a></td>
                     </tr>
                 </tbody>
             </table>

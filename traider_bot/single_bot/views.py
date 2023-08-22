@@ -103,7 +103,7 @@ def single_bot_detail(request, bot_id):
     else:
         form = GridBotForm(request=request, instance=bot)
 
-    return render(request, 'bot_detail.html', {'form': form, 'bot': bot,'symbol_list': symbol_list, })
+    return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'symbol_list': symbol_list, })
 
 
 def bot_start(request, bot_id):

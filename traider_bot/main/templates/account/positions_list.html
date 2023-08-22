@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3 class="text-center mb-5">Открытые позиции "{{ current_acc }}"</h3>
+{% if positions_list %}
+<div class="container">
+    <table class="table" style="vertical-align: middle">
+        <thead>
+        <tr class="">
+            <th>BOT</th>
+            <th>SIDE</th>
+            <th>SYMBOL</th>
+            <th class="d-none d-sm-table-cell">SIZE</th>
+            <th class="d-none d-sm-table-cell">ENTRY PRICE</th>
+            <th>MARK PRICE</th>
+            <th>LIQ PRICE</th>
+            <th class="d-none d-md-table-cell">MARGIN</th>
+            <th>UNREALIZED PNL</th>
+            <th class="d-none d-md-table-cell">CLOSE POSITION</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for bot, symbol_list in positions_list %}
+        <tr class="">
+            <td>{{ bot.pk }}</td>
+            <td>{{ symbol_list.side }}</td>
+            <td>{{ symbol_list.symbol }}</td>
+            <td>{{ symbol_list.size }}</td>
+            <td class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
+            <td>{{ symbol_list.markPrice }}</td>
+            <td>{{ symbol_list.liqPrice }}</td>
+            <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
+            <td>{{ symbol_list.unrealisedPnl }}</td>
+            <td class="d-none d-md-table-cell"><a href="#" class="btn btn-danger">Close position</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<h5 class="text-center mt-5">Открытых позиций нет</h5>
+{% endif %}
+{% endblock %}
