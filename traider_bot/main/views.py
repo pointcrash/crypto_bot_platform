@@ -4,9 +4,9 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 
-from api_v5 import get_query_account_coins_balance
+from api_v5 import get_query_account_coins_balance, get_list
 from bots.bot_logic import func_get_symbol_list
-from bots.models import Log, Bot
+from bots.models import Log, Bot, Symbol
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
 from .forms import RegistrationForm, LoginForm
@@ -73,16 +73,21 @@ def account_list(request):
     return render(request, 'account/accounts_list.html', {'accounts': accounts, })
 
 
+@login_required
 def account_position_list(request, acc_id):
-    positions_list = []
+    bot_symbol_list = []
     account = Account.objects.get(pk=acc_id)
-    bots = Bot.objects.filter(account=account)
-    for bot in bots:
-        symbol_list = func_get_symbol_list(bot)
-        symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
-        if symbol_list['size'] != '0.0':
-            positions_list.append((bot, symbol_list))
-    return render(request, 'account/positions_list.html', {'positions_list': positions_list, 'current_acc': account})
+    positions_list = get_list(account)
+    for psn in positions_list:
+        symbol = Symbol.objects.filter(name=psn['symbol']).first()
+        if symbol:
+            bot = Bot.objects.filter(account=account, symbol=symbol).first()
+            if bot:
+                bot_symbol_list.append((bot.pk, psn))
+            else:
+                bot_symbol_list.append(('---', psn))
+
+    return render(request, 'account/positions_list.html', {'positions_list': bot_symbol_list, 'current_acc': account})
 
 
 @login_required

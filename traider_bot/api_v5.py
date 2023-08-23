@@ -95,12 +95,16 @@ def get_side(symbol_list):
         return [i['side'] for i in symbol_list]
 
 
-def get_list(account, category, symbol):
+def get_list(account, category='inverse', symbol=None, settleCoin='USDT'):
     try:
         endpoint = "/v5/position/list"
         method = "GET"
-        params = f"category={category}&symbol={symbol.name}"
+        if symbol:
+            params = f"category={category}&symbol={symbol.name}"
+        else:
+            params = f"category={category}&settleCoin={settleCoin}"
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+        print(response)
         return response['result']['list']
     except Exception as e:
         return None
