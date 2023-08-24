@@ -14,6 +14,7 @@ class OrdersAdmin(admin.ModelAdmin):
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'priceScale', 'minLeverage', 'maxLeverage', 'minPrice', 'maxPrice', 'minOrderQty',)
     list_display_links = ('id', 'name',)
+    search_fields = ('id', 'name',)
 
 
 @admin.register(Log)

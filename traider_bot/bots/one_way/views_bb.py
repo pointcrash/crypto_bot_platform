@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from bots.bb_set_takes import set_takes
 from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import BotForm
+from bots.hedge.logic.ts_bb.entry import entry_ts_bb_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.models import Bot
 
@@ -30,7 +31,7 @@ def single_bb_bot_create(request):
             connections.close_all()
 
             if bot.side == 'TS':
-                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                bot_thread = threading.Thread(target=entry_ts_bb_bot, args=(bot,))
             else:
                 bot_thread = threading.Thread(target=set_takes, args=(bot,))
             bot_thread.start()
@@ -62,7 +63,7 @@ def single_bb_bot_detail(request, bot_id):
                 stop_bot_with_cancel_orders(bot)
 
             if bot.side == 'TS':
-                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+                bot_thread = threading.Thread(target=entry_ts_bb_bot, args=(bot,))
             else:
                 bot_thread = threading.Thread(target=set_takes, args=(bot,))
 

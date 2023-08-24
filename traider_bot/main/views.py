@@ -74,20 +74,21 @@ def account_list(request):
 
 
 @login_required
-def account_position_list(request, acc_id):
+def account_position_list(request):
     bot_symbol_list = []
-    account = Account.objects.get(pk=acc_id)
-    positions_list = get_list(account)
-    for psn in positions_list:
-        symbol = Symbol.objects.filter(name=psn['symbol']).first()
-        if symbol:
-            bot = Bot.objects.filter(account=account, symbol=symbol).first()
-            if bot:
-                bot_symbol_list.append((bot.pk, psn))
-            else:
-                bot_symbol_list.append(('---', psn))
+    accounts = Account.objects.filter(owner=request.user)
+    for account in accounts:
+        positions_list = get_list(account)
+        for psn in positions_list:
+            symbol = Symbol.objects.filter(name=psn['symbol']).first()
+            if symbol:
+                bot = Bot.objects.filter(account=account, symbol=symbol).first()
+                if bot:
+                    bot_symbol_list.append((account, bot.pk, psn))
+                else:
+                    bot_symbol_list.append((account, '---', psn))
 
-    return render(request, 'account/positions_list.html', {'positions_list': bot_symbol_list, 'current_acc': account})
+    return render(request, 'account/positions_list.html', {'positions_list': bot_symbol_list})
 
 
 @login_required

@@ -112,9 +112,9 @@ class BotForm(forms.ModelForm):
         if leverage > Decimal(symbol.maxLeverage) or leverage < Decimal(symbol.minLeverage):
             raise forms.ValidationError(
                 f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
-
-        if side == 'TS':
-            raise forms.ValidationError('Режим "TS" еще не реализован для стратегии Боллинджера')
+        #
+        # if side == 'TS':
+        #     raise forms.ValidationError('Режим "TS" еще не реализован для стратегии Боллинджера')
 
         return cleaned_data
 

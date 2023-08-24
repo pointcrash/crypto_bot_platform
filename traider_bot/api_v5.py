@@ -104,7 +104,6 @@ def get_list(account, category='inverse', symbol=None, settleCoin='USDT'):
         else:
             params = f"category={category}&settleCoin={settleCoin}"
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
-        print(response)
         return response['result']['list']
     except Exception as e:
         return None
@@ -135,10 +134,10 @@ def get_symbol_set():
 
     account_data = {
         "name": "John Doe",
-        "API_TOKEN": "35cvb1aYDNlbIe7bZd",
-        "SECRET_KEY": "1X9PNigz5mRcPwknuOZeeKSkDa0dDR6v14a4",
-        "is_mainnet": False,
-        "url": "https://api-testnet.bybit.com"
+        "API_TOKEN": "EY0sr8jAA83IuRIbza",
+        "SECRET_KEY": "Wc0SOczSJvS5cjZRIM8wpgnbDvxCP57shoiA",
+        "is_mainnet": True,
+        "url": "https://api.bybit.com"
     }
 
     account = Account(

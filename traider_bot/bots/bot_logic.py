@@ -278,15 +278,6 @@ def count_decimal_places(number):
 
 
 def create_bb_and_avg_obj(bot, position_idx=0):
-    # if bot.work_model == 'bb':
-    #     symbol_list, i = None, 0
-    #     while not symbol_list and i < 10:
-    #         symbol_list = get_list(bot.account, bot.category, bot.symbol)
-    #         i += 1
-    #     psn_qty = get_qty(symbol_list)[position_idx]
-    #     psn_side = get_side(symbol_list)[position_idx]
-    #     psn_price = get_position_price(symbol_list)[position_idx]
-
     if bot.work_model == 'grid' and bot.orderType == 'Market':
         bb_obj = None
     else:
