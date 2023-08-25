@@ -88,7 +88,7 @@ def account_position_list(request):
             for psn in positions_list:
                 symbol = Symbol.objects.filter(name=psn['symbol']).first()
                 if symbol:
-                    count_dict = psn_count(psn)
+                    count_dict = psn_count(psn, int(symbol.priceScale))
                     bot = Bot.objects.filter(account=account, symbol=symbol).first()
                     psn['positionBalance'] = str(round(Decimal(psn['positionBalance']), 2))
                     psn['unrealisedPnl'] = str(round(Decimal(psn['unrealisedPnl']), 2))

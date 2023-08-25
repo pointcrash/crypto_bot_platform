@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 
-def psn_count(psn):
+def psn_count(psn, price_scale):
     pnl = psn['unrealisedPnl']
     if '-' in pnl:
         count_dict = dict()
@@ -13,10 +13,10 @@ def psn_count(psn):
 
         if side == 'Buy':
             for trend in range(1, 4):
-                stop_price = mark_price - (mark_price * trend / 100)
+                stop_price = round(mark_price - (mark_price * trend / 100), price_scale)
                 pnl_old = (stop_price - entry_price) * qty
                 pnl_new = -pnl_old
-                margin = pnl_new * mark_price / (leverage * (mark_price - stop_price))
+                margin = round(pnl_new * mark_price / (leverage * (mark_price - stop_price)), 2)
 
                 count_dict[str(trend)] = {
                     'stop_price': stop_price,
@@ -27,10 +27,10 @@ def psn_count(psn):
 
         elif side == 'Sell':
             for trend in range(1, 4):
-                stop_price = mark_price + (mark_price * trend / 100)
+                stop_price = round(mark_price + (mark_price * trend / 100), price_scale)
                 pnl_old = (entry_price - stop_price) * qty
                 pnl_new = -pnl_old
-                margin = pnl_new * mark_price / (leverage * (stop_price - mark_price))
+                margin = round(pnl_new * mark_price / (leverage * (stop_price - mark_price)), 2)
 
                 count_dict[str(trend)] = {
                     'stop_price': stop_price,
@@ -41,4 +41,3 @@ def psn_count(psn):
         return count_dict
     else:
         return None
-
