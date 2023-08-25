@@ -90,7 +90,7 @@ def account_position_list(request):
                     count_dict = psn_count(psn)
                     bot = Bot.objects.filter(account=account, symbol=symbol).first()
                     if bot:
-                        bot_symbol_list.append((account, bot.pk, psn))
+                        bot_symbol_list.append((account, bot.pk, psn, count_dict))
                     else:
                         bot_symbol_list.append((account, '---', psn, count_dict))
 
