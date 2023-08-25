@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
@@ -89,6 +90,8 @@ def account_position_list(request):
                 if symbol:
                     count_dict = psn_count(psn)
                     bot = Bot.objects.filter(account=account, symbol=symbol).first()
+                    psn['positionBalance'] = str(round(Decimal(psn['positionBalance']), 2))
+                    psn['unrealisedPnl'] = str(round(Decimal(psn['unrealisedPnl']), 2))
                     if bot:
                         bot_symbol_list.append((account, bot.pk, psn, count_dict))
                     else:
