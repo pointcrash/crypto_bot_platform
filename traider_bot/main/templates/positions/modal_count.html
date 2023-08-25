@@ -1,0 +1,38 @@
+<!-- Modal -->
+<div class="modal fade" id="countPosition{{ forloop.counter }}" tabindex="-1" aria-labelledby="countPositionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">{{ account }} | {{ symbol_list.symbol }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table" style="vertical-align: middle">
+                    <thead>
+                    <tr>
+                        <th>Trend %</th>
+                        <th>Margin</th>
+                        <th>StopPrice</th>
+                        <th>PnL old</th>
+                        <th>PnL new</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if count_dict %}
+                    {% for key, trend in count_dict.items %}
+                    <tr style="height: 70px;">
+                        <td>{{ key }}</td>
+                        <td>{{ trend.margin }}</td>
+                        <td>{{ trend.stop_price }}</td>
+                        <td>{{ trend.pnl_old }}</td>
+                        <td>{{ trend.pnl_new }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

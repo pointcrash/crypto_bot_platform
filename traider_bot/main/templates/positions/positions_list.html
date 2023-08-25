@@ -9,7 +9,7 @@
 </style>
 
 {% if positions_list %}
-<div class="container">
+<div class="container mt-3">
     <div class="card p-3">
         <table class="table" style="vertical-align: middle">
             <thead>
@@ -21,14 +21,14 @@
                 <th class="d-none d-sm-table-cell">SIZE</th>
                 <th class="d-none d-sm-table-cell">ENTRY PRICE</th>
                 <th>MARK PRICE</th>
-                <th>LIQ PRICE</th>
+                <th class="d-none d-sm-table-cell">LIQ PRICE</th>
                 <th class="d-none d-md-table-cell">MARGIN</th>
                 <th>PNL</th>
-                <th class="d-none d-md-table-cell">ACTIONS</th>
+                <th class="d-none d-md-table-cell" style="color: orange">COUNT</th>
             </tr>
             </thead>
             <tbody>
-            {% for account, bot_id, symbol_list in positions_list %}
+            {% for account, bot_id, symbol_list, count_dict in positions_list %}
             <tr class="" style="height: 70px;">
                 <td>{{ account }}</td>
                 <td>{{ bot_id }}</td>
@@ -37,12 +37,15 @@
                 <td class="d-none d-sm-table-cell">{{ symbol_list.size }}</td>
                 <td class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
                 <td>{{ symbol_list.markPrice }}</td>
-                <td>{{ symbol_list.liqPrice }}</td>
+                <td class="d-none d-sm-table-cell">{{ symbol_list.liqPrice }}</td>
                 <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
                 <td>{{ symbol_list.unrealisedPnl }}</td>
                 {% if '-' in symbol_list.unrealisedPnl %}
-                <td class="d-none d-md-table-cell"><a href="#" class="btn btn-warning me-1 ">Count</a><a
-                        href="#" class=" btn btn-success">Start</a></td>
+                <td class="d-none d-md-table-cell">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                            data-bs-target="#countPosition{{ forloop.counter }}">Count</button>
+                    {% include 'positions/modal_count.html' %}
+                </td>
                 {% else %}
                 <td></td>
                 {% endif %}

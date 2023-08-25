@@ -1,2 +1,4 @@
-p = '0.0354'
-print(float(p))
+p = dict()
+p['sd'] = dict()
+p['sd']['dfgdfg'] = 153
+print(p)

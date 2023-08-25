@@ -13,6 +13,7 @@ from .forms import RegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
 from main.models import Account
+from .psn_count import psn_count
 
 
 def view_home(request):
@@ -76,19 +77,24 @@ def account_list(request):
 @login_required
 def account_position_list(request):
     bot_symbol_list = []
-    accounts = Account.objects.filter(owner=request.user)
+    if request.user.is_superuser:
+        accounts = Account.objects.all()
+    else:
+        accounts = Account.objects.filter(owner=request.user)
     for account in accounts:
         positions_list = get_list(account)
-        for psn in positions_list:
-            symbol = Symbol.objects.filter(name=psn['symbol']).first()
-            if symbol:
-                bot = Bot.objects.filter(account=account, symbol=symbol).first()
-                if bot:
-                    bot_symbol_list.append((account, bot.pk, psn))
-                else:
-                    bot_symbol_list.append((account, '---', psn))
+        if positions_list:
+            for psn in positions_list:
+                symbol = Symbol.objects.filter(name=psn['symbol']).first()
+                if symbol:
+                    count_dict = psn_count(psn)
+                    bot = Bot.objects.filter(account=account, symbol=symbol).first()
+                    if bot:
+                        bot_symbol_list.append((account, bot.pk, psn))
+                    else:
+                        bot_symbol_list.append((account, '---', psn, count_dict))
 
-    return render(request, 'account/positions_list.html', {'positions_list': bot_symbol_list})
+    return render(request, 'positions/positions_list.html', {'positions_list': bot_symbol_list})
 
 
 @login_required

@@ -38,6 +38,7 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
         except RequestException as e:
             # Обработка ошибки при отправке запроса или получении ответа
             print("Ошибки при отправке запроса или получении ответа:", e)
+            print(account)
             continue
             # return None
         except Exception as e:
