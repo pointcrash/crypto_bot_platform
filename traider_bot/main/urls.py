@@ -4,6 +4,8 @@ from main.views import *
 
 urlpatterns = [
     path('', account_list, name='account_list'),
+    path('asd/', asd_view, name='asd_view'),
+    path('position/recalculate_values', recalculate_values, name='recalculate_values'),
     path('create/', create_account, name='create_account'),
     path('positions_list/', account_position_list, name='account_position_list'),
     path('detail/<int:acc_id>/', edit_account, name='edit_account'),

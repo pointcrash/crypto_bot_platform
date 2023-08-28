@@ -6,7 +6,13 @@
     .btn-shadow {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
+
+    .clickable-row:hover {
+    cursor: pointer;
+    background-color: #f5f5f5;
+}
 </style>
+
 
 {% if positions_list %}
 <div class="container mt-3">
@@ -29,7 +35,7 @@
             </thead>
             <tbody>
             {% for account, bot_id, symbol_list, count_dict in positions_list %}
-            <tr class="" style="height: 70px;">
+            <tr style="height: 70px;">
                 <td>{{ account }}</td>
                 <td>{{ bot_id }}</td>
                 <td>{{ symbol_list.side }}</td>
@@ -43,7 +49,8 @@
                 {% if '-' in symbol_list.unrealisedPnl %}
                 <td class="d-none d-md-table-cell">
                     <button type="button" class="btn btn-warning" data-bs-toggle="modal"
-                            data-bs-target="#countPosition{{ forloop.counter }}">Count</button>
+                            data-bs-target="#countPosition{{ forloop.counter }}">Count
+                    </button>
                     {% include 'positions/modal_count.html' %}
                 </td>
                 {% else %}
@@ -58,4 +65,93 @@
 {% else %}
 <h5 class="text-center mt-5">Открытых позиций нет</h5>
 {% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const rows = document.querySelectorAll(".clickable-row");
+
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                const targetModalId = row.getAttribute("data-target");
+                const forloopCounter = row.getAttribute("data-forloop");
+                const key = row.getAttribute("data-trend");
+
+            // Получение старых значений для перерасчета
+                const accountId = row.getAttribute("data-accountId");
+                const trend = row.getAttribute("data-trend");
+                const symbolName = row.getAttribute("data-symbolName");
+
+            // Отправка данных на сервер
+                fetch("{% url 'recalculate_values' %}?accountId=" + encodeURIComponent(accountId) + "&trend=" + encodeURIComponent(trend) + "&symbolName=" + encodeURIComponent(symbolName), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+
+                .then(response => response.json())
+                .then(data => {
+                    const enoughBalance = data.enough_balance;
+                    const startButton = document.getElementById(`btnStart${forloopCounter}_${key}`);
+                    const notEnoughBalance = document.getElementById(`notEnoughBalance${forloopCounter}_${key}`);
+                // Включаем кнопку и делаем её видимой
+                    if (enoughBalance) {
+                        startButton.classList.remove('disabled');
+                        startButton.classList.remove('d-none');
+                    } else {
+                        notEnoughBalance.classList.remove('d-none');
+                    }
+
+                // Обновление значений в ячейках таблицы
+                    const marginCell = document.getElementById(`marginCell${forloopCounter}_${key}`);
+                    const stopPriceCell = document.getElementById(`stopPriceCell${forloopCounter}_${key}`);
+                    const pnlOldCell = document.getElementById(`pnlOldCell${forloopCounter}_${key}`);
+                    const pnlNewCell = document.getElementById(`pnlNewCell${forloopCounter}_${key}`);
+                    const walletBalance = document.getElementById(`walletBalance${forloopCounter}_${key}`);
+
+                    marginCell.textContent = data.margin;
+                    stopPriceCell.textContent = data.stop_price;
+                    pnlOldCell.textContent = data.pnl_old;
+                    pnlNewCell.textContent = data.pnl_new;
+                    walletBalance.textContent = data.tb;
+                })
+
+                if (targetModalId) {
+                    const currentModal = document.querySelector(".modal.show");
+                    if (currentModal) {
+                        const modal = bootstrap.Modal.getInstance(currentModal);
+                        modal.hide();
+                    }
+
+                    const targetModal = document.querySelector(targetModalId);
+                    if (targetModal) {
+                        const modal = new bootstrap.Modal(targetModal);
+                        modal.show();
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll("[id^='backButton']").forEach(backButton => {
+            backButton.addEventListener('click', function() {
+                const currentModal = document.querySelector('.modal.show');
+                    if (currentModal) {
+                        const modal = bootstrap.Modal.getInstance(currentModal);
+                        modal.hide();
+                    }
+
+
+                const targetModalId = backButton.getAttribute('data-target');
+                const targetModal = document.querySelector(targetModalId);
+
+                    if (targetModal) {
+                        const modal = new bootstrap.Modal(targetModal);
+                        modal.show();
+                    }
+            });
+        });
+    });
+</script>
+
+
 {% endblock %}

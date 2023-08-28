@@ -2,11 +2,11 @@ from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from api_v5 import get_query_account_coins_balance, get_list
-from bots.bot_logic import func_get_symbol_list
 from bots.models import Log, Bot, Symbol
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
@@ -39,14 +39,14 @@ def logs_list(request, bot_id):
     else:
         timezone_form = TimeZoneForm()
 
-    for i in range(1, len(logs)+1):
-        log_list.append([i, logs[i-1]])
+    for i in range(1, len(logs) + 1):
+        log_list.append([i, logs[i - 1]])
 
     logs_per_page = 1000  # Количество логов на странице
     paginator = Paginator(log_list, logs_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'logs.html', {'log_list': page_obj, 'bot': bot, 'timezone_form': timezone_form})
+    return render(request, 'logs/logs.html', {'log_list': page_obj, 'bot': bot, 'timezone_form': timezone_form})
 
 
 @login_required
@@ -98,6 +98,79 @@ def account_position_list(request):
                         bot_symbol_list.append((account, '---', psn, count_dict))
 
     return render(request, 'positions/positions_list.html', {'positions_list': bot_symbol_list})
+
+
+@csrf_exempt
+def recalculate_values(request):
+    if request.method == 'POST':
+        account_id = request.GET.get('accountId')
+        symbol_name = request.GET.get('symbolName')
+        trend = request.GET.get('trend')
+
+        account = Account.objects.filter(pk=account_id).first()
+        balance = get_query_account_coins_balance(account)[0]
+        tb = Decimal(balance['transferBalance'])
+
+        positions_list = get_list(account)
+        for psn in positions_list:
+            if psn['symbol'] == symbol_name:
+                symbol = Symbol.objects.filter(name=psn['symbol']).first()
+                count_dict = psn_count(psn, int(symbol.priceScale))
+                bot = Bot.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
+                if tb > count_dict[trend]['margin'] * Decimal('1.1'):
+                    enough_balance = True
+                else:
+                    enough_balance = False
+
+                count_dict[trend]['tb'] = tb
+                count_dict[trend]['enough_balance'] = enough_balance
+
+        # Возвращение новых значений в формате JSON
+        print(count_dict[trend])
+        return JsonResponse(count_dict[trend])
+
+    return JsonResponse({'error': 'Invalid request method'})
+
+
+
+# @csrf_exempt
+# def recalculate_values(request):
+#     if request.method == 'POST':
+#         data = request.POST
+#
+#         # Получение старых значений
+#         side = data.get('side')
+#         trend = data.get('trend')
+#         symbol_name = data.get('symbolName')
+#         mark_price = data.get('markPrice')
+#         entry_price = data.get('entryPrice')
+#         leverage = data.get('leverage')
+#         qty = data.get('qty')
+#         symbol = Symbol.objects.filter(name=symbol_name).first()
+#         price_scale = int(symbol.priceScale)
+#
+#         # Перерасчет
+#         if side == 'Buy':
+#             stop_price = round(mark_price - (mark_price * trend / 100), price_scale)
+#             pnl_old = (stop_price - entry_price) * qty
+#             pnl_new = -pnl_old
+#             margin = round(pnl_new * mark_price / (leverage * (mark_price - stop_price)), 2)
+#
+#         else:
+#             stop_price = round(mark_price + (mark_price * trend / 100), price_scale)
+#             pnl_old = (entry_price - stop_price) * qty
+#             pnl_new = -pnl_old
+#             margin = round(pnl_new * mark_price / (leverage * (stop_price - mark_price)), 2)
+#
+#         # Возвращение новых значений в формате JSON
+#         return JsonResponse({
+#             'stop_price': stop_price,
+#             'pnl_old': pnl_old,
+#             'pnl_new': pnl_new,
+#             'margin': margin,
+#         })
+#
+#     return JsonResponse({'error': 'Invalid request method'})
 
 
 @login_required
@@ -207,3 +280,6 @@ def get_balance(request, acc_id):
 
     return JsonResponse({"wb": wb, "tb": tb, "name": name})
 
+
+def asd_view(request):
+    return render(request, 'test.html')

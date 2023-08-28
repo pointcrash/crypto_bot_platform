@@ -14,7 +14,7 @@ def psn_count(psn, price_scale):
         if side == 'Buy':
             for trend in range(1, 4):
                 stop_price = round(mark_price - (mark_price * trend / 100), price_scale)
-                pnl_old = (stop_price - entry_price) * qty
+                pnl_old = round((stop_price - entry_price) * qty, 2)
                 pnl_new = -pnl_old
                 margin = round(pnl_new * mark_price / (leverage * (mark_price - stop_price)), 2)
 
@@ -41,3 +41,4 @@ def psn_count(psn, price_scale):
         return count_dict
     else:
         return None
+

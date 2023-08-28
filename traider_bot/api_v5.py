@@ -107,6 +107,7 @@ def get_list(account, category='inverse', symbol=None, settleCoin='USDT'):
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
         return response['result']['list']
     except Exception as e:
+        print("Произошла ошибка:", e)
         return None
 
 

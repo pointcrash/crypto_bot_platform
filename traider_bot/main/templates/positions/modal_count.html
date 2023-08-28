@@ -1,4 +1,5 @@
 <!-- Modal -->
+
 <div class="modal fade" id="countPosition{{ forloop.counter }}" tabindex="-1" aria-labelledby="countPositionModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -10,7 +11,7 @@
             <div class="modal-body">
                 <table class="table" style="vertical-align: middle">
                     <thead>
-                    <tr>
+                    <tr class="text-center">
                         <th>Trend %</th>
                         <th>Margin</th>
                         <th>StopPrice</th>
@@ -21,7 +22,12 @@
                     <tbody>
                     {% if count_dict %}
                     {% for key, trend in count_dict.items %}
-                    <tr style="height: 70px;">
+                    <tr class="clickable-row text-center" data-toggle="modal" style="height: 70px;"
+                        data-target="#trendModal{{ forloop.parentloop.counter }}_{{ key }}"
+                        data-forloop="{{ forloop.parentloop.counter }}"
+                        data-trend="{{ key }}"
+                        data-accountId="{{ account.pk }}"
+                        data-symbolName="{{ symbol_list.symbol }}">
                         <td>{{ key }}</td>
                         <td>{{ trend.margin }}</td>
                         <td>{{ trend.stop_price }}</td>
@@ -36,3 +42,61 @@
         </div>
     </div>
 </div>
+
+{% if count_dict %}
+{% for key, trend in count_dict.items %}
+<div class="modal fade" id="trendModal{{ forloop.parentloop.counter }}_{{ key }}" tabindex="-1"
+     aria-labelledby="trendModalLabel{{ forloop.parentloop.counter }}_{{ key }}"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">{{ account }} | {{ symbol_list.symbol }} | Trend: {{ key }}</h1>
+                <button id="backButton{{ forloop.parentloop.counter }}_{{ key }}"
+                        class="btn btn-outline-secondary ms-2 border-0"
+                        data-target="#countPosition{{ forloop.parentloop.counter }}"><i
+                        class="fa-solid fa-arrow-left fa-lg"></i></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table" style="vertical-align: middle">
+                    <thead>
+                    <tr class="text-center">
+                        <th>Trend %</th>
+                        <th>Margin</th>
+                        <th>StopPrice</th>
+                        <th>PnL old</th>
+                        <th>PnL new</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="height: 70px;" class="text-center">
+                        <td>{{ key }}</td>
+                        <td id="marginCell{{ forloop.parentloop.counter }}_{{ key }}"></td>
+                        <td id="stopPriceCell{{ forloop.parentloop.counter }}_{{ key }}"></td>
+                        <td id="pnlOldCell{{ forloop.parentloop.counter }}_{{ key }}"></td>
+                        <td id="pnlNewCell{{ forloop.parentloop.counter }}_{{ key }}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="container d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <h5 class="">Account balance: &nbsp;</h5>
+                        <h5 id="walletBalance{{ forloop.parentloop.counter }}_{{ key }}"></h5>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <h6 id="notEnoughBalance{{ forloop.parentloop.counter }}_{{ key }}" class="d-none mr-2">Not
+                            enough balance</h6>
+                        <a href="#" id="btnStart{{ forloop.parentloop.counter }}_{{ key }}"
+                           class="btn btn-success disabled d-none">Start</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
