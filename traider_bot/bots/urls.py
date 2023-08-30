@@ -1,6 +1,7 @@
 from django.urls import path, include
 
 from bots.one_way.views_grid import update_symbols_set
+from bots.set_zero_psn.views import start_set_zero_psn_bot, stop_set_zero_psn_bot
 from bots.views import views_bots_type_choice, terminate_bot, delete_bot, reboot_bots
 
 urlpatterns = [
@@ -13,4 +14,6 @@ urlpatterns = [
     #
     path('hedge/', include('bots.hedge.urls')),
     path('one_way/', include('bots.one_way.urls')),
+    path('start_set_zero_psn_bot/<int:acc_id>/<str:symbol_name>/<int:trend>', start_set_zero_psn_bot, name='start_set_zero_psn_bot'),
+    path('stop_set_zero_psn_bot/<int:acc_id>/<str:symbol_name>/', stop_set_zero_psn_bot, name='stop_set_zero_psn_bot'),
 ]

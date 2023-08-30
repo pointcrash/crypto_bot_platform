@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from api_v5 import get_query_account_coins_balance, get_list
 from bots.models import Log, Bot, Symbol
+from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
 from .forms import RegistrationForm, LoginForm
@@ -93,9 +94,13 @@ def account_position_list(request):
                     psn['positionBalance'] = str(round(Decimal(psn['positionBalance']), 2))
                     psn['unrealisedPnl'] = str(round(Decimal(psn['unrealisedPnl']), 2))
                     if bot:
-                        bot_symbol_list.append((account, bot.pk, psn, count_dict))
+                        if bot.work_model == 'set0psn' and bot.pk in global_list_bot_id:
+                            set0psn = True
+                        else:
+                            set0psn = False
+                        bot_symbol_list.append((account, bot.pk, psn, count_dict, set0psn))
                     else:
-                        bot_symbol_list.append((account, '---', psn, count_dict))
+                        bot_symbol_list.append((account, '---', psn, count_dict, False))
 
     return render(request, 'positions/positions_list.html', {'positions_list': bot_symbol_list})
 

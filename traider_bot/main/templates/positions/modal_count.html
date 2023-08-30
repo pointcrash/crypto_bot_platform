@@ -89,7 +89,8 @@
                     <div class="d-flex align-items-center">
                         <h6 id="notEnoughBalance{{ forloop.parentloop.counter }}_{{ key }}" class="d-none mr-2">Not
                             enough balance</h6>
-                        <a href="#" id="btnStart{{ forloop.parentloop.counter }}_{{ key }}"
+                        <a href="{% url 'start_set_zero_psn_bot' acc_id=account.pk symbol_name=symbol_list.symbol trend=key %}"
+                           id="btnStart{{ forloop.parentloop.counter }}_{{ key }}"
                            class="btn btn-success disabled d-none">Start</a>
                     </div>
                 </div>

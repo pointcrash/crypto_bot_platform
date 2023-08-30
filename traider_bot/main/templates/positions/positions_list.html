@@ -34,7 +34,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for account, bot_id, symbol_list, count_dict in positions_list %}
+            {% for account, bot_id, symbol_list, count_dict, set0psn in positions_list %}
             <tr style="height: 70px;">
                 <td>{{ account }}</td>
                 <td>{{ bot_id }}</td>
@@ -46,12 +46,17 @@
                 <td class="d-none d-sm-table-cell">{{ symbol_list.liqPrice }}</td>
                 <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
                 <td>{{ symbol_list.unrealisedPnl }}</td>
-                {% if '-' in symbol_list.unrealisedPnl %}
+                {% if '-' in symbol_list.unrealisedPnl and not set0psn %}
                 <td class="d-none d-md-table-cell">
                     <button type="button" class="btn btn-warning" data-bs-toggle="modal"
                             data-bs-target="#countPosition{{ forloop.counter }}">Count
                     </button>
                     {% include 'positions/modal_count.html' %}
+                </td>
+                {% elif '-' in symbol_list.unrealisedPnl and set0psn %}
+                <td class="d-none d-md-table-cell">
+                    <a href="{% url 'stop_set_zero_psn_bot' acc_id=account.pk symbol_name=symbol_list.symbol %}"
+                       class="btn btn-outline-warning">Stop Bot</a>
                 </td>
                 {% else %}
                 <td></td>

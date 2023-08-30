@@ -22,6 +22,10 @@ from orders.models import Order
 
 
 def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
+    # print('qty_USDT', qty_USDT, type(qty_USDT))
+    # print('price', price, type(price))
+    # print('minOrderQty', minOrderQty)
+    # print('leverage', leverage, type(leverage))
     return (Decimal(str(qty_USDT * leverage)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
 
 

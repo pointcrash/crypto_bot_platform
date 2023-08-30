@@ -183,7 +183,7 @@ def get_position_idx(side):
     return position_idx
 
 
-def append_thread_or_check_duplicate(bot_id, is_ts_bot):
+def append_thread_or_check_duplicate(bot_id, is_ts_bot=False):
     lock.acquire()
     try:
         if bot_id not in global_list_bot_id:

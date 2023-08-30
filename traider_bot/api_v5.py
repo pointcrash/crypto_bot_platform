@@ -251,3 +251,18 @@ def switch_position_mode(bot):
     }
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+
+
+def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0'):
+    endpoint = "/v5/position/trading-stop"
+    method = "POST"
+    params = {
+        'category': bot.category,
+        'symbol': bot.symbol.name,
+        'takeProfit': takeProfit,
+        'stopLoss': stopLoss,
+        'positionIdx': positionIdx,
+    }
+    params = json.dumps(params)
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    print('set_trading_stop:', response)

@@ -22,7 +22,8 @@ class Order(models.Model):
     timeInForce = models.CharField(default='GTC')
     orderLinkId = models.CharField(max_length=32, unique=True)
     is_take = models.BooleanField(default=False)
-    takeProfit = models.CharField(max_length=32)
+    takeProfit = models.CharField(max_length=32, blank=True, null=True, default='')
+    stopLoss = models.CharField(max_length=32, blank=True, null=True, default='')
 
     def realize_order(self):
 
@@ -37,11 +38,14 @@ class Order(models.Model):
             'qty': str(self.qty),
             'price': str(self.price),
             'orderLinkId': self.orderLinkId,
-            'takeProfit': self.takeProfit,
+            'takeProfit': str(self.takeProfit),
+            'stopLoss': str(self.stopLoss),
         }
         params = json.dumps(params)
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
         bot = Bot.objects.get(pk=self.bot.pk)
+        if bot.work_model == 'set0psn':
+            logging(bot, f'{response}')
         # logging(bot, f'{response}')
         # logging(bot, f'{self.price}')
         print(response)
@@ -50,10 +54,11 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if self.category == 'inverse':
-            if self.is_take:
-                self.positionIdx = 2 if self.side == 'Buy' else 1
-            else:
-                self.positionIdx = 1 if self.side == 'Buy' else 2
+            if not self.positionIdx:
+                if self.is_take:
+                    self.positionIdx = 2 if self.side == 'Buy' else 1
+                else:
+                    self.positionIdx = 1 if self.side == 'Buy' else 2
         if not self.orderLinkId:
             self.orderLinkId = uuid.uuid4().hex
         super().save(*args, **kwargs)
