@@ -105,9 +105,9 @@ class BotForm(forms.ModelForm):
         #     if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
         #         raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
 
-        if qty < Decimal(symbol.minOrderQty) or qty > Decimal(symbol.maxOrderQty):
+        if qty * leverage < Decimal(symbol.minOrderQty) or qty * leverage > Decimal(symbol.maxOrderQty):
             raise forms.ValidationError(
-                f"Допустимые значения '1st order investment': min = {symbol.minOrderQty}, max = {symbol.maxOrderQty}")
+                f"Допустимые значения '1st order investment': min = {Decimal(symbol.minOrderQty) / leverage}, max = {Decimal(symbol.maxOrderQty) / leverage}")
 
         if leverage > Decimal(symbol.maxLeverage) or leverage < Decimal(symbol.minLeverage):
             raise forms.ValidationError(
@@ -208,7 +208,8 @@ class GridBotForm(forms.ModelForm):
             raise forms.ValidationError("Значение 'Max Margin' не может быть пустым")
 
         if qty is None:
-            raise forms.ValidationError("Значение '1st order investments' неверно. Поле не может быть пустым или иметь дробные значения")
+            raise forms.ValidationError(
+                "Значение '1st order investments' неверно. Поле не может быть пустым или иметь дробные значения")
 
         if order_type == 'Market' and side == 'Auto':
             raise forms.ValidationError("Invalid combination: orderType - 'Market' cannot have side - 'Auto'.")
