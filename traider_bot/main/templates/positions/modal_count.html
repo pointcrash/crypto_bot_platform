@@ -80,13 +80,19 @@
                     </tr>
                     </tbody>
                 </table>
-                <div class="container d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
+                    <br>
+                    <br>
+                <div class="container d-flex">
+                    <div class="d-flex">
                         <h5 class="">Account balance: &nbsp;</h5>
-                        <h5 id="walletBalance{{ forloop.parentloop.counter }}_{{ key }}"></h5>
+                        <h5 style="color: #198754" id="walletBalance{{ forloop.parentloop.counter }}_{{ key }}"></h5>
+                    </div>
+                    <div class="d-flex ms-5">
+                        <h5>Margin required: &nbsp;</h5>
+                        <h5 style="color: #198754" id="marginCell{{ forloop.parentloop.counter }}_{{ key }}"></h5>
                     </div>
 
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex ms-auto">
                         <h6 id="notEnoughBalance{{ forloop.parentloop.counter }}_{{ key }}" class="d-none mr-2">Not
                             enough balance</h6>
                         <a href="{% url 'start_set_zero_psn_bot' acc_id=account.pk symbol_name=symbol_list.symbol trend=key %}"

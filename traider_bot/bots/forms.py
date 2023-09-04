@@ -15,17 +15,17 @@ class BotForm(forms.ModelForm):
                 self.fields['account'].queryset = Account.objects.all()
             else:
                 self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
-        self.fields['account'].label_from_instance = self.label_from_instance
-
-    @staticmethod
-    def label_from_instance(obj):
-        balance = get_query_account_coins_balance(obj)
-        try:
-            for elem in balance:
-                if elem['coin'] == 'USDT':
-                    return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
-        except:
-            return f"{obj.name} error"
+    #     self.fields['account'].label_from_instance = self.label_from_instance
+    #
+    # @staticmethod
+    # def label_from_instance(obj):
+    #     balance = get_query_account_coins_balance(obj)
+    #     try:
+    #         for elem in balance:
+    #             if elem['coin'] == 'USDT':
+    #                 return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
+    #     except:
+    #         return f"{obj.name} error"
 
     class Meta:
         model = Bot
@@ -128,17 +128,17 @@ class GridBotForm(forms.ModelForm):
                 self.fields['account'].queryset = Account.objects.all()
             else:
                 self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
-        self.fields['account'].label_from_instance = self.label_from_instance
-
-    @staticmethod
-    def label_from_instance(obj):
-        balance = get_query_account_coins_balance(obj)
-        try:
-            for elem in balance:
-                if elem['coin'] == 'USDT':
-                    return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
-        except:
-            return f"{obj.name} error"
+    #     self.fields['account'].label_from_instance = self.label_from_instance
+    #
+    # @staticmethod
+    # def label_from_instance(obj):
+    #     balance = get_query_account_coins_balance(obj)
+    #     try:
+    #         for elem in balance:
+    #             if elem['coin'] == 'USDT':
+    #                 return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
+    #     except:
+    #         return f"{obj.name} error"
 
     class Meta:
         model = Bot

@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from api_v5 import get_list, get_current_price, set_trading_stop, get_order_status
 from bots.bot_logic import get_quantity_from_price
+from main.psn_count import psn_count
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id
 from single_bot.logic.work import append_thread_or_check_duplicate
@@ -37,15 +38,27 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict):
                 if order_status == 'Order not found':
                     orderLinkId = None
                     order_status = None
+                if by_psn_qty and sell_psn_qty:
+                    order_side = bot.side
+                    position_idx = 1 if order_side == 'Buy' else 2
+
+                    if order_side == 'Buy':
+                        order_stop_loss = mark_price - Decimal(bot.symbol.tickSize)
+                    else:
+                        order_stop_loss = mark_price + Decimal(bot.symbol.tickSize)
+
+                    set_trading_stop(bot, position_idx, stopLoss=str(order_stop_loss))
                 time.sleep(bot.time_sleep)
+
+
                 continue
             else:
                 order_side = bot.side
-
-                if order_side == 'Buy':
-                    order_stop_loss = mark_price - Decimal(bot.symbol.tickSize)
-                else:
-                    order_stop_loss = mark_price + Decimal(bot.symbol.tickSize)
+                #
+                # if order_side == 'Buy':
+                #     order_stop_loss = mark_price - 2 * Decimal(bot.symbol.tickSize)
+                # else:
+                #     order_stop_loss = mark_price + 2 * Decimal(bot.symbol.tickSize)
 
                 order = Order.objects.create(
                     bot=bot,
@@ -53,10 +66,11 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict):
                     symbol=bot.symbol.name,
                     side=order_side,
                     orderType="Limit",
-                    qty=get_quantity_from_price(Decimal(str(bot.qty)), mark_price, bot.symbol.minOrderQty, bot.isLeverage),
+                    qty=get_quantity_from_price(Decimal(str(bot.qty)), mark_price, bot.symbol.minOrderQty,
+                                                bot.isLeverage),
                     price=mark_price,
                     takeProfit=str(count_dict['stop_price']),
-                    stopLoss=order_stop_loss,
+                    # stopLoss=order_stop_loss,
                 )
 
                 orderLinkId = order.orderLinkId

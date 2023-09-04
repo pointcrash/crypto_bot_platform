@@ -146,6 +146,8 @@
                 </div>
             </div>
         </form>
+        <h5 class="text-center">POSITION</h5>
+        <hr>
         <div class="row mb-5">
             {% if symbol_list.size != '0.0' %}
             <table class="table" style="vertical-align: middle">
@@ -180,6 +182,48 @@
             </table>
             {% else %}
             <h5 class="text-center">Позиция не открыта</h5>
+            {% endif %}
+        </div>
+            <h5 class="text-center">ORDER BOOK</h5>
+            <a class="btn btn-secondary text-end" href="{% url 'create_order' bot_id=bot.pk %}">New order</a>
+        <hr>
+                <div class="row mb-5">
+            {% if order_list %}
+            <table class="table" style="vertical-align: middle">
+                <thead style="background-color: #525252">
+                <tr class="">
+                    <th>SYMBOL</th>
+                    <th class="d-none d-sm-table-cell">QTY</th>
+                    <th class="d-none d-md-table-cell">PRICE</th>
+                    <th class="d-none d-sm-table-cell">LEAVES QTY</th>
+                    <th>TP/SL</th>
+                    <th>SIDE</th>
+                    <th>STATUS</th>
+                    <th class="d-none d-sm-table-cell">TIME</th>
+                    <th class="d-none d-sm-table-cell">CLOSE</th>
+                </tr>
+                </thead>
+                <tbody style="background-color: #858585">
+                    {% for order in order_list %}
+                    <tr class="">
+                        <td>{{ order.symbol }}</td>
+                        <td class="d-none d-sm-table-cell">{{ order.qty }}</td>
+                        <td class="d-none d-sm-table-cell">{{ order.price }}</td>
+                        <td class="d-none d-sm-table-cell">{{ order.leavesQty }}</td>
+                        <td class="d-none d-sm-table-cell">
+                            {% if order.takeProfit == '0.000' %}--{% else %}{{ order.takeProfit }}{% endif %}/{% if order.stopLoss == '0.000' %}--{% else %}{{ order.stopLoss }}{% endif %}
+                        </td>
+                        <td>{{ order.side }}</td>
+                        <td>{{ order.orderStatus }}</td>
+                        <td class="d-none d-sm-table-cell">{{ order.updatedTime }}</td>
+                        <td class="d-none d-sm-table-cell"><a href="{% url 'cancel_order' bot_id=bot.pk order_id=order.orderLinkId %}"
+                        class="btn btn-sm btn-outline-dark">Cancel</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <h5 class="text-center">Нет открытых ордеров</h5>
             {% endif %}
         </div>
     </div>

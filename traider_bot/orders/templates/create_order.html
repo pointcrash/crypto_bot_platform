@@ -3,16 +3,21 @@
 {% block content %}
 <div class="row">
     <div class="col-3 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Create order</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                {% csrf_token %}
 
+                {{ form.as_p }}
 
-        <h2 class="m-4">Create bot</h2>
-        <form method="POST">
-            {% csrf_token %}
+                <button type="submit" class="btn btn-success">Create</button>
+                </form>
+            </div>
+        </div>
 
-            {{ form.as_p }}
-
-            <button type="submit" class="btn btn-success">Create</button>
-        </form>
     </div>
 </div>
 {% endblock %}

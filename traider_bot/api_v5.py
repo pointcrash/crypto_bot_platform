@@ -67,6 +67,18 @@ def cancel_all(account, category, symbol):
     return response
 
 
+def cancel_order(bot, order_id):
+    endpoint = "/v5/order/cancel"
+    method = "POST"
+    params = {
+        'category': bot.category,
+        'symbol': bot.symbol.name,
+        'orderLinkId': order_id,
+    }
+    params = json.dumps(params)
+    print(json.loads(HTTP_Request(bot.account, endpoint, method, params, "CancelOrder")))
+
+
 def get_current_price(account, category, symbol):
     endpoint = "/v5/market/tickers"
     method = "GET"
@@ -266,3 +278,14 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0'):
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     print('set_trading_stop:', response)
+
+
+def get_open_orders(bot):
+    endpoint = "/v5/order/realtime"
+    method = "GET"
+    params = f"category=inverse&symbol={bot.symbol.name}"
+    try:
+        response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+        return response['result']['list']
+    except:
+        return None

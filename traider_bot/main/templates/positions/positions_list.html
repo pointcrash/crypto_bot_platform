@@ -108,13 +108,15 @@
                     }
 
                 // Обновление значений в ячейках таблицы
-                    const marginCell = document.getElementById(`marginCell${forloopCounter}_${key}`);
+                    const marginCells = document.querySelectorAll('[id^="marginCell"]');
                     const stopPriceCell = document.getElementById(`stopPriceCell${forloopCounter}_${key}`);
                     const pnlOldCell = document.getElementById(`pnlOldCell${forloopCounter}_${key}`);
                     const pnlNewCell = document.getElementById(`pnlNewCell${forloopCounter}_${key}`);
                     const walletBalance = document.getElementById(`walletBalance${forloopCounter}_${key}`);
 
-                    marginCell.textContent = data.margin;
+                    marginCells.forEach(element => {
+                        element.textContent = data.margin;
+                    });
                     stopPriceCell.textContent = data.stop_price;
                     pnlOldCell.textContent = data.pnl_old;
                     pnlNewCell.textContent = data.pnl_new;

@@ -1,9 +1,11 @@
 import threading
+from datetime import datetime
 
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+from api_v5 import get_open_orders
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
@@ -103,7 +105,16 @@ def single_bot_detail(request, bot_id):
     else:
         form = GridBotForm(request=request, instance=bot)
 
-    return render(request, 'bot_detail.html', {'form': form, 'bot': bot, 'symbol_list': symbol_list, })
+    order_list = get_open_orders(bot)
+    for order in order_list:
+        time = int(order['updatedTime'])
+        dt_object = datetime.fromtimestamp(time / 1000.0)
+        formatted_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
+        order['updatedTime'] = formatted_date
+        # print(order)
+
+    return render(request, 'bot_detail.html',
+                  {'form': form, 'bot': bot, 'symbol_list': symbol_list, 'order_list': order_list})
 
 
 def bot_start(request, bot_id):

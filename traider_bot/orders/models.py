@@ -12,13 +12,14 @@ from timezone.models import TimeZone
 class Order(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='orders', blank=True, null=True)
     category = models.CharField(default="linear")
-    symbol = models.CharField(max_length=10)
+    symbol = models.CharField()
     isLeverage = models.IntegerField(default=10)
     side = models.CharField()
     positionIdx = models.IntegerField(blank=True, null=True, default=0)
     orderType = models.CharField()
     qty = models.DecimalField(max_digits=10, decimal_places=3)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    char_price = models.CharField(blank=True, null=True)
     timeInForce = models.CharField(default='GTC')
     orderLinkId = models.CharField(max_length=32, unique=True)
     is_take = models.BooleanField(default=False)
@@ -26,6 +27,7 @@ class Order(models.Model):
     stopLoss = models.CharField(max_length=32, blank=True, null=True, default='')
 
     def realize_order(self):
+        price = self.price if self.price else self.char_price
 
         endpoint = "/v5/order/create"
         method = "POST"
@@ -36,11 +38,15 @@ class Order(models.Model):
             'positionIdx': self.positionIdx,
             'orderType': self.orderType,
             'qty': str(self.qty),
-            'price': str(self.price),
+            'price': str(price),
             'orderLinkId': self.orderLinkId,
-            'takeProfit': str(self.takeProfit),
-            'stopLoss': str(self.stopLoss),
         }
+
+        if self.takeProfit:
+            params['takeProfit'] = self.takeProfit
+        if self.stopLoss:
+            params['stopLoss'] = self.stopLoss
+
         params = json.dumps(params)
         response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
         bot = Bot.objects.get(pk=self.bot.pk)
