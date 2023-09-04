@@ -78,6 +78,9 @@ def single_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
     symbol_list = func_get_symbol_list(bot)
     symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
+    symbol_list['avgPrice'] = round(float(symbol_list['avgPrice']), 2)
+    symbol_list['unrealisedPnl'] = round(float(symbol_list['unrealisedPnl']), 2)
+    symbol_list['positionBalance'] = round(float(symbol_list['positionBalance']), 2)
     if request.method == 'POST':
         form = GridBotForm(request.POST, request=request, instance=bot)
         if form.is_valid():

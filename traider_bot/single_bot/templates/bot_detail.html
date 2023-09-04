@@ -101,20 +101,20 @@
                     <br>
                     <hr>
                     <div class="col-6">
-                    {{ form.time_sleep.label_tag }}
-                    {{ form.time_sleep }}
-                    {{ form.repeat.label_tag }}
-                    {{ form.repeat }}
+                        {{ form.time_sleep.label_tag }}
+                        {{ form.time_sleep }}
+                        {{ form.repeat.label_tag }}
+                        {{ form.repeat }}
                     </div>
                 </div>
             </div>
-                <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
-            <div class="row justify-content-center">
-            <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
-                    data-bs-target="#deleteBotModal">Delete Bot
-            </button>
+            <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
+                <div class="row justify-content-center">
+                    <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
+                            data-bs-target="#deleteBotModal">Delete Bot
+                    </button>
                 </div>
             </div>
             <!-- Modal -->
@@ -148,7 +148,7 @@
         </form>
         <h5 class="text-center">POSITION</h5>
         <hr>
-        <div class="row mb-5">
+        <div class="card mb-5 p-3">
             {% if symbol_list.size != '0.0' %}
             <table class="table" style="vertical-align: middle">
                 <thead>
@@ -157,37 +157,39 @@
                     <th>SYMBOL</th>
                     <th class="d-none d-sm-table-cell">SIZE</th>
                     <th class="d-none d-sm-table-cell">ENTRY PRICE</th>
-                    <th >MARK PRICE</th>
-                    <th >LIQ PRICE</th>
+                    <th>MARK PRICE</th>
+                    <th>LIQ PRICE</th>
                     <th class="d-none d-md-table-cell">MARGIN</th>
-                    <th >UNREALIZED PNL</th>
+                    <th>UNREALIZED PNL</th>
                     <th class="d-none d-md-table-cell">CANCEL M-LINE</th>
                     <th class="d-none d-md-table-cell">CLOSE POSITION</th>
                 </tr>
                 </thead>
                 <tbody>
-                    <tr class="">
-                        <td>{{ symbol_list.side }}</td>
-                        <td>{{ symbol_list.symbol }}</td>
-                        <td>{{ symbol_list.size }}</td>
-                        <td class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
-                        <td >{{ symbol_list.markPrice }}</td>
-                        <td >{{ symbol_list.liqPrice }}</td>
-                        <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
-                        <td >{{ symbol_list.unrealisedPnl }}</td>
-                        <td class="d-none d-md-table-cell"><a href="#" class="btn btn-warning">Cancel M-line</a></td>
-                        <td class="d-none d-md-table-cell"><a href="{% url 'terminate_bot' bot_id=bot.pk event_number=3 %}" class="btn btn-danger">Close position</a></td>
-                    </tr>
+                <tr class="">
+                    <td>{{ symbol_list.side }}</td>
+                    <td>{{ symbol_list.symbol }}</td>
+                    <td>{{ symbol_list.size }}</td>
+                    <td class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
+                    <td>{{ symbol_list.markPrice }}</td>
+                    <td>{{ symbol_list.liqPrice }}</td>
+                    <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
+                    <td>{{ symbol_list.unrealisedPnl }}</td>
+                    <td class="d-none d-md-table-cell"><a href="#" class="btn btn-warning">Cancel M-line</a></td>
+                    <td class="d-none d-md-table-cell"><a
+                            href="{% url 'terminate_bot' bot_id=bot.pk event_number=3 %}" class="btn btn-danger">Close
+                        position</a></td>
+                </tr>
                 </tbody>
             </table>
             {% else %}
             <h5 class="text-center">Позиция не открыта</h5>
             {% endif %}
         </div>
-            <h5 class="text-center">ORDER BOOK</h5>
-            <a class="btn btn-secondary text-end" href="{% url 'create_order' bot_id=bot.pk %}">New order</a>
+        <h5 class="text-center">ORDER BOOK</h5>
+        <a class="btn btn-secondary text-end" href="{% url 'create_order' bot_id=bot.pk %}">New order</a>
         <hr>
-                <div class="row mb-5">
+        <div class="row mb-5">
             {% if order_list %}
             <table class="table" style="vertical-align: middle">
                 <thead style="background-color: #525252">
@@ -204,22 +206,23 @@
                 </tr>
                 </thead>
                 <tbody style="background-color: #858585">
-                    {% for order in order_list %}
-                    <tr class="">
-                        <td>{{ order.symbol }}</td>
-                        <td class="d-none d-sm-table-cell">{{ order.qty }}</td>
-                        <td class="d-none d-sm-table-cell">{{ order.price }}</td>
-                        <td class="d-none d-sm-table-cell">{{ order.leavesQty }}</td>
-                        <td class="d-none d-sm-table-cell">
-                            {% if order.takeProfit == '0.000' %}--{% else %}{{ order.takeProfit }}{% endif %}/{% if order.stopLoss == '0.000' %}--{% else %}{{ order.stopLoss }}{% endif %}
-                        </td>
-                        <td>{{ order.side }}</td>
-                        <td>{{ order.orderStatus }}</td>
-                        <td class="d-none d-sm-table-cell">{{ order.updatedTime }}</td>
-                        <td class="d-none d-sm-table-cell"><a href="{% url 'cancel_order' bot_id=bot.pk order_id=order.orderLinkId %}"
-                        class="btn btn-sm btn-outline-dark">Cancel</a></td>
-                    </tr>
-                    {% endfor %}
+                {% for order in order_list %}
+                <tr class="">
+                    <td>{{ order.symbol }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.qty }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.price }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.leavesQty }}</td>
+                    <td class="d-none d-sm-table-cell">
+                        {% if order.takeProfit == '0.000' %}--{% else %}{{ order.takeProfit }}{% endif %}/{% if order.stopLoss == '0.000' %}--{% else %}{{ order.stopLoss }}{% endif %}
+                    </td>
+                    <td>{{ order.side }}</td>
+                    <td>{{ order.orderStatus }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.updatedTime }}</td>
+                    <td class="d-none d-sm-table-cell"><a
+                            href="{% url 'cancel_order' bot_id=bot.pk order_id=order.orderLinkId %}"
+                            class="btn btn-sm btn-outline-dark">Cancel</a></td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
             {% else %}
