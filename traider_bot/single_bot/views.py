@@ -115,6 +115,7 @@ def single_bot_detail(request, bot_id):
         formatted_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
         order['updatedTime'] = formatted_date
         # print(order)
+        #
 
     return render(request, 'bot_detail.html',
                   {'form': form, 'bot': bot, 'symbol_list': symbol_list, 'order_list': order_list})
