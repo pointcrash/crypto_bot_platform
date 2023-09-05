@@ -1,9 +1,11 @@
 import threading
+from datetime import datetime
 
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+from api_v5 import get_open_orders
 from bots.bb_set_takes import set_takes
 from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import BotForm
@@ -80,7 +82,12 @@ def single_bb_bot_detail(request, bot_id):
     else:
         form = BotForm(request=request, instance=bot)
 
-    return render(request, 'one_way/bb/bot_detail.html', {'form': form, 'bot': bot, 'symbol_list': symbol_list, })
+    order_list = get_open_orders(bot)
+    for order in order_list:
+        time = int(order['updatedTime'])
+        dt_object = datetime.fromtimestamp(time / 1000.0)
+        formatted_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
+        order['updatedTime'] = formatted_date
 
-
-
+    return render(request, 'one_way/bb/bot_detail.html',
+                  {'form': form, 'bot': bot, 'symbol_list': symbol_list, 'order_list': order_list, })
