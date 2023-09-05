@@ -10,13 +10,18 @@ class OrderCreateForm(forms.ModelForm):
             ('Buy', 'Buy'),
             ('Sell', 'Sell'),
         )
+        ORDER_TYPE_CHOICES = (
+            ('Market', 'Market'),
+            ('Limit', 'Limit'),
+        )
 
         model = Order
-        fields = ['side', 'qty', 'isLeverage', 'char_price', 'is_take', 'takeProfit', 'stopLoss']
+        fields = ['side', 'orderType', 'qty', 'isLeverage', 'char_price', 'is_take', 'takeProfit', 'stopLoss', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
             'side': forms.Select(choices=SIDE_CHOICES, attrs={'class': 'form-control'}),
+            'orderType': forms.Select(choices=ORDER_TYPE_CHOICES, attrs={'class': 'form-control'}),
             'isLeverage': forms.NumberInput(attrs={'class': 'form-control'}),
             'char_price': forms.TextInput(attrs={'class': 'form-control'}),
             'takeProfit': forms.TextInput(attrs={'class': 'form-control'}),
@@ -26,6 +31,6 @@ class OrderCreateForm(forms.ModelForm):
         labels = {
             'qty': 'Quantity',
             'char_price': 'Price',
-            'is_take': 'Open/Close',
+            'is_take': 'Close',
             'isLeverage': 'Leverage',
         }

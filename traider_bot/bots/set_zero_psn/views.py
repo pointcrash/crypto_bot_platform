@@ -30,7 +30,7 @@ def start_set_zero_psn_bot(request, acc_id, symbol_name, trend):
         bot.delete()
 
     bot = create_set0osn_bot_obj(user, account, symbol, psn, count_dict)
-    bot_thread = threading.Thread(target=work_set_zero_psn_bot, args=(bot, Decimal(psn['markPrice']), count_dict))
+    bot_thread = threading.Thread(target=work_set_zero_psn_bot, args=(bot, Decimal(psn['markPrice']), count_dict, trend))
     bot_thread.start()
 
     lock.acquire()

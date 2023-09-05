@@ -19,7 +19,6 @@ def create_order_view(request, bot_id):
             order.bot = bot
             order.category = 'inverse'
             order.symbol = bot.symbol.name
-            order.orderType = 'Limit'
             order.save()
 
             return redirect('single_bot_list')

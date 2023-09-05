@@ -84,7 +84,10 @@ def get_current_price(account, category, symbol):
     method = "GET"
     params = f"category={category}&symbol={symbol.name}"
     response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
-    return Decimal(response["result"]["list"][0]["lastPrice"])
+    try:
+        return Decimal(response["result"]["list"][0]["lastPrice"])
+    except:
+        return None
 
 
 def get_position_price(symbol_list):
