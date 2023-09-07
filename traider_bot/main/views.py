@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from api_v5 import get_query_account_coins_balance, get_list
 from bots.models import Log, Bot, Symbol
+from bots.set_zero_psn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
@@ -15,7 +16,6 @@ from .forms import RegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
 from main.models import Account
-from .psn_count import psn_count
 
 
 def view_home(request):
@@ -79,6 +79,7 @@ def account_list(request):
 @login_required
 def account_position_list(request):
     bot_symbol_list = []
+    name_symbol_set = set()
     if request.user.is_superuser:
         accounts = Account.objects.all()
     else:
@@ -89,7 +90,8 @@ def account_position_list(request):
             for psn in positions_list:
                 symbol = Symbol.objects.filter(name=psn['symbol']).first()
                 if symbol:
-                    count_dict = psn_count(psn, int(symbol.priceScale))
+                    name_symbol_set.add(symbol.name)
+                    count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize)
                     bot = Bot.objects.filter(account=account, symbol=symbol).first()
                     psn['positionBalance'] = str(round(Decimal(psn['positionBalance']), 2))
                     psn['unrealisedPnl'] = str(round(Decimal(psn['unrealisedPnl']), 2))
@@ -102,7 +104,7 @@ def account_position_list(request):
                     else:
                         bot_symbol_list.append((account, '---', psn, count_dict, False))
 
-    return render(request, 'positions/positions_list.html', {'positions_list': bot_symbol_list})
+    return render(request, 'positions/positions_list.html', {'positions_list': bot_symbol_list, 'name_symbol_set': name_symbol_set})
 
 
 @csrf_exempt
@@ -120,7 +122,7 @@ def recalculate_values(request):
         for psn in positions_list:
             if psn['symbol'] == symbol_name:
                 symbol = Symbol.objects.filter(name=psn['symbol']).first()
-                count_dict = psn_count(psn, int(symbol.priceScale))
+                count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize)
                 bot = Bot.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
                 if tb > count_dict[trend]['margin'] * Decimal('1.1'):
                     enough_balance = True

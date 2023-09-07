@@ -25,7 +25,7 @@ def create_order_view(request, bot_id):
     else:
         form = OrderCreateForm()
 
-    return render(request, 'create_order.html', {'title': title, 'form': form})
+    return render(request, 'create_order.html', {'title': title, 'form': form,  'symbol': bot.symbol.name, })
 
 
 @login_required

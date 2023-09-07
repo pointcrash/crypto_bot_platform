@@ -2,6 +2,10 @@
 
 {% block content %}
 <div class="row">
+    <div class="container text-center">
+    <h4>Current Price {{symbol}}: <span id="price">Loading...</span></h4>
+    <input type="hidden" id="symbol" value="{{symbol}}">
+    </div>
     <div class="col-3 mx-auto">
         <div class="card">
             <div class="card-header">
@@ -20,4 +24,35 @@
 
     </div>
 </div>
+
+<script>
+    const socket = new WebSocket('wss://stream.bybit.com/v5/public/linear');
+    const symbol = document.getElementById('symbol').value;
+
+    socket.addEventListener('open', (event) => {
+        console.log('WebSocket соединение установлено:', event);
+
+        const subscribeRequest = {
+            op: 'subscribe',
+            args: [`orderbook.1.${symbol}`]
+        };
+
+        socket.send(JSON.stringify(subscribeRequest));
+    });
+
+    socket.addEventListener('message', function(event) {
+        const data = JSON.parse(event.data);
+        const price = data['data']['b'][0][0];
+
+        document.getElementById('price').textContent = price;
+    });
+
+    socket.addEventListener('close', (event) => {
+        console.log('WebSocket соединение закрыто:', event);
+    });
+
+    socket.addEventListener('error', (event) => {
+        console.error('Произошла ошибка WebSocket:', event);
+    });
+</script>
 {% endblock %}

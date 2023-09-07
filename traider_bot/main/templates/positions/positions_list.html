@@ -12,6 +12,7 @@
     background-color: #f5f5f5;
 }
 </style>
+<input type="hidden" id="symbols_names" value="{{ name_symbol_set }}">
 
 
 {% if positions_list %}
@@ -41,11 +42,11 @@
                 <td>{{ symbol_list.side }}</td>
                 <td>{{ symbol_list.symbol }}</td>
                 <td class="d-none d-sm-table-cell">{{ symbol_list.size }}</td>
-                <td class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
-                <td>{{ symbol_list.markPrice }}</td>
-                <td class="d-none d-sm-table-cell">{{ symbol_list.liqPrice }}</td>
-                <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
-                <td>{{ symbol_list.unrealisedPnl }}</td>
+                <td id="avgPrice{{ forloop.counter }}" class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
+                <td id="markPrice{{ forloop.counter }}{{ symbol_list.symbol }}">{{ symbol_list.markPrice }}</td>
+                <td id="liqPrice{{ forloop.counter }}" class="d-none d-sm-table-cell">{{ symbol_list.liqPrice }}</td>
+                <td id="positionBalance{{ forloop.counter }}" class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
+                <td id="unrealisedPnl{{ forloop.counter }}">{{ symbol_list.unrealisedPnl }}</td>
                 {% if '-' in symbol_list.unrealisedPnl and not set0psn %}
                 <td class="d-none d-md-table-cell">
                     <button type="button" class="btn btn-warning" data-bs-toggle="modal"
@@ -159,6 +160,4 @@
         });
     });
 </script>
-
-
 {% endblock %}

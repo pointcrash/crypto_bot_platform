@@ -30,6 +30,5 @@ def stopping_set_zero_psn_bot(bot, account, symbol):
         )
 
     # Инвертируем позицию и снимаем стоп лосс с минусовой позиции
-    print('position_idx------------', position_idx)
     position_idx = '1' if position_idx == '2' else '2'
     set_trading_stop(bot, position_idx)
