@@ -73,7 +73,7 @@ def cancel_order(bot, order_id):
     params = {
         'category': bot.category,
         'symbol': bot.symbol.name,
-        'orderLinkId': order_id,
+        'orderId': order_id,
     }
     params = json.dumps(params)
     print(json.loads(HTTP_Request(bot.account, endpoint, method, params, "CancelOrder")))

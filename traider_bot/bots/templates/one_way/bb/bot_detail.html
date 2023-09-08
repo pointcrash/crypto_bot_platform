@@ -227,7 +227,7 @@
                     <td>{{ order.orderStatus }}</td>
                     <td class="d-none d-sm-table-cell">{{ order.updatedTime }}</td>
                     <td class="d-none d-sm-table-cell"><a
-                            href="{% url 'cancel_order' bot_id=bot.pk order_id=order.orderLinkId %}"
+                            href="{% url 'cancel_order' bot_id=bot.pk order_id=order.orderId %}"
                             class="btn btn-sm btn-outline-dark">Cancel</a></td>
                 </tr>
                 {% endfor %}
