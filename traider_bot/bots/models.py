@@ -124,6 +124,7 @@ class Take(models.Model):
 class Log(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
     content = models.CharField(blank=True, null=True)
+    time = models.CharField(blank=True, null=True)
 
 
 class Process(models.Model):

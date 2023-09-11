@@ -3,7 +3,7 @@ import time
 from decimal import Decimal
 
 from api_v5 import get_list, get_current_price, set_trading_stop, get_order_status
-from bots.bot_logic import get_quantity_from_price
+from bots.bot_logic import get_quantity_from_price, logging
 from bots.set_zero_psn.logic.psn_count import psn_count
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id
@@ -12,6 +12,7 @@ from single_bot.logic.work import append_thread_or_check_duplicate
 
 def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
     bot_id = bot.pk
+    qty = get_quantity_from_price(count_dict['margin'], mark_price, bot.symbol.minOrderQty, bot.isLeverage)
     append_thread_or_check_duplicate(bot_id)
     orderLinkId = None
     order_status = None
@@ -21,6 +22,7 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
     leverage_trend = Decimal(str(trend / leverage / 100))
     order_side = bot.side
     tick_size = Decimal(bot.symbol.tickSize)
+    we_have_2psn_flag = False
 
     lock.acquire()
     try:
@@ -41,25 +43,46 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                 if_not_psn_actions(bot)
                 break
             elif (by_psn_qty and sell_psn_qty) or order_status == 'Order not found' or order_status == 'New':
-                if order_status == 'Order not found':
+                if order_status == 'New':
+                    logging(bot, f'Ордер id={orderLinkId} успешно выставлен qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
+
+                if order_status == 'Order not found' and not (by_psn_qty and sell_psn_qty):
+                    logging(bot, f'Ордер id={orderLinkId} не найден qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
+
+                    recalc = False
                     current_price = get_current_price(bot.account, bot.category, bot.symbol)
                     if current_price:
                         if order_side == 'Sell':
                             current_price = current_price + tick_size
-                            if current_price > mark_price + (tick_size * 5):
-                                mark_price = current_price
-                        else:
+                            recalc = True if current_price > mark_price + (tick_size * 5) else False
+                        elif order_side == 'Buy':
                             current_price = current_price - tick_size
-                            if current_price < mark_price - (tick_size * 5):
-                                mark_price = current_price
-                    symbol_list = get_list(bot.account, symbol=bot.symbol)
-                    psn = symbol_list[0] if float(symbol_list[0]['size']) != 0 else symbol_list[1]
-                    count_dict = psn_count(psn, price_scale, tick_size, mark_price, trend)[str(trend)]
+                            recalc = True if current_price < mark_price - (tick_size * 5) else False
+
+                    if recalc or we_have_2psn_flag:
+                        logging(bot, f'recalc or we_have_2psn_flag')
+                        additional_losses = 0
+                        if we_have_2psn_flag:
+                            if order_side == 'Buy':
+                                additional_losses = round((order_stop_loss - mark_price) * qty, 2)
+                                logging(bot, f'Считаем доп потери {additional_losses}')
+                            else:
+                                logging(bot, f'Считаем доп потери {additional_losses}')
+                                additional_losses = round((mark_price - order_stop_loss) * qty, 2)
+                        symbol_list = get_list(bot.account, symbol=bot.symbol)
+                        psn = symbol_list[0] if float(symbol_list[0]['size']) != 0 else symbol_list[1]
+                        count_dict = psn_count(psn, price_scale, tick_size, trend, additional_losses)[str(trend)]
+                        mark_price = Decimal(psn['markPrice'])
+                        qty = get_quantity_from_price(count_dict['margin'], mark_price, bot.symbol.minOrderQty,
+                                                      bot.isLeverage)
+                        logging(bot, f'Новые данные qty={qty}, entry_price={mark_price}, margin={count_dict["margin"]}')
 
                     orderLinkId = None
                     order_status = None
 
                 if by_psn_qty and sell_psn_qty:
+                    we_have_2psn_flag = True
+
                     position_idx = 1 if order_side == 'Buy' else 2
                     current_price = get_current_price(bot.account, bot.category, bot.symbol)
 
@@ -72,18 +95,19 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                             reduce_sl = True if plus_psn_stop_loss < order_stop_loss else False
 
                         if reduce_sl:
-                            set_trading_stop(bot, position_idx, takeProfit=str(count_dict['stop_price']), stopLoss=str(order_stop_loss))
+                            set_trading_stop(bot, position_idx, takeProfit=str(count_dict['stop_price']),
+                                             stopLoss=str(plus_psn_stop_loss))
+                            logging(bot, f'Переставили SL, new={str(plus_psn_stop_loss)}, old={str(order_stop_loss)}')
+                            order_stop_loss = plus_psn_stop_loss
                 time.sleep(bot.time_sleep)
                 continue
 
             else:
-                # if order_side == 'Buy':
-                #     order_stop_loss = mark_price - 2 * Decimal(bot.symbol.tickSize)
-                # else:
-                #     order_stop_loss = mark_price + 2 * Decimal(bot.symbol.tickSize)
                 if order_side == 'Buy':
+                    mark_price += tick_size
                     order_stop_loss = round(mark_price - (mark_price * leverage_trend), price_scale)
                 else:
+                    mark_price -= tick_size
                     order_stop_loss = round(mark_price + (mark_price * leverage_trend), price_scale)
 
                 order = Order.objects.create(
@@ -92,12 +116,13 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                     symbol=bot.symbol.name,
                     side=order_side,
                     orderType="Limit",
-                    qty=get_quantity_from_price(Decimal(str(bot.qty)), mark_price, bot.symbol.minOrderQty,
-                                                bot.isLeverage),
+                    qty=qty,
                     price=mark_price,
                     takeProfit=str(count_dict['stop_price']),
                     stopLoss=str(order_stop_loss),
                 )
+
+                logging(bot, f'Отправлен ордер qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
 
                 orderLinkId = order.orderLinkId
 

@@ -43,7 +43,8 @@ def logs_list(request, bot_id):
     for i in range(1, len(logs) + 1):
         log_list.append([i, logs[i - 1]])
 
-    logs_per_page = 1000  # Количество логов на странице
+    log_list.sort(key=lambda x: x[0], reverse=True)
+    logs_per_page = 50  # Количество логов на странице
     paginator = Paginator(log_list, logs_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

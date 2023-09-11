@@ -320,8 +320,8 @@ def logging(bot, text):
     else:
         str_gmt = str(gmt)
 
-    in_time = f'{date.time()} {date.date()}'
-    Log.objects.create(bot=bot, content=f'{bot_info} {text} {in_time} (GMT {str_gmt})')
+    in_time = f'{date.time()} | {date.date()}'
+    Log.objects.create(bot=bot, content=f'{bot_info} {text}', time=f'{in_time} (GMT {str_gmt})')
 
 
 def entry_order_status_check(bot):

@@ -12,7 +12,7 @@ def create_set0osn_bot_obj(user, account, symbol, psn, count_dict):
         side=side,
         orderType='Market',
         qty=count_dict['margin'],
-        time_sleep=5,
+        time_sleep=15,
         work_model='set0psn',
     )
 

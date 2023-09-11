@@ -45,13 +45,15 @@
                     <tr>
                         <th>№</th>
                         <th>Content</th>
+                        <th>Time</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for log_id, log in log_list|slice:'-1::-1' %}
+                    {% for log_id, log in log_list %}
                     <tr>
                         <td>{{ log_id }}</td>
                         <td>{{ log.content }}</td>
+                        <td>{{ log.time }}</td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -96,7 +98,7 @@
                 </nav>
 
                 <p class="page-info m-1">
-                    Страница {{ log_list.number }} из {{ log_list.paginator.num_pages }} ({{ log_list.paginator.count }}
+                    Страница {{log_list.number}} из {{log_list.paginator.num_pages}} ({{log_list.paginator.count}}
                     логов)
                 </p>
             </div>
