@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from api_v5 import get_list, get_current_price, set_trading_stop, get_order_status
 from bots.bot_logic import get_quantity_from_price, logging
+from bots.models import Log
 from bots.set_zero_psn.logic.psn_count import psn_count
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id
@@ -23,6 +24,7 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
     order_side = bot.side
     tick_size = Decimal(bot.symbol.tickSize)
     we_have_2psn_flag = False
+    psn_loss_flag = False
 
     lock.acquire()
     try:
@@ -40,11 +42,21 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
 
             # Действия в зависимости от наличия открытых позиций
             if not by_psn_qty and not sell_psn_qty:
+                logging(bot,
+                        f'Обе позиции закрыты. Завершение работы...')
                 if_not_psn_actions(bot)
                 break
             elif (by_psn_qty and sell_psn_qty) or order_status == 'Order not found' or order_status == 'New':
+                # Инвертируем индекс позиции в зависимости от направления выставления плюсового ордера
+                position_idx = 2 if order_side == 'Buy' else 1
+                # Выставляем stopLoss для минусовой позиции
+                set_trading_stop(bot, position_idx)
+
                 if order_status == 'New':
-                    logging(bot, f'Ордер id={orderLinkId} успешно выставлен qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
+                    last_log = Log.objects.filter(bot=bot).last()
+                    f_line = f'Ордер id={orderLinkId} успешно выставлен qty={qty}, price={mark_price}, SL={str(order_stop_loss)}'
+                    if last_log.content != f_line:
+                        logging(bot, f_line)
 
                 if order_status == 'Order not found' and not (by_psn_qty and sell_psn_qty):
                     logging(bot, f'Ордер id={orderLinkId} не найден qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
@@ -60,15 +72,21 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                             recalc = True if current_price < mark_price - (tick_size * 5) else False
 
                     if recalc or we_have_2psn_flag:
-                        logging(bot, f'recalc or we_have_2psn_flag')
+                        if recalc:
+                            logging(bot, f'recalc')
+                        if we_have_2psn_flag:
+                            logging(bot, f'we_have_2psn_flag')
                         additional_losses = 0
+
                         if we_have_2psn_flag:
                             if order_side == 'Buy':
                                 additional_losses = round((order_stop_loss - mark_price) * qty, 2)
                                 logging(bot, f'Считаем доп потери {additional_losses}')
                             else:
-                                logging(bot, f'Считаем доп потери {additional_losses}')
                                 additional_losses = round((mark_price - order_stop_loss) * qty, 2)
+                                logging(bot, f'Считаем доп потери {additional_losses}')
+                            we_have_2psn_flag = False
+
                         symbol_list = get_list(bot.account, symbol=bot.symbol)
                         psn = symbol_list[0] if float(symbol_list[0]['size']) != 0 else symbol_list[1]
                         count_dict = psn_count(psn, price_scale, tick_size, trend, additional_losses)[str(trend)]
@@ -82,6 +100,11 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
 
                 if by_psn_qty and sell_psn_qty:
                     we_have_2psn_flag = True
+
+                    # Инвертируем индекс позиции в зависимости от направления выставления плюсового ордера
+                    position_idx = 2 if order_side == 'Buy' else 1
+                    # Выставляем stopLoss для минусовой позиции
+                    set_trading_stop(bot, position_idx, stopLoss=str(count_dict['stop_price']))
 
                     position_idx = 1 if order_side == 'Buy' else 2
                     current_price = get_current_price(bot.account, bot.category, bot.symbol)
@@ -126,10 +149,10 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
 
                 orderLinkId = order.orderLinkId
 
-                # Инвертируем индекс позиции в зависимости от направления выставления плюсового ордера
-                position_idx = 2 if order_side == 'Buy' else 1
-                # Выставляем stopLoss для минусовой позиции
-                set_trading_stop(bot, position_idx, stopLoss=str(count_dict['stop_price']))
+                # # Инвертируем индекс позиции в зависимости от направления выставления плюсового ордера
+                # position_idx = 2 if order_side == 'Buy' else 1
+                # # Выставляем stopLoss для минусовой позиции
+                # set_trading_stop(bot, position_idx, stopLoss=str(count_dict['stop_price']))
 
             lock.acquire()
 
