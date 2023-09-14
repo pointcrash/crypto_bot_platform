@@ -18,6 +18,7 @@ from single_bot.logic.work import append_thread_or_check_duplicate
 
 def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
     bot_id = bot.pk
+    entry_price = mark_price
     append_thread_or_check_duplicate(bot_id)
     order_side = bot.side
     leverage = bot.isLeverage
@@ -69,6 +70,16 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
 
             else:
                 if sl_check:
+                    while True:
+                        current_price = get_current_price(bot.account, bot.category, bot.symbol)
+                        if not current_price:
+                            time.sleep(5)
+                            continue
+                        if (order_side == 'Buy' and current_price > entry_price) or (order_side == 'Sell' and current_price < entry_price):
+                            time.sleep(15)
+                            continue
+                        break
+
                     time.sleep(30)
                     losses_pnl = Decimal(get_pnl(bot.account, bot.category, bot.symbol.name, limit=1)[0]['closedPnl'])
                     logging(bot, f'LOSSES_PNL = {losses_pnl}')
