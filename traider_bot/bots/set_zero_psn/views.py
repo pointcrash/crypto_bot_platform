@@ -9,6 +9,7 @@ from bots.set_zero_psn.logic.create_bot_obj import create_set0osn_bot_obj
 from bots.set_zero_psn.logic.psn_count import psn_count
 from bots.set_zero_psn.logic.stop import stopping_set_zero_psn_bot
 from bots.set_zero_psn.logic.work import work_set_zero_psn_bot
+from bots.set_zero_psn.logic.work_by_market import work_set0psn_bot_by_market
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, terminate_thread
 from main.models import Account
 from single_bot.logic.global_variables import lock, global_list_threads
@@ -30,7 +31,7 @@ def start_set_zero_psn_bot(request, acc_id, symbol_name, trend):
         bot.delete()
 
     bot = create_set0osn_bot_obj(user, account, symbol, psn, count_dict)
-    bot_thread = threading.Thread(target=work_set_zero_psn_bot, args=(bot, Decimal(psn['markPrice']), count_dict, trend))
+    bot_thread = threading.Thread(target=work_set0psn_bot_by_market, args=(bot, Decimal(psn['markPrice']), count_dict, trend))
     bot_thread.start()
 
     lock.acquire()

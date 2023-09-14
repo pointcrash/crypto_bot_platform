@@ -209,10 +209,10 @@ def get_order_leaves_qty(account, category, symbol, orderLinkId):
         return "Order does not exist"
 
 
-def get_pnl(account, category, symbol, start_time=0):
+def get_pnl(account, category, symbol, start_time=0, limit=50):
     endpoint = "/v5/position/closed-pnl"
     method = "GET"
-    params = f"category={category}&symbol={symbol}&startTime={start_time}"
+    params = f"category={category}&symbol={symbol}&startTime={start_time}&limit={limit}"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     try:
         return response['result']['list']

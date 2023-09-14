@@ -17,7 +17,7 @@ def psn_count(psn, price_scale, tick_size, trend_number=None, additional_losses=
             mark_price += tick_size
             for trend in range(trend_number, 4):
                 stop_price = round(mark_price - (mark_price * trend / 100), price_scale)
-                pnl_old = round((stop_price - entry_price) * qty, 2) - additional_losses
+                pnl_old = round((stop_price - entry_price) * qty, 2) + additional_losses
                 pnl_new = -pnl_old
                 margin = round(pnl_new * mark_price / (leverage * (mark_price - stop_price)), 2)
 
@@ -32,7 +32,7 @@ def psn_count(psn, price_scale, tick_size, trend_number=None, additional_losses=
             mark_price -= tick_size
             for trend in range(trend_number, 4):
                 stop_price = round(mark_price + (mark_price * trend / 100), price_scale)
-                pnl_old = round((entry_price - stop_price) * qty, 2) - additional_losses
+                pnl_old = round((entry_price - stop_price) * qty, 2) + additional_losses
                 pnl_new = -pnl_old
                 margin = round(pnl_new * mark_price / (leverage * (stop_price - mark_price)), 2)
 

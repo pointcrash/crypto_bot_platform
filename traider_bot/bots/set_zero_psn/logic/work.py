@@ -1,10 +1,14 @@
 import time
 
 from decimal import Decimal
+import os
+import django
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
+django.setup()
 from api_v5 import get_list, get_current_price, set_trading_stop, get_order_status
 from bots.bot_logic import get_quantity_from_price, logging
-from bots.models import Log
+from bots.models import Log, Bot
 from bots.set_zero_psn.logic.psn_count import psn_count
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id
@@ -55,7 +59,7 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                 if order_status == 'New':
                     last_log = Log.objects.filter(bot=bot).last()
                     f_line = f'Ордер id={orderLinkId} успешно выставлен qty={qty}, price={mark_price}, SL={str(order_stop_loss)}'
-                    if last_log.content != f_line:
+                    if f_line not in last_log.content:
                         logging(bot, f_line)
 
                 if order_status == 'Order not found' and not (by_psn_qty and sell_psn_qty):
