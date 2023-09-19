@@ -60,12 +60,15 @@ def single_bb_bot_create(request):
 @login_required
 def single_bb_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
-    set0psn = Set0Psn.objects.get(bot=bot)
+    set0psn = Set0Psn.objects.filter(bot=bot).first()
     symbol_list = func_get_symbol_list(bot)
     symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
     if request.method == 'POST':
         bot_form = BotForm(request.POST, request=request, instance=bot)
-        set0psn_form = Set0PsnForm(data=request.POST, instance=set0psn)
+        if set0psn:
+            set0psn_form = Set0PsnForm(data=request.POST, instance=set0psn)
+        else:
+            set0psn_form = Set0PsnForm(data=request.POST)
 
         if bot_form.is_valid() and set0psn_form.is_valid():
 
@@ -93,7 +96,10 @@ def single_bb_bot_detail(request, bot_id):
             return redirect('single_bot_list')
     else:
         bot_form = BotForm(request=request, instance=bot)
-        set0psn_form = Set0PsnForm(instance=set0psn)
+        if set0psn:
+            set0psn_form = Set0PsnForm(instance=set0psn)
+        else:
+            set0psn_form = Set0PsnForm()
 
     order_list = get_open_orders(bot)
     for order in order_list:

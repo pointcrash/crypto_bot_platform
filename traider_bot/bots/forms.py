@@ -32,15 +32,12 @@ class Set0PsnForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        trend = cleaned_data.get('trend')
         limit_pnl = cleaned_data.get('limit_pnl')
 
-        if trend not in [1, 2, 3]:
-            raise forms.ValidationError("Invalid 'Trend' value. Only '1', '2' or '3'")
-
-        if '-' not in limit_pnl and not limit_pnl.isdigit():
-            raise forms.ValidationError(
-                "Invalid 'Limit PNL loss' value. Value must consist of numbers only and contain a sign '-'")
+        if limit_pnl:
+            if '-' not in limit_pnl and not limit_pnl.isdigit():
+                raise forms.ValidationError(
+                    "Invalid 'Limit PNL loss' value. Value must consist of numbers only and contain a sign '-'")
 
         return cleaned_data
 
