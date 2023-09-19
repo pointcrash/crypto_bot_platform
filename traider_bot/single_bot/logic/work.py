@@ -54,9 +54,10 @@ def bot_work_logic(bot):
             psn, psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes, position_idx)
             '''-------------------------------------------------------------------------------------------'''
 
-            if need_set0psn_start_check(bot, psn):
-                lock.acquire()
-                continue
+            if bot.set0psn and bot.set0psn.set0psn:
+                if need_set0psn_start_check(bot, psn):
+                    lock.acquire()
+                    continue
 
             takes = get_takes(bot)
             main_price, is_back = check_change_psn_price(bot, main_price, psn_price)

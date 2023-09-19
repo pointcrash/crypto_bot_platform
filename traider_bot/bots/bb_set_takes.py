@@ -50,9 +50,10 @@ def set_takes(bot):
                 else:
                     raise ValueError(f'Ошибка в блоке calculation_entry_point: {e}')
 
-            if need_set0psn_start_check(bot, psn):
-                lock.acquire()
-                continue
+            if bot.set0psn and bot.set0psn.set0psn:
+                if need_set0psn_start_check(bot, psn):
+                    lock.acquire()
+                    continue
 
             if first_start:
                 first_cycle = False
