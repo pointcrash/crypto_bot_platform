@@ -78,6 +78,7 @@ class BBAutoAverage:
                 if 'MARGIN LIMIT!' not in last_log.content:
                     logging(self.bot,
                             f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+
                 return False
             else:
                 return True
