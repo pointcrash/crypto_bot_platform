@@ -74,8 +74,10 @@ class BBAutoAverage:
             avg_currency_amount = psn_currency_amount * self.bot.bb_avg_percent / 100
 
             if psn_currency_amount + avg_currency_amount > self.max_margin:
-                logging(self.bot,
-                        f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {psn_currency_amount + avg_currency_amount}')
+                last_log = Log.objects.filter(bot=self.bot).last()
+                if 'MARGIN LIMIT!' not in last_log.content:
+                    logging(self.bot,
+                            f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                 return False
             else:
                 return True
