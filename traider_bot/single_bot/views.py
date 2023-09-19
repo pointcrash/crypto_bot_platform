@@ -10,8 +10,8 @@ from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
 from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_list
-from bots.forms import GridBotForm
-from bots.models import Bot, IsTSStart
+from bots.forms import GridBotForm, Set0PsnForm
+from bots.models import Bot, IsTSStart, Set0Psn
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import bot_work_logic
@@ -47,13 +47,19 @@ def single_bot_create(request):
     title = 'Create Bot'
 
     if request.method == 'POST':
-        form = GridBotForm(request=request, data=request.POST)
-        if form.is_valid():
-            bot = form.save(commit=False)
+        bot_form = GridBotForm(request=request, data=request.POST)
+        set0psn_form = Set0PsnForm(data=request.POST)
+
+        if bot_form.is_valid() and set0psn_form.is_valid():
+            bot = bot_form.save(commit=False)
             bot.work_model = 'grid'
             bot.owner = request.user
             bot.category = 'inverse'
             bot.save()
+
+            set0psn = set0psn_form.save(commit=False)
+            set0psn.bot = bot
+            set0psn.save()
 
             connections.close_all()
 
@@ -68,24 +74,29 @@ def single_bot_create(request):
 
             return redirect('single_bot_list')
     else:
-        form = GridBotForm(request=request)
+        bot_form = GridBotForm(request=request)
+        set0psn_form = Set0PsnForm()
 
-    return render(request, 'create_bot.html', {'form': form, 'title': title, })
+    return render(request, 'create_bot.html', {'form': bot_form, 'title': title, 'set0psn_form': set0psn_form, })
 
 
 @login_required
 def single_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
+    set0psn = Set0Psn.objects.get(bot=bot)
     symbol_list = func_get_symbol_list(bot)
     symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
     symbol_list['avgPrice'] = round(float(symbol_list['avgPrice']), 2)
     symbol_list['unrealisedPnl'] = round(float(symbol_list['unrealisedPnl']), 2)
     symbol_list['positionBalance'] = round(float(symbol_list['positionBalance']), 2)
     if request.method == 'POST':
-        form = GridBotForm(request.POST, request=request, instance=bot)
-        if form.is_valid():
-            bot = form.save(commit=False)
+        bot_form = GridBotForm(request.POST, request=request, instance=bot)
+        set0psn_form = Set0PsnForm(data=request.POST, instance=set0psn)
+
+        if bot_form.is_valid() and set0psn_form.is_valid():
+            bot = bot_form.save(commit=False)
             clear_data_bot(bot)
+            set0psn_form.save()
 
             if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
@@ -106,7 +117,8 @@ def single_bot_detail(request, bot_id):
 
             return redirect('single_bot_list')
     else:
-        form = GridBotForm(request=request, instance=bot)
+        bot_form = GridBotForm(request=request, instance=bot)
+        set0psn_form = Set0PsnForm(instance=set0psn)
 
     order_list = get_open_orders(bot)
     for order in order_list:
@@ -117,7 +129,7 @@ def single_bot_detail(request, bot_id):
         print(order)
 
     return render(request, 'bot_detail.html',
-                  {'form': form, 'bot': bot, 'symbol_list': symbol_list, 'order_list': order_list})
+                  {'form': bot_form, 'set0psn_form': set0psn_form, 'bot': bot, 'symbol_list': symbol_list, 'order_list': order_list})
 
 
 def bot_start(request, bot_id):

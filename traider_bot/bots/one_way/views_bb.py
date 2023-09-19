@@ -11,7 +11,7 @@ from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import BotForm, Set0PsnForm
 from bots.hedge.logic.ts_bb.entry import entry_ts_bb_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.models import Bot
+from bots.models import Bot, Set0Psn
 
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders
 from single_bot.logic.global_variables import lock, global_list_threads
@@ -60,13 +60,18 @@ def single_bb_bot_create(request):
 @login_required
 def single_bb_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
+    set0psn = Set0Psn.objects.get(bot=bot)
     symbol_list = func_get_symbol_list(bot)
     symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
     if request.method == 'POST':
-        form = BotForm(request.POST, request=request, instance=bot)
-        if form.is_valid():
-            bot = form.save(commit=False)
+        bot_form = BotForm(request.POST, request=request, instance=bot)
+        set0psn_form = Set0PsnForm(data=request.POST, instance=set0psn)
+
+        if bot_form.is_valid() and set0psn_form.is_valid():
+
+            bot = bot_form.save(commit=False)
             clear_data_bot(bot)
+            set0psn_form.save()
 
             if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
@@ -87,7 +92,8 @@ def single_bb_bot_detail(request, bot_id):
 
             return redirect('single_bot_list')
     else:
-        form = BotForm(request=request, instance=bot)
+        bot_form = BotForm(request=request, instance=bot)
+        set0psn_form = Set0PsnForm(instance=set0psn)
 
     order_list = get_open_orders(bot)
     for order in order_list:
@@ -97,4 +103,4 @@ def single_bb_bot_detail(request, bot_id):
         order['updatedTime'] = formatted_date
 
     return render(request, 'one_way/bb/bot_detail.html',
-                  {'form': form, 'bot': bot, 'symbol_list': symbol_list, 'order_list': order_list, })
+                  {'form': bot_form, 'set0psn_form': set0psn_form, 'bot': bot, 'symbol_list': symbol_list, 'order_list': order_list, })

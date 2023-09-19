@@ -11,7 +11,26 @@ def to_avg_by_grid(bot, side, psn_price, psn_qty):
 
     if side == "Buy":
         if psn_price - current_price > psn_price * bot.grid_avg_value / 100:
-            if psn_currency_amount + avg_currency_amount <= bot.max_margin:
+            if bot.max_margin:
+                if psn_currency_amount + avg_currency_amount <= bot.max_margin:
+                    order = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType="Market",
+                        qty=get_quantity_from_price(avg_currency_amount, current_price, bot.symbol.minOrderQty,
+                                                    bot.isLeverage),
+                    )
+
+                    logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+                    return True
+                else:
+                    last_log = Log.objects.filter(bot=bot).last()
+                    if 'MARGIN LIMIT!' not in last_log.content:
+                        logging(bot,
+                                f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+            else:
                 order = Order.objects.create(
                     bot=bot,
                     category=bot.category,
@@ -21,19 +40,30 @@ def to_avg_by_grid(bot, side, psn_price, psn_qty):
                     qty=get_quantity_from_price(avg_currency_amount, current_price, bot.symbol.minOrderQty,
                                                 bot.isLeverage),
                 )
-
-                logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
-                return True
-            else:
-                last_log = Log.objects.filter(bot=bot).last()
-                if 'MARGIN LIMIT!' not in last_log.content:
-                    logging(bot,
-                            f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
         return False
 
     if side == "Sell":
         if current_price - psn_price > psn_price * bot.grid_avg_value / 100:
-            if psn_currency_amount + avg_currency_amount <= bot.max_margin:
+            if bot.max_margin:
+                if psn_currency_amount + avg_currency_amount <= bot.max_margin:
+                    order = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=side,
+                        orderType="Market",
+                        qty=get_quantity_from_price(avg_currency_amount, current_price, bot.symbol.minOrderQty,
+                                                    bot.isLeverage),
+                    )
+
+                    logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+                    return True
+                else:
+                    last_log = Log.objects.filter(bot=bot).last()
+                    if 'MARGIN LIMIT!' not in last_log.content:
+                        logging(bot,
+                                f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+            else:
                 order = Order.objects.create(
                     bot=bot,
                     category=bot.category,
@@ -46,11 +76,6 @@ def to_avg_by_grid(bot, side, psn_price, psn_qty):
 
                 logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                 return True
-            else:
-                last_log = Log.objects.filter(bot=bot).last()
-                if 'MARGIN LIMIT!' not in last_log.content:
-                    logging(bot,
-                            f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
         return False
 
 

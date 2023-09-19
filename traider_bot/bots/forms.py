@@ -245,8 +245,8 @@ class GridBotForm(forms.ModelForm):
         margin = cleaned_data.get('max_margin')
         leverage = cleaned_data.get('isLeverage')
 
-        if not margin and auto_avg:
-            raise forms.ValidationError("Значение 'Max Margin' не может быть пустым")
+        # if not margin and auto_avg:
+        #     raise forms.ValidationError("Значение 'Max Margin' не может быть пустым")
 
         if qty is None:
             raise forms.ValidationError(

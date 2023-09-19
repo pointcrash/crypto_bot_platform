@@ -15,7 +15,7 @@
             {% csrf_token %}
             <div class="row justify-content-center">
                 {% if form.errors %}
-                <div class="col-10 mx-auto alert alert-danger mt-2">
+                <div class="col-11 mx-auto alert alert-danger mt-2">
                     {% for field_errors in form.errors.values %}
                     {% for error in field_errors %}
                     {{ error }}
@@ -23,7 +23,7 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                <div class="card shadow col-12 col-xl-2 col-lg-5 p-3 m-2">
                     <h4 class="text-center">Settings</h4>
 
                     {{ form.account.label_tag }}
@@ -115,6 +115,11 @@
                     {{ form.repeat.label_tag }}
                     {{ form.repeat }}
                     </div>
+                </div>
+                <div class="card shadow col-12 col-xl-2 col-lg-5 p-3 m-2">
+                <h4 class="text-center">Set 0</h4>
+                    <br>
+                {{ set0psn_form.as_p }}
                 </div>
             </div>
             <div class="col-5 col-sm-3 mx-auto mb-5">
