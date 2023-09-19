@@ -1,2 +1,4 @@
-p = -5
-print(-5 + p)
+from decimal import Decimal
+
+p = Decimal('-1243124')
+print(p)

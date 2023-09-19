@@ -3,7 +3,46 @@ from django import forms
 
 from api_v5 import get_query_account_coins_balance
 from main.models import Account
-from .models import Bot
+from .models import Bot, Set0Psn
+
+
+class Set0PsnForm(forms.ModelForm):
+    class Meta:
+        TREND_CHOICE = (
+            (1, '1'),
+            (1, '2'),
+            (3, '3'),
+        )
+
+        model = Set0Psn
+        fields = ['set0psn', 'trend', 'limit_pnl', 'max_margin']
+
+        widgets = {
+            'trend': forms.Select(choices=TREND_CHOICE, attrs={'class': 'form-control'}),
+            'limit_pnl': forms.TextInput(attrs={'class': 'form-control'}),
+            'max_margin': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'set0psn': 'Activate',
+            'trend': 'Trend (%)',
+            'limit_pnl': 'Limit PNL loss',
+            'max_margin': 'Max Margin',
+
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        trend = cleaned_data.get('trend')
+        limit_pnl = cleaned_data.get('limit_pnl')
+
+        if trend not in [1, 2, 3]:
+            raise forms.ValidationError("Invalid 'Trend' value. Only '1', '2' or '3'")
+
+        if '-' not in limit_pnl and not limit_pnl.isdigit():
+            raise forms.ValidationError(
+                "Invalid 'Limit PNL loss' value. Value must consist of numbers only and contain a sign '-'")
+
+        return cleaned_data
 
 
 class BotForm(forms.ModelForm):
@@ -15,6 +54,7 @@ class BotForm(forms.ModelForm):
                 self.fields['account'].queryset = Account.objects.all()
             else:
                 self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
+
     #     self.fields['account'].label_from_instance = self.label_from_instance
     #
     # @staticmethod
@@ -128,6 +168,7 @@ class GridBotForm(forms.ModelForm):
                 self.fields['account'].queryset = Account.objects.all()
             else:
                 self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
+
     #     self.fields['account'].label_from_instance = self.label_from_instance
     #
     # @staticmethod

@@ -33,6 +33,7 @@ def entry_position(bot, takes, position_idx):
                 position_idx = get_position_idx_by_range(symbol_list)
 
             if position_idx is not None and get_qty(symbol_list)[position_idx]:
+                psn = symbol_list[position_idx]
                 psn_qty = get_qty(symbol_list)[position_idx]
                 psn_side = get_side(symbol_list)[position_idx]
                 psn_price = get_position_price(symbol_list)[position_idx]
@@ -69,7 +70,7 @@ def entry_position(bot, takes, position_idx):
                                 lock.acquire()
                                 continue
 
-                return psn_qty, psn_side, psn_price, first_cycle, avg_order
+                return psn, psn_qty, psn_side, psn_price, first_cycle, avg_order
 
             if bot.orderType == "Market":
                 set_entry_point_by_market(bot)

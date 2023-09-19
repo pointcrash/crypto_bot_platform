@@ -1,25 +1,23 @@
-from single_bot.logic.global_variables import lock, global_list_bot_id
 import time
-
 from decimal import Decimal
+from api_v5 import get_list, get_current_price, set_trading_stop, get_pnl
+from bots.bot_logic import get_quantity_from_price, logging
+from bots.set_zero_psn.logic.psn_count import psn_count
+from single_bot.logic.global_variables import lock, global_list_bot_id
+
 import os
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
-from api_v5 import get_list, get_current_price, set_trading_stop, get_order_status, get_pnl
-from bots.bot_logic import get_quantity_from_price, logging
-from bots.models import Log, Bot
-from bots.set_zero_psn.logic.psn_count import psn_count
+
 from orders.models import Order
-from single_bot.logic.global_variables import lock, global_list_bot_id
-from single_bot.logic.work import append_thread_or_check_duplicate
 
 
 def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
     bot_id = bot.pk
     entry_price = mark_price
-    append_thread_or_check_duplicate(bot_id)
+    bot_id_append_global_list(bot_id)
     order_side = bot.side
     leverage = bot.isLeverage
     price_scale = int(bot.symbol.priceScale)
@@ -30,6 +28,7 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
     tick_size = Decimal(bot.symbol.tickSize)
     order_stop_loss = 0
     sl_check = False
+    max_order_qty = Decimal(bot.symbol.maxOrderQty)
 
     lock.acquire()
     try:
@@ -46,10 +45,13 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
             if not by_psn_qty and not sell_psn_qty:
                 logging(bot,
                         f'Обе позиции закрыты. Завершение работы...')
-                if_not_psn_actions(bot)
+                bot_id_remove_global_list(bot)
                 break
 
             elif by_psn_qty and sell_psn_qty:
+                # Выставляем stopLoss для минусовой позиции
+                set_trading_stop(bot, position_idx_minus, stopLoss=str(count_dict['stop_price']))
+
                 current_price = get_current_price(bot.account, bot.category, bot.symbol)
 
                 if current_price:
@@ -69,6 +71,8 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
                 continue
 
             else:
+                set_trading_stop(bot, position_idx_minus)
+
                 if sl_check:
                     while True:
                         current_price = get_current_price(bot.account, bot.category, bot.symbol)
@@ -80,7 +84,7 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
                             continue
                         break
 
-                    time.sleep(30)
+                    time.sleep(15)
                     losses_pnl = Decimal(get_pnl(bot.account, bot.category, bot.symbol.name, limit=1)[0]['closedPnl'])
                     logging(bot, f'LOSSES_PNL = {losses_pnl}')
                     additional_losses = 0 if losses_pnl > 0 else losses_pnl
@@ -99,19 +103,30 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
                 else:
                     order_stop_loss = round(mark_price + (mark_price * leverage_trend), price_scale)
 
-                order = Order.objects.create(
-                    bot=bot,
-                    category=bot.category,
-                    symbol=bot.symbol.name,
-                    side=order_side,
-                    orderType="Market",
-                    qty=qty,
-                    takeProfit=str(count_dict['stop_price']),
-                    stopLoss=str(order_stop_loss),
-                )
-
-                # Выставляем stopLoss для минусовой позиции
-                set_trading_stop(bot, position_idx_minus, stopLoss=str(count_dict['stop_price']))
+                if qty >= max_order_qty:
+                    half_qty = qty / 2
+                    for _ in range(2):
+                        order = Order.objects.create(
+                            bot=bot,
+                            category=bot.category,
+                            symbol=bot.symbol.name,
+                            side=order_side,
+                            orderType="Market",
+                            qty=half_qty,
+                            takeProfit=str(count_dict['stop_price']),
+                            stopLoss=str(order_stop_loss),
+                        )
+                else:
+                    order = Order.objects.create(
+                        bot=bot,
+                        category=bot.category,
+                        symbol=bot.symbol.name,
+                        side=order_side,
+                        orderType="Market",
+                        qty=qty,
+                        takeProfit=str(count_dict['stop_price']),
+                        stopLoss=str(order_stop_loss),
+                    )
 
             lock.acquire()
     finally:
@@ -119,10 +134,20 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
             lock.release()
 
 
-def if_not_psn_actions(bot):
+def bot_id_remove_global_list(bot):
     lock.acquire()
     global_list_bot_id.remove(bot.pk)
     if lock.locked():
         lock.release()
     bot.is_active = False
     bot.save()
+
+
+def bot_id_append_global_list(bot_id):
+    lock.acquire()
+    try:
+        if bot_id not in global_list_bot_id:
+            global_list_bot_id.add(bot_id)
+    finally:
+        if lock.locked():
+            lock.release()

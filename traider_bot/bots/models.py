@@ -147,3 +147,10 @@ class IsTSStart(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
     TS = models.BooleanField(default=False)
 
+
+class Set0Psn(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    set0psn = models.BooleanField(default=False)
+    trend = models.IntegerField(blank=True, null=True)
+    limit_pnl = models.CharField(blank=True, null=True)
+    max_margin = models.CharField(blank=True, null=True)

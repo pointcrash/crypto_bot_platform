@@ -140,6 +140,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 position_idx = get_position_idx_by_range(symbol_list)
 
             if position_idx is not None and get_qty(symbol_list)[position_idx]:
+                psn = symbol_list[position_idx]
                 psn_qty = get_qty(symbol_list)[position_idx]
                 psn_side = get_side(symbol_list)[position_idx]
                 psn_price = get_position_price(symbol_list)[position_idx]
@@ -178,7 +179,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                                 bot.save()
                             lock.acquire()
                             continue
-                return psn_qty, psn_side, psn_price, first_cycle
+                return psn, psn_qty, psn_side, psn_price, first_cycle
 
             if take2_status_check(bot):
                 actions_after_end_cycle(bot)

@@ -120,6 +120,7 @@ def get_list(account, category='inverse', symbol=None, settleCoin='USDT'):
         else:
             params = f"category={category}&settleCoin={settleCoin}"
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+        # print(response['result']['list'])
         return response['result']['list']
     except Exception as e:
         print("Произошла ошибка:", e)
@@ -203,7 +204,7 @@ def get_order_leaves_qty(account, category, symbol, orderLinkId):
     params = f"category={category}&symbol={symbol}&orderLinkId={orderLinkId}"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     try:
-        print(response['result']['list'][0]['leavesQty'])
+        # print(response['result']['list'][0]['leavesQty'])
         return response['result']['list'][0]['leavesQty']
     except:
         return "Order does not exist"

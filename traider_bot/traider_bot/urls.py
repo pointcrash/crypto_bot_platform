@@ -6,6 +6,7 @@ from main.views import logs_list, registration_view, login_view, logout_view, lo
 # from timezone.views import create_timezone
 
 urlpatterns = [
+    path('', view_home, name='home'),
     path('admin/', admin.site.urls),
     # path('set_timezones/', create_timezone, name='create_timezone'),
     path('logs/', logs_view, name='logs'),
@@ -18,7 +19,6 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('register/', registration_view, name='register'),
     path('login/', login_view, name='login'),
-    path('home/', view_home, name='home'),
     path('logout/', logout_view, name='logout'),
     path('profile/', profile_list, name='profile_list'),
     path('profile/profile_mode_switching/<int:profile_id>/', profile_mode_switching, name='profile_mode_switching'),

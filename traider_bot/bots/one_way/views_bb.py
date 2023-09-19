@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from api_v5 import get_open_orders
 from bots.bb_set_takes import set_takes
 from bots.bot_logic import clear_data_bot, func_get_symbol_list
-from bots.forms import BotForm
+from bots.forms import BotForm, Set0PsnForm
 from bots.hedge.logic.ts_bb.entry import entry_ts_bb_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.models import Bot
@@ -22,13 +22,19 @@ def single_bb_bot_create(request):
     title = 'Create BB Bot'
 
     if request.method == 'POST':
-        form = BotForm(request=request, data=request.POST)
-        if form.is_valid():
-            bot = form.save(commit=False)
+        bot_form = BotForm(request=request, data=request.POST)
+        set0psn_form = Set0PsnForm(data=request.POST)
+
+        if bot_form.is_valid() and set0psn_form.is_valid():
+            bot = bot_form.save(commit=False)
             bot.work_model = 'bb'
             bot.owner = request.user
             bot.category = 'inverse'
             bot.save()
+
+            set0psn = set0psn_form.save(commit=False)
+            set0psn.bot = bot
+            set0psn.save()
 
             connections.close_all()
 
@@ -45,9 +51,10 @@ def single_bb_bot_create(request):
 
             return redirect('single_bot_list')
     else:
-        form = BotForm(request=request)
+        bot_form = BotForm(request=request)
+        set0psn_form = Set0PsnForm()
 
-    return render(request, 'one_way/create_bot.html', {'form': form, 'title': title, })
+    return render(request, 'one_way/create_bot.html', {'form': bot_form, 'set0psn_form': set0psn_form, 'title': title, })
 
 
 @login_required

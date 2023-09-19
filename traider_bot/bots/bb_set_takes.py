@@ -2,10 +2,11 @@ import time
 
 from decimal import Decimal
 
-from api_v5 import cancel_all, switch_position_mode, set_leverage, get_current_price
+from api_v5 import cancel_all, switch_position_mode, set_leverage, get_current_price, get_list
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
     take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
     check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition
+from bots.set_zero_psn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
@@ -39,20 +40,20 @@ def set_takes(bot):
             if lock.locked():
                 lock.release()
 
-            # if take2_status_check(bot):
-            #     actions_after_end_cycle(bot)
-            #     lock.acquire()
-            #     continue
-
             '''  Функция установки точек входа и усреднения  '''
             try:
-                psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj, bb_avg_obj=bb_avg_obj)
+                psn, psn_qty, psn_side, psn_price, first_cycle = calculation_entry_point(bot=bot, bb_obj=bb_obj, bb_avg_obj=bb_avg_obj)
             except Exception as e:
                 if isinstance(e, TypeError):
                     lock.acquire()
                     continue
                 else:
                     raise ValueError(f'Ошибка в блоке calculation_entry_point: {e}')
+
+            if need_set0psn_start_check(bot, psn):
+                lock.acquire()
+                continue
+
             if first_start:
                 first_cycle = False
                 first_start = False

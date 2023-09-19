@@ -6,6 +6,7 @@ from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging, clear_data_bot
 from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder
+from bots.set_zero_psn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.entry import entry_position
 from single_bot.logic.global_variables import global_list_bot_id, lock, global_list_threads
@@ -50,8 +51,12 @@ def bot_work_logic(bot):
             takes = get_takes(bot)
 
             '''Функция открытия позиций, установление точки входа. А так же усредняющая функция'''
-            psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes, position_idx)
+            psn, psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes, position_idx)
             '''-------------------------------------------------------------------------------------------'''
+
+            if need_set0psn_start_check(bot, psn):
+                lock.acquire()
+                continue
 
             takes = get_takes(bot)
             main_price, is_back = check_change_psn_price(bot, main_price, psn_price)
@@ -194,7 +199,8 @@ def append_thread_or_check_duplicate(bot_id, is_ts_bot=False):
             # print('sdgdfsgdfgd', 333333333)
             pass
         else:
-            raise Exception("Duplicate bot")
+            # raise Exception("Duplicate bot")
+            pass
     finally:
         if lock.locked():
             lock.release()
