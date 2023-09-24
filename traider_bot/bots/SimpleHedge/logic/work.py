@@ -62,7 +62,6 @@ def work_simple_hedge_bot(bot, smp_hg):
                             side = 'Buy' if position_idx == 1 else 'Sell'
                             price = str(round(Decimal(symbol_list[0]['avgPrice']), round_number))
                             avg_qty = first_order_qty - current_qty
-                            print('Price INVALID ----', price)
                             order = Order.objects.create(
                                 bot=bot,
                                 category=bot.category,
@@ -72,10 +71,7 @@ def work_simple_hedge_bot(bot, smp_hg):
                                 qty=avg_qty,
                                 price=price,
                             )
-                            print(avg_order_links_id)
                             avg_order_links_id[position_idx] = order.orderLinkId
-                            print(order.orderLinkId)
-                            print(avg_order_links_id)
 
                     elif current_qty > first_order_qty:
                         avg_order_links_id[position_idx] = ''
