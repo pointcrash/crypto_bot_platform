@@ -76,7 +76,8 @@ def cancel_order(bot, order_id):
         'orderId': order_id,
     }
     params = json.dumps(params)
-    print(json.loads(HTTP_Request(bot.account, endpoint, method, params, "CancelOrder")))
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params, "CancelOrder"))
+    return response
 
 
 def get_current_price(account, category, symbol):
@@ -111,15 +112,16 @@ def get_side(symbol_list):
         return [i['side'] for i in symbol_list]
 
 
-def get_list(account, category='inverse', symbol=None, settleCoin='USDT'):
+def get_list(account, category='linear', symbol=None, settleCoin='USDT'):
     try:
         endpoint = "/v5/position/list"
         method = "GET"
         if symbol:
-            params = f"category={category}&symbol={symbol.name}"
+            params = f"category={category}&symbol={symbol}"
         else:
             params = f"category={category}&settleCoin={settleCoin}"
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+        # print(response)
         # print(response['result']['list'])
         return response['result']['list']
     except Exception as e:
@@ -269,16 +271,31 @@ def switch_position_mode(bot):
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
 
 
-def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0'):
+def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None):
     endpoint = "/v5/position/trading-stop"
     method = "POST"
-    params = {
-        'category': bot.category,
-        'symbol': bot.symbol.name,
-        'takeProfit': takeProfit,
-        'stopLoss': stopLoss,
-        'positionIdx': positionIdx,
-    }
+    if tpSize:
+        params = {
+            'category': bot.category,
+            'symbol': bot.symbol.name,
+            'takeProfit': takeProfit,
+            'stopLoss': stopLoss,
+            'tpslMode': 'Partial',
+            'tpSize': tpSize,
+            'slSize': tpSize,
+            'positionIdx': positionIdx,
+            }
+    else:
+        params = {
+            'category': bot.category,
+            'symbol': bot.symbol.name,
+            'takeProfit': takeProfit,
+            'stopLoss': stopLoss,
+            'tpslMode': 'Full',
+            'positionIdx': positionIdx,
+            }
+
+    print(params)
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     print('set_trading_stop:', response)

@@ -54,9 +54,9 @@ class Order(models.Model):
             logging(bot, f'{response}')
         # logging(bot, f'{response}')
         # logging(bot, f'{self.price}')
-        # print(response)
+        print(response)
         # print(self.qty)
-        # print(params)
+        print(params)
 
     def save(self, *args, **kwargs):
         if self.category == 'inverse':

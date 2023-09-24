@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+a {
+    text-decoration: none; /* Убираем подчеркивание */
+    color: #5c5c5c;
+}
+
+a:hover {
+    color: #000; /* Устанавливаем цвет текста при наведении */
+}
+
+.card {
+    transition: background-color 0.3s; /* Плавное изменение фона */
+}
+
+.card:hover {
+    background-color: #e0e0e0; /* Цвет фона при наведении */
+}
+</style>
+
+
+<div class="row">
+    <div class="col-11 col-sm-11 col-lg-10 mx-auto">
+        <h1 class="text-center">Strategies</h1>
+        <div class="row mt-5">
+            <div class="col-12 col-md-6 col-xl-3">
+                <a href="{% url 'simple_hedge_bot_create' %}" class="card text-center m-1">
+                    <div class="card-header">
+                        <h5>Simple Hedge</h5>
+                    </div>
+                </a>
+                <a href="{% url 'single_bb_bot_create' %}" class="card text-center m-1">
+                    <div class="card-header">
+                        <h5>Bollinger Bands</h5>
+                    </div>
+                </a>
+                <a href="{% url 'single_bot_create' %}" class="card text-center m-1">
+                    <div class="card-header">
+                        <h5>Grid</h5>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -5,7 +5,7 @@ from decimal import Decimal
 from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging, clear_data_bot
 from bots.bot_logic_grid import take_status_check
-from bots.models import Take, AvgOrder
+from bots.models import Take, AvgOrder, Set0Psn
 from bots.set_zero_psn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.entry import entry_position
@@ -22,6 +22,8 @@ def bot_work_logic(bot):
 
     position_idx = get_position_idx(bot.side)
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
+    set0psn_obj = Set0Psn.objects.filter(bot=bot).first()
+
 
     new_cycle = True
     if not is_ts_bot:
@@ -54,7 +56,7 @@ def bot_work_logic(bot):
             psn, psn_qty, psn_side, psn_price, first_cycle, avg_order = entry_position(bot, takes, position_idx)
             '''-------------------------------------------------------------------------------------------'''
 
-            if bot.set0psn and bot.set0psn.set0psn:
+            if set0psn_obj and set0psn_obj.set0psn:
                 if need_set0psn_start_check(bot, psn):
                     lock.acquire()
                     continue

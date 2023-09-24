@@ -1,9 +1,25 @@
 from decimal import Decimal
 from django import forms
 
-from api_v5 import get_query_account_coins_balance
+from api_v5 import get_query_account_coins_balance, get_current_price
 from main.models import Account
-from .models import Bot, Set0Psn
+from .bot_logic import get_quantity_from_price
+from .models import Bot, Set0Psn, SimpleHedge
+
+
+class SimpleHedgeForm(forms.ModelForm):
+    class Meta:
+        model = SimpleHedge
+        fields = ['tppp', 'tpap', ]
+
+        widgets = {
+            'tppp': forms.TextInput(attrs={'class': 'form-control'}),
+            'tpap': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'tppp': 'TP Price % (TPPP)',
+            'tpap': 'TP Amount % (TPAP)',
+        }
 
 
 class Set0PsnForm(forms.ModelForm):
@@ -51,6 +67,16 @@ class BotForm(forms.ModelForm):
                 self.fields['account'].queryset = Account.objects.all()
             else:
                 self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
+
+        self.fields['side'].required = False
+        self.fields['orderType'].required = False
+        self.fields['interval'].required = False
+        self.fields['grid_avg_value'].required = False
+        self.fields['chw'].required = False
+        self.fields['deviation_from_lines'].required = False
+        self.fields['bb_avg_percent'].required = False
+        self.fields['dfm'].required = False
+        self.fields['take_on_ml_percent'].required = False
 
     #     self.fields['account'].label_from_instance = self.label_from_instance
     #
@@ -125,14 +151,15 @@ class BotForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         order_type = cleaned_data.get('orderType')
+        account = cleaned_data.get('account')
         side = cleaned_data.get('side')
         deviation_from_lines = cleaned_data.get('deviation_from_lines')
         is_percent_deviation_from_lines = cleaned_data.get('is_percent_deviation_from_lines')
         symbol = cleaned_data.get('symbol')
-        qty = cleaned_data.get('qty')
+        qty_USDT = cleaned_data.get('qty')
         leverage = cleaned_data.get('isLeverage')
 
-        if qty is None:
+        if qty_USDT is None:
             raise forms.ValidationError("Invalid '1st order investments' value. Only whole numbers")
 
         if order_type == 'Market' and side == 'FB':
@@ -142,7 +169,10 @@ class BotForm(forms.ModelForm):
         #     if not is_percent_deviation_from_lines and deviation_from_lines < Decimal(symbol.minPrice):
         #         raise forms.ValidationError(f"Minimum '± BB Deviation' value = {symbol.minPrice}")
 
-        if qty * leverage < Decimal(symbol.minOrderQty) or qty * leverage > Decimal(symbol.maxOrderQty):
+        current_price = get_current_price(account, 'linear', symbol)
+        qty = get_quantity_from_price(qty_USDT, current_price, symbol.minOrderQty, leverage)
+
+        if qty < Decimal(symbol.minOrderQty) or qty > Decimal(symbol.maxOrderQty):
             raise forms.ValidationError(
                 f"Допустимые значения '1st order investment': min = {Decimal(symbol.minOrderQty) / leverage}, max = {Decimal(symbol.maxOrderQty) / leverage}")
 

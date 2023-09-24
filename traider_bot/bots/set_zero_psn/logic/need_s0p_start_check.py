@@ -14,24 +14,23 @@ def need_set0psn_start_check(bot, psn):
     limit_losses_pnl = Decimal(bot.set0psn.limit_pnl)
     max_margin = bot.set0psn.max_margin
 
-    if bot.set0psn.set0psn:
-        if losses_pnl <= limit_losses_pnl:
-            count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize, trend_number=trend)[str(trend)]
-            if max_margin:
-                if count_dict['margin'] < Decimal(max_margin):
-                    transition_to_set0psn(bot, psn, count_dict)
-                    return True
-
-                else:
-                    cancel_all(bot.account, bot.category, bot.symbol)
-                    logging(bot,
-                            f'Not enough margin for switch mod to "set0psn". Need margin: {count_dict["margin"]}, your Margin Limit: {max_margin}')
-                    bot_id_remove_global_list(bot)
-                    return True
-
-            else:
+    if losses_pnl <= limit_losses_pnl:
+        count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize, trend_number=trend)[str(trend)]
+        if max_margin:
+            if count_dict['margin'] < Decimal(max_margin):
                 transition_to_set0psn(bot, psn, count_dict)
                 return True
+
+            else:
+                cancel_all(bot.account, bot.category, bot.symbol)
+                logging(bot,
+                        f'Not enough margin for switch mod to "set0psn". Need margin: {count_dict["margin"]}, your Margin Limit: {max_margin}')
+                bot_id_remove_global_list(bot)
+                return True
+
+        else:
+            transition_to_set0psn(bot, psn, count_dict)
+            return True
 
 
 def transition_to_set0psn(bot, psn, count_dict):

@@ -140,47 +140,6 @@ def recalculate_values(request):
     return JsonResponse({'error': 'Invalid request method'})
 
 
-
-# @csrf_exempt
-# def recalculate_values(request):
-#     if request.method == 'POST':
-#         data = request.POST
-#
-#         # Получение старых значений
-#         side = data.get('side')
-#         trend = data.get('trend')
-#         symbol_name = data.get('symbolName')
-#         mark_price = data.get('markPrice')
-#         entry_price = data.get('entryPrice')
-#         leverage = data.get('leverage')
-#         qty = data.get('qty')
-#         symbol = Symbol.objects.filter(name=symbol_name).first()
-#         price_scale = int(symbol.priceScale)
-#
-#         # Перерасчет
-#         if side == 'Buy':
-#             stop_price = round(mark_price - (mark_price * trend / 100), price_scale)
-#             pnl_old = (stop_price - entry_price) * qty
-#             pnl_new = -pnl_old
-#             margin = round(pnl_new * mark_price / (leverage * (mark_price - stop_price)), 2)
-#
-#         else:
-#             stop_price = round(mark_price + (mark_price * trend / 100), price_scale)
-#             pnl_old = (entry_price - stop_price) * qty
-#             pnl_new = -pnl_old
-#             margin = round(pnl_new * mark_price / (leverage * (stop_price - mark_price)), 2)
-#
-#         # Возвращение новых значений в формате JSON
-#         return JsonResponse({
-#             'stop_price': stop_price,
-#             'pnl_old': pnl_old,
-#             'pnl_new': pnl_new,
-#             'margin': margin,
-#         })
-#
-#     return JsonResponse({'error': 'Invalid request method'})
-
-
 @login_required
 def create_account(request):
     if request.method == 'POST':
@@ -289,5 +248,6 @@ def get_balance(request, acc_id):
     return JsonResponse({"wb": wb, "tb": tb, "name": name})
 
 
-def asd_view(request):
-    return render(request, 'test.html')
+@login_required
+def strategies_view(request):
+    return render(request, 'strategies/strategies.html')

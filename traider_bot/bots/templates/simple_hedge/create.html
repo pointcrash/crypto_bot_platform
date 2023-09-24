@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+
+<div class="row">
+    <div class="col-11 mx-auto">
+        <h2 class="text-center">{{ title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                {% if form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Main Settings</h4>
+
+                    <br>
+                    {{ form.account.label_tag }}
+                    {{ form.account }}
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    <br>
+                    {{ form.symbol.label_tag }}
+                    {{ form.symbol }}
+                    <br>
+                    {{ form.isLeverage.label_tag }}
+                    {{ form.isLeverage }}
+                    <br>
+                    {{ form.margin_type.label_tag }}
+                    {{ form.margin_type }}
+                    <br>
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Simple Hedge Settings</h4>
+                    <br>
+                    {{ form.qty.label_tag }}
+                    {{ form.qty }}
+                    <br>
+                    {{ simple_hedge_form.tppp.label_tag }}
+                    {{ simple_hedge_form.tppp }}
+                    {{ simple_hedge_form.tpap.label_tag }}
+                    {{ simple_hedge_form.tpap }}
+                </div>
+            </div>
+            <div class="col-5 col-sm-3 mx-auto mb-5">
+            <button type="submit" class="col-12 btn-shadow btn btn-success mt-3">Start Bot</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

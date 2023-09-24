@@ -6,6 +6,7 @@ from api_v5 import cancel_all, switch_position_mode, set_leverage, get_current_p
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
     take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
     check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition
+from bots.models import Set0Psn
 from bots.set_zero_psn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
@@ -20,6 +21,7 @@ def set_takes(bot):
     round_number = int(bot.symbol.priceScale)
     is_ts_bot = True if bot.side == 'TS' else False
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
+    set0psn_obj = Set0Psn.objects.filter(bot=bot).first()
 
     if not is_ts_bot:
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
@@ -50,7 +52,7 @@ def set_takes(bot):
                 else:
                     raise ValueError(f'Ошибка в блоке calculation_entry_point: {e}')
 
-            if bot.set0psn and bot.set0psn.set0psn:
+            if set0psn_obj and set0psn_obj.set0psn:
                 if need_set0psn_start_check(bot, psn):
                     lock.acquire()
                     continue

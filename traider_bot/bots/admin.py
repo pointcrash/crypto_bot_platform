@@ -19,8 +19,9 @@ class OrdersAdmin(admin.ModelAdmin):
 
 @admin.register(Log)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content',)
-    list_display_links = ('id', 'content',)
+    list_display = ('bot', 'content', 'time')
+    list_display_links = ('bot', 'content', 'time')
+    search_fields = ('bot', 'content', 'time')
 
 
 @admin.register(Process)

@@ -122,7 +122,7 @@ class Take(models.Model):
 
 
 class Log(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    bot = models.ForeignKey(Bot, on_delete=models.SET_NULL, blank=True, null=True)
     content = models.CharField(blank=True, null=True)
     time = models.CharField(blank=True, null=True)
 
@@ -154,3 +154,9 @@ class Set0Psn(models.Model):
     trend = models.IntegerField(blank=True, null=True)
     limit_pnl = models.CharField(blank=True, null=True)
     max_margin = models.CharField(blank=True, null=True)
+
+
+class SimpleHedge(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    tppp = models.CharField(blank=True, null=True)
+    tpap = models.CharField(blank=True, null=True)

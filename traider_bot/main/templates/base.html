@@ -16,16 +16,23 @@
     <link type="text/css" href="{% static 'css/main.css' %}" rel="stylesheet"/>
     <link type="text/css" href="{% static 'css/my_css.css' %}" rel="stylesheet"/>
     {% block styles %}
-    <style>
+<style>
 .active-link {
   background-color: #f5f5f5;
   border-color: red;
+}
+
+a {
+    transition: background-color 0.3s; /* Плавное изменение фона */
+}
+
+a:hover {
+    background-color: #e0e0e0; /* Цвет фона при наведении */
 }
 </style>
 
     {% endblock %}
 
-</style>
 
 </head>
 <body>
@@ -40,7 +47,8 @@
             <a href="{% url 'account_position_list' %}" class="list-group-item p-3 text-muted{% if 'account_position_list' in request.resolver_match.url_name %} active{% endif %}"><h5>My positions   <i class="fa-sharp fa-solid fa-coins"></i></h5></a>
             <a href="{% url 'single_bot_list' %}" class="list-group-item p-3 text-muted{% if 'single_bot_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Bots   <i class="fa-solid fa-robot ms-2"></i></h5></a>
 <!--            <a href="{% url 'logs' %}" class="list-group-item p-3 text-muted"><h5>Logs   <i class="fa-solid fa-file-lines ms-2"></i></h5></a>-->
-            <a href="{% url 'telegram_list' %}" class="list-group-item p-3 text-muted{% if 'telegram_list' in request.resolver_match.url_name %} active{% endif %}"><h5>telegram-bot   <i class="fa-brands fa-telegram"></i></h5></a>
+            <a href="{% url 'strategies' %}" class="list-group-item p-3 text-muted{% if 'strategies' in request.resolver_match.url_name %} active{% endif %}"><h5>Strategies   <i class="fa-sharp fa-solid fa-chess-knight"></i></h5></a>
+<!--            <a href="{% url 'telegram_list' %}" class="list-group-item p-3 text-muted{% if 'telegram_list' in request.resolver_match.url_name %} active{% endif %}"><h5>telegram-bot   <i class="fa-brands fa-telegram"></i></h5></a>-->
         </div>
     </div>
     <div class="col-md-10">
