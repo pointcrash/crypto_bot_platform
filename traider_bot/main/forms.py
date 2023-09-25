@@ -8,16 +8,18 @@ from .models import Account
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ['name', 'API_TOKEN', 'SECRET_KEY', 'is_mainnet', ]
+        fields = ['name', 'API_TOKEN', 'SECRET_KEY', 'is_mainnet', 'account_type', ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'API_TOKEN': forms.TextInput(attrs={'class': 'form-control'}),
             'SECRET_KEY': forms.TextInput(attrs={'class': 'form-control'}),
+            'account_type': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'name': 'Name',
             'API_TOKEN': 'API TOKEN',
             'SECRET_KEY': 'SECRET KEY',
+            'account_type': 'ACCOUNT TYPE',
             'is_mainnet': 'IS MAINNET',
         }
 

@@ -6,12 +6,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from api_v5 import get_open_orders
+from bots.SimpleHedge.logic.work import work_simple_hedge_bot
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
 from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm, Set0PsnForm
-from bots.models import Bot, IsTSStart, Set0Psn
+from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import bot_work_logic
@@ -156,6 +157,7 @@ def bot_start(request, bot_id):
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
         else:
             bot_thread = threading.Thread(target=set_takes, args=(bot,))
+
     elif bot.work_model == 'grid':
         if bot.side == 'TS':
             if is_ts_start:
@@ -164,6 +166,10 @@ def bot_start(request, bot_id):
                 bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
         else:
             bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+
+    elif bot.work_model == 'SmpHg':
+        simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
+        bot_thread = threading.Thread(target=work_simple_hedge_bot, args=(bot, simple_hedge), kwargs={'first_start': False})
 
     if bot_thread is not None:
         bot_thread.start()

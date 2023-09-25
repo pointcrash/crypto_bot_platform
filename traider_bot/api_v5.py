@@ -112,7 +112,7 @@ def get_side(symbol_list):
         return [i['side'] for i in symbol_list]
 
 
-def get_list(account, category='linear', symbol=None, settleCoin='USDT'):
+def get_list(account, category='inverse', symbol=None, settleCoin='USDT'):
     try:
         endpoint = "/v5/position/list"
         method = "GET"
@@ -122,6 +122,7 @@ def get_list(account, category='linear', symbol=None, settleCoin='USDT'):
             params = f"category={category}&settleCoin={settleCoin}"
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
         # print(response)
+        # print(params)
         # print(response['result']['list'])
         return response['result']['list']
     except Exception as e:
@@ -236,19 +237,21 @@ def set_leverage(account, category, symbol, leverage):
     json.loads(HTTP_Request(account, endpoint, method, params))
 
 
-def get_balance(account):
-    endpoint = "/v5/account/wallet-balance"
-    method = "GET"
-    params = f"accountType=CONTRACT"
-    response = json.loads(HTTP_Request(account, endpoint, method, params))
-    return response
+# def get_balance(account):
+#     endpoint = "/v5/account/wallet-balance"
+#     method = "GET"
+#     params = f"accountType=CONTRACT"
+#     response = json.loads(HTTP_Request(account, endpoint, method, params))
+#     print(response)
+#     return response
 
 
 def get_query_account_coins_balance(account):
     endpoint = "/v5/asset/transfer/query-account-coins-balance"
     method = "GET"
-    params = f"accountType=CONTRACT&coin=USDT"
+    params = f"accountType={account.account_type}&coin=USDT"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
+    print(response)
     try:
         return response['result']['balance']
     except:

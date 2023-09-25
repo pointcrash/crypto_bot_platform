@@ -7,7 +7,23 @@
         <form method="POST">
             {% csrf_token %}
 
-            {{ form.as_p }}
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            <br>
+            {{ form.API_TOKEN.label_tag }}
+            {{ form.API_TOKEN }}
+            <br>
+            {{ form.SECRET_KEY.label_tag }}
+            {{ form.SECRET_KEY }}
+            <br>
+            {{ form.is_mainnet.label_tag }}
+            {{ form.is_mainnet }}
+            <div class="row">
+                <div class="col-6 mx-auto">
+                    <p class="text-center p-0 m-0">{{ form.account_type.label_tag }}</p>
+                    {{ form.account_type }}
+                </div>
+            </div>
 
             <button type="submit" class="btn btn-success mt-3">Save</button>
         </form>
