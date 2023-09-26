@@ -27,7 +27,7 @@ def simple_hedge_bot_create(request):
             bot = bot_form.save(commit=False)
             bot.work_model = 'SmpHg'
             bot.owner = request.user
-            bot.category = 'inverse'
+            bot.category = 'linear'
             bot.save()
 
             simple_hedge = simple_hedge_form.save(commit=False)

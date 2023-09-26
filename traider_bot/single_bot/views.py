@@ -55,7 +55,7 @@ def single_bot_create(request):
             bot = bot_form.save(commit=False)
             bot.work_model = 'grid'
             bot.owner = request.user
-            bot.category = 'inverse'
+            bot.category = 'linear'
             bot.save()
 
             set0psn = set0psn_form.save(commit=False)

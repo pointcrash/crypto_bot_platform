@@ -95,7 +95,7 @@ def one_way_grid_create_bot(request):
             bot = form.save(commit=False)
             bot.work_model = 'grid'
             bot.owner = request.user
-            bot.category = 'inverse'
+            bot.category = 'linear'
             bot.save()
             bb_obj, bb_avg_obj = create_bb_and_avg_obj(bot)
 

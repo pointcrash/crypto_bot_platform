@@ -535,7 +535,7 @@ def actions_after_end_cycle(bot):
 def func_get_symbol_list(bot):
     symbol_list, i = None, 0
     while not symbol_list and i < 4:
-        symbol_list = get_list(bot.account, bot.category, bot.symbol)
+        symbol_list = get_list(bot.account, 'linear', bot.symbol)
         i += 1
         time.sleep(1)
     return symbol_list

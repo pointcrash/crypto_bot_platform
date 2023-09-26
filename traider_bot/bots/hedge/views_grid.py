@@ -36,7 +36,7 @@ def hedge_grid_create_bot(request):
             bot = form.save(commit=False)
             bot.work_model = 'grid'
             bot.owner = request.user
-            bot.category = 'inverse'
+            bot.category = 'linear'
             bot.orderType = 'Market'
             bot.save()
 

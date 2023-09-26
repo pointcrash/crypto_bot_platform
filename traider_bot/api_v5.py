@@ -112,7 +112,7 @@ def get_side(symbol_list):
         return [i['side'] for i in symbol_list]
 
 
-def get_list(account, category='inverse', symbol=None, settleCoin='USDT'):
+def get_list(account, category='linear', symbol=None, settleCoin='USDT'):
     try:
         endpoint = "/v5/position/list"
         method = "GET"
@@ -261,14 +261,14 @@ def get_query_account_coins_balance(account):
 def switch_position_mode(bot):
     endpoint = "/v5/position/switch-mode"
     method = "POST"
-    mode = 0
-    if bot.category == 'inverse':
-        mode = 3
+    # mode = 0
+    # if bot.category == 'inverse':
+    #     mode = 3
 
     params = {
         'category': bot.category,
         'symbol': bot.symbol.name,
-        'mode': mode,
+        'mode': 3,
     }
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
@@ -307,7 +307,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
 def get_open_orders(bot):
     endpoint = "/v5/order/realtime"
     method = "GET"
-    params = f"category=inverse&symbol={bot.symbol.name}"
+    params = f"category=linear&symbol={bot.symbol.name}"
     try:
         response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
         return response['result']['list']

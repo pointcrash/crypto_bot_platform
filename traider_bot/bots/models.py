@@ -62,7 +62,7 @@ class Bot(models.Model):
 
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
-    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='inverse')
+    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
     isLeverage = models.IntegerField(default=10)
     side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='Auto')

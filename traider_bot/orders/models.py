@@ -32,7 +32,7 @@ class Order(models.Model):
         endpoint = "/v5/order/create"
         method = "POST"
         params = {
-            'category': self.category,
+            'category': 'linear',
             'symbol': self.symbol,
             'side': self.side,
             'positionIdx': self.positionIdx,
@@ -53,18 +53,15 @@ class Order(models.Model):
         if bot.work_model == 'set0psn':
             logging(bot, f'{response}')
         # logging(bot, f'{response}')
-        # logging(bot, f'{self.price}')
-        print(response)
-        # print(self.qty)
-        print(params)
+        # print(response)
+        # print(params)
 
     def save(self, *args, **kwargs):
-        if self.category == 'inverse':
-            if not self.positionIdx:
-                if self.is_take:
-                    self.positionIdx = 2 if self.side == 'Buy' else 1
-                else:
-                    self.positionIdx = 1 if self.side == 'Buy' else 2
+        if not self.positionIdx:
+            if self.is_take:
+                self.positionIdx = 2 if self.side == 'Buy' else 1
+            else:
+                self.positionIdx = 1 if self.side == 'Buy' else 2
         if not self.orderLinkId:
             self.orderLinkId = uuid.uuid4().hex
         super().save(*args, **kwargs)
