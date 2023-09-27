@@ -2,14 +2,19 @@ import time
 
 from decimal import Decimal
 
-from api_v5 import get_list, get_current_price, set_trading_stop, get_open_orders, cancel_order
+from api_v5 import get_list, get_current_price, set_trading_stop, get_open_orders, cancel_order, switch_position_mode, \
+    set_leverage
 from bots.bot_logic import logging, get_quantity_from_price
 from orders.models import Order
-from single_bot.logic.global_variables import lock, global_list_bot_id
+from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
 
 
 def work_simple_hedge_bot(bot, smp_hg, first_start=True):
+    # Меняем режим на Хэдж и устанавливаем указанное плечо
+    switch_position_mode(bot)
+    set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
+
     bot_id = bot.pk
     psn_add_flag = False
     round_number = int(bot.symbol.priceScale)
@@ -138,6 +143,20 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
 
             order_clear = True
             lock.acquire()
+
+    except Exception as e:
+        print(f'Error {e}')
+        logging(bot, f'Error {e}')
+        lock.acquire()
+        try:
+            if bot_id in global_list_bot_id:
+                global_list_bot_id.remove(bot_id)
+                del global_list_threads[bot_id]
+                bot.is_active = False
+                bot.save()
+        finally:
+            if lock.locked():
+                lock.release()
     finally:
         if lock.locked():
             lock.release()

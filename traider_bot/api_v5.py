@@ -261,14 +261,14 @@ def get_query_account_coins_balance(account):
 def switch_position_mode(bot):
     endpoint = "/v5/position/switch-mode"
     method = "POST"
-    # mode = 0
+    mode = 3
     # if bot.category == 'inverse':
     #     mode = 3
 
     params = {
         'category': bot.category,
         'symbol': bot.symbol.name,
-        'mode': 3,
+        'mode': mode,
     }
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
@@ -298,10 +298,10 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'positionIdx': positionIdx,
             }
 
-    print(params)
+    # print(params)
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    print('set_trading_stop:', response)
+    # print('set_trading_stop:', response)
 
 
 def get_open_orders(bot):
