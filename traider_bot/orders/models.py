@@ -52,7 +52,8 @@ class Order(models.Model):
         bot = Bot.objects.get(pk=self.bot.pk)
         if bot.work_model == 'set0psn':
             logging(bot, f'{response}')
-        # logging(bot, f'{response}')
+        logging(bot, f'{params}')
+        logging(bot, f'{response}')
         # print(response)
         # print(params)
 

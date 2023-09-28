@@ -6,6 +6,8 @@ from orders.models import Order
 
 
 def manual_average_for_simple_hedge(bot, amount, is_percent):
+    bot.bin_order = True
+    bot.save()
     current_price = get_current_price(bot.account, bot.category, bot.symbol)
     amount = Decimal(amount)
     if not is_percent:

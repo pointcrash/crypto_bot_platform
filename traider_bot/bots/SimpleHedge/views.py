@@ -71,7 +71,7 @@ def simple_hedge_bot_detail(request, bot_id):
             if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
 
-            bot_thread = threading.Thread(target=work_simple_hedge_bot, args=(bot, simple_hedge))
+            bot_thread = threading.Thread(target=work_simple_hedge_bot, args=(bot, simple_hedge), kwargs={'first_start': False})
 
             bot_thread.start()
             bot.is_active = True

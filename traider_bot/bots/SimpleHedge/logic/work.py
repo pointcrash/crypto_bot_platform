@@ -11,22 +11,41 @@ from single_bot.logic.work import append_thread_or_check_duplicate
 
 
 def work_simple_hedge_bot(bot, smp_hg, first_start=True):
+    bot_id = bot.pk
+    append_thread_or_check_duplicate(bot_id)
+
     # Меняем режим на Хэдж и устанавливаем указанное плечо
     switch_position_mode(bot)
     set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
 
-    bot_id = bot.pk
-    psn_add_flag = False
+    bot.bin_order = False
+    bot.save()
+    psn_add_flag = 0
     round_number = int(bot.symbol.priceScale)
     account = bot.account
-    avg_order_links_id = {1: '', 2: ''}
+    avg_order_links_id = {1: f'{bot.take1}', 2: f'{bot.take2}'}
     symbol_list = get_list(account, symbol=bot.symbol)
-    if first_start:
-        if float(symbol_list[0]['size']) != 0 or float(symbol_list[1]['size']) != 0:
-            logging(bot, 'Ошибка! Есть открытые позиции по выбранной торговой паре.')
+
+    try:
+        if first_start:
+            if float(symbol_list[0]['size']) != 0 or float(symbol_list[1]['size']) != 0:
+                logging(bot, 'Ошибка! Есть открытые позиции по выбранной торговой паре.')
+                raise Exception(f'Ошибка! Есть открытые позиции по выбранной торговой паре {bot.symbol}.')
+    except Exception as e:
+        print(f'Error {e}')
+        logging(bot, f'Error {e}')
+        lock.acquire()
+        try:
+            if bot_id in global_list_bot_id:
+                global_list_bot_id.remove(bot_id)
+                del global_list_threads[bot_id]
+                bot.is_active = False
+                bot.save()
+        finally:
+            if lock.locked():
+                lock.release()
             return None
 
-    append_thread_or_check_duplicate(bot_id)
     current_price = get_current_price(account, bot.category, bot.symbol)
     entry_price = current_price
     first_order_qty = get_quantity_from_price(bot.qty, current_price, bot.symbol.minOrderQty, bot.isLeverage)
@@ -64,6 +83,7 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
             qty_buy = Decimal(symbol_list[0]['size'])
             qty_sell = Decimal(symbol_list[1]['size'])
             if qty_buy != 0 and qty_sell != 0:
+                psn_add_flag_2 = False
                 for position_idx, current_qty in [(1, qty_buy), (2, qty_sell)]:
                     if current_qty < first_order_qty:
                         if not avg_order_links_id[position_idx]:
@@ -80,11 +100,24 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
                                 price=price,
                             )
                             avg_order_links_id[position_idx] = order.orderLinkId
+                            if position_idx == 1:
+                                bot.take1 = order.orderLinkId
+                            else:
+                                bot.take2 = order.orderLinkId
+                            bot.save()
 
                     elif current_qty > first_order_qty:
                         avg_order_links_id[position_idx] = ''
+                        if position_idx == 1:
+                            bot.take1 = ''
+                        else:
+                            bot.take2 = ''
+                        bot.save()
 
-                        if not psn_add_flag:
+                        if bot.bin_order:
+                            psn_add_flag = 0
+
+                        if psn_add_flag < 2:
                             order_list = get_open_orders(bot=bot)
                             if order_list and order_clear:
                                 for order in order_list:
@@ -107,11 +140,18 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
                                 else:
                                     set_trading_stop(bot, position_idx_avg, stopLoss=str(entry_price), tpSize=str(tp_sl_size))
 
-                        psn_add_flag = True
+                        psn_add_flag += 1
+                        psn_add_flag_2 = True
 
                     else:
-                        psn_add_flag = False
+                        psn_add_flag = 0
                         avg_order_links_id[position_idx] = ''
+                        if position_idx == 1:
+                            bot.take1 = ''
+                        else:
+                            bot.take2 = ''
+                        bot.save()
+
                         order_list = get_open_orders(bot=bot)
                         # print(order_list)
                         # if order_list:
@@ -139,9 +179,11 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
                             set_trading_stop(bot, position_idx, takeProfit=str(tp_price), tpSize=str(tp_size))
 
             else:
-                raise 'Нулевая позиция'
+                raise Exception('Нулевая позиция')
 
             order_clear = True
+            if psn_add_flag_2:
+                bot.bin_order = False
             lock.acquire()
 
     except Exception as e:
