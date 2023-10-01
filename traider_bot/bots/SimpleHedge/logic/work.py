@@ -47,7 +47,7 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
             return None
 
     current_price = get_current_price(account, bot.category, bot.symbol)
-    entry_price = current_price
+    # entry_price = current_price
     first_order_qty = get_quantity_from_price(bot.qty, current_price, bot.symbol.minOrderQty, bot.isLeverage)
     tp_size = first_order_qty * Decimal(smp_hg.tpap) / 100
 
@@ -62,11 +62,13 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
                 qty=first_order_qty,
             )
 
+        symbol_list = get_list(account, symbol=bot.symbol)
+
         for position_idx in range(1, 3):
             if position_idx == 1:
-                tp_price = round(current_price * (1 + Decimal(smp_hg.tppp) / 100), round_number)
+                tp_price = round(Decimal(symbol_list[position_idx - 1]['avgPrice']) * (1 + Decimal(smp_hg.tppp) / 100), round_number)
             else:
-                tp_price = round(current_price * (1 - Decimal(smp_hg.tppp) / 100), round_number)
+                tp_price = round(Decimal(symbol_list[position_idx - 1]['avgPrice']) * (1 - Decimal(smp_hg.tppp) / 100), round_number)
 
             set_trading_stop(bot, position_idx, takeProfit=str(tp_price), tpSize=str(tp_size))
 
@@ -77,14 +79,16 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
                 lock.release()
 
             order_clear = True
-            time.sleep(15)
+            time.sleep(5)
 
             symbol_list = get_list(account, symbol=bot.symbol)
             qty_buy = Decimal(symbol_list[0]['size'])
             qty_sell = Decimal(symbol_list[1]['size'])
+
             if qty_buy != 0 and qty_sell != 0:
                 psn_add_flag_2 = False
                 for position_idx, current_qty in [(1, qty_buy), (2, qty_sell)]:
+                    entry_price = Decimal(symbol_list[position_idx - 1]['avgPrice'])
                     if current_qty < first_order_qty:
                         if not avg_order_links_id[position_idx]:
                             side = 'Buy' if position_idx == 1 else 'Sell'
@@ -126,19 +130,27 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
                                     order_clear = False
 
                             position_idx_avg = position_idx
-                            if position_idx_avg == 1:
-                                tp_sl_size = abs(first_order_qty - Decimal(symbol_list[0]['size']))
-                                if Decimal(symbol_list[0]['avgPrice']) < entry_price:
-                                    set_trading_stop(bot, position_idx_avg, takeProfit=str(entry_price), tpSize=str(tp_sl_size))
-                                else:
-                                    set_trading_stop(bot, position_idx_avg, stopLoss=str(entry_price), tpSize=str(tp_sl_size))
+                            tp_sl_size = abs(first_order_qty - Decimal(symbol_list[position_idx_avg - 1]['size']))
+                            tp_sl_response = set_trading_stop(bot, position_idx_avg, takeProfit=str(entry_price), tpSize=str(tp_sl_size))
+                            if tp_sl_response['retMsg'] != 'OK':
+                                tp_sl_response = set_trading_stop(bot, position_idx_avg, stopLoss=str(entry_price),
+                                                                  tpSize=str(tp_sl_size))
+                            if tp_sl_response['retMsg'] != 'OK':
+                                raise Exception('Ошибка размещения ордеров закрытия лишней маржи')
 
-                            else:
-                                tp_sl_size = abs(first_order_qty - Decimal(symbol_list[1]['size']))
-                                if Decimal(symbol_list[1]['avgPrice']) > entry_price:
-                                    set_trading_stop(bot, position_idx_avg, takeProfit=str(entry_price), tpSize=str(tp_sl_size))
-                                else:
-                                    set_trading_stop(bot, position_idx_avg, stopLoss=str(entry_price), tpSize=str(tp_sl_size))
+                            # if position_idx_avg == 1:
+                            #     tp_sl_size = abs(first_order_qty - Decimal(symbol_list[position_idx_avg - 1]['size']))
+                            #     if Decimal(symbol_list[0]['avgPrice']) < entry_price:
+                            #         set_trading_stop(bot, position_idx_avg, takeProfit=str(entry_price), tpSize=str(tp_sl_size))
+                            #     else:
+                            #         set_trading_stop(bot, position_idx_avg, stopLoss=str(entry_price - Decimal(bot.symbol.tickSize)), tpSize=str(tp_sl_size))
+                            #
+                            # else:
+                            #     tp_sl_size = abs(first_order_qty - Decimal(symbol_list[1]['size']))
+                            #     if Decimal(symbol_list[1]['avgPrice']) > entry_price:
+                            #         set_trading_stop(bot, position_idx_avg, takeProfit=str(entry_price), tpSize=str(tp_sl_size))
+                            #     else:
+                            #         set_trading_stop(bot, position_idx_avg, stopLoss=str(entry_price + Decimal(bot.symbol.tickSize)), tpSize=str(tp_sl_size))
 
                         psn_add_flag += 1
                         psn_add_flag_2 = True

@@ -30,7 +30,10 @@ def manual_average_for_simple_hedge(bot, amount, is_percent):
                 qty = Decimal(symbol_list[position_idx - 1]['size'])
                 side = symbol_list[position_idx - 1]['side']
                 if qty != 0:
-                    decimal_part = str(qty).split('.')[1]
+                    try:
+                        decimal_part = str(qty).split('.')[1]
+                    except:
+                        decimal_part = []
                     decimal_places = len(decimal_part)
                     qty = round(qty * amount / 100, decimal_places)
                     order = Order.objects.create(

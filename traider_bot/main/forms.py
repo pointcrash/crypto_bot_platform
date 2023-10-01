@@ -43,3 +43,8 @@ class RegistrationForm(UserCreationForm):
 class LoginForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'password'}))
+
+
+class DateRangeForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'title': 'Расчет будет произведен от 00:00 выбранной даты'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'title': 'За выбранную дату расчет произведен не будет'}))

@@ -213,10 +213,13 @@ def get_order_leaves_qty(account, category, symbol, orderLinkId):
         return "Order does not exist"
 
 
-def get_pnl(account, category, symbol, start_time=0, limit=50):
+def get_pnl(account, category, symbol, start_time=0, end_time=0, limit=50):
     endpoint = "/v5/position/closed-pnl"
     method = "GET"
-    params = f"category={category}&symbol={symbol}&startTime={start_time}&limit={limit}"
+    if end_time == 0:
+        params = f"category={category}&symbol={symbol}&startTime={start_time}&limit={limit}"
+    else:
+        params = f"category={category}&symbol={symbol}&startTime={start_time}&endTime={end_time}&limit={limit}"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
     try:
         return response['result']['list']
@@ -298,10 +301,11 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'positionIdx': positionIdx,
             }
 
-    # print(params)
+    print(params)
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    # print('set_trading_stop:', response)
+    print('set_trading_stop:', response)
+    return response
 
 
 def get_open_orders(bot):

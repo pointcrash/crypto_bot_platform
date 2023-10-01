@@ -32,12 +32,50 @@
                     {% endif %}
                 </div>
             </div>
+
+<!--            <div class="row text-end">-->
+<!--                <div class="col-4 ms-auto">-->
+<!--                    <form method="post">-->
+<!--                        {% csrf_token %}-->
+<!--                        {{ date_form.as_p }}-->
+<!--                        <button class="btn btn-sm btn-primary ms-auto" type="submit">Submit</button>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </div>-->
+
             {% if bot.work_model == 'bb' %}
             <a href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
-            {% else %}
+            {% elif bot.work_model == 'grid' %}
             <a href="{% url 'single_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% elif bot.work_model == 'SmpHg' %}
+            <a href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% endif %}
-            <a href="{% url 'logs_delete' bot_id=bot.pk %}" class="btn btn-outline-danger">Clear history</a>
+
+            <!-- Кнопка для открытия модального окна -->
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#warningModal">
+              Clear history
+            </button>
+
+            <!-- Модальное окно с предупреждением -->
+            <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Вся история будет безвозвратно удалена...</p>
+                      <br>
+                    <p>Вы уверены, что хотите продолжить?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <a href="{% url 'logs_delete' bot_id=bot.pk %}" class="btn btn-danger">Clear history</a>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div class="card mt-3">
                 <table class="table" style="vertical-align: middle">

@@ -12,10 +12,11 @@ from bots.set_zero_psn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, DateRangeForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
 from main.models import Account
+from .logic import calculate_pnl
 
 
 def view_home(request):
@@ -28,16 +29,27 @@ def logs_list(request, bot_id):
     bot = Bot.objects.get(id=bot_id)
     logs = Log.objects.filter(bot=bot_id).order_by('pk')
     user = request.user
+    not_timezone = False
+    pnl = None
 
     if request.method == 'POST':
         timezone_form = TimeZoneForm(request.POST)
-        if timezone_form.is_valid():
-            user_tz = TimeZone.objects.filter(users=user)
-            for tz in user_tz:
-                tz.users.remove(user)
-            time_zone = timezone_form.cleaned_data['time_zone']
-            time_zone.users.add(user)
+        date_form = DateRangeForm(request.POST)
+        if date_form.is_valid():
+            start_date = date_form.cleaned_data['start_date']
+            end_date = date_form.cleaned_data['end_date']
+            pnl = calculate_pnl(bot=bot, start_date=start_date, end_date=end_date)
+            not_timezone = True
+
+        if not not_timezone:
+            if timezone_form.is_valid():
+                user_tz = TimeZone.objects.filter(users=user)
+                for tz in user_tz:
+                    tz.users.remove(user)
+                time_zone = timezone_form.cleaned_data['time_zone']
+                time_zone.users.add(user)
     else:
+        date_form = DateRangeForm()
         timezone_form = TimeZoneForm()
 
     for i in range(1, len(logs) + 1):
@@ -48,7 +60,13 @@ def logs_list(request, bot_id):
     paginator = Paginator(log_list, logs_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'logs/logs.html', {'log_list': page_obj, 'bot': bot, 'timezone_form': timezone_form})
+    return render(request, 'logs/logs.html', {
+        'log_list': page_obj,
+        'bot': bot,
+        'timezone_form': timezone_form,
+        'date_form': date_form,
+        'calculated_bot_pnl_in_logs': pnl,
+    })
 
 
 @login_required
