@@ -9,11 +9,15 @@ from tg_bot.send_message import send_telegram_message
 
 @login_required
 def telegram_list(request):
+    user = request.user
+    active_users = None
     status = False
-    tg = TelegramAccount.objects.filter(owner=request.user).first()
+    if user.is_superuser:
+        active_users = TelegramAccount.objects.all()
+    tg = TelegramAccount.objects.filter(owner=user).first()
     if tg:
         status = True
-    return render(request, 'tg_list_users.html', context={'status': status})
+    return render(request, 'tg_list_users.html', context={'status': status, 'active_users': active_users, })
 
 
 @login_required
@@ -53,6 +57,6 @@ def say_hello(request):
     tg = TelegramAccount.objects.filter(owner=request.user).first()
     if tg:
         chat_id = tg.chat_id
-        send_telegram_message(chat_id, 'Hello')
+        send_telegram_message(chat_id, 'Привет. Я бот-ассистент. Буду информировать тебя о работе твоих торговых ботов на сайте. ')
     return redirect('telegram_list')
 

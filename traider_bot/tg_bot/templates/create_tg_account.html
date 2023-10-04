@@ -4,18 +4,27 @@
 <div class="row">
     <div class="col-6 mx-auto">
         <h2 class="text-center">Add Telegram</h2>
-        {% if error_messages %}
-        <div class="col-10 mx-auto alert alert-danger mt-2">
-            {{ error_messages }}
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-6">
+                <p>Напиши сообщение боту чтобы он мог найти тебя</p>
+                <a class="btn btn-success btn-shadow" href="https://t.me/bybit_assistant_bot">Написать (ссылка на телеграм)</a>
+            </div>
+            <div class="col-6">
+                {% if error_messages %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                {{ error_messages }}
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success mt-3">Подключить</button>
+                </form>
+            </div>
         </div>
-        {% endif %}
-        <form method="POST">
-            {% csrf_token %}
-
-            {{ form.as_p }}
-
-            <button type="submit" class="btn btn-success mt-3">Add</button>
-        </form>
     </div>
 </div>
 {% endblock %}

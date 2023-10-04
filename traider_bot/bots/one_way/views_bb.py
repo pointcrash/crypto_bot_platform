@@ -72,6 +72,7 @@ def single_bb_bot_detail(request, bot_id):
 
         if bot_form.is_valid() and set0psn_form.is_valid():
 
+            print(bot_form.cleaned_data['max_margin'])
             bot = bot_form.save(commit=False)
             clear_data_bot(bot)
             set0psn_form.save()

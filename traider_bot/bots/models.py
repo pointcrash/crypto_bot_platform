@@ -153,7 +153,7 @@ class Set0Psn(models.Model):
     set0psn = models.BooleanField(default=False)
     trend = models.IntegerField(blank=True, null=True)
     limit_pnl = models.CharField(blank=True, null=True)
-    max_margin = models.CharField(blank=True, null=True)
+    max_margin_s0p = models.CharField(blank=True, null=True)
 
 
 class SimpleHedge(models.Model):

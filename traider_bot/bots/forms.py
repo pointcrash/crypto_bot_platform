@@ -31,18 +31,18 @@ class Set0PsnForm(forms.ModelForm):
         )
 
         model = Set0Psn
-        fields = ['set0psn', 'trend', 'limit_pnl', 'max_margin']
+        fields = ['set0psn', 'trend', 'limit_pnl', 'max_margin_s0p']
 
         widgets = {
             'trend': forms.Select(choices=TREND_CHOICE, attrs={'class': 'form-control'}),
             'limit_pnl': forms.TextInput(attrs={'class': 'form-control'}),
-            'max_margin': forms.TextInput(attrs={'class': 'form-control'}),
+            'max_margin_s0p': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'set0psn': 'Activate',
             'trend': 'Trend (%)',
             'limit_pnl': 'Limit PNL loss',
-            'max_margin': 'Max Margin',
+            'max_margin_s0p': 'Max Margin',
 
         }
 

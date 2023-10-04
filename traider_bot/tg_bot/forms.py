@@ -10,5 +10,5 @@ class TelegramAccountForm(forms.ModelForm):
             'telegram_username': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'telegram_username': 'Enter username in telegram',
+            'telegram_username': 'Напиши свой юзернейм в телеграм',
         }

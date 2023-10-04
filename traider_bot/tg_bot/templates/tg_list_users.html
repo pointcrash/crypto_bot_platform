@@ -9,18 +9,42 @@
 </style>
 
 <div class="row">
-    <div class="col-12 mx-auto">
-        <p>Напиши мне сообщение чтобы я мог найти тебя</p>
-        <a class="btn btn-success btn-shadow" href="https://t.me/bybit_assistant_bot">Написать (ссылка на телеграм)</a>
-    </div>
-    <div class="col-12 mx-auto">
+    <div class="col-md-12 col-xxl-4 m-1">
+        <p class="m-0 p-0">Ваш статус: {% if status %}Подключен{% else %}Не подключен{% endif %}</p>
         {% if status %}
-        <a href="{% url 'delete_tg_acc' %}" class="btn btn-danger btn-shadow mt-5">Отключить телеграм бота</a>
-        <a href="{% url 'say_hello' %}" class="btn btn-secondary btn-shadow">Поздороваться</a>
+        <div class="row">
+            <div class="col-12 mb-1">
+                <a href="{% url 'delete_tg_acc' %}" class="btn btn-danger btn-shadow mt-5">Отключить телеграм бота</a>
+            </div>
+            <div class="col-12">
+                <a href="{% url 'say_hello' %}" class="btn btn-secondary btn-shadow">Сказать "Привет"</a>
+            </div>
+        </div>
         {% else %}
         <a href="{% url 'telegram_add_account' %}" class="btn btn-primary btn-shadow mt-5">Подключить телеграм бота</a>
         {% endif %}
-        <p>Ваш статус: {% if status %}Подключен{% else %}Не подключен{% endif %}</p>
     </div>
+    {% if active_users %}
+    <div class="col-md-12 col-xl-4 p-3">
+        <h4 class="text-center">Список подключенных пользователей</h4>
+        <br>
+        <table class="table" style="vertical-align: middle">
+            <thead>
+            <tr class="">
+                <th>Username</th>
+                <th>Activate</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in active_users %}
+            <tr class="">
+                <td>{{ user.owner }}</td>
+                <td> ---</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -16,6 +16,8 @@ from tg_bot.send_message import send_telegram_message
 
 
 def set_takes(bot):
+    tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+    chat_id = tg.chat_id if tg else None
     bot_id = bot.pk
     first_start = True
     round_number = int(bot.symbol.priceScale)
@@ -24,10 +26,8 @@ def set_takes(bot):
     set0psn_obj = Set0Psn.objects.filter(bot=bot).first()
 
     if not is_ts_bot:
-        tg = TelegramAccount.objects.filter(owner=bot.owner).first()
-        if tg:
-            chat_id = tg.chat_id
-            send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} started work')
+        # if chat_id:
+        #     send_telegram_message(chat_id, bot, 'started work')
         switch_position_mode(bot)
         set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
 
@@ -249,10 +249,8 @@ def set_takes(bot):
             if lock.locked():
                 lock.release()
     finally:
-        tg = TelegramAccount.objects.filter(owner=bot.owner).first()
-        if tg:
-            chat_id = tg.chat_id
-            send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} finished work')
+        # if chat_id:
+        #     send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} finished work')
         if lock.locked():
             lock.release()
 
