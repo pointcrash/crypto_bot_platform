@@ -57,6 +57,6 @@ def say_hello(request):
     tg = TelegramAccount.objects.filter(owner=request.user).first()
     if tg:
         chat_id = tg.chat_id
-        send_telegram_message(chat_id, 'Привет. Я бот-ассистент. Буду информировать тебя о работе твоих торговых ботов на сайте. ')
+        send_telegram_message(chat_id, message='Привет. Я бот-ассистент. Буду информировать тебя о работе твоих торговых ботов на сайте. ')
     return redirect('telegram_list')
 
