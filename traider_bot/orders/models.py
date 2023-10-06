@@ -25,6 +25,8 @@ class Order(models.Model):
     is_take = models.BooleanField(default=False)
     takeProfit = models.CharField(max_length=32, blank=True, null=True, default='')
     stopLoss = models.CharField(max_length=32, blank=True, null=True, default='')
+    triggerPrice = models.CharField(max_length=32, blank=True, null=True, default='')
+    triggerDirection = models.CharField(max_length=32, blank=True, null=True, default='')
 
     def realize_order(self):
         price = self.price if self.price else self.char_price
@@ -46,12 +48,13 @@ class Order(models.Model):
             params['takeProfit'] = self.takeProfit
         if self.stopLoss:
             params['stopLoss'] = self.stopLoss
+        if self.triggerPrice and self.triggerDirection:
+            params['triggerDirection'] = self.triggerDirection
+            params['triggerPrice'] = self.triggerPrice
 
         params = json.dumps(params)
-        response = HTTP_Request(self.bot.account, endpoint, method, params, "Create")
+        response = HTTP_Request(self.bot.account, endpoint, method, params, bot=self.bot)
         bot = Bot.objects.get(pk=self.bot.pk)
-        if bot.work_model == 'set0psn':
-            logging(bot, f'{response}')
         logging(bot, f'{params}')
         logging(bot, f'{response}')
         # print(response)

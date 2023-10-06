@@ -7,6 +7,8 @@ from decimal import Decimal, ROUND_DOWN
 
 from bots.models import Log
 from orders.models import Order
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 from timezone.models import TimeZone
 
 

@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from api_v5 import get_open_orders
 from bots.SimpleHedge.logic.manual_average import manual_average_for_simple_hedge
 from bots.SimpleHedge.logic.work import work_simple_hedge_bot
-from bots.bot_logic import clear_data_bot, logging
+from bots.bot_logic import clear_data_bot, logging, func_get_symbol_list
 from bots.forms import BotForm, SimpleHedgeForm
 from bots.models import Bot, SimpleHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders
@@ -32,6 +32,8 @@ def simple_hedge_bot_create(request):
 
             simple_hedge = simple_hedge_form.save(commit=False)
             simple_hedge.bot = bot
+            simple_hedge.tppp = simple_hedge.tppp.replace(',', '.') if ',' in simple_hedge.tppp else simple_hedge.tppp
+            simple_hedge.tpap = simple_hedge.tpap.replace(',', '.') if ',' in simple_hedge.tpap else simple_hedge.tpap
             simple_hedge.save()
 
             connections.close_all()
@@ -57,6 +59,8 @@ def simple_hedge_bot_create(request):
 def simple_hedge_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
     simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
+    symbol_list = func_get_symbol_list(bot)
+    have_open_psn = True if float(symbol_list[0]['size']) or float(symbol_list[1]['size']) else False
 
     if request.method == 'POST':
         bot_form = BotForm(request.POST, request=request, instance=bot)
@@ -66,7 +70,10 @@ def simple_hedge_bot_detail(request, bot_id):
 
             bot = bot_form.save(commit=False)
             clear_data_bot(bot)
-            simple_hedge = simple_hedge_form.save()
+            simple_hedge = simple_hedge_form.save(commit=False)
+            simple_hedge.tppp = simple_hedge.tppp.replace(',', '.') if ',' in simple_hedge.tppp else simple_hedge.tppp
+            simple_hedge.tpap = simple_hedge.tpap.replace(',', '.') if ',' in simple_hedge.tpap else simple_hedge.tpap
+            simple_hedge.save()
 
             if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
@@ -95,7 +102,14 @@ def simple_hedge_bot_detail(request, bot_id):
         order['updatedTime'] = formatted_date
 
     return render(request, 'simple_hedge/detail.html',
-                  {'form': bot_form, 'simple_hedge_form': simple_hedge_form, 'bot': bot, 'order_list': order_list, })
+                  {
+                      'form': bot_form,
+                      'simple_hedge_form': simple_hedge_form,
+                      'bot': bot,
+                      'order_list': order_list,
+                      'symbol_list': symbol_list,
+                      'have_open_psn': have_open_psn,
+                  })
 
 
 def averaging_simple_hedge_view(request, bot_id):

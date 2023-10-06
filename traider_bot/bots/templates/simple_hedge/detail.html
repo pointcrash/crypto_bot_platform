@@ -41,6 +41,8 @@
                     <br>
                     {{ form.qty.label_tag }}
                     {{ form.qty }}
+                    {{ form.price.label_tag }}
+                    {{ form.price }}
                     <br>
                     {{ simple_hedge_form.tppp.label_tag }}
                     {{ simple_hedge_form.tppp }}
@@ -136,11 +138,11 @@
 
 
 
-        <h5 class="text-center">POSITION</h5>
+        <h5 class="text-center">POSITIONS</h5>
         <hr>
         <br>
         <div class="row mb-5">
-            {% if symbol_list.size != '0.0' %}
+            {% if have_open_psn %}
             <div class="card shadow">
             <table class="table" style="vertical-align: middle">
                 <thead>
@@ -153,24 +155,22 @@
                     <th >LIQ PRICE</th>
                     <th class="d-none d-md-table-cell">MARGIN</th>
                     <th >UNREALIZED PNL</th>
-                    <th class="d-none d-md-table-cell">CANCEL M-LINE</th>
-                    <th class="d-none d-md-table-cell">CLOSE POSITION</th>
                 </tr>
                 </thead>
+                {% for position in symbol_list %}
                 <tbody>
                     <tr class="">
-                        <td>{{ symbol_list.side }}</td>
-                        <td>{{ symbol_list.symbol }}</td>
-                        <td>{{ symbol_list.size }}</td>
-                        <td class="d-none d-sm-table-cell">{{ symbol_list.avgPrice }}</td>
-                        <td >{{ symbol_list.markPrice }}</td>
-                        <td >{{ symbol_list.liqPrice }}</td>
-                        <td class="d-none d-md-table-cell">{{ symbol_list.positionBalance }}</td>
-                        <td >{{ symbol_list.unrealisedPnl }}</td>
-                        <td class="d-none d-md-table-cell"><a href="#" class="btn btn-warning">Cancel M-line</a></td>
-                        <td class="d-none d-md-table-cell"><a href="{% url 'terminate_bot' bot_id=bot.pk event_number=3 %}" class="btn btn-danger">Close position</a></td>
+                        <td>{{ position.side }}</td>
+                        <td>{{ position.symbol }}</td>
+                        <td>{{ position.size }}</td>
+                        <td class="d-none d-sm-table-cell">{{ position.avgPrice }}</td>
+                        <td >{{ position.markPrice }}</td>
+                        <td >{{ position.liqPrice }}</td>
+                        <td class="d-none d-md-table-cell">{{ position.positionBalance }}</td>
+                        <td >{{ position.unrealisedPnl }}</td>
                     </tr>
                 </tbody>
+                {% endfor %}
             </table>
             </div>
             {% else %}

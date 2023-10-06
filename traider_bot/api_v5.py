@@ -7,11 +7,14 @@ import hmac
 
 from requests import RequestException
 
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
+
 httpClient = requests.Session()
 recv_window = str(5000)
 
 
-def HTTP_Request(account, endPoint, method, payload, Info=' '):
+def HTTP_Request(account, endPoint, method, payload, bot=None):
     i = 0
     while i < 4:
         i += 1
@@ -32,20 +35,24 @@ def HTTP_Request(account, endPoint, method, payload, Info=' '):
             else:
                 response = requests.get(account.url + endPoint + "?" + payload, headers=headers)
             response.raise_for_status()  # Проверка наличия ошибки в ответе
-            # print(endPoint)
-            # print(response.text)
+
+            # Отправляем сообщение в tg в случае возникновения ошибки при запросе
+            if bot:
+                tg_error_message(bot, response)
+
             return response.text
         except RequestException as e:
+            if bot:
+                chat_id = TelegramAccount(owner=bot.owner).chat_id
+                message = f'Вызвано исключение RequestException: {e}'
+                send_telegram_message(chat_id, bot, message)
+
             # Обработка ошибки при отправке запроса или получении ответа
-            print("Ошибки при отправке запроса или получении ответа:", e)
-            print(account)
             continue
-            # return None
         except Exception as e:
             # Обработка других неожиданных ошибок
             print("An unexpected error occurred:", e)
             continue
-            # return None
 
 
 def genSignature(secret_key, api_key, payload):
@@ -227,7 +234,7 @@ def get_pnl(account, category, symbol, start_time=0, end_time=0, limit=50):
         print(e, response)
 
 
-def set_leverage(account, category, symbol, leverage):
+def set_leverage(account, category, symbol, leverage, bot=None):
     endpoint = "/v5/position/set-leverage"
     method = "POST"
     params = {
@@ -237,7 +244,7 @@ def set_leverage(account, category, symbol, leverage):
         'sellLeverage': str(leverage),
     }
     params = json.dumps(params)
-    json.loads(HTTP_Request(account, endpoint, method, params))
+    json.loads(HTTP_Request(account, endpoint, method, params, bot))
 
 
 # def get_balance(account):
@@ -301,10 +308,10 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'positionIdx': positionIdx,
             }
 
-    print(params)
+    # print(params)
     params = json.dumps(params)
-    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    print('set_trading_stop:', response)
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot=bot))
+    # print('set_trading_stop:', response)
     return response
 
 
@@ -317,3 +324,17 @@ def get_open_orders(bot):
         return response['result']['list']
     except:
         return None
+
+
+def tg_error_message(bot, response):
+    response_data = json.loads(response.text)
+    response_data_retcode = str(response_data["retCode"])
+    response_data_retmsg = str(response_data["retMsg"])
+
+    if len(response_data_retcode) == 6:
+        if response_data_retcode != '110025' and response_data_retcode != '110043':
+            tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+            if tg:
+                chat_id = tg.chat_id
+                message = f'Код ошибки: "{response_data_retcode}"\nТекст ошибки: "{response_data_retmsg}"'
+                send_telegram_message(chat_id, bot, message)

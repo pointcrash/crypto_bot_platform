@@ -77,6 +77,7 @@ class BotForm(forms.ModelForm):
         self.fields['bb_avg_percent'].required = False
         self.fields['dfm'].required = False
         self.fields['take_on_ml_percent'].required = False
+        self.fields['price'].required = False
 
     #     self.fields['account'].label_from_instance = self.label_from_instance
     #
@@ -97,7 +98,7 @@ class BotForm(forms.ModelForm):
                   'deviation_from_lines',
                   'is_percent_deviation_from_lines', 'dfm',
                   'chw', 'dfep', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
-                  'grid_avg_value', 'bin_order', ]
+                  'grid_avg_value', 'bin_order',  'price', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
@@ -119,6 +120,7 @@ class BotForm(forms.ModelForm):
             'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
             'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
             'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
         labels = {
@@ -146,6 +148,7 @@ class BotForm(forms.ModelForm):
             'repeat': 'Repeat Cycle',
             'grid_avg_value': 'Two-Sided mode: Profit/Avg Value (%)',
             'bin_order': 'Turn after ML',
+            'price': 'Price',
         }
 
     def clean(self):
