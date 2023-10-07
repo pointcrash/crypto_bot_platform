@@ -562,3 +562,16 @@ def bin_order_buy_in_addition(bot, side):
         logging(bot, 'BIN-order is filled')
         return True
 
+
+def lock_release():
+    if lock.locked():
+        lock.release()
+
+
+def exit_by_exception(bot):
+    bot_id = bot.pk
+    if bot_id in global_list_bot_id:
+        global_list_bot_id.remove(bot_id)
+        del global_list_threads[bot_id]
+        bot.is_active = False
+        bot.save()

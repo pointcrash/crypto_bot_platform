@@ -1,13 +1,15 @@
 from decimal import Decimal
 
-from api_v5 import get_current_price, get_list
+from api_v5 import get_current_price, get_list, cancel_all
 from bots.bot_logic import get_quantity_from_price, logging
 from orders.models import Order
 
 
 def manual_average_for_simple_hedge(bot, amount, is_percent):
-    bot.bin_order = True
-    bot.save()
+    # bot.bin_order = True
+    # bot.save()
+    cancel_all(bot.account, bot.category, bot.symbol)
+
     current_price = get_current_price(bot.account, bot.category, bot.symbol)
     amount = Decimal(amount)
     if not is_percent:

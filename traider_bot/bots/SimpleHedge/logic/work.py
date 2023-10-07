@@ -216,34 +216,3 @@ def work_simple_hedge_bot(bot, smp_hg, first_start=True):
     finally:
         if lock.locked():
             lock.release()
-
-
-def actions_when_lower(avg_order_links_id, position_idx, symbol_list, round_number, first_order_qty, current_qty,
-                       bot):
-    if not avg_order_links_id[position_idx]:
-        side = 'Buy' if position_idx == 1 else 'Sell'
-        price = str(round(Decimal(symbol_list[0]['avgPrice']), round_number))
-        avg_qty = first_order_qty - current_qty
-        order = Order.objects.create(
-            bot=bot,
-            category=bot.category,
-            symbol=bot.symbol.name,
-            side=side,
-            orderType="Limit",
-            qty=avg_qty,
-            price=price,
-        )
-        avg_order_links_id[position_idx] = order.orderLinkId
-        if position_idx == 1:
-            bot.take1 = order.orderLinkId
-        else:
-            bot.take2 = order.orderLinkId
-        bot.save()
-
-
-def actions_when_more():
-    pass
-
-
-def actions_when_equal():
-    pass

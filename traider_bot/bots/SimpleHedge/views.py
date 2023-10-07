@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from api_v5 import get_open_orders
+from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.SimpleHedge.logic.manual_average import manual_average_for_simple_hedge
 from bots.SimpleHedge.logic.work import work_simple_hedge_bot
 from bots.bot_logic import clear_data_bot, logging, func_get_symbol_list
@@ -38,7 +39,7 @@ def simple_hedge_bot_create(request):
 
             connections.close_all()
 
-            bot_thread = threading.Thread(target=work_simple_hedge_bot, args=(bot, simple_hedge))
+            bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
             bot_thread.start()
 
             lock.acquire()
@@ -78,7 +79,7 @@ def simple_hedge_bot_detail(request, bot_id):
             if check_thread_alive(bot.pk):
                 stop_bot_with_cancel_orders(bot)
 
-            bot_thread = threading.Thread(target=work_simple_hedge_bot, args=(bot, simple_hedge), kwargs={'first_start': False})
+            bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
 
             bot_thread.start()
             bot.is_active = True

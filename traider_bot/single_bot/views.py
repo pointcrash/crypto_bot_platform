@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from api_v5 import get_open_orders
+from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.SimpleHedge.logic.work import work_simple_hedge_bot
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
@@ -169,7 +170,7 @@ def bot_start(request, bot_id):
 
     elif bot.work_model == 'SmpHg':
         simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
-        bot_thread = threading.Thread(target=work_simple_hedge_bot, args=(bot, simple_hedge), kwargs={'first_start': False})
+        bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
 
     if bot_thread is not None:
         bot_thread.start()
