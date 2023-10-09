@@ -14,8 +14,16 @@
         <h1 class="text-center">Bots</h1>
         <div class="d-flex flex-row">
             {% if request.user.is_superuser %}
-            <a class="btn btn-outline-danger m-1 btn-shadow" href="{% url 'reboot_bots' %}">Reboot all bots</a>
+<!--            <a class="btn btn-outline-danger m-1 btn-shadow" href="{% url 'reboot_bots' %}">Reboot all bots</a>-->
             {% endif %}
+            <!-- Поле ввода "Account" -->
+            <div class="form-group mx-2">
+                <form method="POST" class="d-flex flex-row">
+                    {% csrf_token %}
+                    {{ account_select_form.account }}
+                    <button type="submit" class="ms-1 btn btn-outline-secondary">Select</button>
+                </form>
+            </div>
             <a class="btn btn-primary ms-auto m-1 btn-shadow" href="{% url 'simple_hedge_bot_create' %}">Simple Hedge</a>
             <a class="btn btn-primary m-1 m-1 btn-shadow" href="{% url 'single_bot_create' %}">Grid Create</a>
             <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bb_bot_create' %}">BB Create</a>

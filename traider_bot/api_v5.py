@@ -319,11 +319,11 @@ def get_open_orders(bot):
     endpoint = "/v5/order/realtime"
     method = "GET"
     params = f"category=linear&symbol={bot.symbol.name}"
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     try:
-        response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-        return response['result']['list']
+        return 'Ok', response['result']['list']
     except:
-        return None
+        return 'Error', response
 
 
 def tg_error_message(bot, response):

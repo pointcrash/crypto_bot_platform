@@ -5,12 +5,29 @@ from bots.bot_logic import get_quantity_from_price, logging
 from orders.models import Order
 
 
-def manual_average_for_simple_hedge(bot, amount, is_percent):
-    # bot.bin_order = True
-    # bot.save()
+def manual_average_for_simple_hedge(bot, amount, is_percent, price):
     cancel_all(bot.account, bot.category, bot.symbol)
-
     current_price = get_current_price(bot.account, bot.category, bot.symbol)
+
+    if price:
+        price = Decimal(price)
+        first_order_qty = get_quantity_from_price(bot.qty, price, bot.symbol.minOrderQty, bot.isLeverage)
+        trigger_direction = 1 if price > current_price else 2
+
+        for order_side in ['Buy', 'Sell']:
+            order = Order.objects.create(
+                bot=bot,
+                category=bot.category,
+                symbol=bot.symbol.name,
+                side=order_side,
+                orderType="Market",
+                qty=first_order_qty,
+                price=str(price),
+                triggerDirection=trigger_direction,
+                triggerPrice=str(price),
+            )
+        return
+
     amount = Decimal(amount)
     if not is_percent:
         qty = get_quantity_from_price(float(amount), current_price, bot.symbol.minOrderQty, bot.isLeverage)

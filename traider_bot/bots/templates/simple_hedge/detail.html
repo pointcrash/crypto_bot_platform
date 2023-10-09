@@ -48,6 +48,14 @@
                     {{ simple_hedge_form.tppp }}
                     {{ simple_hedge_form.tpap.label_tag }}
                     {{ simple_hedge_form.tpap }}
+
+                    <br>
+                    <div class="row p-3">
+                        <!-- Кнопка для открытия модального окна -->
+                        <button type="button" class="btn btn-primary col-6 mx-auto" data-bs-toggle="modal"
+                                data-bs-target="#avgModal">Average
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
@@ -90,23 +98,17 @@
         </form>
 
 
-
-            <!-- Кнопка для открытия модального окна -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                data-bs-target="#avgModal">Average
-            </button>
-
-            <!-- Модальное окно -->
-            <div class="modal fade" id="avgModal" tabindex="-1" aria-labelledby="avgModalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="avgModalLabel">{{ bot.symbol }}</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="myForm" method="post" action="{% url 'averaging_simple_hedge' bot_id=bot.pk %}">
+        <!-- Модальное окно -->
+        <div class="modal fade" id="avgModal" tabindex="-1" aria-labelledby="avgModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="avgModalLabel">{{ bot.symbol }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="myForm" method="post" action="{% url 'averaging_simple_hedge' bot_id=bot.pk %}">
                             {% csrf_token %}
 
                             <!-- Поле для булевого выбора (чекбокс) -->
@@ -114,14 +116,25 @@
                                 <label class="form-check-label" for="is_percent">
                                     Is Percent (%)
                                 </label>
-                                <input class="form-check-input" type="checkbox" id="is_percent" name="is_percent">
+                                <input class="form-check-input" type="checkbox" id="is_percent" name="is_percent"
+                                       checked>
                             </div>
 
-                            <!-- Поле ввода "Amount" -->
-                            <div class="form-group">
-                              <label for="amount">Amount:</label>
-                              <input type="text" class="form-control" id="amount" name="amount" required>
+                            <div class="row mt-1">
+                                <!-- Поле ввода "Amount" -->
+                                <div class="form-group col-6">
+                                    <input type="text" class="form-control" id="amount" name="amount" required
+                                           placeholder="Amount" title="Введите количество USDT или процентов">
+                                </div>
+
+                                <!-- Поле ввода "Price" -->
+                                <div class="form-group col-6">
+                                    <input type="text" class="form-control" id="price" name="price"
+                                           placeholder="Price"
+                                           title="Введите цену / Оставьте пустым чтобы купить по маркету">
+                                </div>
                             </div>
+
                             <br>
                             <div class="row">
                                 <div class="col-4 mx-auto">
@@ -130,12 +143,11 @@
                                     </div>
                                 </div>
                             </div>
-                          </form>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
-
+        </div>
 
 
         <h5 class="text-center">POSITIONS</h5>
@@ -144,34 +156,34 @@
         <div class="row mb-5">
             {% if have_open_psn %}
             <div class="card shadow">
-            <table class="table" style="vertical-align: middle">
-                <thead>
-                <tr class="">
-                    <th>SIDE</th>
-                    <th>SYMBOL</th>
-                    <th class="d-none d-sm-table-cell">SIZE</th>
-                    <th class="d-none d-sm-table-cell">ENTRY PRICE</th>
-                    <th >MARK PRICE</th>
-                    <th >LIQ PRICE</th>
-                    <th class="d-none d-md-table-cell">MARGIN</th>
-                    <th >UNREALIZED PNL</th>
-                </tr>
-                </thead>
-                {% for position in symbol_list %}
-                <tbody>
+                <table class="table" style="vertical-align: middle">
+                    <thead>
+                    <tr class="">
+                        <th>SIDE</th>
+                        <th>SYMBOL</th>
+                        <th class="d-none d-sm-table-cell">SIZE</th>
+                        <th class="d-none d-sm-table-cell">ENTRY PRICE</th>
+                        <th>MARK PRICE</th>
+                        <th>LIQ PRICE</th>
+                        <th class="d-none d-md-table-cell">MARGIN</th>
+                        <th>UNREALIZED PNL</th>
+                    </tr>
+                    </thead>
+                    {% for position in symbol_list %}
+                    <tbody>
                     <tr class="">
                         <td>{{ position.side }}</td>
                         <td>{{ position.symbol }}</td>
                         <td>{{ position.size }}</td>
                         <td class="d-none d-sm-table-cell">{{ position.avgPrice }}</td>
-                        <td >{{ position.markPrice }}</td>
-                        <td >{{ position.liqPrice }}</td>
+                        <td>{{ position.markPrice }}</td>
+                        <td>{{ position.liqPrice }}</td>
                         <td class="d-none d-md-table-cell">{{ position.positionBalance }}</td>
-                        <td >{{ position.unrealisedPnl }}</td>
+                        <td>{{ position.unrealisedPnl }}</td>
                     </tr>
-                </tbody>
-                {% endfor %}
-            </table>
+                    </tbody>
+                    {% endfor %}
+                </table>
             </div>
             {% else %}
             <h5 class="text-center">Позиция не открыта</h5>
@@ -204,7 +216,10 @@
                     <td class="d-none d-sm-table-cell">{{ order.price }}</td>
                     <td class="d-none d-sm-table-cell">{{ order.leavesQty }}</td>
                     <td class="d-none d-sm-table-cell">
-                        {% if order.takeProfit == '0.00000' or order.takeProfit == '0.000' %}--{% else %}{{ order.takeProfit }}{% endif %}/{% if order.stopLoss == '0.00000' or order.stopLoss == '0.000' %}--{% else %}{{ order.stopLoss }}{% endif %}
+                        {% if order.takeProfit == '0.00000' or order.takeProfit == '0.000' %}--
+                        {% else %}{{order.takeProfit }}{% endif %}/
+                        {% if order.stopLoss == '0.00000' or order.stopLoss == '0.000'%}--
+                        {% else %}{{ order.stopLoss }}{% endif %}
                     </td>
                     <td>{{ order.side }}</td>
                     <td>{{ order.orderStatus }}</td>

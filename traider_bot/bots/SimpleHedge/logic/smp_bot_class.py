@@ -27,12 +27,10 @@ class SimpleHedgeClassLogic:
         self.tp_size = None
 
     def preparatory_actions(self):
-        append_thread_or_check_duplicate(self.bot_id)
+        # append_thread_or_check_duplicate(self.bot_id)
         cancel_all(self.account, self.category, self.symbol)
         switch_position_mode(self.bot)
         set_leverage(self.account, self.category, self.symbol, self.leverage, self.bot)
-        self.bot.bin_order = False
-        self.bot.save()
 
     def checking_opened_positions(self):
         if float(self.symbol_list[0]['size']) != 0 and float(self.symbol_list[1]['size']) != 0:
@@ -46,7 +44,7 @@ class SimpleHedgeClassLogic:
             return True
 
     def checking_opened_order(self, position_number):
-        if len(self.order_book) > 0:
+        if self.order_book and len(self.order_book) > 0:
             position_idx = position_number + 1
             for order in self.order_book:
                 if position_idx == order['positionIdx']:
@@ -56,7 +54,9 @@ class SimpleHedgeClassLogic:
         self.symbol_list = get_list(self.account, symbol=self.symbol)
 
     def update_order_book(self):
-        self.order_book = get_open_orders(self.bot)
+        status_req, self.order_book = get_open_orders(self.bot)
+        if status_req == 'Error':
+            return 'Error'
 
     def cancel_all_orders_for_smp_hg(self):
         cancel_all(self.account, self.category, self.symbol)

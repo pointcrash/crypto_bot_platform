@@ -14,20 +14,33 @@ from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_a
 from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm, Set0PsnForm
 from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge
+from main.forms import AccountSelectForm
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
-from single_bot.logic.work import bot_work_logic
+from single_bot.logic.work import bot_work_logic, append_thread_or_check_duplicate
 
 
 @login_required
 def single_bot_list(request):
     user = request.user
+
     if user.is_superuser:
         bots = Bot.objects.all().order_by('pk')
         all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
     else:
         bots = Bot.objects.filter(owner=user).order_by('pk')
         all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
+
+    if request.method == 'POST':
+        account_select_form = AccountSelectForm(request.POST, user=request.user)
+        if account_select_form.is_valid():
+            selected_account = account_select_form.cleaned_data['account']
+            if selected_account:
+                bots = bots.filter(account=selected_account)
+                all_bots_pks = bots.values_list('pk', flat=True).order_by('pk')
+    else:
+        account_select_form = AccountSelectForm(user=request.user)
+
     is_alive_list = []
 
     lock.acquire()
@@ -41,7 +54,7 @@ def single_bot_list(request):
         lock.release()
     bots = zip(bots, is_alive_list)
 
-    return render(request, 'bot_list.html', {'bots': bots, })
+    return render(request, 'bot_list.html', {'bots': bots, 'account_select_form': account_select_form, })
 
 
 @login_required
@@ -171,6 +184,7 @@ def bot_start(request, bot_id):
     elif bot.work_model == 'SmpHg':
         simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
         bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
+        append_thread_or_check_duplicate(bot.pk)
 
     if bot_thread is not None:
         bot_thread.start()

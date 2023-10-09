@@ -1,7 +1,7 @@
 import time
 
 from bots.SimpleHedge.logic.smp_bot_class import SimpleHedgeClassLogic
-from bots.bot_logic import lock_release
+from bots.bot_logic import lock_release, logging, exit_by_exception
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
 
@@ -27,16 +27,22 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
             lock_release()
 
             # Обновляем книгу ордеров до отмены ордеров
-            smp_class_obj.update_order_book()
+            status_req_order_book = smp_class_obj.update_order_book()
+            if status_req_order_book == 'Error':
+                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {smp_class_obj.order_book}')
+                raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
             # Обновляем список позиций
             smp_class_obj.update_symbol_list()
 
             for position_number in range(2):
+                time.sleep(2)
                 if not smp_class_obj.checking_opened_order(position_number):
 
+                    time.sleep(2)
                     # Статус позиции принимает значения " >, <, = "
                     position_status = smp_class_obj.take_position_status(position_number)
 
+                    time.sleep(2)
                     if position_status == '>':
                         smp_class_obj.higher_position(position_number)
                     elif position_status == '<':
@@ -44,15 +50,15 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
                     else:
                         smp_class_obj.equal_position(position_number)
 
-            time.sleep(5)
+            time.sleep(1)
             lock.acquire()
-    # except Exception as e:
-    #     logging(bot, f'Error {e}')
-    #     lock.acquire()
-    #     try:
-    #         exit_by_exception(bot)
-    #     finally:
-    #         lock_release()
+    except Exception as e:
+        logging(bot, f'Error {e}')
+        lock.acquire()
+        try:
+            exit_by_exception(bot)
+        finally:
+            lock_release()
     finally:
         lock_release()
 

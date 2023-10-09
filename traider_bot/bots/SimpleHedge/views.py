@@ -14,6 +14,7 @@ from bots.forms import BotForm, SimpleHedgeForm
 from bots.models import Bot, SimpleHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders
 from single_bot.logic.global_variables import lock, global_list_threads
+from single_bot.logic.work import append_thread_or_check_duplicate
 
 
 @login_required
@@ -42,6 +43,7 @@ def simple_hedge_bot_create(request):
             bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
             bot_thread.start()
 
+            append_thread_or_check_duplicate(bot.pk)
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread
             if lock.locked():
@@ -85,6 +87,7 @@ def simple_hedge_bot_detail(request, bot_id):
             bot.is_active = True
             bot.save()
 
+            append_thread_or_check_duplicate(bot.pk)
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread
             if lock.locked():
@@ -95,7 +98,7 @@ def simple_hedge_bot_detail(request, bot_id):
         bot_form = BotForm(request=request, instance=bot)
         simple_hedge_form = SimpleHedgeForm(instance=simple_hedge)
 
-    order_list = get_open_orders(bot)
+    status, order_list = get_open_orders(bot)
     for order in order_list:
         time = int(order['updatedTime'])
         dt_object = datetime.fromtimestamp(time / 1000.0)
@@ -119,11 +122,12 @@ def averaging_simple_hedge_view(request, bot_id):
         is_percent = request.POST.get('is_percent')
         is_percent = True if is_percent else False
         amount = request.POST.get('amount')
+        price = request.POST.get('price')
         if not amount.isdigit():
             logging(bot, f'Введено неверное значение AMOUNT ({amount}) для усреднения')
             return redirect(request.META.get('HTTP_REFERER'))
 
-        manual_average_for_simple_hedge(bot, amount, is_percent)
+        manual_average_for_simple_hedge(bot, amount, is_percent, price)
 
         return redirect(request.META.get('HTTP_REFERER'))
 

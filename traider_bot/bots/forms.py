@@ -120,7 +120,7 @@ class BotForm(forms.ModelForm):
             'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
             'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
             'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Market'}),
         }
 
         labels = {
@@ -351,3 +351,4 @@ class HedgeGridBotForm(forms.ModelForm):
             'time_sleep': 'Request Rate (sec)',
             'bb_avg_percent': 'Average Percent',
         }
+
