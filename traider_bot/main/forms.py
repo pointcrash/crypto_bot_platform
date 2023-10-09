@@ -58,7 +58,12 @@ class AccountSelectForm(forms.Form):
         super(AccountSelectForm, self).__init__(*args, **kwargs)
         self.fields['account'].required = False
 
-        if user:
+        if user.is_superuser:
+            user_accounts = Account.objects.all()
+            account_choices = [('', '---------')]
+            account_choices.extend([(account.id, account.name) for account in user_accounts])
+            self.fields['account'].choices = account_choices
+        else:
             user_accounts = Account.objects.filter(owner=user)
             account_choices = [('', '---------')]
             account_choices.extend([(account.id, account.name) for account in user_accounts])
