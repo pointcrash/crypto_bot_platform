@@ -7,7 +7,6 @@ from django.shortcuts import render, redirect
 
 from api_v5 import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
-from bots.SimpleHedge.logic.work import work_simple_hedge_bot
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive

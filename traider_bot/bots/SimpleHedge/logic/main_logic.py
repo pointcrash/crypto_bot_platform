@@ -28,29 +28,37 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
 
             # Обновляем книгу ордеров до отмены ордеров
             status_req_order_book = smp_class_obj.update_order_book()
-            if status_req_order_book == 'Error':
+            if status_req_order_book not in 'OK':
                 logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {smp_class_obj.order_book}')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
             # Обновляем список позиций
             smp_class_obj.update_symbol_list()
+            if smp_class_obj.symbol_list is None:
+                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+                raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
             for position_number in range(2):
-                time.sleep(2)
+                time.sleep(1)
                 if not smp_class_obj.checking_opened_order(position_number):
 
-                    time.sleep(2)
-                    # Статус позиции принимает значения " >, <, = "
+                    time.sleep(1)
+                    # Статус позиции принимает значения " >, <, = " или "Error"
                     position_status = smp_class_obj.take_position_status(position_number)
 
-                    time.sleep(2)
-                    if position_status == '>':
+                    time.sleep(1)
+                    if position_status == 'Error':
+                        logging(bot, f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
+                        raise Exception(f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
+                    elif position_status == '>':
                         smp_class_obj.higher_position(position_number)
                     elif position_status == '<':
                         smp_class_obj.lower_position(position_number)
-                    else:
-                        smp_class_obj.equal_position(position_number)
+                    elif position_status == '=':
+                        response_equal = smp_class_obj.equal_position(position_number)
+                        if response_equal['retMsg'] != 'OK':
+                            smp_class_obj.sale_at_better_price(position_number)
 
-            time.sleep(1)
+            time.sleep(3)
             lock.acquire()
     except Exception as e:
         logging(bot, f'Error {e}')

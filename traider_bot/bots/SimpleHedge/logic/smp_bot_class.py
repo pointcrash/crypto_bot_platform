@@ -1,3 +1,4 @@
+import time
 from decimal import Decimal
 
 from api_v5 import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
@@ -52,17 +53,28 @@ class SimpleHedgeClassLogic:
 
     def update_symbol_list(self):
         self.symbol_list = get_list(self.account, symbol=self.symbol)
+        if self.symbol_list is None:
+            count = 0
+            while self.symbol_list is None or count < 60:
+                time.sleep(1)
+                count += 1
+                self.symbol_list = get_list(self.account, symbol=self.symbol)
 
     def update_order_book(self):
         status_req, self.order_book = get_open_orders(self.bot)
-        if status_req == 'Error':
-            return 'Error'
+        if status_req not in 'OK':
+            count = 0
+            while status_req not in 'OK' or count < 60:
+                time.sleep(1)
+                count += 1
+                status_req, self.order_book = get_open_orders(self.bot)
+        return status_req
 
     def cancel_all_orders_for_smp_hg(self):
         cancel_all(self.account, self.category, self.symbol)
 
     def calculate_tp_size(self):
-        self.tp_size = self.first_order_qty * Decimal(self.smp_hg.tpap) / 100
+        self.tp_size = (self.first_order_qty * Decimal(self.smp_hg.tpap) / 100).quantize(Decimal(self.symbol.minOrderQty))
 
     def buy_by_market(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -100,12 +112,16 @@ class SimpleHedgeClassLogic:
 
     def take_position_status(self, position_number):
         position_size = Decimal(self.symbol_list[position_number]['size'])
+        print(position_size)
+        print(self.first_order_qty)
 
-        if position_size == self.first_order_qty:
+        if position_size == 0:
+            return 'Error'
+        elif position_size == self.first_order_qty:
             return '='
         elif position_size > self.first_order_qty:
             return '>'
-        else:
+        elif position_size < self.first_order_qty:
             return '<'
 
     def lower_position(self, position_number):
@@ -126,6 +142,14 @@ class SimpleHedgeClassLogic:
     def higher_position(self, position_number):
         position_idx_avg = position_number + 1
         entry_price = Decimal(self.symbol_list[position_number]['avgPrice'])
+
+        self.first_order_qty = get_quantity_from_price(
+            self.bot.qty,
+            Decimal(self.symbol_list[0]['avgPrice']),
+            self.symbol.minOrderQty,
+            self.leverage)
+        self.calculate_tp_size()
+
         tp_sl_size = abs(self.first_order_qty - Decimal(self.symbol_list[position_number]['size']))
         tp_sl_response = set_trading_stop(self.bot, position_idx_avg, takeProfit=str(entry_price), tpSize=str(tp_sl_size))
         if tp_sl_response['retMsg'] != 'OK':
@@ -142,7 +166,37 @@ class SimpleHedgeClassLogic:
             tp_price = round(Decimal(self.symbol_list[1]['avgPrice']) * (1 - Decimal(self.smp_hg.tppp) / 100),
                              self.round_number)
 
-        set_trading_stop(self.bot, position_idx, takeProfit=str(tp_price), tpSize=str(self.tp_size))
+        return set_trading_stop(self.bot, position_idx, takeProfit=str(tp_price), tpSize=str(self.tp_size))
+
+    def sale_at_better_price(self, position_number):
+        print('Зашли в sale_at_better_price')
+        current_price = get_current_price(self.account, self.category, self.symbol)
+        if position_number == 0:
+            tp_price = round(Decimal(self.symbol_list[0]['avgPrice']) * (1 + Decimal(self.smp_hg.tppp) / 100),
+                             self.round_number)
+            if current_price >= tp_price:
+                Order.objects.create(
+                    bot=self.bot,
+                    category=self.category,
+                    symbol=self.symbol.name,
+                    side='Sell',
+                    orderType='Market',
+                    qty=self.tp_size,
+                    is_take=True,
+                )
+        else:
+            tp_price = round(Decimal(self.symbol_list[1]['avgPrice']) * (1 - Decimal(self.smp_hg.tppp) / 100),
+                             self.round_number)
+            if current_price <= tp_price:
+                Order.objects.create(
+                    bot=self.bot,
+                    category=self.category,
+                    symbol=self.symbol.name,
+                    side='Buy',
+                    orderType='Market',
+                    qty=self.tp_size,
+                    is_take=True,
+                )
 
 
 

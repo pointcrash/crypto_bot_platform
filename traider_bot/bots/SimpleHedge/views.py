@@ -8,7 +8,6 @@ from django.shortcuts import render, redirect
 from api_v5 import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.SimpleHedge.logic.manual_average import manual_average_for_simple_hedge
-from bots.SimpleHedge.logic.work import work_simple_hedge_bot
 from bots.bot_logic import clear_data_bot, logging, func_get_symbol_list
 from bots.forms import BotForm, SimpleHedgeForm
 from bots.models import Bot, SimpleHedge

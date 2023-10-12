@@ -128,12 +128,8 @@ def get_list(account, category='linear', symbol=None, settleCoin='USDT'):
         else:
             params = f"category={category}&settleCoin={settleCoin}"
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
-        # print(response)
-        # print(params)
-        # print(response['result']['list'])
         return response['result']['list']
     except Exception as e:
-        print("Произошла ошибка:", e)
         return None
 
 
@@ -311,7 +307,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
     # print(params)
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot=bot))
-    # print('set_trading_stop:', response)
+    print('set_trading_stop:', response)
     return response
 
 
@@ -320,9 +316,9 @@ def get_open_orders(bot):
     method = "GET"
     params = f"category=linear&symbol={bot.symbol.name}"
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    try:
-        return 'Ok', response['result']['list']
-    except:
+    if response['retMsg'] == 'OK':
+        return 'OK', response['result']['list']
+    else:
         return 'Error', response
 
 
