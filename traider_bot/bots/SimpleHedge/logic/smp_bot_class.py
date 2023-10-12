@@ -112,8 +112,6 @@ class SimpleHedgeClassLogic:
 
     def take_position_status(self, position_number):
         position_size = Decimal(self.symbol_list[position_number]['size'])
-        print(position_size)
-        print(self.first_order_qty)
 
         if position_size == 0:
             return 'Error'
@@ -169,7 +167,6 @@ class SimpleHedgeClassLogic:
         return set_trading_stop(self.bot, position_idx, takeProfit=str(tp_price), tpSize=str(self.tp_size))
 
     def sale_at_better_price(self, position_number):
-        print('Зашли в sale_at_better_price')
         current_price = get_current_price(self.account, self.category, self.symbol)
         if position_number == 0:
             tp_price = round(Decimal(self.symbol_list[0]['avgPrice']) * (1 + Decimal(self.smp_hg.tppp) / 100),
