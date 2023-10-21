@@ -6,7 +6,7 @@ from api_v5 import switch_position_mode, set_leverage, cancel_all
 from bots.bot_logic import count_decimal_places, logging, clear_data_bot
 from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder, Set0Psn
-from bots.set_zero_psn.logic.need_s0p_start_check import need_set0psn_start_check
+from bots.SetZeroPsn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.entry import entry_position
 from single_bot.logic.global_variables import global_list_bot_id, lock, global_list_threads
@@ -24,13 +24,12 @@ def bot_work_logic(bot):
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
     set0psn_obj = Set0Psn.objects.filter(bot=bot).first()
 
-
     new_cycle = True
     if not is_ts_bot:
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:
             chat_id = tg.chat_id
-            send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} started work')
+            send_telegram_message(chat_id, message=f'Bot {bot.pk} - {bot} started work')
         switch_position_mode(bot)
         set_leverage(bot.account, bot.category, bot.symbol, bot.isLeverage)
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
@@ -147,24 +146,24 @@ def bot_work_logic(bot):
                 Take.objects.bulk_update(takes, ['order_link_id'])
 
             lock.acquire()
-    except Exception as e:
-        print(f'Error {e}')
-        logging(bot, f'Error {e}')
-        lock.acquire()
-        try:
-            if bot_id in global_list_bot_id:
-                global_list_bot_id.remove(bot_id)
-                del global_list_threads[bot_id]
-                bot.is_active = False
-                bot.save()
-        finally:
-            if lock.locked():
-                lock.release()
+    # except Exception as e:
+    #     print(f'Error {e}')
+    #     logging(bot, f'Error {e}')
+    #     lock.acquire()
+    #     try:
+    #         if bot_id in global_list_bot_id:
+    #             global_list_bot_id.remove(bot_id)
+    #             del global_list_threads[bot_id]
+    #             bot.is_active = False
+    #             bot.save()
+    #     finally:
+    #         if lock.locked():
+    #             lock.release()
     finally:
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:
             chat_id = tg.chat_id
-            send_telegram_message(chat_id, f'Bot {bot.pk} - {bot} finished work')
+            send_telegram_message(chat_id, message=f'Bot {bot.pk} - {bot} finished work')
         if lock.locked():
             lock.release()
 
@@ -223,6 +222,11 @@ def check_change_psn_price(bot, main_price, psn_price):
 def actions_after_end_cycle(bot):
     bot_id = bot.pk
     logging(bot, f'bot finished cycle. P&L: {bot.pnl}')
+    tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+    if tg:
+        chat_id = tg.chat_id
+        send_telegram_message(chat_id, bot, f'bot finished work. P&L: {bot.pnl}')
+
     if not bot.repeat:
         lock.acquire()
         try:
@@ -238,13 +242,6 @@ def actions_after_end_cycle(bot):
         return False
     else:
         cancel_all(bot.account, bot.category, bot.symbol)
-        # takes = get_takes(bot)
-        # avg_order = AvgOrder.objects.filter(bot=bot).first()
-        # for take in takes:
-        #     take.order_link_id = ''
-        #     take.is_filled = False
-        # Take.objects.bulk_update(takes, ['order_link_id', 'is_filled'])
-        # avg_order.delete()
         clear_data_bot(bot)
         logging(bot, 'New cycle start')
         return True

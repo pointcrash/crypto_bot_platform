@@ -9,7 +9,7 @@ django.setup()
 from api_v5 import get_list, get_current_price, set_trading_stop, get_order_status
 from bots.bot_logic import get_quantity_from_price, logging
 from bots.models import Log, Bot
-from bots.set_zero_psn.logic.psn_count import psn_count
+from bots.SetZeroPsn.logic.psn_count import psn_count
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id
 from single_bot.logic.work import append_thread_or_check_duplicate

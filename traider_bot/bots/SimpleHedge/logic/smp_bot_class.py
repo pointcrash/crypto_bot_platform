@@ -2,10 +2,9 @@ import time
 from decimal import Decimal
 
 from api_v5 import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
-    get_open_orders
+    get_open_orders, cancel_order
 from bots.bot_logic import get_quantity_from_price
 from orders.models import Order
-from single_bot.logic.work import append_thread_or_check_duplicate
 
 
 class SimpleHedgeClassLogic:
@@ -51,6 +50,20 @@ class SimpleHedgeClassLogic:
                 if position_idx == order['positionIdx']:
                     return True
 
+    def checking_opened_order_for_lower_psn(self, position_number):
+        if self.order_book and len(self.order_book) > 0:
+            position_idx = position_number + 1
+            for order in self.order_book:
+                if position_idx == order['positionIdx']:
+                    status = order['orderStatus']
+                    if (status == 'New' or status == 'PartiallyFilled') and order['reduceOnly'] is False:
+                        return order
+
+    def checking_change_qty_for_order_lower_psn(self, position_number, order):
+        if float(order['qty']) < self.first_order_qty - Decimal(self.symbol_list[position_number]['size']):
+            cancel_order(self.bot, order['orderId'])
+            return True
+
     def update_symbol_list(self):
         self.symbol_list = get_list(self.account, symbol=self.symbol)
         if self.symbol_list is None:
@@ -62,6 +75,7 @@ class SimpleHedgeClassLogic:
 
     def update_order_book(self):
         status_req, self.order_book = get_open_orders(self.bot)
+        print(self.order_book)
         if status_req not in 'OK':
             count = 0
             while status_req not in 'OK' or count < 60:
@@ -154,14 +168,14 @@ class SimpleHedgeClassLogic:
             tp_sl_response = set_trading_stop(self.bot, position_idx_avg, stopLoss=str(entry_price),
                                               tpSize=str(tp_sl_size))
 
-    def equal_position(self, position_number):
+    def equal_position(self, position_number, tp_count):
         position_idx = position_number + 1
 
         if position_number == 0:
-            tp_price = round(Decimal(self.symbol_list[0]['avgPrice']) * (1 + Decimal(self.smp_hg.tppp) / 100),
+            tp_price = round(Decimal(self.symbol_list[0]['avgPrice']) * (1 + Decimal(self.smp_hg.tppp) * tp_count / 100),
                              self.round_number)
         else:
-            tp_price = round(Decimal(self.symbol_list[1]['avgPrice']) * (1 - Decimal(self.smp_hg.tppp) / 100),
+            tp_price = round(Decimal(self.symbol_list[1]['avgPrice']) * (1 - Decimal(self.smp_hg.tppp) * tp_count / 100),
                              self.round_number)
 
         return set_trading_stop(self.bot, position_idx, takeProfit=str(tp_price), tpSize=str(self.tp_size))

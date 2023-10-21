@@ -140,7 +140,7 @@ def single_bot_detail(request, bot_id):
         else:
             set0psn_form = Set0PsnForm()
 
-    order_list = get_open_orders(bot)
+    order_list_status, order_list = get_open_orders(bot)
     for order in order_list:
         time = int(order['updatedTime'])
         dt_object = datetime.fromtimestamp(time / 1000.0)

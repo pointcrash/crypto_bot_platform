@@ -38,25 +38,33 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
             for position_number in range(2):
+
                 time.sleep(1)
-                if not smp_class_obj.checking_opened_order(position_number):
+                # Статус позиции принимает значения " >, <, = " или "Error"
+                position_status = smp_class_obj.take_position_status(position_number)
 
+                time.sleep(1)
+                if position_status == 'Error':
+                    logging(bot, f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
+                    raise Exception(f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
+                elif position_status == '>':
                     time.sleep(1)
-                    # Статус позиции принимает значения " >, <, = " или "Error"
-                    position_status = smp_class_obj.take_position_status(position_number)
-
-                    time.sleep(1)
-                    if position_status == 'Error':
-                        logging(bot, f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
-                        raise Exception(f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
-                    elif position_status == '>':
+                    if not smp_class_obj.checking_opened_order(position_number):
                         smp_class_obj.higher_position(position_number)
-                    elif position_status == '<':
+                elif position_status == '<':
+                    time.sleep(1)
+                    order = smp_class_obj.checking_opened_order_for_lower_psn(position_number)
+                    if not order or smp_class_obj.checking_change_qty_for_order_lower_psn(position_number, order):
+                        time.sleep(1)
                         smp_class_obj.lower_position(position_number)
-                    elif position_status == '=':
-                        response_equal = smp_class_obj.equal_position(position_number)
-                        if response_equal['retMsg'] != 'OK':
-                            smp_class_obj.sale_at_better_price(position_number)
+                elif position_status == '=':
+                    time.sleep(1)
+                    if not smp_class_obj.checking_opened_order(position_number):
+                        for count in range(smp_hg.tp_count):
+                            count += 1
+                            response_equal = smp_class_obj.equal_position(position_number, count)
+                            # if response_equal['retMsg'] != 'OK':
+                            #     smp_class_obj.sale_at_better_price(position_number)
 
             time.sleep(3)
             lock.acquire()
@@ -69,4 +77,3 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
             lock_release()
     finally:
         lock_release()
-

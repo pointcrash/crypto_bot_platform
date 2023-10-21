@@ -10,16 +10,27 @@ from .models import Bot, Set0Psn, SimpleHedge
 class SimpleHedgeForm(forms.ModelForm):
     class Meta:
         model = SimpleHedge
-        fields = ['tppp', 'tpap', ]
+        fields = ['tppp', 'tpap',  'tp_count', ]
 
         widgets = {
             'tppp': forms.TextInput(attrs={'class': 'form-control'}),
             'tpap': forms.TextInput(attrs={'class': 'form-control'}),
+            'tp_count': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'tppp': 'TP Price % (TPPP)',
             'tpap': 'TP Amount % (TPAP)',
+            'tp_count': 'TP Count',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        tpap = cleaned_data.get('tpap')
+        tp_count = cleaned_data.get('tp_count')
+
+        if float(tpap) * tp_count > 100:
+            raise forms.ValidationError(f"Произведение значений TP Amount = {tpap} и TP Count = {tp_count} не может превышать 100%."
+                                        f" Текущий результат = {float(tpap) * tp_count}")
 
 
 class Set0PsnForm(forms.ModelForm):
@@ -98,7 +109,7 @@ class BotForm(forms.ModelForm):
                   'deviation_from_lines',
                   'is_percent_deviation_from_lines', 'dfm',
                   'chw', 'dfep', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
-                  'grid_avg_value', 'bin_order',  'price', ]
+                  'grid_avg_value', 'bin_order',  'price',  ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),

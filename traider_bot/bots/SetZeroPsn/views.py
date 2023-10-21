@@ -5,11 +5,11 @@ from django.shortcuts import redirect
 
 from api_v5 import get_list
 from bots.models import Symbol, Bot
-from bots.set_zero_psn.logic.create_bot_obj import create_set0osn_bot_obj
-from bots.set_zero_psn.logic.psn_count import psn_count
-from bots.set_zero_psn.logic.stop import stopping_set_zero_psn_bot
-from bots.set_zero_psn.logic.work import work_set_zero_psn_bot
-from bots.set_zero_psn.logic.work_by_market import work_set0psn_bot_by_market
+from bots.SetZeroPsn.logic.create_bot_obj import create_set0osn_bot_obj
+from bots.SetZeroPsn.logic.psn_count import psn_count
+from bots.SetZeroPsn.logic.stop import stopping_set_zero_psn_bot
+from bots.SetZeroPsn.logic.work import work_set_zero_psn_bot
+from bots.SetZeroPsn.logic.work_by_market import work_set0psn_bot_by_market
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, terminate_thread
 from main.models import Account
 from single_bot.logic.global_variables import lock, global_list_threads

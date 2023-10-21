@@ -7,11 +7,13 @@ import django
 import pytz
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
+from tg_bot.send_message import send_telegram_message
 from timezone.models import TimeZone
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
+from tg_bot.models import TelegramAccount
 from bots.bb_auto_avg import BBAutoAverage
 from bots.bb_class import BollingerBands
 from bots.models import Symbol, Log, AvgOrder, Bot, Take, IsTSStart
@@ -516,6 +518,11 @@ def clear_data_bot(bot, clear_data=0):
 def actions_after_end_cycle(bot):
     bot_id = bot.pk
     logging(bot, f'bot finished work. P&L: {bot.pnl}')
+    tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+    if tg:
+        chat_id = tg.chat_id
+        send_telegram_message(chat_id, bot, f'bot finished work. P&L: {bot.pnl}')
+
     if not bot.repeat:
         lock.acquire()
         try:
@@ -536,6 +543,7 @@ def func_get_symbol_list(bot):
     symbol_list, i = None, 0
     while not symbol_list and i < 4:
         symbol_list = get_list(bot.account, 'linear', bot.symbol)
+        print(symbol_list)
         i += 1
         time.sleep(1)
     return symbol_list

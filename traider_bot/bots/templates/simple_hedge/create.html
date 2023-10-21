@@ -23,6 +23,15 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+                {% if simple_hedge_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in simple_hedge_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
                     <h4 class="text-center">Main Settings</h4>
 
@@ -54,6 +63,8 @@
                     {{ simple_hedge_form.tppp }}
                     {{ simple_hedge_form.tpap.label_tag }}
                     {{ simple_hedge_form.tpap }}
+                    {{ simple_hedge_form.tp_count.label_tag }}
+                    {{ simple_hedge_form.tp_count }}
                 </div>
             </div>
             <div class="col-5 col-sm-3 mx-auto mb-5">

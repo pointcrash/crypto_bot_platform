@@ -160,3 +160,4 @@ class SimpleHedge(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
     tppp = models.CharField(blank=True, null=True)
     tpap = models.CharField(blank=True, null=True)
+    tp_count = models.IntegerField(blank=True, null=True, default=1)

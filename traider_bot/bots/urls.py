@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from bots.SimpleHedge.views import averaging_simple_hedge_view
 from bots.one_way.views_grid import update_symbols_set
-from bots.set_zero_psn.views import start_set_zero_psn_bot, stop_set_zero_psn_bot
+from bots.SetZeroPsn.views import start_set_zero_psn_bot, stop_set_zero_psn_bot
 from bots.views import views_bots_type_choice, terminate_bot, delete_bot, reboot_bots
 
 urlpatterns = [

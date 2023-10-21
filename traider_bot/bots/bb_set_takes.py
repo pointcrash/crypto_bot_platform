@@ -7,7 +7,7 @@ from bots.bot_logic import calculation_entry_point, take1_status_check, logging,
     take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
     check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition
 from bots.models import Set0Psn
-from bots.set_zero_psn.logic.need_s0p_start_check import need_set0psn_start_check
+from bots.SetZeroPsn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate

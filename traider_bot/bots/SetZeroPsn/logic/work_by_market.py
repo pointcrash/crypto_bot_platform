@@ -2,7 +2,7 @@ import time
 from decimal import Decimal
 from api_v5 import get_list, get_current_price, set_trading_stop, get_pnl
 from bots.bot_logic import get_quantity_from_price, logging
-from bots.set_zero_psn.logic.psn_count import psn_count
+from bots.SetZeroPsn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
 import os

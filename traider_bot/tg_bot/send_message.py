@@ -4,7 +4,7 @@ from .connect_tg_bot import bot_token
 
 def send_telegram_message(chat_id, bot=None,  message='None'):
     if bot:
-        account_info = bot.account + '\n'
+        account_info = bot.account.name + '\n'
         bot_info = f'Bot {bot.pk} - {bot}\n'
         message = account_info + bot_info + message
 

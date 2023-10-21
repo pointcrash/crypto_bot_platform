@@ -128,6 +128,7 @@ def get_list(account, category='linear', symbol=None, settleCoin='USDT'):
         else:
             params = f"category={category}&settleCoin={settleCoin}"
         response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+        # print(response)
         return response['result']['list']
     except Exception as e:
         return None
@@ -257,7 +258,7 @@ def get_query_account_coins_balance(account):
     method = "GET"
     params = f"accountType={account.account_type}&coin=USDT"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
-    print(response)
+    # print(response)
     try:
         return response['result']['balance']
     except:
@@ -307,7 +308,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
     # print(params)
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot=bot))
-    print('set_trading_stop:', response)
+    # print('set_trading_stop:', response)
     return response
 
 
