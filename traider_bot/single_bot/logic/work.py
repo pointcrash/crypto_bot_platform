@@ -2,10 +2,10 @@ import math
 import time
 from decimal import Decimal
 
-from api_v5 import switch_position_mode, set_leverage, cancel_all
+from api_v5 import switch_position_mode, set_leverage, cancel_all, get_current_price
 from bots.bot_logic import count_decimal_places, logging, clear_data_bot
 from bots.bot_logic_grid import take_status_check
-from bots.models import Take, AvgOrder, Set0Psn
+from bots.models import Take, AvgOrder, Set0Psn, OppositePosition
 from bots.SetZeroPsn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.entry import entry_position
@@ -23,6 +23,7 @@ def bot_work_logic(bot):
     position_idx = get_position_idx(bot.side)
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
     set0psn_obj = Set0Psn.objects.filter(bot=bot).first()
+    opp_obj = OppositePosition.objects.filter(bot=bot).first()
 
     new_cycle = True
     if not is_ts_bot:
@@ -35,6 +36,7 @@ def bot_work_logic(bot):
     fraction_length = int(count_decimal_places(Decimal(bot.symbol.minOrderQty)))
     round_number = int(bot.symbol.priceScale)
 
+    # START CYCLE
     lock.acquire()
     try:
         while bot_id in global_list_bot_id:
@@ -59,6 +61,26 @@ def bot_work_logic(bot):
                 if need_set0psn_start_check(bot, psn):
                     lock.acquire()
                     continue
+
+            if opp_obj and opp_obj.activate_opp:
+                if Decimal(psn['unrealisedPnl']) <= Decimal(opp_obj.limit_pnl_loss_opp):
+                    current_price_opp = get_current_price(bot.account, bot.category, bot.symbol)
+                    side_opp = 'Buy' if psn['positionIdx'] == 2 else 'Sell'
+                    qty_opp = Decimal(psn['size']) * Decimal(opp_obj.psn_qty_percent_opp) / 100
+                    margin_opp = qty_opp * current_price_opp / bot.isLeverage
+                    if margin_opp > Decimal(opp_obj.max_margin_opp):
+                        raise Exception('Ошибка при попытке открыть обратную позицию. Превышен лимит маржи.')
+                    else:
+                        Order.objects.create(
+                            bot=bot,
+                            category=bot.category,
+                            symbol=bot.symbol.name,
+                            side=side_opp,
+                            orderType='Market',
+                            qty=qty_opp,
+                        )
+                        cancel_all(bot.account, bot.category, bot.symbol)
+                        raise Exception('Open reverse position')
 
             takes = get_takes(bot)
             main_price, is_back = check_change_psn_price(bot, main_price, psn_price)
@@ -146,19 +168,19 @@ def bot_work_logic(bot):
                 Take.objects.bulk_update(takes, ['order_link_id'])
 
             lock.acquire()
-    # except Exception as e:
-    #     print(f'Error {e}')
-    #     logging(bot, f'Error {e}')
-    #     lock.acquire()
-    #     try:
-    #         if bot_id in global_list_bot_id:
-    #             global_list_bot_id.remove(bot_id)
-    #             del global_list_threads[bot_id]
-    #             bot.is_active = False
-    #             bot.save()
-    #     finally:
-    #         if lock.locked():
-    #             lock.release()
+    except Exception as e:
+        print(f'Error {e}')
+        logging(bot, f'Error {e}')
+        lock.acquire()
+        try:
+            if bot_id in global_list_bot_id:
+                global_list_bot_id.remove(bot_id)
+                del global_list_threads[bot_id]
+                bot.is_active = False
+                bot.save()
+        finally:
+            if lock.locked():
+                lock.release()
     finally:
         tg = TelegramAccount.objects.filter(owner=bot.owner).first()
         if tg:

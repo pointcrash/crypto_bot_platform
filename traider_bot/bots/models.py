@@ -152,7 +152,7 @@ class Set0Psn(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
     set0psn = models.BooleanField(default=False)
     trend = models.IntegerField(blank=True, null=True)
-    limit_pnl = models.CharField(blank=True, null=True)
+    limit_pnl_loss_s0n = models.CharField(blank=True, null=True)
     max_margin_s0p = models.CharField(blank=True, null=True)
 
 
@@ -161,3 +161,11 @@ class SimpleHedge(models.Model):
     tppp = models.CharField(blank=True, null=True)
     tpap = models.CharField(blank=True, null=True)
     tp_count = models.IntegerField(blank=True, null=True, default=1)
+
+
+class OppositePosition(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    activate_opp = models.BooleanField(default=False)
+    limit_pnl_loss_opp = models.CharField(blank=True, null=True)
+    psn_qty_percent_opp = models.CharField(blank=True, null=True)
+    max_margin_opp = models.CharField(blank=True, null=True)

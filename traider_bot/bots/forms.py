@@ -4,7 +4,7 @@ from django import forms
 from api_v5 import get_query_account_coins_balance, get_current_price
 from main.models import Account
 from .bot_logic import get_quantity_from_price
-from .models import Bot, Set0Psn, SimpleHedge
+from .models import Bot, Set0Psn, SimpleHedge, OppositePosition
 
 
 class SimpleHedgeForm(forms.ModelForm):
@@ -42,27 +42,56 @@ class Set0PsnForm(forms.ModelForm):
         )
 
         model = Set0Psn
-        fields = ['set0psn', 'trend', 'limit_pnl', 'max_margin_s0p']
+        fields = ['set0psn', 'trend', 'limit_pnl_loss_s0n', 'max_margin_s0p']
 
         widgets = {
             'trend': forms.Select(choices=TREND_CHOICE, attrs={'class': 'form-control'}),
-            'limit_pnl': forms.TextInput(attrs={'class': 'form-control'}),
+            'limit_pnl_loss_s0n': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '-100'}),
             'max_margin_s0p': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'set0psn': 'Activate',
             'trend': 'Trend (%)',
-            'limit_pnl': 'Limit PNL loss',
+            'limit_pnl_loss_s0n': 'Limit PNL loss',
             'max_margin_s0p': 'Max Margin',
 
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        limit_pnl = cleaned_data.get('limit_pnl')
+        limit_pnl = cleaned_data.get('limit_pnl_loss_s0n')
 
         if limit_pnl:
-            if '-' not in limit_pnl and not limit_pnl.isdigit():
+            if '-' not in limit_pnl:
+                raise forms.ValidationError(
+                    "Invalid 'Limit PNL loss' value. Value must consist of numbers only and contain a sign '-'")
+
+        return cleaned_data
+
+
+class OppositePositionForm(forms.ModelForm):
+    class Meta:
+        model = OppositePosition
+        fields = ['activate_opp', 'limit_pnl_loss_opp', 'max_margin_opp', 'psn_qty_percent_opp']
+
+        widgets = {
+            'limit_pnl_loss_opp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '-100'}),
+            'max_margin_opp': forms.TextInput(attrs={'class': 'form-control'}),
+            'psn_qty_percent_opp': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'activate_opp': 'Activate',
+            'limit_pnl_loss_opp': 'Limit PNL loss',
+            'psn_qty_percent_opp': 'Quantity (%)',
+            'max_margin_opp': 'Max Margin',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        limit_pnl = cleaned_data.get('limit_pnl_loss_opp')
+
+        if limit_pnl:
+            if '-' not in limit_pnl:
                 raise forms.ValidationError(
                     "Invalid 'Limit PNL loss' value. Value must consist of numbers only and contain a sign '-'")
 

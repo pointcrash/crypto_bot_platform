@@ -152,7 +152,7 @@ def recalculate_values(request):
                 count_dict[trend]['enough_balance'] = enough_balance
 
         # Возвращение новых значений в формате JSON
-        print(count_dict[trend])
+        # print(count_dict[trend])
         return JsonResponse(count_dict[trend])
 
     return JsonResponse({'error': 'Invalid request method'})
@@ -258,6 +258,7 @@ def profile_mode_switching(request, profile_id):
 
 def get_balance(request, acc_id):
     acc = Account.objects.get(pk=acc_id)
+    # print(get_query_account_coins_balance(acc))
     balance = get_query_account_coins_balance(acc)[0]
     wb = balance['walletBalance']
     tb = balance['transferBalance']

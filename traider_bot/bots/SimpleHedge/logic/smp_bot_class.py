@@ -75,7 +75,7 @@ class SimpleHedgeClassLogic:
 
     def update_order_book(self):
         status_req, self.order_book = get_open_orders(self.bot)
-        print(self.order_book)
+        # print(self.order_book)
         if status_req not in 'OK':
             count = 0
             while status_req not in 'OK' or count < 60:

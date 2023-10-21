@@ -6,7 +6,7 @@ from api_v5 import cancel_all, switch_position_mode, set_leverage, get_current_p
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
     take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
     check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition
-from bots.models import Set0Psn
+from bots.models import Set0Psn, OppositePosition
 from bots.SetZeroPsn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
@@ -24,6 +24,7 @@ def set_takes(bot):
     is_ts_bot = True if bot.side == 'TS' else False
     append_thread_or_check_duplicate(bot_id, is_ts_bot)
     set0psn_obj = Set0Psn.objects.filter(bot=bot).first()
+    opp_obj = OppositePosition.objects.filter(bot=bot).first()
 
     if not is_ts_bot:
         # if chat_id:
@@ -56,6 +57,26 @@ def set_takes(bot):
                 if need_set0psn_start_check(bot, psn):
                     lock.acquire()
                     continue
+
+            if opp_obj and opp_obj.activate_opp:
+                if Decimal(psn['unrealisedPnl']) <= Decimal(opp_obj.limit_pnl_loss_opp):
+                    current_price_opp = get_current_price(bot.account, bot.category, bot.symbol)
+                    side_opp = 'Buy' if psn['positionIdx'] == 2 else 'Sell'
+                    qty_opp = Decimal(psn['size']) * Decimal(opp_obj.psn_qty_percent_opp) / 100
+                    margin_opp = qty_opp * current_price_opp / bot.isLeverage
+                    if margin_opp > Decimal(opp_obj.max_margin_opp):
+                        raise Exception('Ошибка при попытке открыть обратную позицию. Превышен лимит маржи.')
+                    else:
+                        Order.objects.create(
+                            bot=bot,
+                            category=bot.category,
+                            symbol=bot.symbol.name,
+                            side=side_opp,
+                            orderType='Market',
+                            qty=qty_opp,
+                        )
+                        cancel_all(bot.account, bot.category, bot.symbol)
+                        raise Exception('Open reverse position')
 
             if first_start:
                 first_cycle = False

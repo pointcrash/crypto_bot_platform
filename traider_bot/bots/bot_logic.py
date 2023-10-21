@@ -543,7 +543,7 @@ def func_get_symbol_list(bot):
     symbol_list, i = None, 0
     while not symbol_list and i < 4:
         symbol_list = get_list(bot.account, 'linear', bot.symbol)
-        print(symbol_list)
+        # print(symbol_list)
         i += 1
         time.sleep(1)
     return symbol_list

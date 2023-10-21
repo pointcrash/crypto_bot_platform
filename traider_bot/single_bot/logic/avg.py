@@ -97,7 +97,7 @@ def set_avg_order(bot, side, psn_price, psn_qty):
     elif side == 'Sell':
         avg_price = psn_price + (psn_price * bot.grid_avg_value / 100)
 
-    if psn_currency_amount + avg_currency_amount > bot.max_margin:
+    if bot.max_margin and psn_currency_amount + avg_currency_amount > bot.max_margin:
         last_log = Log.objects.filter(bot=bot).last()
         if 'MARGIN LIMIT!' not in last_log.content:
             logging(bot,

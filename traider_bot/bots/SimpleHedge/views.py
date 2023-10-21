@@ -62,7 +62,10 @@ def simple_hedge_bot_detail(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
     simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
     symbol_list = func_get_symbol_list(bot)
-    have_open_psn = True if float(symbol_list[0]['size']) or float(symbol_list[1]['size']) else False
+    try:
+        have_open_psn = True if float(symbol_list[0]['size']) or float(symbol_list[1]['size']) else False
+    except:
+        have_open_psn = False
 
     if request.method == 'POST':
         bot_form = BotForm(request.POST, request=request, instance=bot)
