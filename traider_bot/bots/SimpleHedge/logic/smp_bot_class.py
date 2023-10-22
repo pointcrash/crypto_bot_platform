@@ -60,7 +60,7 @@ class SimpleHedgeClassLogic:
                         return order
 
     def checking_change_qty_for_order_lower_psn(self, position_number, order):
-        if float(order['qty']) < self.first_order_qty - Decimal(self.symbol_list[position_number]['size']):
+        if Decimal(order['qty']) < self.first_order_qty - Decimal(self.symbol_list[position_number]['size']):
             cancel_order(self.bot, order['orderId'])
             return True
 
@@ -75,7 +75,6 @@ class SimpleHedgeClassLogic:
 
     def update_order_book(self):
         status_req, self.order_book = get_open_orders(self.bot)
-        # print(self.order_book)
         if status_req not in 'OK':
             count = 0
             while status_req not in 'OK' or count < 60:
@@ -84,8 +83,8 @@ class SimpleHedgeClassLogic:
                 status_req, self.order_book = get_open_orders(self.bot)
         return status_req
 
-    def cancel_all_orders_for_smp_hg(self):
-        cancel_all(self.account, self.category, self.symbol)
+    # def cancel_all_orders_for_smp_hg(self):
+    #     cancel_all(self.account, self.category, self.symbol)
 
     def calculate_tp_size(self):
         self.tp_size = (self.first_order_qty * Decimal(self.smp_hg.tpap) / 100).quantize(Decimal(self.symbol.minOrderQty))

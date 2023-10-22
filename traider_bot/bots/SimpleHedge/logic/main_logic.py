@@ -63,8 +63,8 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
                         for count in range(smp_hg.tp_count):
                             count += 1
                             response_equal = smp_class_obj.equal_position(position_number, count)
-                            # if response_equal['retMsg'] != 'OK':
-                            #     smp_class_obj.sale_at_better_price(position_number)
+                            if response_equal['retMsg'] != 'OK':
+                                smp_class_obj.sale_at_better_price(position_number)
 
             time.sleep(3)
             lock.acquire()
