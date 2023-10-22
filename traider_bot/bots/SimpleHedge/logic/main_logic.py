@@ -44,20 +44,28 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
                 position_status = smp_class_obj.take_position_status(position_number)
 
                 time.sleep(1)
+
                 if position_status == 'Error':
                     logging(bot, f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
                     raise Exception(f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
+
                 elif position_status == '>':
                     time.sleep(1)
                     if not smp_class_obj.checking_opened_order(position_number):
                         smp_class_obj.higher_position(position_number)
+
                 elif position_status == '<':
                     time.sleep(1)
                     order = smp_class_obj.checking_opened_order_for_lower_psn(position_number)
                     if not order or smp_class_obj.checking_change_qty_for_order_lower_psn(position_number, order):
                         time.sleep(1)
                         smp_class_obj.lower_position(position_number)
+
                 elif position_status == '=':
+                    if smp_class_obj.add_psn_flag[position_number] is True:
+                        smp_class_obj.cancel_tp_orders(position_number)
+                        smp_class_obj.add_psn_flag[position_number] = False
+
                     time.sleep(1)
                     if not smp_class_obj.checking_opened_order(position_number):
                         for count in range(smp_hg.tp_count):

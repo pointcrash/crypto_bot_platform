@@ -25,6 +25,7 @@ class SimpleHedgeClassLogic:
         self.psn_add_flag_2 = False
         self.first_order_qty = None
         self.tp_size = None
+        self.add_psn_flag = {0: False, 1: False}
 
     def preparatory_actions(self):
         # append_thread_or_check_duplicate(self.bot_id)
@@ -139,6 +140,7 @@ class SimpleHedgeClassLogic:
         side = 'Buy' if position_number == 0 else 'Sell'
         avg_qty = str(self.first_order_qty - Decimal(self.symbol_list[position_number]['size']))
         price = self.symbol_list[position_number]['avgPrice']
+        self.add_psn_flag[position_number] = True
 
         order = Order.objects.create(
             bot=self.bot,
@@ -207,6 +209,14 @@ class SimpleHedgeClassLogic:
                     qty=self.tp_size,
                     is_take=True,
                 )
+
+    def cancel_tp_orders(self, position_number):
+        if self.order_book and len(self.order_book) > 0:
+            position_idx = position_number + 1
+            for order in self.order_book:
+                if position_idx == order['positionIdx']:
+                    if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is True:
+                        cancel_order(self.bot, order['orderId'])
 
 
 
