@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-11 mx-auto">
+        <h2 class="text-center">Edit bot</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field_errors in form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if simple_hedge_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in simple_hedge_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Main Settings</h4>
+
+                    <br>
+                    {{ form.account.label_tag }}
+                    {{ form.account }}
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    <br>
+                    {{ form.symbol.label_tag }}
+                    {{ form.symbol }}
+                    <br>
+                    {{ form.isLeverage.label_tag }}
+                    {{ form.isLeverage }}
+                    <br>
+                    {{ form.margin_type.label_tag }}
+                    {{ form.margin_type }}
+                    <br>
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Step Hedge Settings</h4>
+                    <br>
+                    {{ step_hedge_form.short1invest.label_tag }}
+                    {{ step_hedge_form.short1invest }}
+                    {{ step_hedge_form.long1invest.label_tag }}
+                    {{ step_hedge_form.long1invest }}
+                    <br>
+                    {{ step_hedge_form.tp_pnl_percent.label_tag }}
+                    {{ step_hedge_form.tp_pnl_percent }}
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    {{ step_hedge_form.pnl_short_avg.label_tag }}
+                    {{ step_hedge_form.pnl_short_avg }}
+                    {{ step_hedge_form.pnl_long_avg.label_tag }}
+                    {{ step_hedge_form.pnl_long_avg }}
+                    <br>
+                    {{ step_hedge_form.margin_short_avg.label_tag }}
+                    {{ step_hedge_form.margin_short_avg }}
+                    {{ step_hedge_form.margin_long_avg.label_tag }}
+                    {{ step_hedge_form.margin_long_avg }}
+                </div>
+            </div>
+            <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
+                <div class="row justify-content-center">
+                    <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
+                            data-bs-target="#deleteBotModal">Delete Bot
+                    </button>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="deleteBotModal" tabindex="-1" aria-labelledby="stopBotModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="deleteBotModalLabel">{{ bot.symbol }}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6>Choose way to delete:</h6>
+                        </div>
+                        <div class="modal-footer">
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=1 %}"
+                               class="btn btn-warning col-12">Delete and stop bot only</a>
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
+                               class="btn btn-warning col-12">Delete bot with cancel all orders</a>
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"
+                               class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
+                                Market
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <h5 class="text-center">POSITIONS</h5>
+        <hr>
+        <br>
+        <div class="row mb-5">
+            {% if have_open_psn %}
+            <div class="card shadow">
+                <table class="table" style="vertical-align: middle">
+                    <thead>
+                    <tr class="">
+                        <th>SIDE</th>
+                        <th>SYMBOL</th>
+                        <th class="d-none d-sm-table-cell">SIZE</th>
+                        <th class="d-none d-sm-table-cell">ENTRY PRICE</th>
+                        <th>MARK PRICE</th>
+                        <th>LIQ PRICE</th>
+                        <th class="d-none d-md-table-cell">MARGIN</th>
+                        <th>UNREALIZED PNL</th>
+                    </tr>
+                    </thead>
+                    {% for position in symbol_list %}
+                    <tbody>
+                    <tr class="">
+                        <td>{{ position.side }}</td>
+                        <td>{{ position.symbol }}</td>
+                        <td>{{ position.size }}</td>
+                        <td class="d-none d-sm-table-cell">{{ position.avgPrice }}</td>
+                        <td>{{ position.markPrice }}</td>
+                        <td>{{ position.liqPrice }}</td>
+                        <td class="d-none d-md-table-cell">{{ position.positionBalance }}</td>
+                        <td>{{ position.unrealisedPnl }}</td>
+                    </tr>
+                    </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+            {% else %}
+            <h5 class="text-center">Позиция не открыта</h5>
+            {% endif %}
+        </div>
+        <h5 class="text-center">ORDER BOOK</h5>
+        <a class="btn btn-secondary text-end" href="{% url 'create_order' bot_id=bot.pk %}">New order</a>
+        <hr>
+        <div class="row mb-5">
+            {% if order_list %}
+            <table class="table" style="vertical-align: middle">
+                <thead style="background-color: #525252">
+                <tr class="">
+                    <th>SYMBOL</th>
+                    <th class="d-none d-sm-table-cell">QTY</th>
+                    <th class="d-none d-md-table-cell">PRICE</th>
+                    <th class="d-none d-sm-table-cell">LEAVES QTY</th>
+                    <th>TP/SL</th>
+                    <th>SIDE</th>
+                    <th>STATUS</th>
+                    <th class="d-none d-sm-table-cell">TIME</th>
+                    <th class="d-none d-sm-table-cell">CLOSE</th>
+                </tr>
+                </thead>
+                <tbody style="background-color: #858585">
+                {% for order in order_list %}
+                <tr class="">
+                    <td>{{ order.symbol }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.qty }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.price }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.leavesQty }}</td>
+                    <td class="d-none d-sm-table-cell">
+                        {% if order.takeProfit == '0.00000' or order.takeProfit == '0.000' %}--
+                        {% else %}{{order.takeProfit }}{% endif %}/
+                        {% if order.stopLoss == '0.00000' or order.stopLoss == '0.000'%}--
+                        {% else %}{{ order.stopLoss }}{% endif %}
+                    </td>
+                    <td>{{ order.side }}</td>
+                    <td>{{ order.orderStatus }}</td>
+                    <td class="d-none d-sm-table-cell">{{ order.updatedTime }}</td>
+                    <td class="d-none d-sm-table-cell"><a
+                            href="{% url 'cancel_order' bot_id=bot.pk order_id=order.orderId %}"
+                            class="btn btn-sm btn-outline-dark">Cancel</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <h5 class="text-center">Нет открытых ордеров</h5>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

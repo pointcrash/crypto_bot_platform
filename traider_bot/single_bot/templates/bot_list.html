@@ -68,6 +68,8 @@
                     <a class="btn btn-primary btn-shadow" href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                     {% elif bot.work_model == 'SmpHg' %}
                     <a class="btn btn-primary btn-shadow" href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                    {% elif bot.work_model == 'StepHg' %}
+                    <a class="btn btn-primary btn-shadow" href="{% url 'step_hedge_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                     {% endif %}
 
                     <a class="btn  btn-secondary btn-shadow" href="{% url 'logs_detail' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>

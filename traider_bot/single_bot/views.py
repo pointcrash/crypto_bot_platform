@@ -7,12 +7,13 @@ from django.shortcuts import render, redirect
 
 from api_v5 import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
+from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
 from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
-from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition
+from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition, StepHedge
 from main.forms import AccountSelectForm
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
@@ -214,6 +215,11 @@ def bot_start(request, bot_id):
     elif bot.work_model == 'SmpHg':
         simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
         bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
+        append_thread_or_check_duplicate(bot.pk)
+
+    elif bot.work_model == 'StepHg':
+        step_hedge = StepHedge.objects.filter(bot=bot).first()
+        bot_thread = threading.Thread(target=step_hedge_bot_main_logic, args=(bot, step_hedge))
         append_thread_or_check_duplicate(bot.pk)
 
     if bot_thread is not None:

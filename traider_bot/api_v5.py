@@ -87,6 +87,21 @@ def cancel_order(bot, order_id):
     return response
 
 
+def amend_order(bot, order_id, data=None):
+    endpoint = "/v5/order/amend"
+    method = "POST"
+    params = {
+        'category': bot.category,
+        'symbol': bot.symbol.name,
+        'orderId': order_id,
+    }
+    if data:
+        params.update(data)
+    params = json.dumps(params)
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params, "AmendOrder"))
+    return response
+
+
 def get_current_price(account, category, symbol):
     endpoint = "/v5/market/tickers"
     method = "GET"
@@ -176,7 +191,8 @@ def get_symbol_set():
     data_set = get_instruments_info(account, category="linear")
     symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
                    i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
-                   i['lotSizeFilter']['minOrderQty'], i['lotSizeFilter']['maxOrderQty'], i['priceFilter']['tickSize'])
+                   i['lotSizeFilter']['minOrderQty'], i['lotSizeFilter']['maxOrderQty'], i['priceFilter']['tickSize'],
+                   i['lotSizeFilter']['qtyStep'])
                   for i in data_set['result']['list'] if
                   i['symbol'].endswith('USDT')]
 
@@ -305,10 +321,8 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'positionIdx': positionIdx,
             }
 
-    # print(params)
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot=bot))
-    # print('set_trading_stop:', response)
     return response
 
 

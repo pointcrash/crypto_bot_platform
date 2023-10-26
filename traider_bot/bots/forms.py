@@ -4,7 +4,7 @@ from django import forms
 from api_v5 import get_query_account_coins_balance, get_current_price
 from main.models import Account
 from .bot_logic import get_quantity_from_price
-from .models import Bot, Set0Psn, SimpleHedge, OppositePosition
+from .models import Bot, Set0Psn, SimpleHedge, OppositePosition, StepHedge
 
 
 class SimpleHedgeForm(forms.ModelForm):
@@ -101,7 +101,13 @@ class OppositePositionForm(forms.ModelForm):
 class BotForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
+        self.qty = kwargs.pop('initial', None)
         super().__init__(*args, **kwargs)
+        if self.qty:
+            print(self.qty)
+            print('__________________________________________________________')
+            self.fields['qty'] = self.qty
+
         if self.request:
             if self.request.user.is_superuser:
                 self.fields['account'].queryset = Account.objects.all()

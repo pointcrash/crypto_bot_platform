@@ -14,6 +14,7 @@ class Symbol(models.Model):
     tickSize = models.CharField(max_length=20, null=True)
     minOrderQty = models.CharField(max_length=20, null=True)
     maxOrderQty = models.CharField(max_length=20, null=True)
+    qtyStep = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -161,6 +162,18 @@ class SimpleHedge(models.Model):
     tppp = models.CharField(blank=True, null=True)
     tpap = models.CharField(blank=True, null=True)
     tp_count = models.IntegerField(blank=True, null=True, default=1)
+
+
+class StepHedge(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    short1invest = models.CharField(blank=True, null=True)
+    long1invest = models.CharField(blank=True, null=True)
+    tp_pnl_percent = models.CharField(blank=True, null=True)
+    pnl_short_avg = models.CharField(blank=True, null=True)
+    pnl_long_avg = models.CharField(blank=True, null=True)
+    margin_short_avg = models.CharField(blank=True, null=True)
+    margin_long_avg = models.CharField(blank=True, null=True)
+    qty_steps = models.CharField(blank=True, null=True)
 
 
 class OppositePosition(models.Model):

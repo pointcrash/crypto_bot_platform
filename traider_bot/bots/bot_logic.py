@@ -262,6 +262,7 @@ def get_update_symbols():
             coin.minOrderQty = symbol[7]
             coin.maxOrderQty = symbol[8]
             coin.tickSize = symbol[9]
+            coin.qtyStep = symbol[10]
             coin.save()
         else:
             Symbol.objects.create(
@@ -275,6 +276,7 @@ def get_update_symbols():
                 minOrderQty=symbol[7],
                 maxOrderQty=symbol[8],
                 tickSize=symbol[9],
+                qtyStep=symbol[10],
             )
 
 
