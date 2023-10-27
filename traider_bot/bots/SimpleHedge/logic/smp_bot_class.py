@@ -46,14 +46,15 @@ class SimpleHedgeClassLogic:
 
     def checking_opened_order(self, position_number):
         if self.order_book and len(self.order_book) > 0:
-            position_idx = position_number + 1
+            position_idx = self.symbol_list[position_number]['positionIdx']
+
             for order in self.order_book:
                 if position_idx == order['positionIdx']:
                     return True
 
     def checking_opened_order_for_lower_psn(self, position_number):
         if self.order_book and len(self.order_book) > 0:
-            position_idx = position_number + 1
+            position_idx = self.symbol_list[position_number]['positionIdx']
             for order in self.order_book:
                 if position_idx == order['positionIdx']:
                     status = order['orderStatus']
@@ -170,7 +171,7 @@ class SimpleHedgeClassLogic:
                                               tpSize=str(tp_sl_size))
 
     def equal_position(self, position_number, tp_count):
-        position_idx = position_number + 1
+        position_idx = self.symbol_list[position_number]['positionIdx']
 
         if position_number == 0:
             tp_price = round(Decimal(self.symbol_list[0]['avgPrice']) * (1 + Decimal(self.smp_hg.tppp) * tp_count / 100),
@@ -212,7 +213,7 @@ class SimpleHedgeClassLogic:
 
     def cancel_tp_orders(self, position_number):
         if self.order_book and len(self.order_book) > 0:
-            position_idx = position_number + 1
+            position_idx = self.symbol_list[position_number]['positionIdx']
             for order in self.order_book:
                 if position_idx == order['positionIdx']:
                     if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is True:

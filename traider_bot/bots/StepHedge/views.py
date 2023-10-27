@@ -25,7 +25,7 @@ def step_hedge_bot_create(request):
 
         if bot_form.is_valid() and step_hedge_form.is_valid():
             bot = bot_form.save(commit=False)
-            bot.work_model = 'StepHg'
+            bot.work_model = 'Step Hedge'
             bot.owner = request.user
             bot.category = 'linear'
             bot.qty = 1

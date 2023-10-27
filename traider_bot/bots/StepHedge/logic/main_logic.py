@@ -39,7 +39,11 @@ def step_hedge_bot_main_logic(bot, step_hg):
 
             for position_number in range(2):
                 time.sleep(1)
+                if step_class_obj.losses_pnl_check(position_number):
+                    step_class_obj.average_psn(position_number)
+
                 step_class_obj.place_tp_order(position_number)
+
                 if not step_class_obj.checking_opened_new_psn_order(position_number):
                     step_class_obj.place_new_psn_order(position_number)
                 else:
@@ -47,7 +51,7 @@ def step_hedge_bot_main_logic(bot, step_hg):
                         if step_class_obj.distance_between_price_and_order_check(position_number):
                             step_class_obj.amend_new_psn_order(position_number)
 
-            time.sleep(5)
+            time.sleep(7)
             lock.acquire()
     except Exception as e:
         logging(bot, f'Error {e}')

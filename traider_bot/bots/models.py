@@ -166,14 +166,15 @@ class SimpleHedge(models.Model):
 
 class StepHedge(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    short1invest = models.CharField(blank=True, null=True)
-    long1invest = models.CharField(blank=True, null=True)
-    tp_pnl_percent = models.CharField(blank=True, null=True)
-    pnl_short_avg = models.CharField(blank=True, null=True)
-    pnl_long_avg = models.CharField(blank=True, null=True)
-    margin_short_avg = models.CharField(blank=True, null=True)
-    margin_long_avg = models.CharField(blank=True, null=True)
-    qty_steps = models.CharField(blank=True, null=True)
+    short1invest = models.CharField(max_length=20, null=True)
+    long1invest = models.CharField(max_length=20, null=True)
+    tp_pnl_percent = models.CharField(max_length=20, null=True)
+    pnl_short_avg = models.CharField(max_length=20, null=True)
+    pnl_long_avg = models.CharField(max_length=20, null=True)
+    margin_short_avg = models.CharField(max_length=20, null=True)
+    margin_long_avg = models.CharField(max_length=20, null=True)
+    qty_steps = models.IntegerField(default=30, null=True)
+    qty_steps_diff = models.IntegerField(default=10)
 
 
 class OppositePosition(models.Model):

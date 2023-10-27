@@ -217,7 +217,7 @@ def bot_start(request, bot_id):
         bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
         append_thread_or_check_duplicate(bot.pk)
 
-    elif bot.work_model == 'StepHg':
+    elif bot.work_model == 'Step Hedge':
         step_hedge = StepHedge.objects.filter(bot=bot).first()
         bot_thread = threading.Thread(target=step_hedge_bot_main_logic, args=(bot, step_hedge))
         append_thread_or_check_duplicate(bot.pk)

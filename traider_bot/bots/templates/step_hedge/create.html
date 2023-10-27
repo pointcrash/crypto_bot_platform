@@ -61,6 +61,16 @@
                     <br>
                     {{ step_hedge_form.tp_pnl_percent.label_tag }}
                     {{ step_hedge_form.tp_pnl_percent }}
+                    <div class="row">
+                        <div class="col-6">
+                            {{ step_hedge_form.qty_steps.label_tag }}
+                            {{ step_hedge_form.qty_steps }}
+                        </div>
+                        <div class="col-6">
+                            {{ step_hedge_form.qty_steps_diff.label_tag }}
+                            {{ step_hedge_form.qty_steps_diff }}
+                        </div>
+                    </div>
                 </div>
                 <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
                     {{ step_hedge_form.pnl_short_avg.label_tag }}

@@ -38,7 +38,6 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
             for position_number in range(2):
-
                 time.sleep(1)
                 # Статус позиции принимает значения " >, <, = " или "Error"
                 position_status = smp_class_obj.take_position_status(position_number)

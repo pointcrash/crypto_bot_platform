@@ -31,6 +31,8 @@ class StepHedgeClassLogic:
         self.new_psn_price_dict = dict()
         self.new_psn_orderId_dict = dict()
         self.tickSize = Decimal(self.bot.symbol.tickSize)
+        self.qty_steps = self.step_hg.qty_steps
+        self.qty_steps_diff = self.step_hg.qty_steps_diff
 
     def preparatory_actions(self):
         # append_thread_or_check_duplicate(self.bot_id)
@@ -58,7 +60,7 @@ class StepHedgeClassLogic:
         return status_req
 
     def checking_opened_positions(self):
-        if float(self.symbol_list[0]['size']) != 0 and float(self.symbol_list[1]['size']) != 0:
+        if float(self.symbol_list[0]['size']) != 0 or float(self.symbol_list[1]['size']) != 0:
             return True
 
     def checking_opened_position(self, position_number):
@@ -67,7 +69,7 @@ class StepHedgeClassLogic:
 
     def checking_opened_new_psn_order(self, position_number):
         if self.order_book and len(self.order_book) > 0:
-            position_idx = position_number + 1
+            position_idx = self.symbol_list[position_number]['positionIdx']
             for order in self.order_book:
                 if position_idx == order['positionIdx']:
                     if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is False:
@@ -111,34 +113,70 @@ class StepHedgeClassLogic:
             )
 
     def place_tp_order(self, position_number):
-        position_idx = position_number + 1
-        tp_qty = Decimal(self.symbol_list[position_number]['size'])
+        position_idx = self.symbol_list[position_number]['positionIdx']
 
-        if position_number == 0:
-            # tp_margin = self.long1invest * (1 + self.tp_pnl_percent / 100)
-            # self.tp_price_dict[position_number] = round(tp_margin * self.leverage / tp_qty, self.round_number)
-            self.tp_price_dict[position_number] = round(Decimal(self.symbol_list[position_number]['avgPrice']) * Decimal(1 + self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+        if self.checking_opened_position(position_number):
+            psn_avg_price = Decimal(self.symbol_list[position_number]['avgPrice'])
         else:
-            # tp_margin = self.short1invest * (1 - self.tp_pnl_percent / 100)
-            # self.tp_price_dict[position_number] = round(tp_margin * self.leverage / tp_qty, self.round_number)
-            self.tp_price_dict[position_number] = round(Decimal(self.symbol_list[position_number]['avgPrice']) * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            psn_avg_price = Decimal(self.symbol_list[0 if position_number == 1 else 1]['avgPrice'])
+
+        if position_idx == 1:
+            self.tp_price_dict[position_number] = round(psn_avg_price * Decimal(1 + self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+        else:
+            self.tp_price_dict[position_number] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
 
         return set_trading_stop(self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]))
 
-    def losses_check(self, position_number):
-        pass
+    def losses_pnl_check(self, position_number):
+        position_idx = self.symbol_list[position_number]['positionIdx']
+        try:
+            pnl = Decimal(self.symbol_list[position_number]['unrealisedPnl'])
+        except:
+            pnl = 1
+
+        if pnl < 0:
+            symbol_list = self.symbol_list[position_number]
+            psn_margin = Decimal(symbol_list['avgPrice']) * Decimal(symbol_list['size']) / self.leverage
+            if position_idx == 1:
+                if abs(pnl) > psn_margin / 100 * self.pnl_long_avg:
+                    return True
+            else:
+                if abs(pnl) > psn_margin / 100 * self.pnl_short_avg:
+                    return True
+
+    def average_psn(self, position_number):
+        position_idx = self.symbol_list[position_number]['positionIdx']
+        side = 'Buy' if position_idx == 1 else 'Sell'
+        current_price = get_current_price(self.account, self.category, self.symbol)
+        if side == 'Buy':
+            qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
+            avg_qty = qty * self.margin_long_avg / 100
+        else:
+            qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
+            avg_qty = qty * self.margin_short_avg / 100
+
+        order = Order.objects.create(
+            bot=self.bot,
+            category=self.category,
+            symbol=self.symbol.name,
+            side=side,
+            orderType="Market",
+            qty=avg_qty,
+        )
+        cancel_all(self.account, self.category, self.symbol)
 
     def place_new_psn_order(self, position_number):
+        position_idx = self.symbol_list[position_number]['positionIdx']
         current_price = get_current_price(self.account, self.category, self.symbol)
-        if position_number == 0:
-            price = self.tp_price_dict[position_number] + 30 * self.tickSize
+        if position_idx == 1:
+            price = self.tp_price_dict[position_number] + self.qty_steps * self.tickSize
             qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
         else:
-            price = self.tp_price_dict[position_number] - 30 * self.tickSize
+            price = self.tp_price_dict[position_number] - self.qty_steps * self.tickSize
             qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
 
         trigger_direction = 1 if price > current_price else 2
-        order_side = 'Buy' if position_number == 0 else 'Sell'
+        order_side = 'Buy' if position_idx == 1 else 'Sell'
         self.new_psn_price_dict[position_number] = price
         order = Order.objects.create(
             bot=self.bot,
@@ -155,13 +193,15 @@ class StepHedgeClassLogic:
     def distance_between_price_and_order_check(self, position_number):
         current_price = get_current_price(self.account, self.category, self.symbol)
         distance_between = abs(current_price - self.new_psn_price_dict[position_number]) / self.tickSize
-        if distance_between > 30:
+        if distance_between > self.qty_steps:
             return True
 
     def amend_new_psn_order(self, position_number):
-        if position_number == 0:
-            self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] - 10 * self.tickSize
+        position_idx = self.symbol_list[position_number]['positionIdx']
+        if position_idx == 1:
+            self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] - self.qty_steps_diff * self.tickSize
         else:
-            self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] + 10 * self.tickSize
+            self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] + self.qty_steps_diff * self.tickSize
         params = {'price': str(self.new_psn_price_dict[position_number])}
         amend_order(self.bot, self.new_psn_orderId_dict[position_number], params)
+

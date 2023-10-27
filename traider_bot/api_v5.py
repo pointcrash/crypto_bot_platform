@@ -172,21 +172,23 @@ def get_instruments_info(account, category, symbol=None):
 def get_symbol_set():
     from main.models import Account
 
-    account_data = {
-        "name": "John Doe",
-        "API_TOKEN": "EY0sr8jAA83IuRIbza",
-        "SECRET_KEY": "Wc0SOczSJvS5cjZRIM8wpgnbDvxCP57shoiA",
-        "is_mainnet": True,
-        "url": "https://api.bybit.com"
-    }
+    account = Account.objects.filter(name='Roman').first()
 
-    account = Account(
-        name=account_data["name"],
-        API_TOKEN=account_data["API_TOKEN"],
-        SECRET_KEY=account_data["SECRET_KEY"],
-        is_mainnet=account_data["is_mainnet"],
-        url=account_data["url"]
-    )
+    # account_data = {
+    #     "name": "John Doe",
+    #     "API_TOKEN": "EY0sr8jAA83IuRIbza",
+    #     "SECRET_KEY": "Wc0SOczSJvS5cjZRIM8wpgnbDvxCP57shoiA",
+    #     "is_mainnet": True,
+    #     "url": "https://api.bybit.com"
+    # }
+    #
+    # account = Account(
+    #     name=account_data["name"],
+    #     API_TOKEN=account_data["API_TOKEN"],
+    #     SECRET_KEY=account_data["SECRET_KEY"],
+    #     is_mainnet=account_data["is_mainnet"],
+    #     url=account_data["url"]
+    # )
 
     data_set = get_instruments_info(account, category="linear")
     symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
