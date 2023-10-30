@@ -18,7 +18,7 @@ class StepHedgeClassLogic:
         self.leverage = bot.isLeverage
         self.price = bot.price
         self.round_number = int(bot.symbol.priceScale)
-        self.symbol_list = get_list(bot.account, symbol=bot.symbol)
+        self.symbol_list = None
         self.order_book = None
         self.short1invest = Decimal(step_hg.short1invest)
         self.long1invest = Decimal(step_hg.long1invest)
@@ -39,6 +39,7 @@ class StepHedgeClassLogic:
         cancel_all(self.account, self.category, self.symbol)
         switch_position_mode(self.bot)
         set_leverage(self.account, self.category, self.symbol, self.leverage, self.bot)
+        self.update_symbol_list()
 
     def update_symbol_list(self):
         self.symbol_list = get_list(self.account, symbol=self.symbol)
@@ -60,6 +61,7 @@ class StepHedgeClassLogic:
         return status_req
 
     def checking_opened_positions(self):
+        print(self.symbol_list)
         if float(self.symbol_list[0]['size']) != 0 or float(self.symbol_list[1]['size']) != 0:
             return True
 
@@ -67,16 +69,8 @@ class StepHedgeClassLogic:
         if Decimal(self.symbol_list[position_number]['size']) != 0:
             return True
 
-    def checking_opened_new_psn_order(self, position_number):
-        if self.order_book and len(self.order_book) > 0:
-            position_idx = self.symbol_list[position_number]['positionIdx']
-            for order in self.order_book:
-                if position_idx == order['positionIdx']:
-                    if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is False:
-                        self.new_psn_orderId_dict[position_number] = order['orderId']
-                        return True
-
     def buy_by_market(self):
+        cancel_all(self.account, self.category, self.symbol)
         current_price = get_current_price(self.account, self.category, self.symbol) + 2 * self.tickSize
         for order_side in ['Buy', 'Sell']:
             if order_side == 'Buy':
@@ -112,9 +106,27 @@ class StepHedgeClassLogic:
                 triggerPrice=str(self.price),
             )
 
+    # def buy_by_market_limit_order(self):
+    #     current_price = get_current_price(self.account, self.category, self.symbol)
+    #     for order_side in ['Buy', 'Sell']:
+    #         if order_side == 'Buy':
+    #             qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
+    #         else:
+    #             qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
+    #
+    #         order = Order.objects.create(
+    #             bot=self.bot,
+    #             category=self.category,
+    #             symbol=self.symbol.name,
+    #             side=order_side,
+    #             orderType="Limit",
+    #             qty=qty,
+    #             price=str(current_price),
+    #         )
+
     def place_tp_order(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
-        tp_size = self.symbol_list[position_number]['size']
+        # tp_size = self.symbol_list[position_number]['size']
 
         if self.checking_opened_position(position_number):
             psn_avg_price = Decimal(self.symbol_list[position_number]['avgPrice'])
@@ -127,7 +139,8 @@ class StepHedgeClassLogic:
             self.tp_price_dict[position_number] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
 
         return set_trading_stop(
-            self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]), tpSize=tp_size)
+            # self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]), tpSize=tp_size)
+            self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]))
 
     def losses_pnl_check(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
@@ -167,30 +180,44 @@ class StepHedgeClassLogic:
         )
         # cancel_all(self.account, self.category, self.symbol)
 
-    def place_new_psn_order(self, position_number):
-        position_idx = self.symbol_list[position_number]['positionIdx']
-        current_price = get_current_price(self.account, self.category, self.symbol)
-        if position_idx == 1:
-            price = self.tp_price_dict[position_number] + self.qty_steps * self.tickSize
-            qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
-        else:
-            price = self.tp_price_dict[position_number] - self.qty_steps * self.tickSize
-            qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+    def checking_opened_new_psn_order(self, position_number):
+        if self.order_book and len(self.order_book) > 0:
+            position_idx = self.symbol_list[position_number]['positionIdx']
+            for order in self.order_book:
+                if position_idx == order['positionIdx']:
+                    # if order['orderStatus'] == 'New' or order['orderStatus'] == 'PartiallyFilled':
+                    #     self.new_psn_orderId_dict[position_number] = order['orderId']
+                    #     return True
+                    if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is False:
+                        self.new_psn_orderId_dict[position_number] = order['orderId']
+                        self.new_psn_price_dict[position_number] = Decimal(order['triggerPrice'])
+                        return True
 
-        trigger_direction = 1 if price > current_price else 2
-        order_side = 'Buy' if position_idx == 1 else 'Sell'
-        self.new_psn_price_dict[position_number] = price
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=order_side,
-            orderType="Market",
-            qty=qty,
-            price=str(price),
-            triggerDirection=trigger_direction,
-            triggerPrice=str(price),
-        )
+    def place_new_psn_order(self, position_number):
+        if self.tp_price_dict[position_number]:
+            position_idx = self.symbol_list[position_number]['positionIdx']
+            current_price = get_current_price(self.account, self.category, self.symbol)
+            if position_idx == 1:
+                price = self.tp_price_dict[position_number] + self.qty_steps * self.tickSize
+                qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
+            else:
+                price = self.tp_price_dict[position_number] - self.qty_steps * self.tickSize
+                qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+
+            trigger_direction = 1 if price > current_price else 2
+            order_side = 'Buy' if position_idx == 1 else 'Sell'
+            self.new_psn_price_dict[position_number] = price
+            order = Order.objects.create(
+                bot=self.bot,
+                category=self.category,
+                symbol=self.symbol.name,
+                side=order_side,
+                orderType="Limit",
+                qty=qty,
+                price=str(price),
+                triggerDirection=trigger_direction,
+                triggerPrice=str(price),
+            )
 
     def distance_between_price_and_order_check(self, position_number):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -201,9 +228,9 @@ class StepHedgeClassLogic:
     def amend_new_psn_order(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
         if position_idx == 1:
-            self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] - self.qty_steps_diff * self.tickSize
+            self.new_psn_price_dict[position_number] -= self.qty_steps_diff * self.tickSize
         else:
-            self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] + self.qty_steps_diff * self.tickSize
+            self.new_psn_price_dict[position_number] += self.qty_steps_diff * self.tickSize
         params = {'triggerPrice': str(self.new_psn_price_dict[position_number])}
         amend_order(self.bot, self.new_psn_orderId_dict[position_number], params)
 

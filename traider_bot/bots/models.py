@@ -175,6 +175,7 @@ class StepHedge(models.Model):
     margin_long_avg = models.CharField(max_length=20, null=True)
     qty_steps = models.IntegerField(default=30, null=True)
     qty_steps_diff = models.IntegerField(default=10)
+    add_tp = models.BooleanField(default=False)
 
 
 class OppositePosition(models.Model):
