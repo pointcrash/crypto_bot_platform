@@ -26,12 +26,18 @@ class SimpleHedgeClassLogic:
         self.first_order_qty = None
         self.tp_size = None
         self.add_psn_flag = {0: False, 1: False}
+        self.orders_equalize = {0: None, 1: None}
 
     def preparatory_actions(self):
         # append_thread_or_check_duplicate(self.bot_id)
         cancel_all(self.account, self.category, self.symbol)
         switch_position_mode(self.bot)
         set_leverage(self.account, self.category, self.symbol, self.leverage, self.bot)
+
+    def calc_first_order_qty(self):
+        time.sleep(1)
+        self.update_symbol_list()
+        self.first_order_qty = Decimal(self.symbol_list[0]['size'])
 
     def checking_opened_positions(self):
         if float(self.symbol_list[0]['size']) != 0 and float(self.symbol_list[1]['size']) != 0:
@@ -85,8 +91,18 @@ class SimpleHedgeClassLogic:
                 status_req, self.order_book = get_open_orders(self.bot)
         return status_req
 
-    # def cancel_all_orders_for_smp_hg(self):
-    #     cancel_all(self.account, self.category, self.symbol)
+    def cancel_all_orders(self):
+        cancel_all(self.account, self.category, self.symbol)
+
+    def cancel_order(self, order_id):
+        cancel_order(self.bot, order_id)
+
+    def cancel_equalize_orders(self):
+        for num in range(2):
+            if self.orders_equalize[num] is not None:
+                if self.orders_equalize[num] in [order['orderId'] for order in self.order_book]:
+                    self.cancel_order(self.orders_equalize[num])
+                    self.orders_equalize[num] = None
 
     def calculate_tp_size(self):
         self.tp_size = (self.first_order_qty * Decimal(self.smp_hg.tpap) / 100).quantize(Decimal(self.symbol.minOrderQty))
@@ -138,7 +154,8 @@ class SimpleHedgeClassLogic:
             return '<'
 
     def lower_position(self, position_number):
-        side = 'Buy' if position_number == 0 else 'Sell'
+        position_idx = self.symbol_list[position_number]['positionIdx']
+        side = 'Buy' if position_idx == 1 else 'Sell'
         avg_qty = str(self.first_order_qty - Decimal(self.symbol_list[position_number]['size']))
         price = self.symbol_list[position_number]['avgPrice']
         self.add_psn_flag[position_number] = True
@@ -154,7 +171,7 @@ class SimpleHedgeClassLogic:
         )
 
     def higher_position(self, position_number):
-        position_idx_avg = position_number + 1
+        position_idx_avg = self.symbol_list[position_number]['positionIdx']
         entry_price = Decimal(self.symbol_list[position_number]['avgPrice'])
 
         self.first_order_qty = get_quantity_from_price(
@@ -173,7 +190,7 @@ class SimpleHedgeClassLogic:
     def equal_position(self, position_number, tp_count):
         position_idx = self.symbol_list[position_number]['positionIdx']
 
-        if position_number == 0:
+        if position_idx == 1:
             tp_price = round(Decimal(self.symbol_list[0]['avgPrice']) * (1 + Decimal(self.smp_hg.tppp) * tp_count / 100),
                              self.round_number)
         else:
@@ -219,9 +236,40 @@ class SimpleHedgeClassLogic:
                     if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is True:
                         cancel_order(self.bot, order['orderId'])
 
+    def psn_price_difference_calculation(self):
+        if Decimal(self.symbol_list[0]['avgPrice']) == Decimal(self.symbol_list[1]['avgPrice']):
+            return 0
+        else:
+            return abs(Decimal(self.symbol_list[0]['avgPrice']) - Decimal(self.symbol_list[1]['avgPrice']))
 
+    def order_equalize_check(self):
+        if len(self.order_book) == 2:
+            if self.order_book[0]['orderStatus'] == 'New' or self.order_book[0]['orderStatus'] == 'PartiallyFilled':
+                if self.order_book[1]['orderStatus'] == 'New' or self.order_book[1]['orderStatus'] == 'PartiallyFilled':
+                    self.orders_equalize[0] = self.order_book[0]['orderId']
+                    self.orders_equalize[1] = self.order_book[1]['orderId']
+                    return True
 
+    def equalize_positions_price(self, difference):
+        cancel_all(self.account, self.category, self.symbol)
 
+        for position_number in range(2):
+            position_idx = self.symbol_list[position_number]['positionIdx']
+            avg_price = Decimal(self.symbol_list[position_number]['avgPrice'])
+            qty = Decimal(self.symbol_list[position_number]['size'])
+            if position_idx == 1:
+                price = avg_price - difference * 2
+            else:
+                price = avg_price + difference * 2
+            Order.objects.create(
+                bot=self.bot,
+                category=self.category,
+                symbol=self.symbol.name,
+                side='Buy' if position_idx == 1 else 'Sell',
+                orderType='Limit',
+                qty=qty,
+                price=price
+            )
 
 
 

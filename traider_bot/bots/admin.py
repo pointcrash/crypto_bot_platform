@@ -5,9 +5,9 @@ from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot
 
 @admin.register(Bot)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'symbol', 'side', 'orderType', 'qty', 'price', 'work_model',)
+    list_display = ('id', 'symbol', 'side', 'is_active', 'qty', 'price', 'work_model',)
     list_display_links = ('id', 'symbol',)
-    search_fields = ('symbol', 'orderType', 'side', 'work_model')
+    search_fields = ('symbol', 'orderType', 'side', 'is_active', 'work_model')
 
 
 @admin.register(Symbol)

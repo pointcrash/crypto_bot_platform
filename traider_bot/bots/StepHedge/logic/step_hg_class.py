@@ -77,7 +77,7 @@ class StepHedgeClassLogic:
                         return True
 
     def buy_by_market(self):
-        current_price = get_current_price(self.account, self.category, self.symbol)
+        current_price = get_current_price(self.account, self.category, self.symbol) + 2 * self.tickSize
         for order_side in ['Buy', 'Sell']:
             if order_side == 'Buy':
                 qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
@@ -114,6 +114,7 @@ class StepHedgeClassLogic:
 
     def place_tp_order(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
+        tp_size = self.symbol_list[position_number]['size']
 
         if self.checking_opened_position(position_number):
             psn_avg_price = Decimal(self.symbol_list[position_number]['avgPrice'])
@@ -125,7 +126,8 @@ class StepHedgeClassLogic:
         else:
             self.tp_price_dict[position_number] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
 
-        return set_trading_stop(self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]))
+        return set_trading_stop(
+            self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]), tpSize=tp_size)
 
     def losses_pnl_check(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
@@ -163,7 +165,7 @@ class StepHedgeClassLogic:
             orderType="Market",
             qty=avg_qty,
         )
-        cancel_all(self.account, self.category, self.symbol)
+        # cancel_all(self.account, self.category, self.symbol)
 
     def place_new_psn_order(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
@@ -202,6 +204,32 @@ class StepHedgeClassLogic:
             self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] - self.qty_steps_diff * self.tickSize
         else:
             self.new_psn_price_dict[position_number] = self.new_psn_price_dict[position_number] + self.qty_steps_diff * self.tickSize
-        params = {'price': str(self.new_psn_price_dict[position_number])}
+        params = {'triggerPrice': str(self.new_psn_price_dict[position_number])}
         amend_order(self.bot, self.new_psn_orderId_dict[position_number], params)
 
+    def psn_size_bigger_then_start(self, position_number):
+        position_idx = self.symbol_list[position_number]['positionIdx']
+        qty = Decimal(self.symbol_list[position_number]['size'])
+        price = Decimal(self.symbol_list[position_number]['avgPrice'])
+        first_invest = self.long1invest if position_idx == 1 else self.short1invest
+        if qty * price / self.leverage > first_invest:
+            return True
+
+    def tp_full_size_psn_check(self, position_number):
+        position_idx = self.symbol_list[position_number]['positionIdx']
+        full_qty = Decimal(self.symbol_list[position_number]['size'])
+        fill_qty = 0
+        for order in self.order_book:
+            if order['positionIdx'] == position_idx and order['reduceOnly'] is True:
+                fill_qty += Decimal(order['leavesQty'])
+        if full_qty == fill_qty:
+            return True
+
+    def add_tp(self, position_number):
+        position_idx = self.symbol_list[position_number]['positionIdx']
+        price = self.symbol_list[position_number]['avgPrice']
+        excess_qty = Decimal(self.symbol_list[position_number]['size'])
+        for order in self.order_book:
+            if order['positionIdx'] == position_idx and order['reduceOnly'] is True:
+                excess_qty -= Decimal(order['leavesQty'])
+        set_trading_stop(self.bot, position_idx, takeProfit=price, tpSize=str(excess_qty))

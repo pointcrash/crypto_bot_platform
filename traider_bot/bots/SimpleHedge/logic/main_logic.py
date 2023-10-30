@@ -20,6 +20,7 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
         else:
             smp_class_obj.buy_by_market()
 
+    # smp_class_obj.calc_first_order_qty()
     # Запускаем цикл отслеживания состояния позиций
     lock.acquire()
     try:
@@ -36,6 +37,17 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
             if smp_class_obj.symbol_list is None:
                 logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+
+            # # Проверяем равенство цен открытых позиций
+            # difference_price = smp_class_obj.psn_price_difference_calculation()
+            # if difference_price:
+            #     if not smp_class_obj.order_equalize_check():
+            #         # Если разница есть - уравниваем цены
+            #         smp_class_obj.equalize_positions_price(difference_price)
+            #     time.sleep(10)
+            #     continue
+            #
+            # smp_class_obj.cancel_equalize_orders()
 
             for position_number in range(2):
                 time.sleep(1)

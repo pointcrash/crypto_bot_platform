@@ -37,12 +37,17 @@ def step_hedge_bot_main_logic(bot, step_hg):
                 logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
+            # print(step_class_obj.order_book)
             for position_number in range(2):
                 time.sleep(1)
                 if step_class_obj.losses_pnl_check(position_number):
                     step_class_obj.average_psn(position_number)
 
-                step_class_obj.place_tp_order(position_number)
+                if not step_class_obj.tp_full_size_psn_check(position_number):
+                    if step_class_obj.psn_size_bigger_then_start(position_number):
+                        step_class_obj.add_tp(position_number)
+                    else:
+                        step_class_obj.place_tp_order(position_number)
 
                 if not step_class_obj.checking_opened_new_psn_order(position_number):
                     step_class_obj.place_new_psn_order(position_number)
@@ -50,6 +55,8 @@ def step_hedge_bot_main_logic(bot, step_hg):
                     if not step_class_obj.checking_opened_position(position_number):
                         if step_class_obj.distance_between_price_and_order_check(position_number):
                             step_class_obj.amend_new_psn_order(position_number)
+            # print(step_class_obj.order_book)
+            # print('----------------------------------')
 
             time.sleep(7)
             lock.acquire()

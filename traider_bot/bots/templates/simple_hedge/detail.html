@@ -224,7 +224,10 @@
                 <tr class="">
                     <td>{{ order.symbol }}</td>
                     <td class="d-none d-sm-table-cell">{{ order.qty }}</td>
-                    <td class="d-none d-sm-table-cell">{{ order.price }}</td>
+                    <td class="d-none d-sm-table-cell">
+                        {% if order.price != '0' %}{{ order.price }}
+                        {% elif order.triggerPrice != '0' %}{{ order.triggerPrice }}{% endif %}
+                    </td>
                     <td class="d-none d-sm-table-cell">{{ order.leavesQty }}</td>
                     <td class="d-none d-sm-table-cell">
                         {% if order.takeProfit == '0.00000' or order.takeProfit == '0.000' %}--
