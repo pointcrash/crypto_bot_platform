@@ -33,10 +33,11 @@ class StepHedgeClassLogic:
         self.tickSize = Decimal(self.bot.symbol.tickSize)
         self.qty_steps = self.step_hg.qty_steps
         self.qty_steps_diff = self.step_hg.qty_steps_diff
+        self.entry_qty = dict()
 
     def preparatory_actions(self):
         # append_thread_or_check_duplicate(self.bot_id)
-        cancel_all(self.account, self.category, self.symbol)
+        # cancel_all(self.account, self.category, self.symbol)
         switch_position_mode(self.bot)
         set_leverage(self.account, self.category, self.symbol, self.leverage, self.bot)
         self.update_symbol_list()
@@ -61,7 +62,6 @@ class StepHedgeClassLogic:
         return status_req
 
     def checking_opened_positions(self):
-        print(self.symbol_list)
         if float(self.symbol_list[0]['size']) != 0 or float(self.symbol_list[1]['size']) != 0:
             return True
 
@@ -77,6 +77,8 @@ class StepHedgeClassLogic:
                 qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
             else:
                 qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
+            self.entry_qty[1 if order_side == 'Buy' else 2] = qty
+
             order = Order.objects.create(
                 bot=self.bot,
                 category=self.category,
@@ -126,7 +128,7 @@ class StepHedgeClassLogic:
 
     def place_tp_order(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
-        # tp_size = self.symbol_list[position_number]['size']
+        tp_size = self.symbol_list[position_number]['size']
 
         if self.checking_opened_position(position_number):
             psn_avg_price = Decimal(self.symbol_list[position_number]['avgPrice'])
@@ -138,9 +140,12 @@ class StepHedgeClassLogic:
         else:
             self.tp_price_dict[position_number] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
 
-        return set_trading_stop(
-            # self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]), tpSize=tp_size)
-            self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]))
+        if self.step_hg.add_tp:
+            return set_trading_stop(
+                self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]), tpSize=tp_size)
+        else:
+            return set_trading_stop(
+                self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_number]))
 
     def losses_pnl_check(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
@@ -161,13 +166,14 @@ class StepHedgeClassLogic:
 
     def average_psn(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
+        qty = Decimal(self.symbol_list[position_number]['size'])
         side = 'Buy' if position_idx == 1 else 'Sell'
-        current_price = get_current_price(self.account, self.category, self.symbol)
+        # current_price = get_current_price(self.account, self.category, self.symbol)
         if side == 'Buy':
-            qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
+            # qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
             avg_qty = qty * self.margin_long_avg / 100
         else:
-            qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
+            # qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
             avg_qty = qty * self.margin_short_avg / 100
 
         order = Order.objects.create(
@@ -212,7 +218,7 @@ class StepHedgeClassLogic:
                 category=self.category,
                 symbol=self.symbol.name,
                 side=order_side,
-                orderType="Limit",
+                orderType="Market",
                 qty=qty,
                 price=str(price),
                 triggerDirection=trigger_direction,
@@ -239,6 +245,8 @@ class StepHedgeClassLogic:
         qty = Decimal(self.symbol_list[position_number]['size'])
         price = Decimal(self.symbol_list[position_number]['avgPrice'])
         first_invest = self.long1invest if position_idx == 1 else self.short1invest
+        # Это делается затем чтобы first_invest точно был больше начального значения, но меньше усредненного
+        first_invest = first_invest * (1 + (self.margin_long_avg / 100) / 2)
         if qty * price / self.leverage > first_invest:
             return True
 
@@ -249,14 +257,20 @@ class StepHedgeClassLogic:
         for order in self.order_book:
             if order['positionIdx'] == position_idx and order['reduceOnly'] is True:
                 fill_qty += Decimal(order['leavesQty'])
-        if full_qty == fill_qty:
+        print(fill_qty, full_qty)
+        if full_qty <= fill_qty:
             return True
 
     def add_tp(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
-        price = self.symbol_list[position_number]['avgPrice']
+        psn_price = Decimal(self.symbol_list[position_number]['avgPrice'])
         excess_qty = Decimal(self.symbol_list[position_number]['size'])
+        if position_idx == 1:
+            tp_price = round(psn_price * Decimal(1 + self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+        else:
+            tp_price = round(psn_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+
         for order in self.order_book:
             if order['positionIdx'] == position_idx and order['reduceOnly'] is True:
                 excess_qty -= Decimal(order['leavesQty'])
-        set_trading_stop(self.bot, position_idx, takeProfit=price, tpSize=str(excess_qty))
+        set_trading_stop(self.bot, position_idx, takeProfit=str(tp_price), tpSize=str(excess_qty))

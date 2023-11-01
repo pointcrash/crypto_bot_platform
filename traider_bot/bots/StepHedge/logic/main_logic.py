@@ -42,11 +42,16 @@ def step_hedge_bot_main_logic(bot, step_hg):
                 if step_class_obj.losses_pnl_check(position_number):
                     step_class_obj.average_psn(position_number)
 
-                # if not step_class_obj.tp_full_size_psn_check(position_number):
-                #     if step_class_obj.psn_size_bigger_then_start(position_number):
-                #         step_class_obj.add_tp(position_number)
-                #     else:
-                step_class_obj.place_tp_order(position_number)
+                if step_hg.add_tp:
+                    if not step_class_obj.tp_full_size_psn_check(position_number):
+                        if step_class_obj.psn_size_bigger_then_start(position_number):
+                            step_class_obj.add_tp(position_number)
+                        else:
+                            if step_class_obj.checking_opened_position(position_number):
+                                step_class_obj.place_tp_order(position_number)
+                else:
+                    if step_class_obj.checking_opened_position(position_number):
+                        step_class_obj.place_tp_order(position_number)
 
                 if not step_class_obj.checking_opened_new_psn_order(position_number):
                     step_class_obj.place_new_psn_order(position_number)
@@ -57,12 +62,12 @@ def step_hedge_bot_main_logic(bot, step_hg):
 
             time.sleep(7)
             lock.acquire()
-    except Exception as e:
-        logging(bot, f'Error {e}')
-        lock.acquire()
-        try:
-            exit_by_exception(bot)
-        finally:
-            lock_release()
+    # except Exception as e:
+    #     logging(bot, f'Error {e}')
+    #     lock.acquire()
+    #     try:
+    #         exit_by_exception(bot)
+    #     finally:
+    #         lock_release()
     finally:
         lock_release()

@@ -101,7 +101,7 @@ class StepHedgeForm(forms.ModelForm):
     class Meta:
         model = StepHedge
         fields = ['short1invest', 'long1invest', 'tp_pnl_percent', 'pnl_short_avg', 'pnl_long_avg',
-                  'margin_short_avg', 'margin_long_avg',  'qty_steps',  'qty_steps_diff', ]
+                  'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff', 'add_tp', ]
 
         widgets = {
             'short1invest': forms.TextInput(attrs={'class': 'form-control'}),
@@ -113,6 +113,7 @@ class StepHedgeForm(forms.ModelForm):
             'margin_long_avg': forms.TextInput(attrs={'class': 'form-control'}),
             'qty_steps': forms.NumberInput(attrs={'class': 'form-control'}),
             'qty_steps_diff': forms.NumberInput(attrs={'class': 'form-control'}),
+            'add_tp': forms.RadioSelect(choices=[(True, 'Add take profit'), (False, 'Replace take profit')]),
         }
         labels = {
             'short1invest': 'SHORT - 1ST ORDER INVESTMENTS',
@@ -124,4 +125,5 @@ class StepHedgeForm(forms.ModelForm):
             'margin_long_avg': '% Margin Long average',
             'qty_steps': 'COUNT TICKS',
             'qty_steps_diff': 'TICKS DIFF',
+            'add_tp': 'Many TP',
         }

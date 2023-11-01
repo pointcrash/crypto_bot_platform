@@ -71,6 +71,7 @@
                             {{ step_hedge_form.qty_steps_diff }}
                         </div>
                     </div>
+
                 </div>
                 <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
                     {{ step_hedge_form.pnl_short_avg.label_tag }}
@@ -82,6 +83,9 @@
                     {{ step_hedge_form.margin_short_avg }}
                     {{ step_hedge_form.margin_long_avg.label_tag }}
                     {{ step_hedge_form.margin_long_avg }}
+                    <div class="form-check mt-2 p-1">
+                        {{ step_hedge_form.add_tp }}
+                    </div>
                 </div>
             </div>
             <div class="col-5 col-sm-3 mx-auto mb-5">
