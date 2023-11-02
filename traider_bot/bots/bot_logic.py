@@ -414,15 +414,6 @@ def take2_status_check(bot):
         return True
 
 
-# def bot_stats_clear(bot):
-#     bot.take1 = ''
-#     bot.take2 = ''
-#     bot.entry_order_by = ''
-#     bot.entry_order_sell = ''
-#     bot.pnl = 0
-#     bot.save()
-
-
 def order_placement_verification(bot, order_id):
     if order_id == 'Filled' or not order_id:
         return True
@@ -585,3 +576,5 @@ def exit_by_exception(bot):
         del global_list_threads[bot_id]
         bot.is_active = False
         bot.save()
+
+

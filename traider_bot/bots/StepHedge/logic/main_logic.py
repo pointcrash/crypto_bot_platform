@@ -2,12 +2,14 @@ import time
 
 from bots.StepHedge.logic.step_hg_class import StepHedgeClassLogic
 from bots.bot_logic import lock_release, logging, exit_by_exception
+from main.models import ActiveBot
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
 
 def step_hedge_bot_main_logic(bot, step_hg):
     bot_id = bot.pk
     step_class_obj = StepHedgeClassLogic(bot, step_hg)
+    # bot_names = list(ActiveBot.objects.values_list('bot_id', flat=True))
 
     # Выполняем подготовительные действия для старта работы бота
     step_class_obj.preparatory_actions()
@@ -53,21 +55,27 @@ def step_hedge_bot_main_logic(bot, step_hg):
                     if step_class_obj.checking_opened_position(position_number):
                         step_class_obj.place_tp_order(position_number)
 
-                if not step_class_obj.checking_opened_new_psn_order(position_number):
-                    step_class_obj.place_new_psn_order(position_number)
-                else:
-                    if not step_class_obj.checking_opened_position(position_number):
-                        if step_class_obj.distance_between_price_and_order_check(position_number):
-                            step_class_obj.amend_new_psn_order(position_number)
+                    if not step_hg.is_nipple_active:
+                        if not step_class_obj.checking_opened_new_psn_order(position_number):
+                            step_class_obj.place_nipple_on_tp(position_number)
+                    else:
+                        if not step_class_obj.checking_opened_new_psn_order(position_number):
+                            step_class_obj.place_new_psn_order(position_number)
+                        else:
+                            if not step_class_obj.checking_opened_position(position_number):
+                                if step_class_obj.distance_between_price_and_order_check(position_number):
+                                    step_class_obj.amend_new_psn_order(position_number)
 
             time.sleep(7)
+            # bot_names = list(ActiveBot.objects.values_list('name', flat=True))
+
             lock.acquire()
-    # except Exception as e:
-    #     logging(bot, f'Error {e}')
-    #     lock.acquire()
-    #     try:
-    #         exit_by_exception(bot)
-    #     finally:
-    #         lock_release()
+    except Exception as e:
+        logging(bot, f'Error {e}')
+        lock.acquire()
+        try:
+            exit_by_exception(bot)
+        finally:
+            lock_release()
     finally:
         lock_release()

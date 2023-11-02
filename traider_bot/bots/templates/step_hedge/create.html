@@ -71,6 +71,8 @@
                             {{ step_hedge_form.qty_steps_diff }}
                         </div>
                     </div>
+                    <button id="pnl_validation" class="btn btn-sm btn-danger disabled mt-2">(%PnL / Leverage) must be >= 0.5</button>
+                    <button id="ticks_validation" class="btn btn-sm btn-danger disabled mt-1">(COUNT TICKS / TICKS DIFF) must be >= 5</button>
 
                 </div>
                 <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
@@ -86,12 +88,77 @@
                     <div class="form-check mt-2 p-1">
                         {{ step_hedge_form.add_tp }}
                     </div>
+                    <br>
+                    <div class="d-flex flex-row">
+                        {{ step_hedge_form.is_nipple_active.label_tag }}
+                        {{ step_hedge_form.is_nipple_active }}
+                    </div>
                 </div>
             </div>
             <div class="col-5 col-sm-3 mx-auto mb-5">
-            <button type="submit" class="col-12 btn-shadow btn btn-success mt-3">Start Bot</button>
+            <button id="start-bot-button" type="submit" class="col-12 btn-shadow btn btn-success mt-3">Start Bot</button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const startBotButton = document.querySelector('#start-bot-button');
+        const tpPnlPercentField = document.querySelector('#tp_pnl_percent');
+        const isLeverageField = document.querySelector('#is_leverage');
+        const qtyStepsField = document.querySelector('#qty_steps');
+        const qtyStepsDiffField = document.querySelector('#qty_steps_diff');
+        const pnlValidationCondition = document.querySelector('#pnl_validation');
+        const ticksValidationCondition = document.querySelector('#ticks_validation');
+
+        function checkConditions() {
+            if (ticksValidationCondition.classList.contains('btn-success') && pnlValidationCondition.classList.contains('btn-success')) {
+                startBotButton.removeAttribute('disabled');
+            } else {
+                startBotButton.setAttribute('disabled', 'disabled');
+            }
+        }
+
+        function checkPnlConditions() {
+            const tpPnlPercentValue = parseFloat(tpPnlPercentField.value.toString());
+            const isLeverageValue = parseFloat(isLeverageField.value.toString());
+
+            if (tpPnlPercentValue / isLeverageValue >= 0.5) {
+                pnlValidationCondition.classList.remove('btn-danger');
+                pnlValidationCondition.classList.add('btn-success');
+            } else {
+                pnlValidationCondition.classList.remove('btn-success');
+                pnlValidationCondition.classList.add('btn-danger');
+            }
+            checkConditions();
+        }
+
+        function checkTicksConditions() {
+            const qtyStepsValue = parseFloat(qtyStepsField.value.toString());
+            const qtyStepsDiffValue = parseFloat(qtyStepsDiffField.value.toString());
+
+            if (qtyStepsValue / qtyStepsDiffValue >= 5) {
+                ticksValidationCondition.classList.remove('btn-danger');
+                ticksValidationCondition.classList.add('btn-success');
+            } else {
+                ticksValidationCondition.classList.remove('btn-success');
+                ticksValidationCondition.classList.add('btn-danger');
+            }
+            checkConditions();
+        }
+
+        // Начальная проверка условий при загрузке страницы
+        checkPnlConditions();
+        checkTicksConditions();
+
+        // Следить за изменениями в полях и обновлять кнопку при необходимости
+        tpPnlPercentField.addEventListener('change', checkPnlConditions);
+        isLeverageField.addEventListener('change', checkPnlConditions);
+        qtyStepsField.addEventListener('change', checkTicksConditions);
+        qtyStepsDiffField.addEventListener('change', checkTicksConditions);
+    });
+</script>
+
+
 {% endblock %}

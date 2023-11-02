@@ -25,3 +25,11 @@ class Account(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ActiveBot(models.Model):
+    bot_id = models.CharField()
+
+
+
+

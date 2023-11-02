@@ -193,6 +193,7 @@ class StepHedgeClassLogic:
                 if position_idx == order['positionIdx']:
                     # if order['orderStatus'] == 'New' or order['orderStatus'] == 'PartiallyFilled':
                     #     self.new_psn_orderId_dict[position_number] = order['orderId']
+                    #     self.new_psn_price_dict[position_number] = Decimal(order['price'])
                     #     return True
                     if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is False:
                         self.new_psn_orderId_dict[position_number] = order['orderId']
@@ -257,7 +258,6 @@ class StepHedgeClassLogic:
         for order in self.order_book:
             if order['positionIdx'] == position_idx and order['reduceOnly'] is True:
                 fill_qty += Decimal(order['leavesQty'])
-        print(fill_qty, full_qty)
         if full_qty <= fill_qty:
             return True
 
@@ -274,3 +274,57 @@ class StepHedgeClassLogic:
             if order['positionIdx'] == position_idx and order['reduceOnly'] is True:
                 excess_qty -= Decimal(order['leavesQty'])
         set_trading_stop(self.bot, position_idx, takeProfit=str(tp_price), tpSize=str(excess_qty))
+
+    def place_nipple_on_tp(self, position_number):
+        if self.tp_price_dict[position_number]:
+            position_idx = self.symbol_list[position_number]['positionIdx']
+            current_price = get_current_price(self.account, self.category, self.symbol)
+            if position_idx == 1:
+                price = self.tp_price_dict[position_number]
+                qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
+            else:
+                price = self.tp_price_dict[position_number]
+                qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+
+            trigger_direction = 1 if price > current_price else 2
+            order_side = 'Buy' if position_idx == 1 else 'Sell'
+            self.new_psn_price_dict[position_number] = price
+            Order.objects.create(
+                bot=self.bot,
+                category=self.category,
+                symbol=self.symbol.name,
+                side=order_side,
+                orderType="Market",
+                qty=qty,
+                price=str(price),
+                triggerDirection=trigger_direction,
+                triggerPrice=str(price),
+            )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

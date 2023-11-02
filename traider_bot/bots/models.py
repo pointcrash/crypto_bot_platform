@@ -126,6 +126,7 @@ class Log(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.SET_NULL, blank=True, null=True)
     content = models.CharField(blank=True, null=True)
     time = models.CharField(blank=True, null=True)
+    time_create = models.DateTimeField(auto_now_add=True, null=True)
 
 
 class Process(models.Model):
@@ -176,6 +177,7 @@ class StepHedge(models.Model):
     qty_steps = models.IntegerField(default=30, null=True)
     qty_steps_diff = models.IntegerField(default=10)
     add_tp = models.BooleanField(default=False)
+    is_nipple_active = models.BooleanField(default=True)
 
 
 class OppositePosition(models.Model):

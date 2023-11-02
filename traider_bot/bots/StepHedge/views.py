@@ -11,6 +11,7 @@ from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.models import Bot, StepHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders, terminate_thread
+from main.models import ActiveBot
 from single_bot.logic.global_variables import lock, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
 
@@ -43,6 +44,8 @@ def step_hedge_bot_create(request):
             bot_thread.start()
 
             append_thread_or_check_duplicate(bot.pk)
+            # if not ActiveBot.objects.filter(bot_id=bot.pk).first():
+            #     ActiveBot.objects.create(bot_id=bot.pk)
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread
             if lock.locked():

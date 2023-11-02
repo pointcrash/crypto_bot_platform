@@ -5,6 +5,8 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta
+from django.utils import timezone
 
 from api_v5 import get_query_account_coins_balance, get_list
 from bots.models import Log, Bot, Symbol
@@ -15,7 +17,7 @@ from timezone.models import TimeZone
 from .forms import RegistrationForm, LoginForm, DateRangeForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
-from main.models import Account
+from main.models import Account, ActiveBot
 from .logic import calculate_pnl
 
 
@@ -269,4 +271,13 @@ def get_balance(request, acc_id):
 
 @login_required
 def strategies_view(request):
+    return render(request, 'strategies/strategies.html')
+
+
+@login_required
+def cleaning_logs_view(request):
+    one_week_ago = timezone.now() - timedelta(weeks=1)
+    logs = Log.objects.filter(bot=None, time_create__lt=one_week_ago)
+    logs.delete()
+
     return render(request, 'strategies/strategies.html')

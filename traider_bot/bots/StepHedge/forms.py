@@ -53,7 +53,7 @@ class BotForm(forms.ModelForm):
             'side': forms.Select(attrs={'class': 'form-control'}),
             'orderType': forms.Select(attrs={'class': 'form-control'}),
             'margin_type': forms.Select(attrs={'class': 'form-control'}),
-            'isLeverage': forms.NumberInput(attrs={'class': 'form-control'}),
+            'isLeverage': forms.NumberInput(attrs={'class': 'form-control', 'id': 'is_leverage'}),
             'qty_kline': forms.NumberInput(attrs={'class': 'form-control'}),
             'interval': forms.Select(attrs={'class': 'form-control'}),
             'd': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -101,18 +101,18 @@ class StepHedgeForm(forms.ModelForm):
     class Meta:
         model = StepHedge
         fields = ['short1invest', 'long1invest', 'tp_pnl_percent', 'pnl_short_avg', 'pnl_long_avg',
-                  'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff', 'add_tp', ]
+                  'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff', 'add_tp', 'is_nipple_active', ]
 
         widgets = {
             'short1invest': forms.TextInput(attrs={'class': 'form-control'}),
             'long1invest': forms.TextInput(attrs={'class': 'form-control'}),
-            'tp_pnl_percent': forms.TextInput(attrs={'class': 'form-control'}),
+            'tp_pnl_percent': forms.TextInput(attrs={'class': 'form-control', 'id': 'tp_pnl_percent'}),
             'pnl_short_avg': forms.TextInput(attrs={'class': 'form-control'}),
             'pnl_long_avg': forms.TextInput(attrs={'class': 'form-control'}),
             'margin_short_avg': forms.TextInput(attrs={'class': 'form-control'}),
             'margin_long_avg': forms.TextInput(attrs={'class': 'form-control'}),
-            'qty_steps': forms.NumberInput(attrs={'class': 'form-control'}),
-            'qty_steps_diff': forms.NumberInput(attrs={'class': 'form-control'}),
+            'qty_steps': forms.NumberInput(attrs={'class': 'form-control', 'id': 'qty_steps'}),
+            'qty_steps_diff': forms.NumberInput(attrs={'class': 'form-control', 'id': 'qty_steps_diff'}),
             'add_tp': forms.RadioSelect(choices=[(True, 'Add take profit'), (False, 'Replace take profit')]),
         }
         labels = {
@@ -126,4 +126,5 @@ class StepHedgeForm(forms.ModelForm):
             'qty_steps': 'COUNT TICKS',
             'qty_steps_diff': 'TICKS DIFF',
             'add_tp': 'Many TP',
+            'is_nipple_active': 'Nipple',
         }
