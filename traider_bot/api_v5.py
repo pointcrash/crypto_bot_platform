@@ -51,6 +51,7 @@ def HTTP_Request(account, endPoint, method, payload, bot=None):
             continue
         except Exception as e:
             # Обработка других неожиданных ошибок
+            print(bot, type(bot))
             print("An unexpected error occurred:", e)
             continue
 
@@ -70,7 +71,7 @@ def cancel_all(account, category, symbol):
         'symbol': symbol.name,
     }
     params = json.dumps(params)
-    response = json.loads(HTTP_Request(account, endpoint, method, params, "CancelAll"))
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
     return response
 
 
@@ -83,7 +84,7 @@ def cancel_order(bot, order_id):
         'orderId': order_id,
     }
     params = json.dumps(params)
-    response = json.loads(HTTP_Request(bot.account, endpoint, method, params, "CancelOrder"))
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     return response
 
 
@@ -98,7 +99,7 @@ def amend_order(bot, order_id, data=None):
     if data:
         params.update(data)
     params = json.dumps(params)
-    response = json.loads(HTTP_Request(bot.account, endpoint, method, params, "AmendOrder"))
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     return response
 
 
@@ -106,7 +107,7 @@ def get_current_price(account, category, symbol):
     endpoint = "/v5/market/tickers"
     method = "GET"
     params = f"category={category}&symbol={symbol.name}"
-    response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
     try:
         return Decimal(response["result"]["list"][0]["lastPrice"])
     except:
@@ -142,7 +143,7 @@ def get_list(account, category='linear', symbol=None, settleCoin='USDT'):
             params = f"category={category}&symbol={symbol}"
         else:
             params = f"category={category}&settleCoin={settleCoin}"
-        response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+        response = json.loads(HTTP_Request(account, endpoint, method, params))
         # print(response)
         return response['result']['list']
     except Exception as e:
@@ -153,7 +154,7 @@ def get_order_book(account, category, symbol):
     endpoint = "/v5/market/orderbook"
     method = "GET"
     params = f"category={category}&symbol={symbol.name}"
-    response = json.loads(HTTP_Request(account, endpoint, method, params, "Price"))
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
     # print(response)
     return None
 
@@ -246,7 +247,8 @@ def get_pnl(account, category, symbol, start_time=0, end_time=0, limit=50):
     try:
         return response['result']['list']
     except Exception as e:
-        print(e, response)
+        pass
+        # print(e, response)
 
 
 def set_leverage(account, category, symbol, leverage, bot=None):
@@ -325,6 +327,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
 
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot=bot))
+    # print(response)
     return response
 
 

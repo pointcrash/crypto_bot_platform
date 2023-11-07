@@ -57,8 +57,10 @@ class Order(models.Model):
         bot = Bot.objects.get(pk=self.bot.pk)
         logging(bot, f'{params}')
         logging(bot, f'{response}')
+        # print('Order ----')
         # print(response)
         # print(params)
+        # print('Order ----')
 
     def save(self, *args, **kwargs):
         if not self.positionIdx:

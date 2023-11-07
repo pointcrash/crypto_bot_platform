@@ -114,6 +114,7 @@ class StepHedgeForm(forms.ModelForm):
             'qty_steps': forms.NumberInput(attrs={'class': 'form-control', 'id': 'qty_steps'}),
             'qty_steps_diff': forms.NumberInput(attrs={'class': 'form-control', 'id': 'qty_steps_diff'}),
             'add_tp': forms.RadioSelect(choices=[(True, 'Add take profit'), (False, 'Replace take profit')]),
+            'is_nipple_active': forms.CheckboxInput(attrs={'id': 'is_nipple_active'}),
         }
         labels = {
             'short1invest': 'SHORT - 1ST ORDER INVESTMENTS',

@@ -65,8 +65,8 @@
                             {{ step_hedge_form.qty_steps_diff }}
                         </div>
                     </div>
-                    <button id="pnl_validation" class="btn btn-sm btn-danger disabled mt-2">(%PnL / Leverage) must be >= 0.5</button>
-                    <button id="ticks_validation" class="btn btn-sm btn-danger disabled mt-1">(COUNT TICKS / TICKS DIFF) must be >= 5</button>
+                    <button id="pnl_validation" class="btn btn-sm btn-danger disabled mt-2">(%PnL / Leverage) >= 0.5</button>
+                    <button id="ticks_validation" class="btn btn-sm btn-danger disabled mt-1">(COUNT TICKS / TICKS DIFF) >= 5</button>
 
                 </div>
                 <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
@@ -227,6 +227,7 @@
         const isLeverageField = document.querySelector('#is_leverage');
         const qtyStepsField = document.querySelector('#qty_steps');
         const qtyStepsDiffField = document.querySelector('#qty_steps_diff');
+        const isNippleActive = document.querySelector('#is_nipple_active');
         const pnlValidationCondition = document.querySelector('#pnl_validation');
         const ticksValidationCondition = document.querySelector('#ticks_validation');
 
@@ -239,42 +240,66 @@
         }
 
         function checkPnlConditions() {
+            const isChecked = isNippleActive.checked;
             const tpPnlPercentValue = parseFloat(tpPnlPercentField.value.toString());
             const isLeverageValue = parseFloat(isLeverageField.value.toString());
 
-            if (tpPnlPercentValue / isLeverageValue >= 0.5) {
-                pnlValidationCondition.classList.remove('btn-danger');
-                pnlValidationCondition.classList.add('btn-success');
-            } else {
-                pnlValidationCondition.classList.remove('btn-success');
-                pnlValidationCondition.classList.add('btn-danger');
+            if (isChecked) {
+                if (tpPnlPercentValue / isLeverageValue >= 0.5) {
+                    pnlValidationCondition.classList.remove('btn-danger');
+                    pnlValidationCondition.classList.add('btn-success');
+                } else {
+                    pnlValidationCondition.classList.remove('btn-success');
+                    pnlValidationCondition.classList.add('btn-danger');
+                }
+                checkConditions();
             }
-            checkConditions();
         }
 
         function checkTicksConditions() {
+            const isChecked = isNippleActive.checked;
             const qtyStepsValue = parseFloat(qtyStepsField.value.toString());
             const qtyStepsDiffValue = parseFloat(qtyStepsDiffField.value.toString());
 
-            if (qtyStepsValue / qtyStepsDiffValue >= 5) {
-                ticksValidationCondition.classList.remove('btn-danger');
-                ticksValidationCondition.classList.add('btn-success');
-            } else {
-                ticksValidationCondition.classList.remove('btn-success');
-                ticksValidationCondition.classList.add('btn-danger');
+            if (isChecked) {
+                if (qtyStepsValue / qtyStepsDiffValue >= 5) {
+                    ticksValidationCondition.classList.remove('btn-danger');
+                    ticksValidationCondition.classList.add('btn-success');
+                } else {
+                    ticksValidationCondition.classList.remove('btn-success');
+                    ticksValidationCondition.classList.add('btn-danger');
+                }
+                checkConditions();
             }
-            checkConditions();
+        }
+
+        function checkNipple() {
+            const isChecked = isNippleActive.checked;
+
+            if (isChecked) {
+                startBotButton.setAttribute('disabled', 'disabled');
+                pnlValidationCondition.removeAttribute('hidden');
+                ticksValidationCondition.removeAttribute('hidden');
+                checkPnlConditions();
+                checkTicksConditions();
+            } else {
+                startBotButton.removeAttribute('disabled');
+                pnlValidationCondition.setAttribute('hidden', 'hidden');
+                ticksValidationCondition.setAttribute('hidden', 'hidden');
+            }
         }
 
         // Начальная проверка условий при загрузке страницы
         checkPnlConditions();
         checkTicksConditions();
+        checkNipple();
 
         // Следить за изменениями в полях и обновлять кнопку при необходимости
         tpPnlPercentField.addEventListener('change', checkPnlConditions);
         isLeverageField.addEventListener('change', checkPnlConditions);
         qtyStepsField.addEventListener('change', checkTicksConditions);
         qtyStepsDiffField.addEventListener('change', checkTicksConditions);
+        isNippleActive.addEventListener('change', checkNipple);
     });
 </script>
 

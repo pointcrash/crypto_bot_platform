@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from api_v5 import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
+from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive, terminate_thread
@@ -222,7 +223,7 @@ def bot_start(request, bot_id):
 
     elif bot.work_model == 'Step Hedge':
         step_hedge = StepHedge.objects.filter(bot=bot).first()
-        bot_thread = threading.Thread(target=step_hedge_bot_main_logic, args=(bot, step_hedge))
+        bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
         append_thread_or_check_duplicate(bot.pk)
 
     if bot_thread is not None:
