@@ -4,12 +4,17 @@ import time
 from bots.StepHedge.ws_logic.handlers_messages import handle_stream_callback
 from bots.StepHedge.ws_logic.ws_step_class import WSStepHedgeClassLogic
 from bots.bot_logic import lock_release, logging, exit_by_exception
+from bots.models import JsonObjectClass
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
 
 def ws_step_hedge_bot_main_logic(bot, step_hg):
     bot_id = bot.pk
-    step_class_obj = WSStepHedgeClassLogic(bot, step_hg)
+    class_data = JsonObjectClass.objects.create(bot=bot, bot_mode=bot.work_model, data=dict())
+    step_class_obj = WSStepHedgeClassLogic(bot, step_hg, class_data)
+    step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'] = step_class_obj.is_avg_psn_flag_dict
+    # step_class_obj.class_data_obj.data['avg_trigger_price'] = dict()
+    step_class_obj.class_data_obj.save()
 
     ws_private = WebSocket(
         testnet=not bot.account.is_mainnet,
@@ -17,10 +22,10 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
         api_key=bot.account.API_TOKEN,
         api_secret=bot.account.SECRET_KEY,
     )
-    # ws_public = WebSocket(
-    #     testnet=not bot.account.is_mainnet,
-    #     channel_type="linear",
-    # )
+    ws_public = WebSocket(
+        testnet=not bot.account.is_mainnet,
+        channel_type="linear",
+    )
 
     ws_private.position_stream(callback=handle_stream_callback(step_class_obj, arg='position'))
     ws_private.order_stream(callback=handle_stream_callback(step_class_obj, arg='order'))
@@ -38,7 +43,7 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
     else:
         raise Exception('Имеются открытые позиции по данной торговой паре')
 
-    # ws_public.ticker_stream(symbol=bot.symbol.name, callback=handle_stream_callback(step_class_obj, arg='ticker'))
+    ws_public.ticker_stream(symbol=bot.symbol.name, callback=handle_stream_callback(step_class_obj, arg='ticker'))
     t = True
     # Запускаем цикл отслеживания состояния позиций
     lock.acquire()
@@ -86,13 +91,14 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                                     step_class_obj.amend_new_psn_order(position_number)
 
                     # выставление усредняющего ордера
-                    step_class_obj.limit_average_psn(position_number)
+                    # step_class_obj.limit_average_psn(position_number)
 
             if not ws_private.is_connected():
                 raise ConnectionError('Private WebSocket connected error')
-            # if not ws_public.is_connected():
-            #     raise ConnectionError('Public WebSocket connected error')
-            time.sleep(2)
+            if not ws_public.is_connected():
+                raise ConnectionError('Public WebSocket connected error')
+            # print(step_class_obj.class_data_obj.data)
+            time.sleep(5)
             lock.acquire()
     except Exception as e:
         logging(bot, f'Error {e}')
@@ -102,6 +108,8 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
         finally:
             lock_release()
     finally:
+        ws_private.exit()
+        ws_public.exit()
         lock_release()
 
 

@@ -16,7 +16,7 @@ django.setup()
 from tg_bot.models import TelegramAccount
 from bots.bb_auto_avg import BBAutoAverage
 from bots.bb_class import BollingerBands
-from bots.models import Symbol, Log, AvgOrder, Bot, Take, IsTSStart
+from bots.models import Symbol, Log, AvgOrder, Bot, Take, IsTSStart, JsonObjectClass
 from api_v5 import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
@@ -480,6 +480,10 @@ def clean_and_return_bot_object(bot_id):
 
 def clear_data_bot(bot, clear_data=0):
     from django.db import connections
+
+    json_obj = JsonObjectClass.objects.filter(bot=bot).first()
+    if json_obj:
+        json_obj.delete()
 
     bot.entry_order_by = ''
     bot.entry_order_by_amount = None

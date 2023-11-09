@@ -186,3 +186,9 @@ class OppositePosition(models.Model):
     limit_pnl_loss_opp = models.CharField(blank=True, null=True)
     psn_qty_percent_opp = models.CharField(blank=True, null=True)
     max_margin_opp = models.CharField(blank=True, null=True)
+
+
+class JsonObjectClass(models.Model):
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    bot_mode = models.CharField(blank=True, null=True)
+    data = models.JSONField(blank=True, null=True)

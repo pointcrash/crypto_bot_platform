@@ -18,15 +18,32 @@ def handle_stream_callback(step_class_obj, arg):
 
 
 def handle_ticker_stream_message(message, step_class_obj):
-    # try:
-    #     last_price = Decimal(message['data']['lastPrice'])
-    #     if last_price <= step_class_obj.avg_trigger_price[1]:
-    #         step_class_obj.ws_average_psn(1)
-    #     if last_price >= step_class_obj.avg_trigger_price[2]:
-    #         step_class_obj.ws_average_psn(2)
-    # except Exception as e:
-    #     raise ValueError(f'{e}')
-    pass
+    try:
+        last_price = Decimal(message['data']['lastPrice'])
+        # print(last_price, step_class_obj.avg_trigger_price[1], step_class_obj.avg_trigger_price[2])
+        # print(step_class_obj.class_data_obj.data)
+        # if last_price <= Decimal(step_class_obj.class_data_obj.data['avg_trigger_price'][1]):
+        if last_price <= step_class_obj.avg_trigger_price[1]:
+            if not step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][1]:
+                # print('average')
+                # print(step_class_obj.class_data_obj.data)
+                step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][1] = True
+                # print(step_class_obj.class_data_obj.data)
+                step_class_obj.class_data_obj.save()
+                # print(step_class_obj.class_data_obj.data)
+                step_class_obj.ws_average_psn_by_market(1)
+        # if last_price >= Decimal(step_class_obj.class_data_obj.data['avg_trigger_price'][2]):
+        if last_price >= step_class_obj.avg_trigger_price[2]:
+            if not step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][2]:
+                # print('average-2')
+                # print(step_class_obj.class_data_obj.data)
+                step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][2] = True
+                # print(step_class_obj.class_data_obj.data)
+                step_class_obj.class_data_obj.save()
+                # print(step_class_obj.class_data_obj.data)
+                step_class_obj.ws_average_psn_by_market(2)
+    except Exception as e:
+        print(e)
 
 
 def handle_order_stream_message(message, step_class_obj):
@@ -42,15 +59,15 @@ def handle_order_stream_message(message, step_class_obj):
                                 step_class_obj.ws_place_tp_order(order)
                                 step_class_obj.ws_place_new_psn_order(order)
 
-                    elif order['timeInForce'] == 'GTC':
-                        step_class_obj.is_avg_psn_flag_dict[order['positionIdx']] = True
+                    # elif order['timeInForce'] == 'GTC':
+                    #     step_class_obj.is_avg_psn_flag_dict[order['positionIdx']] = True
 
                 elif order['orderStatus'] == 'Untriggered':
                     step_class_obj.new_psn_orderId_dict[order['positionIdx']] = order['orderId']
 
-                elif order['orderStatus'] == 'New':
-                    if order['timeInForce'] == 'GTC':
-                        step_class_obj.avg_order_id[order['positionIdx']] = order['orderId']
+                # elif order['orderStatus'] == 'New':
+                #     if order['timeInForce'] == 'GTC':
+                #         step_class_obj.avg_order_id[order['positionIdx']] = order['orderId']
 
     # print('--------------------END--ORDER-LIST------------------------')
     # print()
@@ -66,15 +83,12 @@ def handle_position_stream_message(message, step_class_obj):
                 if psn['entryPrice'] != step_class_obj.ws_symbol_list[position_idx]['entryPrice']:
                     step_class_obj.ws_symbol_list[position_idx] = psn
                     step_class_obj.calculate_avg_trigger_price(position_idx)
+
+                    step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx] = False
+                    step_class_obj.class_data_obj.save()
+
                     step_class_obj.ws_amend_tp_order(position_idx)
                     step_class_obj.ws_amend_new_psn_order(position_idx)
-
-                    if step_class_obj.is_avg_psn_flag_dict[position_idx] is True:
-                        step_class_obj.ws_limit_average_psn(position_idx)
-                        step_class_obj.is_avg_psn_flag_dict[position_idx] = False
-                    else:
-                        step_class_obj.ws_amend_avg_psn_order(position_idx)
-
             except Exception as e:
                 try:
                     step_class_obj.ws_symbol_list[position_idx] = psn

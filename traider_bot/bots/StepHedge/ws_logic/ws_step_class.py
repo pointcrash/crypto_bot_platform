@@ -4,13 +4,15 @@ from decimal import Decimal
 from api_v5 import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
     get_open_orders, cancel_order, amend_order
 from bots.bot_logic import get_quantity_from_price
+from bots.models import JsonObjectClass
 from orders.models import Order
 
 
 class WSStepHedgeClassLogic:
-    def __init__(self, bot, step_hg):
+    def __init__(self, bot, step_hg, class_data_obj):
         self.bot = bot
         self.step_hg = step_hg
+        self.class_data_obj = class_data_obj
         self.bot_id = bot.pk
         self.account = bot.account
         self.category = bot.category
@@ -161,6 +163,9 @@ class WSStepHedgeClassLogic:
             else:
                 self.avg_trigger_price[position_idx] = round(
                     psn_entry_price * Decimal(1 + self.pnl_short_avg / 100 / self.leverage), self.round_number)
+
+        # self.class_data_obj.data['avg_trigger_price'][position_idx] = str(self.avg_trigger_price[position_idx])
+        # self.class_data_obj.save()
 
     def losses_pnl_check(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
@@ -402,7 +407,7 @@ class WSStepHedgeClassLogic:
             triggerPrice=str(price),
         )
 
-    def ws_average_psn(self, position_idx):
+    def ws_average_psn_by_market(self, position_idx):
         qty = Decimal(self.ws_symbol_list[position_idx]['size'])
         side = 'Buy' if position_idx == 1 else 'Sell'
         if side == 'Buy':
