@@ -112,6 +112,7 @@ def get_current_price(account, category, symbol):
         return Decimal(response["result"]["list"][0]["lastPrice"])
     except:
         return None
+        # raise Exception('Ошибка запроса текущей цены "get_current_price"')
 
 
 def get_position_price(symbol_list):

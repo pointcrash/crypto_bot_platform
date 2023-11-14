@@ -1,3 +1,4 @@
+import threading
 import time
 from decimal import Decimal
 
@@ -41,6 +42,12 @@ class WSStepHedgeClassLogic:
         self.avg_trigger_price = dict()
         self.avg_order_id = dict()
         self.is_avg_psn_flag_dict = {1: False, 2: False}
+        self.tp_order_executed = {1: False, 2: False}
+        self.new_order_is_filled = {1: False, 2: False}
+
+        self.locker_1 = threading.Lock()
+        self.locker_2 = threading.Lock()
+        self.locker_3 = threading.Lock()
 
     def preparatory_actions(self):
         # append_thread_or_check_duplicate(self.bot_id)
@@ -78,7 +85,7 @@ class WSStepHedgeClassLogic:
 
     def buy_by_market(self):
         cancel_all(self.account, self.category, self.symbol)
-        current_price = get_current_price(self.account, self.category, self.symbol) + 2 * self.tickSize
+        current_price = get_current_price(self.account, self.category, self.symbol) + 3 * self.tickSize
         for order_side in ['Buy', 'Sell']:
             if order_side == 'Buy':
                 qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
@@ -369,11 +376,13 @@ class WSStepHedgeClassLogic:
             self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
 
         if self.step_hg.add_tp:
+            print('ADD_TP RESPONSE -------- ')
             return set_trading_stop(
                 self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_idx]), tpSize=tp_size)
         else:
             response = set_trading_stop(self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_idx]))
-            # print('TP RESPONSE: ', response)
+            print('TP RESPONSE: ', response)
+            print()
             return response
 
     def ws_place_new_psn_order(self, order):
@@ -395,6 +404,30 @@ class WSStepHedgeClassLogic:
         trigger_direction = 1 if price > current_price else 2
         order_side = 'Buy' if position_idx == 1 else 'Sell'
         self.new_psn_price_dict[position_idx] = price
+        Order.objects.create(
+            bot=self.bot,
+            category=self.category,
+            symbol=self.symbol.name,
+            side=order_side,
+            orderType="Market",
+            qty=qty,
+            price=str(price),
+            triggerDirection=trigger_direction,
+            triggerPrice=str(price),
+        )
+        print('PLACE ORDER AFTER -', order['orderId'])
+        print()
+
+    def ws_replace_new_psn_order(self, position_idx):
+        current_price = get_current_price(self.account, self.category, self.symbol)
+        price = self.new_psn_price_dict[position_idx]
+        if position_idx == 1:
+            qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
+        else:
+            qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+
+        trigger_direction = 1 if price > current_price else 2
+        order_side = 'Buy' if position_idx == 1 else 'Sell'
         order = Order.objects.create(
             bot=self.bot,
             category=self.category,
@@ -406,6 +439,12 @@ class WSStepHedgeClassLogic:
             triggerDirection=trigger_direction,
             triggerPrice=str(price),
         )
+        print()
+        print()
+        print('RE-PLACE ORDER AFTER -')
+        print()
+        print()
+
 
     def ws_average_psn_by_market(self, position_idx):
         qty = Decimal(self.ws_symbol_list[position_idx]['size'])
@@ -433,8 +472,12 @@ class WSStepHedgeClassLogic:
 
         set_trading_stop(self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_idx]))
 
-    def ws_amend_new_psn_order(self, position_idx):
-        params = {'triggerPrice': str(self.tp_price_dict[position_idx])}
+    def ws_amend_new_psn_order(self, position_idx, current_price=False):
+        if current_price:
+            current_price = get_current_price(self.account, self.category, self.symbol)
+            params = {'triggerPrice': str(current_price + self.tickSize)}
+        else:
+            params = {'triggerPrice': str(self.tp_price_dict[position_idx])}
         amend_order(self.bot, self.new_psn_orderId_dict[position_idx], params)
 
     def ws_amend_avg_psn_order(self, position_idx):
@@ -442,17 +485,43 @@ class WSStepHedgeClassLogic:
         # print(params)
         print("РЕДАКТИРОВАНИЕ УСРЕДНЯЮЩЕГО ОРДЕРА", amend_order(self.bot, self.avg_order_id[position_idx], data=params))
 
+    def ws_checking_opened_new_psn_order(self, position_idx):
+        if self.order_book and len(self.order_book) > 0:
+            for order in self.order_book:
+                if position_idx == order['positionIdx']:
+                    if order['orderStatus'] == 'Untriggered' and order['reduceOnly'] is False:
+                        self.new_psn_orderId_dict[position_idx] = order['orderId']
+                        self.new_psn_price_dict[position_idx] = Decimal(order['triggerPrice'])
+                        return True
 
+    def order_missed_check(self, position_idx):
+        current_price = get_current_price(self.account, self.category, self.symbol)
 
+        if position_idx == 1 and current_price > self.new_psn_price_dict[position_idx]:
+            return True
+        elif position_idx == 2 and current_price < self.new_psn_price_dict[position_idx]:
+            return True
 
+    # def buy(self, position_idx, cur_price):
+    #     if position_idx == 1:
+    #         qty = get_quantity_from_price(self.long1invest, cur_price, self.symbol.minOrderQty, self.leverage)
+    #     else:
+    #         qty = get_quantity_from_price(self.short1invest, cur_price, self.symbol.minOrderQty, self.leverage)
+    #
+    #     order = Order.objects.create(
+    #         bot=self.bot,
+    #         category=self.category,
+    #         symbol=self.symbol.name,
+    #         side='Buy' if position_idx == 1 else 'Sell',
+    #         orderType="Market",
+    #         qty=qty,
+    #     )
 
-
-
-
-
-
-
-
+    def not_new_order_is_filled(self, position_idx):
+        with self.locker_1:
+            if not self.new_order_is_filled[position_idx]:
+                self.new_order_is_filled[position_idx] = True
+                return True
 
 
 

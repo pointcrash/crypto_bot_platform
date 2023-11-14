@@ -193,14 +193,14 @@
                     <td>{{ order.symbol }}</td>
                     <td class="d-none d-sm-table-cell">{{ order.qty }}</td>
                     <td class="d-none d-sm-table-cell">
-                        {% if order.price != '0' %}{{ order.price }}
-                        {% elif order.triggerPrice != '0' %}{{ order.triggerPrice }}{% endif %}
+                        {% if order.price != 0 %}{{ order.price }}
+                        {% elif order.triggerPrice != 0 %}{{ order.triggerPrice }}{% endif %}
                     </td>
                     <td class="d-none d-sm-table-cell">{{ order.leavesQty }}</td>
                     <td class="d-none d-sm-table-cell">
-                        {% if order.takeProfit == '0.00000' or order.takeProfit == '0.000' %}--
-                        {% else %}{{order.takeProfit }}{% endif %}/
-                        {% if order.stopLoss == '0.00000' or order.stopLoss == '0.000'%}--
+                        {% if order.takeProfit == 0 or order.takeProfit == '' %}--
+                        {% else %}{{ order.takeProfit }}{% endif %}/
+                        {% if order.stopLoss == 0  or order.stopLoss == '' %}--
                         {% else %}{{ order.stopLoss }}{% endif %}
                     </td>
                     <td>{{ order.side }}</td>

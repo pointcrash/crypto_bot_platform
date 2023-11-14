@@ -8,7 +8,7 @@ from single_bot.logic.global_variables import lock, global_list_bot_id, global_l
 
 def terminate_thread(bot_id, keep_active=False):
     bot = Bot.objects.get(pk=bot_id)
-    # ActiveBot.objects.filter(bot_id=bot_id).delete()
+    ActiveBot.objects.filter(bot_id=bot_id).delete()
     lock.acquire()
     try:
         if bot_id in global_list_bot_id:

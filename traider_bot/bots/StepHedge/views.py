@@ -90,10 +90,12 @@ def step_hedge_bot_detail(request, bot_id):
             bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
 
             bot_thread.start()
-            bot.is_active = True
+            # bot.is_active = True
             bot.save()
 
-            append_thread_or_check_duplicate(bot.pk)
+            if not ActiveBot.objects.filter(bot_id=bot.pk):
+                ActiveBot.objects.create(bot_id=bot.pk)
+            # append_thread_or_check_duplicate(bot.pk)
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread
             if lock.locked():
@@ -110,6 +112,10 @@ def step_hedge_bot_detail(request, bot_id):
         dt_object = datetime.fromtimestamp(time / 1000.0)
         formatted_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
         order['updatedTime'] = formatted_date
+        order['price'] = float(order['price']) if order['price'] else order['price']
+        order['triggerPrice'] = float(order['triggerPrice']) if order['triggerPrice'] else order['triggerPrice']
+        order['takeProfit'] = float(order['takeProfit']) if order['takeProfit'] else order['takeProfit']
+        order['stopLoss'] = float(order['stopLoss']) if order['stopLoss'] else order['stopLoss']
 
     return render(request, 'step_hedge/detail.html',
                   {

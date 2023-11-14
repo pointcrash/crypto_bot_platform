@@ -6,6 +6,7 @@ import os
 import django
 import pytz
 
+from main.models import ActiveBot
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from tg_bot.send_message import send_telegram_message
 from timezone.models import TimeZone
@@ -575,6 +576,8 @@ def lock_release():
 
 def exit_by_exception(bot):
     bot_id = bot.pk
+    ActiveBot.objects.filter(bot_id=bot_id).delete()
+
     if bot_id in global_list_bot_id:
         global_list_bot_id.remove(bot_id)
         del global_list_threads[bot_id]

@@ -16,6 +16,7 @@ from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_l
 from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
 from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition, StepHedge
 from main.forms import AccountSelectForm
+from main.models import ActiveBot
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from single_bot.logic.work import bot_work_logic, append_thread_or_check_duplicate
@@ -43,11 +44,13 @@ def single_bot_list(request):
         account_select_form = AccountSelectForm(user=request.user)
 
     is_alive_list = []
+    active_bot_ids = ActiveBot.objects.all().values_list('bot_id', flat=True)
 
     lock.acquire()
     try:
         for bot_id in all_bots_pks:
-            if bot_id in global_list_bot_id:
+            bot_id = str(bot_id)
+            if bot_id in active_bot_ids:
                 is_alive_list.append(True)
             else:
                 is_alive_list.append(False)
@@ -224,7 +227,9 @@ def bot_start(request, bot_id):
     elif bot.work_model == 'Step Hedge':
         step_hedge = StepHedge.objects.filter(bot=bot).first()
         bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
-        append_thread_or_check_duplicate(bot.pk)
+        if not ActiveBot.objects.filter(bot_id=bot.pk):
+            ActiveBot.objects.create(bot_id=bot.pk)
+        # append_thread_or_check_duplicate(bot.pk)
 
     if bot_thread is not None:
         bot_thread.start()
