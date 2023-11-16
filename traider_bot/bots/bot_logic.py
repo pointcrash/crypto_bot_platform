@@ -576,7 +576,8 @@ def lock_release():
 
 def exit_by_exception(bot):
     bot_id = bot.pk
-    ActiveBot.objects.filter(bot_id=bot_id).delete()
+    if ActiveBot.objects.filter(bot_id=bot_id):
+        ActiveBot.objects.filter(bot_id=bot_id).delete()
 
     if bot_id in global_list_bot_id:
         global_list_bot_id.remove(bot_id)

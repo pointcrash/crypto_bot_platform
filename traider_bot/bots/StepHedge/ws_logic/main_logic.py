@@ -11,9 +11,9 @@ from main.models import ActiveBot
 def ws_step_hedge_bot_main_logic(bot, step_hg):
     ws_private = None
     ws_public = None
+    bot_id = bot.pk
 
     try:
-        bot_id = bot.pk
         class_data = JsonObjectClass.objects.create(bot=bot, bot_mode=bot.work_model, data=dict())
         step_class_obj = WSStepHedgeClassLogic(bot, step_hg, class_data)
         step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'] = step_class_obj.is_avg_psn_flag_dict
@@ -142,6 +142,8 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
     finally:
         if ws_public and ws_private:
             ws_closing(ws_private, ws_public)
+        if ActiveBot.objects.filter(bot_id=bot_id):
+            ActiveBot.objects.filter(bot_id=bot_id).delete()
 
 
 def ws_closing(*args):

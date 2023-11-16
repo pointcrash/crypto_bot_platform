@@ -376,13 +376,13 @@ class WSStepHedgeClassLogic:
             self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
 
         if self.step_hg.add_tp:
-            print('ADD_TP RESPONSE -------- ')
+            # print('ADD_TP RESPONSE -------- ')
             return set_trading_stop(
                 self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_idx]), tpSize=tp_size)
         else:
             response = set_trading_stop(self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_idx]))
-            print('TP RESPONSE: ', response)
-            print()
+            # print('TP RESPONSE: ', response)
+            # print()
             return response
 
     def ws_place_new_psn_order(self, order):
@@ -415,8 +415,8 @@ class WSStepHedgeClassLogic:
             triggerDirection=trigger_direction,
             triggerPrice=str(price),
         )
-        print('PLACE ORDER AFTER -', order['orderId'])
-        print()
+        # print('PLACE ORDER AFTER -', order['orderId'])
+        # print()
 
     def ws_replace_new_psn_order(self, position_idx):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -439,12 +439,6 @@ class WSStepHedgeClassLogic:
             triggerDirection=trigger_direction,
             triggerPrice=str(price),
         )
-        print()
-        print()
-        print('RE-PLACE ORDER AFTER -')
-        print()
-        print()
-
 
     def ws_average_psn_by_market(self, position_idx):
         qty = Decimal(self.ws_symbol_list[position_idx]['size'])
@@ -482,8 +476,7 @@ class WSStepHedgeClassLogic:
 
     def ws_amend_avg_psn_order(self, position_idx):
         params = {'price': str(self.avg_trigger_price[position_idx])}
-        # print(params)
-        print("РЕДАКТИРОВАНИЕ УСРЕДНЯЮЩЕГО ОРДЕРА", amend_order(self.bot, self.avg_order_id[position_idx], data=params))
+        # print("РЕДАКТИРОВАНИЕ УСРЕДНЯЮЩЕГО ОРДЕРА", amend_order(self.bot, self.avg_order_id[position_idx], data=params))
 
     def ws_checking_opened_new_psn_order(self, position_idx):
         if self.order_book and len(self.order_book) > 0:
@@ -501,21 +494,6 @@ class WSStepHedgeClassLogic:
             return True
         elif position_idx == 2 and current_price < self.new_psn_price_dict[position_idx]:
             return True
-
-    # def buy(self, position_idx, cur_price):
-    #     if position_idx == 1:
-    #         qty = get_quantity_from_price(self.long1invest, cur_price, self.symbol.minOrderQty, self.leverage)
-    #     else:
-    #         qty = get_quantity_from_price(self.short1invest, cur_price, self.symbol.minOrderQty, self.leverage)
-    #
-    #     order = Order.objects.create(
-    #         bot=self.bot,
-    #         category=self.category,
-    #         symbol=self.symbol.name,
-    #         side='Buy' if position_idx == 1 else 'Sell',
-    #         orderType="Market",
-    #         qty=qty,
-    #     )
 
     def not_new_order_is_filled(self, position_idx):
         with self.locker_1:

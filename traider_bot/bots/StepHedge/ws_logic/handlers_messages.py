@@ -76,8 +76,8 @@ def handle_order_stream_message(message, step_class_obj):
                                 if order['stopOrderType'] == 'Stop':
                                     if order['orderId'] == step_class_obj.new_psn_orderId_dict[order['positionIdx']]:
                                         if not step_class_obj.new_order_is_filled[order['positionIdx']]:
-                                            print(order)
-                                            print()
+                                            # print(order)
+                                            # print()
                                             step_class_obj.new_order_is_filled[order['positionIdx']] = True
                                             step_class_obj.tp_order_executed[order['positionIdx']] = False
                                             step_class_obj.ws_place_tp_order(order)

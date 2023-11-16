@@ -35,18 +35,17 @@ def step_hedge_bot_create(request):
 
             step_hedge = step_hedge_form.save(commit=False)
             step_hedge.bot = bot
-            # step_hedge.tppp = step_hedge.tppp.replace(',', '.') if ',' in step_hedge.tppp else step_hedge.tppp
-            # step_hedge.tpap = step_hedge.tpap.replace(',', '.') if ',' in step_hedge.tpap else step_hedge.tpap
             step_hedge.save()
+
+            if not ActiveBot.objects.filter(bot_id=bot.pk):
+                ActiveBot.objects.create(bot_id=bot.pk)
 
             connections.close_all()
 
             bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
             bot_thread.start()
 
-            append_thread_or_check_duplicate(bot.pk)
-            # if not ActiveBot.objects.filter(bot_id=bot.pk).first():
-            #     ActiveBot.objects.create(bot_id=bot.pk)
+            # append_thread_or_check_duplicate(bot.pk)
             lock.acquire()
             global_list_threads[bot.pk] = bot_thread
             if lock.locked():
