@@ -152,3 +152,7 @@ def ws_closing(*args):
             ws.exit()
             print('trying to close ws connection')
             time.sleep(1)
+
+
+def pass_func():
+    pass
