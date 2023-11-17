@@ -79,12 +79,9 @@ def step_hedge_bot_detail(request, bot_id):
             bot = bot_form.save(commit=False)
             clear_data_bot(bot)
             step_hedge = step_hedge_form.save(commit=False)
-            # step_hedge.tppp = step_hedge.tppp.replace(',', '.') if ',' in step_hedge.tppp else step_hedge.tppp
-            # step_hedge.tpap = step_hedge.tpap.replace(',', '.') if ',' in step_hedge.tpap else step_hedge.tpap
             step_hedge.save()
 
-            if check_thread_alive(bot.pk):
-                terminate_thread(bot.pk)
+            terminate_thread(bot.pk)
 
             bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
 

@@ -134,7 +134,6 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             if step_class_obj.locker_3.locked():
                 step_class_obj.locker_3.release()
 
-            print('ZzzzzzzZZzzz....')
             time.sleep(5)
     except Exception as e:
         logging(bot, f'Error {e}')
