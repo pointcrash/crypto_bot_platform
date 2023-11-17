@@ -3,11 +3,13 @@ from django.urls import path, include
 
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
     profile_list, profile_mode_switching, cleaning_logs_view
+from single_bot.views import say_hello
 
 # from timezone.views import create_timezone
 
 urlpatterns = [
     path('', view_home, name='home'),
+    path('say_hello', say_hello, name='say_hello'),
     path('admin/', admin.site.urls),
     path('logs/', logs_view, name='logs'),
     path('logs/<int:bot_id>/', logs_list, name='logs_detail'),

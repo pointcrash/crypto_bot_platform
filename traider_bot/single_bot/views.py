@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.db import connections
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from api_v5 import get_open_orders
@@ -245,3 +246,7 @@ def bot_start(request, bot_id):
 def update_symbols_set(request):
     get_update_symbols()
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+def say_hello(request):
+    return HttpResponse('<h1>Hello guys</h1>')
