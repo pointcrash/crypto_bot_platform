@@ -1,10 +1,14 @@
+import threading
+from decimal import Decimal
+
 from pybit.unified_trading import WebSocket
 import time
 
+from api_v5 import cancel_all
 from bots.StepHedge.ws_logic.handlers_messages import handle_stream_callback
 from bots.StepHedge.ws_logic.ws_step_class import WSStepHedgeClassLogic
-from bots.bot_logic import logging, exit_by_exception
-from bots.models import JsonObjectClass
+from bots.bot_logic import logging, exit_by_exception, is_bot_active
+from bots.models import JsonObjectClass, StepHedge
 from main.models import ActiveBot
 
 
@@ -14,7 +18,12 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
     bot_id = bot.pk
 
     try:
-        class_data = JsonObjectClass.objects.create(bot=bot, bot_mode=bot.work_model, data=dict())
+        class_data, created = JsonObjectClass.objects.get_or_create(
+            bot=bot,
+            bot_mode=bot.work_model,
+            defaults={'data': dict()}
+        )
+
         step_class_obj = WSStepHedgeClassLogic(bot, step_hg, class_data)
         step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'] = step_class_obj.is_avg_psn_flag_dict
         step_class_obj.class_data_obj.save()
@@ -44,8 +53,10 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                 step_class_obj.buy_by_limit()
             else:
                 step_class_obj.buy_by_market()
+        elif step_class_obj.checking_2opened_positions():
+            cancel_all(step_class_obj.account, step_class_obj.category, step_class_obj.symbol)
         else:
-            raise Exception('Имеются открытые позиции по данной торговой паре')
+            raise Exception('Некорректное состояние позиций по данной торговой паре')
 
         ws_public.ticker_stream(symbol=bot.symbol.name, callback=handle_stream_callback(step_class_obj, arg='ticker'))
 
@@ -87,7 +98,7 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                             step_class_obj.amend_new_psn_order(position_number)
 
         # Запускаем цикл отслеживания состояния позиций/ордеров
-        while ActiveBot.objects.filter(bot_id=bot_id):
+        while is_bot_active(bot_id):
 
             if not ws_public.is_connected():
                 c = 0
@@ -134,7 +145,7 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             if step_class_obj.locker_3.locked():
                 step_class_obj.locker_3.release()
 
-            time.sleep(5)
+            sleep_function(5, bot_id)
     except Exception as e:
         logging(bot, f'Error {e}')
         exit_by_exception(bot)
@@ -142,7 +153,7 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
     finally:
         if ws_public and ws_private:
             ws_closing(ws_private, ws_public)
-        if ActiveBot.objects.filter(bot_id=bot_id):
+        if is_bot_active(bot_id):
             ActiveBot.objects.filter(bot_id=bot_id).delete()
 
 
@@ -153,3 +164,78 @@ def ws_closing(*args):
             print('trying to close ws connection')
             time.sleep(1)
 
+
+def sleep_function(sleep_time, bot_id):
+    sleep = 0
+    while sleep < sleep_time:
+        if is_bot_active(bot_id):
+            sleep += 1
+            time.sleep(1)
+        else:
+            break
+
+
+def changes_tracking_function(bot, step_hedge, step_class_obj):
+    while ActiveBot.objects.filter(bot_id=bot.pk):
+        apply_changes = False
+        step_hedge_data = StepHedge.objects.get(id=step_hedge.id)
+
+        step_class_obj.short1invest = Decimal(step_hedge_data.short1invest)
+        step_class_obj.long1invest = Decimal(step_hedge_data.long1invest)
+        step_class_obj.margin_short_avg = Decimal(step_hedge_data.margin_short_avg)
+        step_class_obj.margin_long_avg = Decimal(step_hedge_data.margin_long_avg)
+
+        print(step_class_obj.tp_pnl_percent, Decimal(step_hedge_data.tp_pnl_percent))
+        if step_class_obj.tp_pnl_percent != Decimal(step_hedge_data.tp_pnl_percent):
+            step_class_obj.tp_pnl_percent = Decimal(step_hedge_data.tp_pnl_percent)
+            apply_changes = True
+
+        if step_class_obj.pnl_short_avg != Decimal(step_hedge_data.pnl_short_avg):
+            step_class_obj.pnl_short_avg = Decimal(step_hedge_data.pnl_short_avg)
+        if step_class_obj.pnl_long_avg != Decimal(step_hedge_data.pnl_long_avg):
+            step_class_obj.pnl_long_avg = Decimal(step_hedge_data.pnl_long_avg)
+
+        if step_class_obj.qty_steps != step_hedge_data.qty_steps:
+            step_class_obj.qty_steps = step_hedge_data.qty_steps
+            apply_changes = True
+        if step_class_obj.qty_steps_diff != step_hedge_data.qty_steps_diff:
+            step_class_obj.qty_steps_diff = step_hedge_data.qty_steps_diff
+
+        if apply_changes:
+            step_class_obj.locker_3.acquire()
+            cancel_all(step_class_obj.account, step_class_obj.category, step_class_obj.symbol)
+            time.sleep(1)
+
+            # Обновляем книгу ордеров до отмены ордеров
+            status_req_order_book = step_class_obj.update_order_book()
+            if status_req_order_book not in 'OK':
+                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
+                raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
+            # Обновляем список позиций
+            step_class_obj.update_symbol_list()
+            if step_class_obj.symbol_list is None:
+                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+                raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+
+            for position_number in range(2):
+                if step_hedge_data.add_tp:
+                    if not step_class_obj.tp_full_size_psn_check(position_number):
+                        if step_class_obj.psn_size_bigger_then_start(position_number):
+                            step_class_obj.add_tp(position_number)
+                        else:
+                            if step_class_obj.checking_opened_position(position_number):
+                                step_class_obj.place_tp_order(position_number)
+                else:
+                    if step_class_obj.checking_opened_position(position_number):
+                        step_class_obj.place_tp_order(position_number)
+
+                if not step_hedge_data.is_nipple_active:
+                    if not step_class_obj.checking_opened_new_psn_order(position_number):
+                        step_class_obj.place_nipple_on_tp(position_number)
+                else:
+                    if not step_class_obj.checking_opened_new_psn_order(position_number):
+                        step_class_obj.place_new_psn_order(position_number)
+            # Снимаем блокировку потока
+            if step_class_obj.locker_3.locked():
+                step_class_obj.locker_3.release()
+        time.sleep(4)

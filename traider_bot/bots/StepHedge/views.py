@@ -1,5 +1,6 @@
 import threading
 from datetime import datetime
+import time
 
 from django.db import connections
 from django.contrib.auth.decorators import login_required
@@ -9,7 +10,7 @@ from api_v5 import get_open_orders
 from bots.StepHedge.forms import BotForm, StepHedgeForm
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
-from bots.bot_logic import clear_data_bot, func_get_symbol_list
+from bots.bot_logic import clear_data_bot, func_get_symbol_list, is_bot_active
 from bots.models import Bot, StepHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders, terminate_thread
 from main.models import ActiveBot
@@ -77,25 +78,22 @@ def step_hedge_bot_detail(request, bot_id):
         if bot_form.is_valid() and step_hedge_form.is_valid():
 
             bot = bot_form.save(commit=False)
-            clear_data_bot(bot)
             step_hedge = step_hedge_form.save(commit=False)
             step_hedge.save()
-
-            terminate_thread(bot.pk)
-
-            bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
-
-            bot_thread.start()
-            # bot.is_active = True
+            bot.is_active = True
             bot.save()
 
-            if not ActiveBot.objects.filter(bot_id=bot.pk):
+            terminate_thread(bot_id)
+            bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
+            if not is_bot_active(bot.pk):
                 ActiveBot.objects.create(bot_id=bot.pk)
+                bot_thread.start()
+
             # append_thread_or_check_duplicate(bot.pk)
-            lock.acquire()
-            global_list_threads[bot.pk] = bot_thread
-            if lock.locked():
-                lock.release()
+            # lock.acquire()
+            # global_list_threads[bot.pk] = bot_thread
+            # if lock.locked():
+            #     lock.release()
 
             return redirect('single_bot_list')
     else:

@@ -79,6 +79,10 @@ class WSStepHedgeClassLogic:
         if float(self.symbol_list[0]['size']) != 0 or float(self.symbol_list[1]['size']) != 0:
             return True
 
+    def checking_2opened_positions(self):
+        if float(self.symbol_list[0]['size']) != 0 and float(self.symbol_list[1]['size']) != 0:
+            return True
+
     def checking_opened_position(self, position_number):
         if Decimal(self.symbol_list[position_number]['size']) != 0:
             return True
@@ -88,9 +92,9 @@ class WSStepHedgeClassLogic:
         current_price = get_current_price(self.account, self.category, self.symbol) + 3 * self.tickSize
         for order_side in ['Buy', 'Sell']:
             if order_side == 'Buy':
-                qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
+                qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), current_price, self.symbol.minOrderQty, self.leverage)
             else:
-                qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
+                qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), current_price, self.symbol.minOrderQty, self.leverage)
             self.entry_qty[1 if order_side == 'Buy' else 2] = qty
 
             order = Order.objects.create(
@@ -107,9 +111,9 @@ class WSStepHedgeClassLogic:
         trigger_direction = 1 if self.price > current_price else 2
         for order_side in ['Buy', 'Sell']:
             if order_side == 'Buy':
-                qty = get_quantity_from_price(self.long1invest, self.price, self.symbol.minOrderQty, self.leverage)
+                qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), self.price, self.symbol.minOrderQty, self.leverage)
             else:
-                qty = get_quantity_from_price(self.short1invest, self.price, self.symbol.minOrderQty, self.leverage)
+                qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), self.price, self.symbol.minOrderQty, self.leverage)
             logging(self.bot, f'buy_by_limit, trigger_direction = {trigger_direction}')
             order = Order.objects.create(
                 bot=self.bot,
@@ -127,9 +131,9 @@ class WSStepHedgeClassLogic:
     #     current_price = get_current_price(self.account, self.category, self.symbol)
     #     for order_side in ['Buy', 'Sell']:
     #         if order_side == 'Buy':
-    #             qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
+    #             qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), current_price, self.symbol.minOrderQty, self.leverage)
     #         else:
-    #             qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
+    #             qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), current_price, self.symbol.minOrderQty, self.leverage)
     #
     #         order = Order.objects.create(
     #             bot=self.bot,
@@ -151,9 +155,9 @@ class WSStepHedgeClassLogic:
             psn_avg_price = Decimal(self.symbol_list[0 if position_number == 1 else 1]['avgPrice'])
 
         if position_idx == 1:
-            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 + self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
         else:
-            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
 
         if self.step_hg.add_tp:
             return set_trading_stop(
@@ -167,10 +171,10 @@ class WSStepHedgeClassLogic:
         if psn_entry_price > 0:
             if position_idx == 1:
                 self.avg_trigger_price[position_idx] = round(
-                    psn_entry_price * Decimal(str(1 - self.pnl_long_avg / 100 / self.leverage)), self.round_number)
+                    psn_entry_price * Decimal(str(1 - Decimal(self.step_hg.pnl_long_avg) / 100 / self.leverage)), self.round_number)
             else:
                 self.avg_trigger_price[position_idx] = round(
-                    psn_entry_price * Decimal(1 + self.pnl_short_avg / 100 / self.leverage), self.round_number)
+                    psn_entry_price * Decimal(1 + Decimal(self.step_hg.pnl_short_avg) / 100 / self.leverage), self.round_number)
 
         # self.class_data_obj.data['avg_trigger_price'][position_idx] = str(self.avg_trigger_price[position_idx])
         # self.class_data_obj.save()
@@ -186,10 +190,10 @@ class WSStepHedgeClassLogic:
             symbol_list = self.symbol_list[position_number]
             psn_margin = Decimal(symbol_list['avgPrice']) * Decimal(symbol_list['size']) / self.leverage
             if position_idx == 1:
-                if abs(pnl) > psn_margin / 100 * self.pnl_long_avg:
+                if abs(pnl) > psn_margin / 100 * Decimal(self.step_hg.pnl_long_avg):
                     return True
             else:
-                if abs(pnl) > psn_margin / 100 * self.pnl_short_avg:
+                if abs(pnl) > psn_margin / 100 * Decimal(self.step_hg.pnl_short_avg):
                     return True
 
     def limit_average_psn(self, position_number):
@@ -197,9 +201,9 @@ class WSStepHedgeClassLogic:
         qty = Decimal(self.symbol_list[position_number]['size'])
         side = 'Buy' if position_idx == 1 else 'Sell'
         if side == 'Buy':
-            avg_qty = qty * self.margin_long_avg / 100
+            avg_qty = qty * Decimal(self.step_hg.margin_long_avg) / 100
         else:
-            avg_qty = qty * self.margin_short_avg / 100
+            avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
         order = Order.objects.create(
             bot=self.bot,
             category=self.category,
@@ -215,9 +219,9 @@ class WSStepHedgeClassLogic:
         if qty > 0:
             side = 'Buy' if position_idx == 1 else 'Sell'
             if side == 'Buy':
-                avg_qty = qty * self.margin_long_avg / 100
+                avg_qty = qty * Decimal(self.step_hg.margin_long_avg) / 100
             else:
-                avg_qty = qty * self.margin_short_avg / 100
+                avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
             order = Order.objects.create(
                 bot=self.bot,
                 category=self.category,
@@ -234,11 +238,11 @@ class WSStepHedgeClassLogic:
         side = 'Buy' if position_idx == 1 else 'Sell'
         # current_price = get_current_price(self.account, self.category, self.symbol)
         if side == 'Buy':
-            # qty = get_quantity_from_price(self.long1invest, current_price, self.symbol.minOrderQty, self.leverage)
-            avg_qty = qty * self.margin_long_avg / 100
+            # qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), current_price, self.symbol.minOrderQty, self.leverage)
+            avg_qty = qty * Decimal(self.step_hg.margin_long_avg) / 100
         else:
-            # qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
-            avg_qty = qty * self.margin_short_avg / 100
+            # qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), current_price, self.symbol.minOrderQty, self.leverage)
+            avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
 
         order = Order.objects.create(
             bot=self.bot,
@@ -269,10 +273,10 @@ class WSStepHedgeClassLogic:
         current_price = get_current_price(self.account, self.category, self.symbol)
         if position_idx == 1:
             price = self.tp_price_dict[position_idx] + self.qty_steps * self.tickSize
-            qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
+            qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), price, self.symbol.minOrderQty, self.leverage)
         else:
             price = self.tp_price_dict[position_idx] - self.qty_steps * self.tickSize
-            qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+            qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), price, self.symbol.minOrderQty, self.leverage)
 
         trigger_direction = 1 if price > current_price else 2
         order_side = 'Buy' if position_idx == 1 else 'Sell'
@@ -310,9 +314,9 @@ class WSStepHedgeClassLogic:
         position_idx = self.symbol_list[position_number]['positionIdx']
         qty = Decimal(self.symbol_list[position_number]['size'])
         price = Decimal(self.symbol_list[position_number]['avgPrice'])
-        first_invest = self.long1invest if position_idx == 1 else self.short1invest
+        first_invest = Decimal(self.step_hg.long1invest) if position_idx == 1 else Decimal(self.step_hg.short1invest)
         # Это делается затем чтобы first_invest точно был больше начального значения, но меньше усредненного
-        first_invest = first_invest * (1 + (self.margin_long_avg / 100) / 2)
+        first_invest = first_invest * (1 + (Decimal(self.step_hg.margin_long_avg) / 100) / 2)
         if qty * price / self.leverage > first_invest:
             return True
 
@@ -331,9 +335,9 @@ class WSStepHedgeClassLogic:
         psn_price = Decimal(self.symbol_list[position_number]['avgPrice'])
         excess_qty = Decimal(self.symbol_list[position_number]['size'])
         if position_idx == 1:
-            tp_price = round(psn_price * Decimal(1 + self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            tp_price = round(psn_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
         else:
-            tp_price = round(psn_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            tp_price = round(psn_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
 
         for order in self.order_book:
             if order['positionIdx'] == position_idx and order['reduceOnly'] is True:
@@ -346,10 +350,10 @@ class WSStepHedgeClassLogic:
             current_price = get_current_price(self.account, self.category, self.symbol)
             if position_idx == 1:
                 price = self.tp_price_dict[position_idx]
-                qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
+                qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), price, self.symbol.minOrderQty, self.leverage)
             else:
                 price = self.tp_price_dict[position_idx]
-                qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+                qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), price, self.symbol.minOrderQty, self.leverage)
 
             trigger_direction = 1 if price > current_price else 2
             order_side = 'Buy' if position_idx == 1 else 'Sell'
@@ -374,9 +378,9 @@ class WSStepHedgeClassLogic:
         psn_avg_price = Decimal(order['avgPrice'])
 
         if position_idx == 1:
-            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 + self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
         else:
-            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
 
         if self.step_hg.add_tp:
             # print('ADD_TP RESPONSE -------- ')
@@ -396,13 +400,13 @@ class WSStepHedgeClassLogic:
                 price = self.tp_price_dict[position_idx] + self.qty_steps * self.tickSize
             else:
                 price = self.tp_price_dict[position_idx]
-            qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
+            qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), price, self.symbol.minOrderQty, self.leverage)
         else:
             if self.step_hg.is_nipple_active:
                 price = self.tp_price_dict[position_idx] - self.qty_steps * self.tickSize
             else:
                 price = self.tp_price_dict[position_idx]
-            qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+            qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), price, self.symbol.minOrderQty, self.leverage)
 
         trigger_direction = 1 if price > current_price else 2
         order_side = 'Buy' if position_idx == 1 else 'Sell'
@@ -426,9 +430,9 @@ class WSStepHedgeClassLogic:
         current_price = get_current_price(self.account, self.category, self.symbol)
         price = self.new_psn_price_dict[position_idx]
         if position_idx == 1:
-            qty = get_quantity_from_price(self.long1invest, price, self.symbol.minOrderQty, self.leverage)
+            qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), price, self.symbol.minOrderQty, self.leverage)
         else:
-            qty = get_quantity_from_price(self.short1invest, price, self.symbol.minOrderQty, self.leverage)
+            qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), price, self.symbol.minOrderQty, self.leverage)
 
         trigger_direction = 1 if price > current_price else 2
         order_side = 'Buy' if position_idx == 1 else 'Sell'
@@ -449,9 +453,9 @@ class WSStepHedgeClassLogic:
         qty = Decimal(self.ws_symbol_list[position_idx]['size'])
         side = 'Buy' if position_idx == 1 else 'Sell'
         if side == 'Buy':
-            avg_qty = qty * self.margin_long_avg / 100
+            avg_qty = qty * Decimal(self.step_hg.margin_long_avg) / 100
         else:
-            avg_qty = qty * self.margin_short_avg / 100
+            avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
 
         order = Order.objects.create(
             bot=self.bot,
@@ -465,9 +469,9 @@ class WSStepHedgeClassLogic:
     def ws_amend_tp_order(self, position_idx):
         new_psn_price = Decimal(self.ws_symbol_list[position_idx]['entryPrice'])
         if position_idx == 1:
-            self.tp_price_dict[position_idx] = round(new_psn_price * Decimal(1 + self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(new_psn_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
         elif position_idx == 2:
-            self.tp_price_dict[position_idx] = round(new_psn_price * Decimal(1 - self.tp_pnl_percent / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(new_psn_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
 
         set_trading_stop(self.bot, position_idx, takeProfit=str(self.tp_price_dict[position_idx]))
 

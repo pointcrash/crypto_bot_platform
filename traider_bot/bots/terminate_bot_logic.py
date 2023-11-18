@@ -1,3 +1,5 @@
+import time
+
 from api_v5 import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging, clear_data_bot
 from bots.models import Bot
@@ -8,7 +10,9 @@ from single_bot.logic.global_variables import lock, global_list_bot_id, global_l
 
 def terminate_thread(bot_id, keep_active=False):
     bot = Bot.objects.get(pk=bot_id)
-    ActiveBot.objects.filter(bot_id=bot_id).delete()
+    if ActiveBot.objects.filter(bot_id=bot_id):
+        ActiveBot.objects.filter(bot_id=bot_id).delete()
+        time.sleep(5)
     lock.acquire()
     try:
         if bot_id in global_list_bot_id:
