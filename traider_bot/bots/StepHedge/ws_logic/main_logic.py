@@ -25,8 +25,8 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
         )
 
         step_class_obj = WSStepHedgeClassLogic(bot, step_hg, class_data)
-        step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'] = step_class_obj.is_avg_psn_flag_dict
-        step_class_obj.class_data_obj.save()
+        # step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'] = step_class_obj.is_avg_psn_flag_dict
+        # step_class_obj.class_data_obj.save()
 
         ws_private = WebSocket(
             # trace_logging=True,
@@ -53,10 +53,11 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                 step_class_obj.buy_by_limit()
             else:
                 step_class_obj.buy_by_market()
-        elif step_class_obj.checking_2opened_positions():
-            cancel_all(step_class_obj.account, step_class_obj.category, step_class_obj.symbol)
+        # elif step_class_obj.checking_2opened_positions():
         else:
-            raise Exception('Некорректное состояние позиций по данной торговой паре')
+            cancel_all(step_class_obj.account, step_class_obj.category, step_class_obj.symbol)
+        # else:
+        #     raise Exception('Некорректное состояние позиций по данной торговой паре')
 
         ws_public.ticker_stream(symbol=bot.symbol.name, callback=handle_stream_callback(step_class_obj, arg='ticker'))
 
@@ -72,6 +73,9 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
         for position_number in range(2):
+            if step_class_obj.symbol_list[position_number]['size'] == '0':
+                continue
+
             if step_class_obj.losses_pnl_check(position_number):
                 step_class_obj.average_psn(position_number)
 
@@ -97,6 +101,18 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                         if step_class_obj.distance_between_price_and_order_check(position_number):
                             step_class_obj.amend_new_psn_order(position_number)
 
+        # Проверка наличия указанной маржи для позиций
+        if step_class_obj.short1invest and step_class_obj.long1invest:
+            position_idxs_list = [1, 2]
+        else:
+            if not step_class_obj.short1invest and not step_class_obj.long1invest:
+                raise Exception('Не указана маржа открытия позиций')
+            elif step_class_obj.short1invest:
+                position_idxs_list = [2]
+            else:
+                position_idxs_list = [1]
+
+        s = 0
         # Запускаем цикл отслеживания состояния позиций/ордеров
         while is_bot_active(bot_id):
 
@@ -134,7 +150,7 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                 raise Exception('len orderbook > 4')
 
             # Проверка наличия выставленных ордеров
-            for position_idx in [1, 2]:
+            for position_idx in position_idxs_list:
                 if not step_class_obj.ws_checking_opened_new_psn_order(position_idx):
                     step_class_obj.ws_replace_new_psn_order(position_idx)
                 else:
@@ -145,6 +161,8 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             if step_class_obj.locker_3.locked():
                 step_class_obj.locker_3.release()
 
+            s += 1
+            # print('bot', bot_id, 'is working', s)
             sleep_function(5, bot_id)
     except Exception as e:
         logging(bot, f'Error {e}')
@@ -185,7 +203,6 @@ def changes_tracking_function(bot, step_hedge, step_class_obj):
         step_class_obj.margin_short_avg = Decimal(step_hedge_data.margin_short_avg)
         step_class_obj.margin_long_avg = Decimal(step_hedge_data.margin_long_avg)
 
-        print(step_class_obj.tp_pnl_percent, Decimal(step_hedge_data.tp_pnl_percent))
         if step_class_obj.tp_pnl_percent != Decimal(step_hedge_data.tp_pnl_percent):
             step_class_obj.tp_pnl_percent = Decimal(step_hedge_data.tp_pnl_percent)
             apply_changes = True

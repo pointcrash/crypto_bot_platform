@@ -31,6 +31,7 @@ class WSStepHedgeClassLogic:
         self.pnl_long_avg = Decimal(step_hg.pnl_long_avg)
         self.margin_short_avg = Decimal(step_hg.margin_short_avg)
         self.margin_long_avg = Decimal(step_hg.margin_long_avg)
+        self.last_price = 0
         self.tp_price_dict = dict()
         self.new_psn_price_dict = dict()
         self.psn_price_dict = dict()
@@ -97,14 +98,15 @@ class WSStepHedgeClassLogic:
                 qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), current_price, self.symbol.minOrderQty, self.leverage)
             self.entry_qty[1 if order_side == 'Buy' else 2] = qty
 
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-            )
+            if qty:
+                order = Order.objects.create(
+                    bot=self.bot,
+                    category=self.category,
+                    symbol=self.symbol.name,
+                    side=order_side,
+                    orderType="Market",
+                    qty=qty,
+                )
 
     def buy_by_limit(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -478,9 +480,20 @@ class WSStepHedgeClassLogic:
     def ws_amend_new_psn_order(self, position_idx, current_price=False):
         if current_price:
             current_price = get_current_price(self.account, self.category, self.symbol)
-            params = {'triggerPrice': str(current_price + self.tickSize)}
+            if position_idx == 1:
+                trigger_price = current_price + self.tickSize
+            else:
+                trigger_price = current_price - self.tickSize
         else:
-            params = {'triggerPrice': str(self.tp_price_dict[position_idx])}
+            if self.step_hg.is_nipple_active:
+                if position_idx == 1:
+                    trigger_price = self.tp_price_dict[position_idx] + self.qty_steps * self.tickSize
+                else:
+                    trigger_price = self.tp_price_dict[position_idx] - self.qty_steps * self.tickSize
+            else:
+                trigger_price = self.tp_price_dict[position_idx]
+
+        params = {'triggerPrice': str(trigger_price)}
         amend_order(self.bot, self.new_psn_orderId_dict[position_idx], params)
 
     def ws_amend_avg_psn_order(self, position_idx):

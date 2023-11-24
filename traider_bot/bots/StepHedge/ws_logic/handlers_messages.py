@@ -35,29 +35,39 @@ def handle_ticker_stream_message(message, step_class_obj):
         try:
             if 'lastPrice' in message['data']:
                 last_price = Decimal(message['data']['lastPrice'])
+                if step_class_obj.last_price != last_price:
+                    step_class_obj.last_price = last_price
 
-                # missed_order_psn_idx = step_class_obj.order_missed_check(last_price)
-                # if missed_order_psn_idx:
-                #     step_class_obj.buy(missed_order_psn_idx, last_price)
+                    # missed_order_psn_idx = step_class_obj.order_missed_check(last_price)
+                    # if missed_order_psn_idx:
+                    #     step_class_obj.buy(missed_order_psn_idx, last_price)
 
-                # Ниппель
-                # print(step_class_obj.tp_order_executed)
-                # if step_class_obj.tp_order_executed[1]:
-                #     print(step_class_obj.new_psn_price_dict, last_price, step_class_obj.qty_steps * step_class_obj.tickSize)
-                #     if step_class_obj.new_psn_price_dict[1] - last_price > step_class_obj.qty_steps * step_class_obj.tickSize:
-                #         step_class_obj.new_psn_price_dict[1] -= step_class_obj.qty_steps_diff * step_class_obj.tickSize
-                #         print(step_class_obj.new_psn_price_dict)
-                # if step_class_obj.tp_order_executed[2]:
-                #     print(step_class_obj.new_psn_price_dict, last_price, step_class_obj.qty_steps * step_class_obj.tickSize)
-                #     if last_price - step_class_obj.new_psn_price_dict[2] > step_class_obj.qty_steps * step_class_obj.tickSize:
-                #         step_class_obj.new_psn_price_dict[2] += step_class_obj.qty_steps_diff * step_class_obj.tickSize
-                #         print(step_class_obj.new_psn_price_dict)
+                    # Ниппель, усреднение
+                    if step_class_obj.long1invest:
+                        position_idx = 1
+                        if step_class_obj.tp_order_executed[position_idx]:
+                            if step_class_obj.new_psn_price_dict[position_idx] - last_price > step_class_obj.qty_steps * step_class_obj.tickSize:
+                                step_class_obj.new_psn_price_dict[position_idx] -= step_class_obj.qty_steps_diff * step_class_obj.tickSize
+                                step_class_obj.ws_amend_new_psn_order(position_idx)
+                        if last_price <= step_class_obj.avg_trigger_price[position_idx]:
+                            ws_average_actions_for_step_hedge(step_class_obj, position_idx)
 
-                # Усреднение
-                if last_price <= step_class_obj.avg_trigger_price[1]:
-                    ws_average_actions_for_step_hedge(step_class_obj, 1)
-                elif last_price >= step_class_obj.avg_trigger_price[2]:
-                    ws_average_actions_for_step_hedge(step_class_obj, 2)
+                    if step_class_obj.short1invest:
+                        position_idx = 2
+                        if step_class_obj.tp_order_executed[position_idx]:
+                            if last_price - step_class_obj.new_psn_price_dict[position_idx] > step_class_obj.qty_steps * step_class_obj.tickSize:
+                                step_class_obj.new_psn_price_dict[position_idx] += step_class_obj.qty_steps_diff * step_class_obj.tickSize
+                                step_class_obj.ws_amend_new_psn_order(position_idx)
+                        if last_price >= step_class_obj.avg_trigger_price[position_idx]:
+                            ws_average_actions_for_step_hedge(step_class_obj, position_idx)
+
+                    # Усреднение
+                    # if step_class_obj.long1invest:
+                    #     if last_price <= step_class_obj.avg_trigger_price[1]:
+                    #         ws_average_actions_for_step_hedge(step_class_obj, 1)
+                    # if step_class_obj.short1invest:
+                    #     if last_price >= step_class_obj.avg_trigger_price[2]:
+                    #         ws_average_actions_for_step_hedge(step_class_obj, 2)
 
         except Exception as e:
             print('Exception in tickers func: ', e)
@@ -76,8 +86,6 @@ def handle_order_stream_message(message, step_class_obj):
                                 if order['stopOrderType'] == 'Stop':
                                     if order['orderId'] == step_class_obj.new_psn_orderId_dict[order['positionIdx']]:
                                         if not step_class_obj.new_order_is_filled[order['positionIdx']]:
-                                            # print(order)
-                                            # print()
                                             step_class_obj.new_order_is_filled[order['positionIdx']] = True
                                             step_class_obj.tp_order_executed[order['positionIdx']] = False
                                             step_class_obj.ws_place_tp_order(order)
@@ -117,8 +125,9 @@ def handle_position_stream_message(message, step_class_obj):
                             step_class_obj.ws_symbol_list[position_idx] = psn
                             step_class_obj.calculate_avg_trigger_price(position_idx)
 
-                            step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx] = False
-                            step_class_obj.class_data_obj.save()
+                            step_class_obj.is_avg_psn_flag_dict[position_idx] = False
+                            # step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx] = False
+                            # step_class_obj.class_data_obj.save()
 
                             step_class_obj.ws_amend_tp_order(position_idx)
                             step_class_obj.ws_amend_new_psn_order(position_idx)
@@ -135,8 +144,10 @@ def handle_position_stream_message(message, step_class_obj):
 
 def ws_average_actions_for_step_hedge(step_class_obj, position_idx):
     # print(step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'])
-    if not step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx]:
-        step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx] = True
+    # if not step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx]:
+    if not step_class_obj.is_avg_psn_flag_dict[position_idx]:
+        # step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx] = True
+        step_class_obj.is_avg_psn_flag_dict[position_idx] = True
         step_class_obj.class_data_obj.save()
         step_class_obj.ws_average_psn_by_market(position_idx)
 
