@@ -178,6 +178,15 @@ class StepHedge(models.Model):
     qty_steps_diff = models.IntegerField(default=10)
     add_tp = models.BooleanField(default=False)
     is_nipple_active = models.BooleanField(default=True)
+    move_nipple = models.BooleanField(blank=True, null=True)
+
+    def set_move_nipple_value(self):
+        if self.move_nipple is None:
+            self.move_nipple = True if self.is_nipple_active is True else False
+
+    def save(self, *args, **kwargs):
+        self.set_move_nipple_value()
+        super().save(*args, **kwargs)
 
 
 class OppositePosition(models.Model):

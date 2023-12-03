@@ -112,7 +112,6 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             else:
                 position_idxs_list = [1]
 
-        s = 0
         # Запускаем цикл отслеживания состояния позиций/ордеров
         while is_bot_active(bot_id):
 
@@ -161,9 +160,9 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             if step_class_obj.locker_3.locked():
                 step_class_obj.locker_3.release()
 
-            s += 1
-            # print('bot', bot_id, 'is working', s)
-            sleep_function(5, bot_id)
+            # print(step_class_obj.ws_symbol_list)
+            # print()
+            sleep_function(10, bot_id)
     except Exception as e:
         logging(bot, f'Error {e}')
         exit_by_exception(bot)

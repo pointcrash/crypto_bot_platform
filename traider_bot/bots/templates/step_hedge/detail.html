@@ -79,13 +79,24 @@
                     {{ step_hedge_form.margin_short_avg }}
                     {{ step_hedge_form.margin_long_avg.label_tag }}
                     {{ step_hedge_form.margin_long_avg }}
+                    {{ form.max_margin.label_tag }}
+                    {{ form.max_margin }}
                     <div class="form-check mt-2 p-1">
                         {{ step_hedge_form.add_tp }}
                     </div>
                     <br>
                     <div class="d-flex flex-row">
                         {{ step_hedge_form.is_nipple_active.label_tag }}
-                        {{ step_hedge_form.is_nipple_active }}
+                        <div class="ms-1">
+                            {{ step_hedge_form.is_nipple_active }}
+                        </div>
+
+                        {% if bot.stephedge.is_nipple_active %}
+                            <a class="ms-auto btn btn-sm {% if move_nipple %}btn-danger{% else %}btn-success{% endif %}"
+                               href="{% url 'on_off_move_nipple' bot_id=bot.pk %}">
+                                {% if move_nipple %}Отключить поджим{% else %}Включить поджим{% endif %}
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

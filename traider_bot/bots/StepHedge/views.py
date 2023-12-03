@@ -119,4 +119,14 @@ def step_hedge_bot_detail(request, bot_id):
                       'order_list': order_list,
                       'symbol_list': symbol_list,
                       'have_open_psn': have_open_psn,
+                      'move_nipple': step_hedge.move_nipple,
                   })
+
+
+def on_off_move_nipple(request, bot_id):
+    bot = Bot.objects.get(pk=bot_id)
+    step_hedge = StepHedge.objects.filter(bot=bot).first()
+    step_hedge.move_nipple = False if step_hedge.move_nipple is True else True
+    step_hedge.save()
+
+    return redirect(request.META.get('HTTP_REFERER'))

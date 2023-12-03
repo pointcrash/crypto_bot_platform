@@ -101,7 +101,7 @@ class StepHedgeForm(forms.ModelForm):
     class Meta:
         model = StepHedge
         fields = ['short1invest', 'long1invest', 'tp_pnl_percent', 'pnl_short_avg', 'pnl_long_avg',
-                  'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff', 'add_tp', 'is_nipple_active', ]
+                  'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff', 'is_nipple_active', ]
 
         widgets = {
             'short1invest': forms.TextInput(attrs={'class': 'form-control'}),

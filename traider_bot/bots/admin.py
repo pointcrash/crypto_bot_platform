@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot
+from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot, StepHedge
 
 
 @admin.register(Bot)
@@ -33,16 +33,31 @@ class OrdersAdmin(admin.ModelAdmin):
 @admin.register(Take)
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'bot', 'take_number', 'order_link_id', 'is_filled',)
-    list_display_links = ('id', 'bot', 'order_link_id', )
+    list_display_links = ('id', 'bot', 'order_link_id',)
 
 
 @admin.register(AvgOrder)
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'bot', 'order_link_id', 'is_filled',)
-    list_display_links = ('id', 'bot', 'order_link_id', )
+    list_display_links = ('id', 'bot', 'order_link_id',)
 
 
 @admin.register(SingleBot)
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'bot', 'single')
     list_display_links = ('id', 'bot')
+
+
+@admin.register(StepHedge)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'bot', 'bot_id', 'bot_owner', )
+    list_display_links = ('id', 'bot')
+    search_fields = ('bot', 'bot_id', 'bot_owner', )
+
+    @staticmethod
+    def bot_id(obj):
+        return obj.bot.pk
+
+    @staticmethod
+    def bot_owner(obj):
+        return obj.bot.account

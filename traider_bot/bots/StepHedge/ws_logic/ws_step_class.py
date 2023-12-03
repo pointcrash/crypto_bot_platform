@@ -459,14 +459,32 @@ class WSStepHedgeClassLogic:
         else:
             avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
 
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=side,
-            orderType="Market",
-            qty=avg_qty,
-        )
+        if self.bot.max_margin:
+            current_margin = self.get_current_margin()
+            avg_margin = avg_qty * Decimal(self.ws_symbol_list[position_idx]['entryPrice']) / self.leverage
+            total_margin = current_margin + avg_margin
+
+            if total_margin < self.bot.max_margin:
+                order = Order.objects.create(
+                    bot=self.bot,
+                    category=self.category,
+                    symbol=self.symbol.name,
+                    side=side,
+                    orderType="Market",
+                    qty=avg_qty,
+                )
+            else:
+                logging(self.bot,
+                        f'Margin limit reached. Current limit {self.bot.max_margin}. Margin after avg {total_margin}')
+        else:
+            order = Order.objects.create(
+                bot=self.bot,
+                category=self.category,
+                symbol=self.symbol.name,
+                side=side,
+                orderType="Market",
+                qty=avg_qty,
+            )
 
     def ws_amend_tp_order(self, position_idx):
         new_psn_price = Decimal(self.ws_symbol_list[position_idx]['entryPrice'])
@@ -523,7 +541,12 @@ class WSStepHedgeClassLogic:
                 self.new_order_is_filled[position_idx] = True
                 return True
 
-
+    def get_current_margin(self):
+        total_margin = 0
+        for i in [1, 2]:
+            margin = Decimal(self.ws_symbol_list[i]['size']) * Decimal(self.ws_symbol_list[i]['entryPrice']) / self.leverage
+            total_margin += margin
+        return total_margin
 
 
 
