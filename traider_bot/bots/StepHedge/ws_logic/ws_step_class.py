@@ -373,16 +373,24 @@ class WSStepHedgeClassLogic:
                 triggerPrice=str(price),
             )
 
-    def ws_place_tp_order(self, order):
+    def ws_place_tp_order(self, order, status='Filled'):
         position_idx = order['positionIdx']
         tp_size = Decimal(order['qty'])
 
-        psn_avg_price = Decimal(order['avgPrice'])
+        if status == 'Filled':
+            psn_avg_price = Decimal(order['avgPrice'])
 
-        if position_idx == 1:
-            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
-        else:
-            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
+            if position_idx == 1:
+                self.tp_price_dict[position_idx] = round(
+                    psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage),
+                    self.round_number)
+            else:
+                self.tp_price_dict[position_idx] = round(
+                    psn_avg_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage),
+                    self.round_number)
+
+        elif status == 'Deactivated':
+            self.tp_price_dict[position_idx] = Decimal(order['triggerPrice'])
 
         if self.step_hg.add_tp:
             # print('ADD_TP RESPONSE -------- ')
@@ -394,37 +402,53 @@ class WSStepHedgeClassLogic:
             # print()
             return response
 
-    def ws_place_new_psn_order(self, order):
+    def ws_place_new_psn_order(self, order, status='Filled'):
         position_idx = order['positionIdx']
-        current_price = Decimal(order['avgPrice'])
-        if position_idx == 1:
-            if self.step_hg.is_nipple_active:
-                price = self.tp_price_dict[position_idx] + self.qty_steps * self.tickSize
-            else:
-                price = self.tp_price_dict[position_idx]
-            qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), price, self.symbol.minOrderQty, self.leverage)
-        else:
-            if self.step_hg.is_nipple_active:
-                price = self.tp_price_dict[position_idx] - self.qty_steps * self.tickSize
-            else:
-                price = self.tp_price_dict[position_idx]
-            qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), price, self.symbol.minOrderQty, self.leverage)
+        if status == 'Filled':
+            current_price = Decimal(order['avgPrice'])
 
-        trigger_direction = 1 if price > current_price else 2
-        order_side = 'Buy' if position_idx == 1 else 'Sell'
-        self.new_psn_price_dict[position_idx] = price
-        logging(self.bot, f'ws_place_new_psn_order, trigger_direction = {trigger_direction}')
-        Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=order_side,
-            orderType="Market",
-            qty=qty,
-            price=str(price),
-            triggerDirection=trigger_direction,
-            triggerPrice=str(price),
-        )
+            if position_idx == 1:
+                if self.step_hg.is_nipple_active:
+                    price = self.tp_price_dict[position_idx] + self.qty_steps * self.tickSize
+                else:
+                    price = self.tp_price_dict[position_idx]
+                qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), price, self.symbol.minOrderQty, self.leverage)
+            else:
+                if self.step_hg.is_nipple_active:
+                    price = self.tp_price_dict[position_idx] - self.qty_steps * self.tickSize
+                else:
+                    price = self.tp_price_dict[position_idx]
+                qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), price, self.symbol.minOrderQty, self.leverage)
+
+            trigger_direction = 1 if price > current_price else 2
+            order_side = 'Buy' if position_idx == 1 else 'Sell'
+            self.new_psn_price_dict[position_idx] = price
+            logging(self.bot, f'ws_place_new_psn_order, trigger_direction = {trigger_direction}')
+            Order.objects.create(
+                bot=self.bot,
+                category=self.category,
+                symbol=self.symbol.name,
+                side=order_side,
+                orderType="Market",
+                qty=qty,
+                price=str(price),
+                triggerDirection=trigger_direction,
+                triggerPrice=str(price),
+            )
+        elif status == 'Deactivated':
+            price = Decimal(order['triggerPrice'])
+            self.new_psn_price_dict[position_idx] = price
+            Order.objects.create(
+                bot=self.bot,
+                category=self.category,
+                symbol=self.symbol.name,
+                side=order['side'],
+                orderType="Market",
+                qty=order['qty'],
+                price=order['triggerPrice'],
+                triggerDirection=order['triggerDirection'],
+                triggerPrice=order['triggerPrice'],
+            )
         # print('PLACE ORDER AFTER -', order['orderId'])
         # print()
 
@@ -547,9 +571,6 @@ class WSStepHedgeClassLogic:
             margin = Decimal(self.ws_symbol_list[i]['size']) * Decimal(self.ws_symbol_list[i]['entryPrice']) / self.leverage
             total_margin += margin
         return total_margin
-
-
-
 
 
 

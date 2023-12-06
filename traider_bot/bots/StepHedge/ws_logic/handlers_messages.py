@@ -79,7 +79,8 @@ def handle_order_stream_message(message, step_class_obj):
         try:
             # print('--------------------START--ORDER-LIST----------------------')
             for order in message['data']:
-                # print(order)
+                print(order)
+                print()
                 if order['symbol'] == step_class_obj.symbol.name:
                     if order['reduceOnly'] is False:
                         if order['orderStatus'] == 'Filled':
@@ -91,6 +92,10 @@ def handle_order_stream_message(message, step_class_obj):
                                             step_class_obj.tp_order_executed[order['positionIdx']] = False
                                             step_class_obj.ws_place_tp_order(order)
                                             step_class_obj.ws_place_new_psn_order(order)
+                        elif order['orderStatus'] == 'Deactivated':
+                            if order['cancelType'] == 'CancelByUser':
+                                if order['orderId'] == step_class_obj.new_psn_orderId_dict[order['positionIdx']]:
+                                    step_class_obj.ws_place_new_psn_order(order, status=order['orderStatus'])
 
                         elif order['orderStatus'] == 'Untriggered':
                             step_class_obj.new_psn_orderId_dict[order['positionIdx']] = order['orderId']
@@ -102,8 +107,12 @@ def handle_order_stream_message(message, step_class_obj):
                             step_class_obj.locker_3.acquire()
 
                     elif order['reduceOnly'] is True:
+                        print(order['orderStatus'])
+                        print()
                         if order['orderStatus'] == 'Filled':
                             step_class_obj.tp_order_executed[order['positionIdx']] = True
+                        elif order['orderStatus'] == 'Deactivated':
+                            step_class_obj.ws_place_tp_order(order, status=order['orderStatus'])
 
             # print('--------------------END--ORDER-LIST------------------------')
             # print()
@@ -163,4 +172,18 @@ def ws_average_actions_for_step_hedge(step_class_obj, position_idx):
     'triggerDirection': 0, 'placeType': '', 'lastPriceOnCreated': '0.3897', 'closeOnTrigger': False, 'reduceOnly': False,
     'smpGroup': 0, 'smpType': 'None', 'smpOrderId': '', 'slLimitPrice': '0', 'tpLimitPrice': '0', 'tpslMode': 'UNKNOWN',
     'createdTime': '1699279409295', 'updatedTime': '1699279409299', 'feeCurrency': ''}
+'''
+
+
+
+'''
+{'category': 'linear', 'symbol': 'SANDUSDT', 'orderId': 'd2f1c5f4-578c-4ab0-ad23-0d58e1dca456',
+ 'orderLinkId': '9171ebfc9e64420294fafac27dfc7694', 'blockTradeId': '', 'side': 'Sell', 'positionIdx': 2,
+ 'orderStatus': 'Deactivated', 'cancelType': 'CancelByUser', 'rejectReason': 'EC_NoError', 'timeInForce': 'IOC',
+ 'isLeverage': '', 'price': '0', 'qty': '2287', 'avgPrice': '', 'leavesQty': '0', 'leavesValue': '0',
+ 'cumExecQty': '0', 'cumExecValue': '0', 'cumExecFee': '0', 'orderType': 'Market', 'stopOrderType': 'Stop',
+ 'orderIv': '', 'triggerPrice': '0.4371', 'takeProfit': '', 'stopLoss': '', 'triggerBy': 'LastPrice',
+ 'tpTriggerBy': '', 'slTriggerBy': '', 'triggerDirection': 2, 'placeType': '', 'lastPriceOnCreated': '0.4423',
+ 'closeOnTrigger': False, 'reduceOnly': False, 'smpGroup': 0, 'smpType': 'None', 'smpOrderId': '', 'slLimitPrice': '0',
+ 'tpLimitPrice': '0', 'tpslMode': 'UNKNOWN', 'createdTime': '1701794440765', 'updatedTime': '1701794479238', 'feeCurrency': ''}
 '''
