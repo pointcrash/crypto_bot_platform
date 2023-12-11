@@ -7,6 +7,8 @@ from api_v5 import get_list, cancel_all, switch_position_mode, set_leverage, get
 from bots.bot_logic import get_quantity_from_price, logging
 from bots.models import JsonObjectClass
 from orders.models import Order
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 
 
 class WSStepHedgeClassLogic:
@@ -14,6 +16,7 @@ class WSStepHedgeClassLogic:
         self.bot = bot
         self.step_hg = step_hg
         self.class_data_obj = class_data_obj
+        self.telegram_account = TelegramAccount.objects.filter(owner=bot.owner).first()
         self.bot_id = bot.pk
         self.account = bot.account
         self.category = bot.category
@@ -49,6 +52,11 @@ class WSStepHedgeClassLogic:
         self.locker_1 = threading.Lock()
         self.locker_2 = threading.Lock()
         self.locker_3 = threading.Lock()
+
+    def send_telegram_notice(self, message):
+        if self.telegram_account:
+            chat_id = self.telegram_account.chat_id
+            send_telegram_message(chat_id, bot=self.bot, message=message)
 
     def preparatory_actions(self):
         # append_thread_or_check_duplicate(self.bot_id)
@@ -497,6 +505,10 @@ class WSStepHedgeClassLogic:
                     orderType="Market",
                     qty=avg_qty,
                 )
+
+                message = f'Позиция {side} была усреднена на {avg_qty} {self.symbol.name}'
+                self.send_telegram_notice(message)
+
             else:
                 logging(self.bot,
                         f'Margin limit reached. Current limit {self.bot.max_margin}. Margin after avg {total_margin}')
@@ -509,6 +521,9 @@ class WSStepHedgeClassLogic:
                 orderType="Market",
                 qty=avg_qty,
             )
+
+            message = f'Позиция {side} была усреднена на {avg_qty} {self.symbol.name}'
+            self.send_telegram_notice(message)
 
     def ws_amend_tp_order(self, position_idx):
         new_psn_price = Decimal(self.ws_symbol_list[position_idx]['entryPrice'])

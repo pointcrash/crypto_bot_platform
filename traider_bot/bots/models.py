@@ -105,6 +105,8 @@ class Bot(models.Model):
 
     repeat = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    time_create = models.DateTimeField(auto_now_add=True, null=True)
+    time_update = models.DateTimeField(auto_now=True, null=True)
 
     # def save(self, *args, **kwargs):
     #     super().save(*args, **kwargs)

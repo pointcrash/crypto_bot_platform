@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 
 from api_v5 import get_query_account_coins_balance, get_list
@@ -40,7 +40,8 @@ def logs_list(request, bot_id):
         if date_form.is_valid():
             start_date = date_form.cleaned_data['start_date']
             end_date = date_form.cleaned_data['end_date']
-            pnl = calculate_pnl(bot=bot, start_date=start_date, end_date=end_date)
+            pnl_list = calculate_pnl(bot=bot, start_date=start_date, end_date=end_date)
+            pnl = pnl_list['pnl']
             not_timezone = True
 
         if not not_timezone:
@@ -53,6 +54,9 @@ def logs_list(request, bot_id):
     else:
         date_form = DateRangeForm()
         timezone_form = TimeZoneForm()
+
+        if bot.time_update:
+            pnl_list = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
 
     for i in range(1, len(logs) + 1):
         log_list.append([i, logs[i - 1]])
@@ -68,6 +72,7 @@ def logs_list(request, bot_id):
         'timezone_form': timezone_form,
         'date_form': date_form,
         'calculated_bot_pnl_in_logs': pnl,
+        'pnl_list': pnl_list,
     })
 
 

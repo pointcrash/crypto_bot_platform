@@ -140,6 +140,13 @@
             </div>
         </form>
 
+            <div class="border-bottom border-2 border-dark col-3 text-center">
+                {% if pnl_list %}
+                <h5>Общий PNL ({{ pnl_list.pnl }})</h5>
+                <h6>Long ({{ pnl_list.pnl_buy }}) | Short ({{ pnl_list.pnl_sell }})</h6>
+                {% endif %}
+            </div>
+
         <h5 class="text-center">POSITIONS</h5>
         <hr>
         <br>

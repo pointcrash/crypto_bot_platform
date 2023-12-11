@@ -79,8 +79,6 @@ def handle_order_stream_message(message, step_class_obj):
         try:
             # print('--------------------START--ORDER-LIST----------------------')
             for order in message['data']:
-                print(order)
-                print()
                 if order['symbol'] == step_class_obj.symbol.name:
                     if order['reduceOnly'] is False:
                         if order['orderStatus'] == 'Filled':
@@ -107,8 +105,6 @@ def handle_order_stream_message(message, step_class_obj):
                             step_class_obj.locker_3.acquire()
 
                     elif order['reduceOnly'] is True:
-                        print(order['orderStatus'])
-                        print()
                         if order['orderStatus'] == 'Filled':
                             step_class_obj.tp_order_executed[order['positionIdx']] = True
                         elif order['orderStatus'] == 'Deactivated':
@@ -151,13 +147,9 @@ def handle_position_stream_message(message, step_class_obj):
 
 
 def ws_average_actions_for_step_hedge(step_class_obj, position_idx):
-    # print(step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'])
-    # if not step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx]:
     if float(step_class_obj.ws_symbol_list[position_idx]['size']):
         if not step_class_obj.is_avg_psn_flag_dict[position_idx]:
-            # step_class_obj.class_data_obj.data['is_avg_psn_flag_dict'][position_idx] = True
             step_class_obj.is_avg_psn_flag_dict[position_idx] = True
-            step_class_obj.class_data_obj.save()
             step_class_obj.ws_average_psn_by_market(position_idx)
 
 

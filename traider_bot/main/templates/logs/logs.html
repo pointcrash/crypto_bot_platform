@@ -49,6 +49,8 @@
             <a href="{% url 'single_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% elif bot.work_model == 'SmpHg' %}
             <a href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% elif bot.work_model == 'StpHg' %}
+            <a href="{% url 'step_hedge_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% endif %}
 
             <!-- Кнопка для открытия модального окна -->
@@ -77,7 +79,14 @@
               </div>
             </div>
 
-            <div class="card mt-3">
+            <div class="border-bottom border-2 border-dark col-3 mt-1 mx-auto text-center">
+                {% if pnl_list %}
+                <h5>Общий PNL ({{ pnl_list.pnl }})</h5>
+                <h6>Long ({{ pnl_list.pnl_buy }}) | Short ({{ pnl_list.pnl_sell }})</h6>
+                {% endif %}
+            </div>
+
+            <div class="card mt-1">
                 <table class="table" style="vertical-align: middle">
                     <thead>
                     <tr>
