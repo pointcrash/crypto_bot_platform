@@ -55,8 +55,8 @@ def logs_list(request, bot_id):
         date_form = DateRangeForm()
         timezone_form = TimeZoneForm()
 
-        if bot.time_update:
-            pnl_list = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
+        # if bot.time_update:
+        #     pnl_list = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
 
     for i in range(1, len(logs) + 1):
         log_list.append([i, logs[i - 1]])
@@ -72,7 +72,7 @@ def logs_list(request, bot_id):
         'timezone_form': timezone_form,
         'date_form': date_form,
         'calculated_bot_pnl_in_logs': pnl,
-        'pnl_list': pnl_list,
+        # 'pnl_list': pnl_list,
     })
 
 

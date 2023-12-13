@@ -245,8 +245,8 @@ def get_pnl(account, category, symbol, start_time=0, end_time=0, limit=50):
     else:
         params = f"category={category}&symbol={symbol}&startTime={start_time}&endTime={end_time}&limit={limit}"
     response = json.loads(HTTP_Request(account, endpoint, method, params))
-    print(response)
-    print(params)
+    # print(response)
+    # print(params)
     try:
         return response['result']['list']
     except Exception as e:

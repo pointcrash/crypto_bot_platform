@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+
+from bots_group.models import BotsGroup
 from main.models import Account
 
 
@@ -102,6 +104,8 @@ class Bot(models.Model):
     bin_order = models.BooleanField(default=True)
     bin_order_id = models.CharField(blank=True, null=True)
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
+
+    group = models.ForeignKey(BotsGroup, on_delete=models.SET_NULL, null=True, blank=True)
 
     repeat = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

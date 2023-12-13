@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'orders',
     'main',
     'bots',
+    'bots_group',
     'single_bot',
     'tg_bot',
     'timezone',

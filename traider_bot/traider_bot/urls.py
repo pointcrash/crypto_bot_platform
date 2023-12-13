@@ -18,6 +18,7 @@ urlpatterns = [
     path('bots1/', include('bots.urls')),
     path('accounts/', include('main.urls')),
     path('bots/', include('single_bot.urls')),
+    path('bots_group/', include('bots_group.urls')),
     path('telegram/', include('tg_bot.urls')),
     path('orders/', include('orders.urls')),
     path('register/', registration_view, name='register'),

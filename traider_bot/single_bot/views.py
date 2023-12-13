@@ -17,6 +17,7 @@ from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_l
 from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
 from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition, StepHedge
 from main.forms import AccountSelectForm
+from main.logic import calculate_pnl
 from main.models import ActiveBot
 
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
@@ -26,6 +27,7 @@ from single_bot.logic.work import bot_work_logic, append_thread_or_check_duplica
 @login_required
 def single_bot_list(request):
     user = request.user
+    pnl_list = []
 
     if user.is_superuser:
         bots = Bot.objects.all().order_by('pk')
@@ -33,6 +35,10 @@ def single_bot_list(request):
     else:
         bots = Bot.objects.filter(owner=user).order_by('pk')
         all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
+
+    for bot in bots:
+        pnl = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
+        pnl_list.append(pnl)
 
     if request.method == 'POST':
         account_select_form = AccountSelectForm(request.POST, user=request.user)
@@ -57,9 +63,12 @@ def single_bot_list(request):
                 is_alive_list.append(False)
     finally:
         lock.release()
-    bots = zip(bots, is_alive_list)
+    bots = zip(bots, is_alive_list, pnl_list)
 
-    return render(request, 'bot_list.html', {'bots': bots, 'account_select_form': account_select_form, })
+    return render(request, 'bot_list.html', {
+        'bots': bots,
+        'account_select_form': account_select_form,
+    })
 
 
 @login_required

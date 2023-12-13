@@ -31,7 +31,7 @@
             <a class="btn btn-warning m-1 btn-shadow" href="{% url 'update_symbols_set' %}">Refresh coins</a>
         </div>
 
-        <div class="card mt-2 border-0 shadow mx-2 p-1">
+        <div class="card mt-2 border-0 shadow mx-2 p-2">
             <table class="table" style="vertical-align: middle">
                 <thead>
                 <tr class="">
@@ -43,10 +43,11 @@
                     <th class="d-none d-md-table-cell">USDT$</th>
                     <th>Is alive</th>
                     <th style="color: black">Actions</th>
+                    <th class="text-center">PNL</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for bot, is_alive in bots %}
+                {% for bot, is_alive, pnl_list in bots %}
                 <tr class="">
                     <td>{{ bot.pk }}</td>
                     <td>{{ bot.account }}</td>
@@ -112,7 +113,13 @@
                         </div>
                     </div>
                     </td>
-
+                    <td class="text-center">
+                        {% if pnl_list.pnl == 0 or None %}
+                        <p>-</p>
+                        {% else %}
+                        <h6>{{ pnl_list.pnl }}</h6>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>

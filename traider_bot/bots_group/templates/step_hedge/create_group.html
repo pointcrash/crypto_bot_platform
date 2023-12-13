@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+
+<div class="row">
+    <div class="col-11 mx-auto">
+        <h2 class="text-center">{{ title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                {% if form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if simple_hedge_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in simple_hedge_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Main Settings</h4>
+
+                    <br>
+                    {{ form.accounts_list.label_tag }}
+                    {{ form.accounts_list }}
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    <br>
+                    {{ form.symbol.label_tag }}
+                    {{ form.symbol }}
+                    <br>
+                    {{ form.isLeverage.label_tag }}
+                    {{ form.isLeverage }}
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Step Hedge Settings</h4>
+                    <br>
+                    {{ step_hedge_form.short1invest.label_tag }}
+                    {{ step_hedge_form.short1invest }}
+                    {{ step_hedge_form.long1invest.label_tag }}
+                    {{ step_hedge_form.long1invest }}
+                    <br>
+                    {{ step_hedge_form.tp_pnl_percent.label_tag }}
+                    {{ step_hedge_form.tp_pnl_percent }}
+                    <div class="row">
+                        <div class="col-6">
+                            {{ step_hedge_form.qty_steps.label_tag }}
+                            {{ step_hedge_form.qty_steps }}
+                        </div>
+                        <div class="col-6">
+                            {{ step_hedge_form.qty_steps_diff.label_tag }}
+                            {{ step_hedge_form.qty_steps_diff }}
+                        </div>
+                    </div>
+                    <button id="pnl_validation" class="btn btn-sm btn-danger disabled mt-2">(%PnL / Leverage) >= 0.5</button>
+                    <button id="ticks_validation" class="btn btn-sm btn-danger disabled mt-1">(COUNT TICKS / TICKS DIFF) >= 5</button>
+
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    {{ step_hedge_form.pnl_short_avg.label_tag }}
+                    {{ step_hedge_form.pnl_short_avg }}
+                    {{ step_hedge_form.pnl_long_avg.label_tag }}
+                    {{ step_hedge_form.pnl_long_avg }}
+                    <br>
+                    {{ step_hedge_form.margin_short_avg.label_tag }}
+                    {{ step_hedge_form.margin_short_avg }}
+                    {{ step_hedge_form.margin_long_avg.label_tag }}
+                    {{ step_hedge_form.margin_long_avg }}
+                    {{ form.max_margin.label_tag }}
+                    {{ form.max_margin }}
+                    <div class="form-check mt-2 p-1">
+                        {{ step_hedge_form.add_tp }}
+                    </div>
+                    <br>
+                    <div class="d-flex flex-row">
+                        {{ step_hedge_form.is_nipple_active.label_tag }}
+                        {{ step_hedge_form.is_nipple_active }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-5 col-sm-3 mx-auto mb-5">
+            <button id="start-bot-button" type="submit" class="col-12 btn-shadow btn btn-success mt-3">Start Bot</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const startBotButton = document.querySelector('#start-bot-button');
+        const tpPnlPercentField = document.querySelector('#tp_pnl_percent');
+        const isLeverageField = document.querySelector('#is_leverage');
+        const qtyStepsField = document.querySelector('#qty_steps');
+        const qtyStepsDiffField = document.querySelector('#qty_steps_diff');
+        const isNippleActive = document.querySelector('#is_nipple_active');
+        const pnlValidationCondition = document.querySelector('#pnl_validation');
+        const ticksValidationCondition = document.querySelector('#ticks_validation');
+
+        function checkConditions() {
+            if (ticksValidationCondition.classList.contains('btn-success') && pnlValidationCondition.classList.contains('btn-success')) {
+                startBotButton.removeAttribute('disabled');
+            } else {
+                startBotButton.setAttribute('disabled', 'disabled');
+            }
+        }
+
+        function checkPnlConditions() {
+            const isChecked = isNippleActive.checked;
+            const tpPnlPercentValue = parseFloat(tpPnlPercentField.value.toString());
+            const isLeverageValue = parseFloat(isLeverageField.value.toString());
+
+            if (isChecked) {
+                if (tpPnlPercentValue / isLeverageValue >= 0.5) {
+                    pnlValidationCondition.classList.remove('btn-danger');
+                    pnlValidationCondition.classList.add('btn-success');
+                } else {
+                    pnlValidationCondition.classList.remove('btn-success');
+                    pnlValidationCondition.classList.add('btn-danger');
+                }
+                checkConditions();
+            }
+        }
+
+        function checkTicksConditions() {
+            const isChecked = isNippleActive.checked;
+            const qtyStepsValue = parseFloat(qtyStepsField.value.toString());
+            const qtyStepsDiffValue = parseFloat(qtyStepsDiffField.value.toString());
+
+            if (isChecked) {
+                if (qtyStepsValue / qtyStepsDiffValue >= 5) {
+                    ticksValidationCondition.classList.remove('btn-danger');
+                    ticksValidationCondition.classList.add('btn-success');
+                } else {
+                    ticksValidationCondition.classList.remove('btn-success');
+                    ticksValidationCondition.classList.add('btn-danger');
+                }
+                checkConditions();
+            }
+        }
+
+        function checkNipple() {
+            const isChecked = isNippleActive.checked;
+
+            if (isChecked) {
+                startBotButton.setAttribute('disabled', 'disabled');
+                pnlValidationCondition.removeAttribute('hidden');
+                ticksValidationCondition.removeAttribute('hidden');
+                checkPnlConditions();
+                checkTicksConditions();
+            } else {
+                startBotButton.removeAttribute('disabled');
+                pnlValidationCondition.setAttribute('hidden', 'hidden');
+                ticksValidationCondition.setAttribute('hidden', 'hidden');
+            }
+        }
+
+        // Начальная проверка условий при загрузке страницы
+        checkPnlConditions();
+        checkTicksConditions();
+        checkNipple();
+
+        // Следить за изменениями в полях и обновлять кнопку при необходимости
+        tpPnlPercentField.addEventListener('change', checkPnlConditions);
+        isLeverageField.addEventListener('change', checkPnlConditions);
+        qtyStepsField.addEventListener('change', checkTicksConditions);
+        qtyStepsDiffField.addEventListener('change', checkTicksConditions);
+        isNippleActive.addEventListener('change', checkNipple);
+    });
+</script>
+
+
+{% endblock %}
