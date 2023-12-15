@@ -19,11 +19,12 @@ def calculate_pnl(bot, start_date, end_date):
         data_list_pnl = get_pnl(bot.account, bot.category, bot.symbol, start_time=start_timestamp, end_time=end_timestamp)
         for data in data_list_pnl:
             pnl += float(data['closedPnl'])
-            if data['side'] == 'Buy':
+            if data['side'] == 'Sell':
                 pnl_buy += float(data['closedPnl'])
-            elif data['side'] == 'Sell':
+            elif data['side'] == 'Buy':
                 pnl_sell += float(data['closedPnl'])
 
         return {'pnl': round(pnl, 2), 'pnl_buy': round(pnl_buy, 2), 'pnl_sell': round(pnl_sell, 2)}
-    except:
+    except Exception as e:
+        print(e)
         return None

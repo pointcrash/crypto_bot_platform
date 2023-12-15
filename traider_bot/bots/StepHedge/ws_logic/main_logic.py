@@ -192,66 +192,66 @@ def sleep_function(sleep_time, bot_id):
             break
 
 
-def changes_tracking_function(bot, step_hedge, step_class_obj):
-    while ActiveBot.objects.filter(bot_id=bot.pk):
-        apply_changes = False
-        step_hedge_data = StepHedge.objects.get(id=step_hedge.id)
-
-        step_class_obj.short1invest = Decimal(step_hedge_data.short1invest)
-        step_class_obj.long1invest = Decimal(step_hedge_data.long1invest)
-        step_class_obj.margin_short_avg = Decimal(step_hedge_data.margin_short_avg)
-        step_class_obj.margin_long_avg = Decimal(step_hedge_data.margin_long_avg)
-
-        if step_class_obj.tp_pnl_percent != Decimal(step_hedge_data.tp_pnl_percent):
-            step_class_obj.tp_pnl_percent = Decimal(step_hedge_data.tp_pnl_percent)
-            apply_changes = True
-
-        if step_class_obj.pnl_short_avg != Decimal(step_hedge_data.pnl_short_avg):
-            step_class_obj.pnl_short_avg = Decimal(step_hedge_data.pnl_short_avg)
-        if step_class_obj.pnl_long_avg != Decimal(step_hedge_data.pnl_long_avg):
-            step_class_obj.pnl_long_avg = Decimal(step_hedge_data.pnl_long_avg)
-
-        if step_class_obj.qty_steps != step_hedge_data.qty_steps:
-            step_class_obj.qty_steps = step_hedge_data.qty_steps
-            apply_changes = True
-        if step_class_obj.qty_steps_diff != step_hedge_data.qty_steps_diff:
-            step_class_obj.qty_steps_diff = step_hedge_data.qty_steps_diff
-
-        if apply_changes:
-            step_class_obj.locker_3.acquire()
-            cancel_all(step_class_obj.account, step_class_obj.category, step_class_obj.symbol)
-            time.sleep(1)
-
-            # Обновляем книгу ордеров до отмены ордеров
-            status_req_order_book = step_class_obj.update_order_book()
-            if status_req_order_book not in 'OK':
-                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
-                raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
-            # Обновляем список позиций
-            step_class_obj.update_symbol_list()
-            if step_class_obj.symbol_list is None:
-                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
-                raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
-
-            for position_number in range(2):
-                if step_hedge_data.add_tp:
-                    if not step_class_obj.tp_full_size_psn_check(position_number):
-                        if step_class_obj.psn_size_bigger_then_start(position_number):
-                            step_class_obj.add_tp(position_number)
-                        else:
-                            if step_class_obj.checking_opened_position(position_number):
-                                step_class_obj.place_tp_order(position_number)
-                else:
-                    if step_class_obj.checking_opened_position(position_number):
-                        step_class_obj.place_tp_order(position_number)
-
-                if not step_hedge_data.is_nipple_active:
-                    if not step_class_obj.checking_opened_new_psn_order(position_number):
-                        step_class_obj.place_nipple_on_tp(position_number)
-                else:
-                    if not step_class_obj.checking_opened_new_psn_order(position_number):
-                        step_class_obj.place_new_psn_order(position_number)
-            # Снимаем блокировку потока
-            if step_class_obj.locker_3.locked():
-                step_class_obj.locker_3.release()
-        time.sleep(4)
+# def changes_tracking_function(bot, step_hedge, step_class_obj):
+#     while ActiveBot.objects.filter(bot_id=bot.pk):
+#         apply_changes = False
+#         step_hedge_data = StepHedge.objects.get(id=step_hedge.id)
+#
+#         step_class_obj.short1invest = Decimal(step_hedge_data.short1invest)
+#         step_class_obj.long1invest = Decimal(step_hedge_data.long1invest)
+#         step_class_obj.margin_short_avg = Decimal(step_hedge_data.margin_short_avg)
+#         step_class_obj.margin_long_avg = Decimal(step_hedge_data.margin_long_avg)
+#
+#         if step_class_obj.tp_pnl_percent != Decimal(step_hedge_data.tp_pnl_percent):
+#             step_class_obj.tp_pnl_percent = Decimal(step_hedge_data.tp_pnl_percent)
+#             apply_changes = True
+#
+#         if step_class_obj.pnl_short_avg != Decimal(step_hedge_data.pnl_short_avg):
+#             step_class_obj.pnl_short_avg = Decimal(step_hedge_data.pnl_short_avg)
+#         if step_class_obj.pnl_long_avg != Decimal(step_hedge_data.pnl_long_avg):
+#             step_class_obj.pnl_long_avg = Decimal(step_hedge_data.pnl_long_avg)
+#
+#         if step_class_obj.qty_steps != step_hedge_data.qty_steps:
+#             step_class_obj.qty_steps = step_hedge_data.qty_steps
+#             apply_changes = True
+#         if step_class_obj.qty_steps_diff != step_hedge_data.qty_steps_diff:
+#             step_class_obj.qty_steps_diff = step_hedge_data.qty_steps_diff
+#
+#         if apply_changes:
+#             step_class_obj.locker_3.acquire()
+#             cancel_all(step_class_obj.account, step_class_obj.category, step_class_obj.symbol)
+#             time.sleep(1)
+#
+#             # Обновляем книгу ордеров до отмены ордеров
+#             status_req_order_book = step_class_obj.update_order_book()
+#             if status_req_order_book not in 'OK':
+#                 logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
+#                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
+#             # Обновляем список позиций
+#             step_class_obj.update_symbol_list()
+#             if step_class_obj.symbol_list is None:
+#                 logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+#                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+#
+#             for position_number in range(2):
+#                 if step_hedge_data.add_tp:
+#                     if not step_class_obj.tp_full_size_psn_check(position_number):
+#                         if step_class_obj.psn_size_bigger_then_start(position_number):
+#                             step_class_obj.add_tp(position_number)
+#                         else:
+#                             if step_class_obj.checking_opened_position(position_number):
+#                                 step_class_obj.place_tp_order(position_number)
+#                 else:
+#                     if step_class_obj.checking_opened_position(position_number):
+#                         step_class_obj.place_tp_order(position_number)
+#
+#                 if not step_hedge_data.is_nipple_active:
+#                     if not step_class_obj.checking_opened_new_psn_order(position_number):
+#                         step_class_obj.place_nipple_on_tp(position_number)
+#                 else:
+#                     if not step_class_obj.checking_opened_new_psn_order(position_number):
+#                         step_class_obj.place_new_psn_order(position_number)
+#             # Снимаем блокировку потока
+#             if step_class_obj.locker_3.locked():
+#                 step_class_obj.locker_3.release()
+#         time.sleep(4)

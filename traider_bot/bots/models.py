@@ -176,6 +176,7 @@ class StepHedge(models.Model):
     short1invest = models.CharField(max_length=20, null=True)
     long1invest = models.CharField(max_length=20, null=True)
     tp_pnl_percent = models.CharField(max_length=20, null=True)
+    tp_pnl_percent_long = models.CharField(max_length=20, null=True)
     pnl_short_avg = models.CharField(max_length=20, null=True)
     pnl_long_avg = models.CharField(max_length=20, null=True)
     margin_short_avg = models.CharField(max_length=20, null=True)

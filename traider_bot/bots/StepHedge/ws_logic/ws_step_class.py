@@ -29,7 +29,8 @@ class WSStepHedgeClassLogic:
         self.order_book = None
         self.short1invest = Decimal(step_hg.short1invest)
         self.long1invest = Decimal(step_hg.long1invest)
-        self.tp_pnl_percent = Decimal(step_hg.tp_pnl_percent)
+        self.tp_pnl_percent_short = Decimal(step_hg.tp_pnl_percent)
+        self.tp_pnl_percent_long = Decimal(step_hg.tp_pnl_percent_long)
         self.pnl_short_avg = Decimal(step_hg.pnl_short_avg)
         self.pnl_long_avg = Decimal(step_hg.pnl_long_avg)
         self.margin_short_avg = Decimal(step_hg.margin_short_avg)
@@ -165,7 +166,7 @@ class WSStepHedgeClassLogic:
             psn_avg_price = Decimal(self.symbol_list[0 if position_number == 1 else 1]['avgPrice'])
 
         if position_idx == 1:
-            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent_long) / 100 / self.leverage), self.round_number)
         else:
             self.tp_price_dict[position_idx] = round(psn_avg_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
 
@@ -345,7 +346,7 @@ class WSStepHedgeClassLogic:
         psn_price = Decimal(self.symbol_list[position_number]['avgPrice'])
         excess_qty = Decimal(self.symbol_list[position_number]['size'])
         if position_idx == 1:
-            tp_price = round(psn_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
+            tp_price = round(psn_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent_long) / 100 / self.leverage), self.round_number)
         else:
             tp_price = round(psn_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
 
@@ -390,7 +391,7 @@ class WSStepHedgeClassLogic:
 
             if position_idx == 1:
                 self.tp_price_dict[position_idx] = round(
-                    psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage),
+                    psn_avg_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent_long) / 100 / self.leverage),
                     self.round_number)
             else:
                 self.tp_price_dict[position_idx] = round(
@@ -528,7 +529,7 @@ class WSStepHedgeClassLogic:
     def ws_amend_tp_order(self, position_idx):
         new_psn_price = Decimal(self.ws_symbol_list[position_idx]['entryPrice'])
         if position_idx == 1:
-            self.tp_price_dict[position_idx] = round(new_psn_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
+            self.tp_price_dict[position_idx] = round(new_psn_price * Decimal(1 + Decimal(self.step_hg.tp_pnl_percent_long) / 100 / self.leverage), self.round_number)
         elif position_idx == 2:
             self.tp_price_dict[position_idx] = round(new_psn_price * Decimal(1 - Decimal(self.step_hg.tp_pnl_percent) / 100 / self.leverage), self.round_number)
 
