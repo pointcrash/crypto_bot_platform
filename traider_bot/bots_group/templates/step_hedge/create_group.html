@@ -37,7 +37,10 @@
 
                     <br>
                     {{ form.accounts_list.label_tag }}
+                    <div class="border rounded ps-3 p-1">
+
                     {{ form.accounts_list }}
+                    </div>
                     {{ form.category.label_tag }}
                     {{ form.category }}
                     <br>
@@ -55,8 +58,17 @@
                     {{ step_hedge_form.long1invest.label_tag }}
                     {{ step_hedge_form.long1invest }}
                     <br>
-                    {{ step_hedge_form.tp_pnl_percent.label_tag }}
-                    {{ step_hedge_form.tp_pnl_percent }}
+                    <div class="row">
+                        <div class="col-6">
+                            {{ step_hedge_form.tp_pnl_percent.label_tag }}
+                            {{ step_hedge_form.tp_pnl_percent }}
+                        </div>
+                        <div class="col-6">
+                            {{ step_hedge_form.tp_pnl_percent_long.label_tag }}
+                            {{ step_hedge_form.tp_pnl_percent_long }}
+                        </div>
+                    </div>
+                    <br>
                     <div class="row">
                         <div class="col-6">
                             {{ step_hedge_form.qty_steps.label_tag }}
@@ -104,6 +116,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const startBotButton = document.querySelector('#start-bot-button');
         const tpPnlPercentField = document.querySelector('#tp_pnl_percent');
+        const tpPnlPercentFieldLong = document.querySelector('#tp_pnl_percent_long');
         const isLeverageField = document.querySelector('#is_leverage');
         const qtyStepsField = document.querySelector('#qty_steps');
         const qtyStepsDiffField = document.querySelector('#qty_steps_diff');
@@ -122,10 +135,11 @@
         function checkPnlConditions() {
             const isChecked = isNippleActive.checked;
             const tpPnlPercentValue = parseFloat(tpPnlPercentField.value.toString());
+            const tpPnlPercentValueLong = parseFloat(tpPnlPercentFieldLong.value.toString());
             const isLeverageValue = parseFloat(isLeverageField.value.toString());
 
             if (isChecked) {
-                if (tpPnlPercentValue / isLeverageValue >= 0.5) {
+                if (tpPnlPercentValue / isLeverageValue >= 0.5 && tpPnlPercentValueLong / isLeverageValue >= 0.5) {
                     pnlValidationCondition.classList.remove('btn-danger');
                     pnlValidationCondition.classList.add('btn-success');
                 } else {
@@ -176,6 +190,7 @@
 
         // Следить за изменениями в полях и обновлять кнопку при необходимости
         tpPnlPercentField.addEventListener('change', checkPnlConditions);
+        tpPnlPercentFieldLong.addEventListener('change', checkPnlConditions);
         isLeverageField.addEventListener('change', checkPnlConditions);
         qtyStepsField.addEventListener('change', checkTicksConditions);
         qtyStepsDiffField.addEventListener('change', checkTicksConditions);

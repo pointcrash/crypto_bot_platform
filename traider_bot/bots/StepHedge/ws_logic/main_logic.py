@@ -146,7 +146,10 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                 logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
             elif len(step_class_obj.order_book) > 4:
-                raise Exception('len orderbook > 4')
+                filtered_list = [order for order in step_class_obj.order_book if order.get('orderType') != 'Limit']
+                if len(filtered_list) > 4:
+                    logging(bot, f'{step_class_obj.order_book}')
+                    raise Exception('len orderbook > 4')
 
             # Проверка наличия выставленных ордеров
             for position_idx in position_idxs_list:
