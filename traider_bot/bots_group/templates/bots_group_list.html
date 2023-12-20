@@ -50,7 +50,7 @@
                         </div>
                         <table class="table" style="vertical-align: middle">
                             <tbody>
-                {% for bot in bots_list %}
+                {% for bot, is_active_bot in bots_list %}
                                 <tr>
                                     <td>{{ bot.pk }}</td>
                                     <td>{{ bot.account }}</td>
@@ -63,11 +63,11 @@
                                             {{ bot.qty }}
                                         {% endif %}
                                         </td>
-                                    <td>{% if is_alive %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
+                                    <td>{% if is_active_bot %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
                                         {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}
                                     </td>
                                     <td>
-                                    {% if is_alive %}
+                                    {% if is_active_bot %}
                                     {% include 'modal_stop_bot.html' %}
                                     {% else %}
                                         <a href="{% url 'single_bot_start' bot_id=bot.pk %}" class="btn btn-success btn-shadow"><i class="fa-solid fa-play"></i></a>

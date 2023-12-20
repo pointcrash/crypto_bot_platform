@@ -249,7 +249,7 @@ def bot_start(request, bot_id):
         global_list_threads[bot.pk] = bot_thread
         if lock.locked():
             lock.release()
-    return redirect('single_bot_list')
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 def update_symbols_set(request):

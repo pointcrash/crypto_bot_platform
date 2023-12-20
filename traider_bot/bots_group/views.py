@@ -26,51 +26,33 @@ from concurrent.futures import ThreadPoolExecutor
 @login_required
 def bots_groups_list(request):
     user = request.user
-    # pnl_list = []
     bots_groups = dict()
 
     if user.is_superuser:
         for group in BotsGroup.objects.all():
-            bots_groups[group] = group.bot_set.all()
-        # all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
+            group_elem = []
+            for bot in group.bot_set.all():
+                group_elem.append((bot, True if ActiveBot.objects.filter(bot_id=bot.pk).first() else False))
+            bots_groups[group] = group_elem
     else:
         for group in BotsGroup.objects.filter(owner=user).order_by('pk'):
-            bots_groups[group] = group.bot_set.all()
-        # all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
+            group_elem = []
+            for bot in group.bot_set.all():
+                group_elem.append((bot, True if ActiveBot.objects.filter(bot_id=bot.pk).first() else False))
+            bots_groups[group] = group_elem
 
     # for bot in bots:
     #     pnl = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
     #     pnl_list.append(pnl)
 
+    print(bots_groups)
     if request.method == 'POST':
         pass
-        # account_select_form = AccountSelectForm(request.POST, user=request.user)
-        # if account_select_form.is_valid():
-        #     selected_account = account_select_form.cleaned_data['account']
-        #     if selected_account:
-        #         bots = bots.filter(account=selected_account)
-        # all_bots_pks = bots.values_list('pk', flat=True).order_by('pk')
     else:
         account_select_form = AccountSelectForm(user=request.user)
 
-    is_alive_list = []
-    active_bot_ids = ActiveBot.objects.all().values_list('bot_id', flat=True)
-
-    # lock.acquire()
-    # try:
-    #     for bot_id in all_bots_pks:
-    #         bot_id = str(bot_id)
-    #         if bot_id in active_bot_ids:
-    #             is_alive_list.append(True)
-    #         else:
-    #             is_alive_list.append(False)
-    # finally:
-    #     lock.release()
-    # bots = zip(bots, is_alive_list)
-
     return render(request, 'bots_group_list.html', {
         'bots_groups': bots_groups,
-        # 'account_select_form': account_select_form,
     })
 
 
@@ -119,13 +101,13 @@ def group_step_hedge_bot_create(request):
 
                 connections.close_all()
 
-                # bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
-                # bot_thread.start()
+                bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
+                bot_thread.start()
 
-                # lock.acquire()
-                # global_list_threads[bot.pk] = bot_thread
-                # if lock.locked():
-                #     lock.release()
+                lock.acquire()
+                global_list_threads[bot.pk] = bot_thread
+                if lock.locked():
+                    lock.release()
 
             return redirect('bots_groups_list')
     else:
