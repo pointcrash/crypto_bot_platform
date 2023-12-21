@@ -37,8 +37,8 @@ def single_bot_list(request):
         all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
 
     for bot in bots:
-        pnl = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
-        pnl_list.append(pnl)
+        # pnl = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
+        pnl_list.append(1)
 
     if request.method == 'POST':
         account_select_form = AccountSelectForm(request.POST, user=request.user)
