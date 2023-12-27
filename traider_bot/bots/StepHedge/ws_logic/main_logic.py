@@ -195,6 +195,12 @@ def sleep_function(sleep_time, bot_id):
             break
 
 
+def manual_average_function(bot, step_hg):
+    pass
+
+
+
+
 # def changes_tracking_function(bot, step_hedge, step_class_obj):
 #     while ActiveBot.objects.filter(bot_id=bot.pk):
 #         apply_changes = False

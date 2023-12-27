@@ -177,6 +177,14 @@ def group_step_hedge_bot_create(request):
 #                       'pnl_list': pnl_list,
 #                   })
 
+# def stop_group(request, group_id):
+#     group = BotsGroup.objects.get(pk=group_id)
+#     bots = group.bot_set.all()
+#
+#     with ThreadPoolExecutor() as executor:
+#         executor.map(some_averaging_function, bots)
+#     return redirect(request.META.get('HTTP_REFERER'))
+
 
 def stop_group(request, group_id):
     group = BotsGroup.objects.get(pk=group_id)

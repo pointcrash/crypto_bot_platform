@@ -43,6 +43,10 @@
                 <div id="panelsStayOpen-collapseOne{{group.pk}}" class="accordion-collapse collapse show">
                     <div class="accordion-body">
                         <div class="row">
+                            <div class="col">
+                                <button type="button" class="btn btn-light" disabled>Усреднить все</button>
+                            </div>
+
                             <div class="col ms-auto text-end">
                                 <a href="{% url 'stop_group' group_id=group.pk %}" class="btn btn-warning">Остановить все</a>
                                 <a href="{% url 'delete_group' group_id=group.pk %}" class="btn btn-danger"><i class="fa-solid fa-trash"></i></a>
