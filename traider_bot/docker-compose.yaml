@@ -1,0 +1,21 @@
+
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: MyDB
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: lksd23GBKwed.
+
+volumes:
+  postgres_data:
