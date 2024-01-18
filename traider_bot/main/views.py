@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta, datetime
 from django.utils import timezone
 
-from api_v5 import get_query_account_coins_balance, get_list
+from api.api_v5 import get_query_account_coins_balance, get_list
 from bots.models import Log, Bot, Symbol
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import global_list_bot_id
