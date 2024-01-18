@@ -130,7 +130,6 @@ class Take(models.Model):
 
 
 class ExchangeService(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField()
 
 
