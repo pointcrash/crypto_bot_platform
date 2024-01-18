@@ -17,7 +17,7 @@ client = Client(api_key, api_secret, testnet=True)
 # print(client.futures_get_all_orders(symbol='BTCUSDT'))  # Список ордеров
 # print(client.futures_get_order(symbol='BTCUSDT', orderId='3653110189'))  # Инфо по открытому ордеру
 # print(client.futures_cancel_order(symbol='BTCUSDT', orderId='3653110189'))  # Отменить ордер
-# print(client.futures_cancel_all_open_orders(symbol='BTCUSDT'))  #
+# print(client.futures_cancel_all_open_orders(symbol='BTCUSDT'))  # Отменит все ордера
 # print(client.futures_account_balance())  # Получить баланс кошелька
 # print(client.futures_change_leverage(symbol='BTCUSDT', leverage=9))  # Изменить плечо
 # print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму

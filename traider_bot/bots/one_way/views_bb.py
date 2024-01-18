@@ -5,7 +5,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api_v5 import get_open_orders
+from api.api_v5 import get_open_orders
 from bots.bb_set_takes import set_takes
 from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import BotForm, Set0PsnForm, OppositePositionForm

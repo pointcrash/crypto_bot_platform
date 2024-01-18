@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 from django.db import models
 
-from api_v5 import *
+from api.api_v5 import *
 from bots.models import Bot, Log
 from timezone.models import TimeZone
 

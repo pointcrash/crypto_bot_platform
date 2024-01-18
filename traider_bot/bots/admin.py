@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot, StepHedge
+from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot, StepHedge, ExchangeService
 
 
 @admin.register(Bot)
@@ -13,6 +13,13 @@ class OrdersAdmin(admin.ModelAdmin):
 @admin.register(Symbol)
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'priceScale', 'minLeverage', 'maxLeverage', 'minPrice', 'maxPrice', 'minOrderQty',)
+    list_display_links = ('id', 'name',)
+    search_fields = ('id', 'name',)
+
+
+@admin.register(ExchangeService)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name',)
     list_display_links = ('id', 'name',)
     search_fields = ('id', 'name',)
 

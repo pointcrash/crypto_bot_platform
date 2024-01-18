@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from api_v5 import get_list, set_trading_stop, cancel_all
+from api.api_v5 import get_list, set_trading_stop, cancel_all
 from orders.models import Order
 
 

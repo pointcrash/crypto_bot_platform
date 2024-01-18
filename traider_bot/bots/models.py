@@ -64,7 +64,7 @@ class Bot(models.Model):
     )
 
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, blank=True, null=True)
+    service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
     account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
@@ -131,6 +131,9 @@ class Take(models.Model):
 
 class ExchangeService(models.Model):
     name = models.CharField()
+
+    def __str__(self):
+        return self.name
 
 
 class Log(models.Model):

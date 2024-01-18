@@ -16,7 +16,7 @@ from tg_bot.send_message import send_telegram_message
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
-from api_v5 import get_order_status, get_pnl, set_leverage, switch_position_mode, get_list, get_qty, \
+from api.api_v5 import get_order_status, get_pnl, set_leverage, switch_position_mode, get_list, get_qty, \
     get_position_price, get_current_price
 from bots.bot_logic import count_decimal_places, logging, get_quantity_from_price, create_bb_and_avg_obj
 from orders.models import Order

@@ -9,7 +9,7 @@ from django.db import connections
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
-from api_v5 import cancel_all, get_order_status, get_pnl, set_leverage, switch_position_mode
+from api.api_v5 import cancel_all, get_order_status, get_pnl, set_leverage, switch_position_mode
 from bots.bot_logic import calculation_entry_point, count_decimal_places, logging
 from orders.models import Order
 

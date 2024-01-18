@@ -4,7 +4,7 @@ import time
 from decimal import Decimal
 from datetime import datetime, timedelta
 
-from api_v5 import HTTP_Request
+from api.api_v5 import HTTP_Request
 
 
 class BollingerBands:
