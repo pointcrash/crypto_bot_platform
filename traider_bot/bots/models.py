@@ -64,6 +64,7 @@ class Bot(models.Model):
     )
 
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
@@ -126,6 +127,11 @@ class Take(models.Model):
     take_number = models.SmallIntegerField(blank=True, null=True)
     order_link_id = models.CharField(default='', blank=True, null=True)
     is_filled = models.BooleanField(default=False, blank=True, null=True)
+
+
+class ExchangeService(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.SET_NULL, blank=True, null=True)
+    name = models.CharField()
 
 
 class Log(models.Model):
