@@ -10,8 +10,8 @@ django.setup()
 
 from binance.client import Client
 from api.api_v5_bybit import HTTP_Request
-from main.models import Account
-from bots.models import Bot
+from main.models import Account, ExchangeService
+from bots.models import Bot, Symbol
 
 api_key_binance = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
 api_secret_binance = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
@@ -103,6 +103,52 @@ def cancel_order(account, symbol, order_id, category='linear'):
         return response
 
 
+def get_position_inform(account, symbol):
+    def format_data(service_name, position_list):
+        def sort_function(unsorted_list):
+            sorted_list = sorted(unsorted_list, key=lambda x: x['side'])
+            return sorted_list
+
+        position_inform_list = []
+        if service_name == 'Binance':
+            position_inform_list = [{
+                'symbol': position['symbol'],
+                'qty': position['positionAmt'],
+                'entryPrice': position['entryPrice'],
+                'markPrice': position['markPrice'],
+                'unrealisedPnl': position['unRealizedProfit'],
+                'side': position['positionSide'],
+            } for position in position_list]
+        elif service_name == 'ByBit':
+            position_inform_list = [{
+                'symbol': position['symbol'],
+                'qty': position['size'],
+                'entryPrice': position['avgPrice'],
+                'markPrice': position['markPrice'],
+                'unrealisedPnl': position['unrealisedPnl'],
+                'side': 'LONG' if position['side'] == 'Buy' else 'SHORT',
+            } for position in position_list]
+        return sort_function(position_inform_list)
+
+    if account.service.name == 'Binance':
+        client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
+        response = client.futures_position_information(symbol=symbol)
+        position_inform_list = format_data('Binance', response)
+        return position_inform_list
+
+    elif account.service.name == 'ByBit':
+        endpoint = "/v5/position/list"
+        method = "GET"
+        if symbol:
+            params = f"category=linear&symbol={symbol}"
+        else:
+            params = f"category=linear&settleCoin=USDT"
+        response = json.loads(HTTP_Request(account, endpoint, method, params))
+        response = response['result']['list']
+        position_inform_list = format_data('ByBit', response)
+        return position_inform_list
+
+
 def get_current_price(account, symbol, category='linear'):
     if account.service.name == 'Binance':
         client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
@@ -160,11 +206,15 @@ def switch_position_mode(account, symbol, category='linear'):
     return response
 
 
-def get_query_account_coins_balance(account, symbol):
+def get_query_account_coins_balance(account):
     if account.service.name == 'Binance':
         client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
-        response = client.futures_account_balance(symbol=symbol)
+        response = client.futures_account_balance()
         response = [x for x in response if x['asset'] == 'USDT'][0]
+        response = {
+            'fullBalance': round(float(response['balance']), 2),
+            'availableBalance': round(float(response['availableBalance']), 2),
+        }
         return response
 
     elif account.service.name == 'ByBit':
@@ -172,8 +222,13 @@ def get_query_account_coins_balance(account, symbol):
         method = "GET"
         params = f"accountType={account.account_type}&coin=USDT"
         response = json.loads(HTTP_Request(account, endpoint, method, params))
+        response = response['result']['balance'][0]
+        response = {
+            'fullBalance': round(float(response['walletBalance']), 2),
+            'availableBalance': round(float(response['transferBalance']), 2),
+        }
         try:
-            return response['result']['balance'][0]
+            return response
         except:
             return None
 
@@ -196,12 +251,12 @@ if __name__ == '__main__':
     #     price=42000,
     # ))
     #
-    print(get_query_account_coins_balance(
-        account=account_bybit,
-        symbol='BTCUSDT',
-    ))
-
-    print(get_query_account_coins_balance(
-        account=account_binance,
-        symbol='BTCUSDT',
-    ))
+    # print(get_position_inform(
+    #     account=account_bybit,
+    #     symbol='BTCUSDT',
+    # ))
+    #
+    # print(get_position_inform(
+    #     account=account_binance,
+    #     symbol='BTCUSDT',
+    # ))

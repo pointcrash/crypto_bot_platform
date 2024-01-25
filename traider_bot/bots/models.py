@@ -7,6 +7,7 @@ from main.models import Account, ExchangeService
 
 class Symbol(models.Model):
     name = models.CharField(max_length=20)
+    service = models.ForeignKey(ExchangeService, on_delete=models.SET_NULL, null=True)
     priceScale = models.CharField(max_length=20, null=True)
     minLeverage = models.CharField(max_length=20, null=True)
     maxLeverage = models.CharField(max_length=20, null=True)

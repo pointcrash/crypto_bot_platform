@@ -24,6 +24,19 @@ client = Client(api_key, api_secret, testnet=True)
 # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
 # print(client.futures_position_information(symbol='BTCUSDT'))  # Инфо по позиции
 
+
 # print(client.futures_get_order(symbol='BTCUSDT'))  #
-# print(client.futures_coin_exchange_info(symbol='BTCUSDT'))  #
+def get_exchange_information():
+    data_set = client.futures_exchange_info()
+    symbol_set = {
+        i['symbol']: {
+            'minPrice': i['filters'][0]['minPrice'],
+            'maxPrice': i['filters'][0]['maxPrice'],
+            'priceTickSize': i['filters'][0]['tickSize'],
+            'minQty': i['filters'][2]['minQty'],
+            'maxQty': i['filters'][2]['maxQty'],
+            'stepQtySize': i['filters'][2]['stepSize']
+        } for i in data_set['symbols'] if i['symbol'].endswith('USDT')
+    }
+    return symbol_set
 

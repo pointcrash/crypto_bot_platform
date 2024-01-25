@@ -79,13 +79,13 @@ def get_side(bot, symbol_list):
         pass
 
 
-def get_list(bot, account, category='linear', symbol=None, settleCoin='USDT'):
-    if bot.service == 'Binance':
-        client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-        client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
-
-    elif bot.service == 'ByBit':
-        pass
+# def get_list(bot, account, category='linear', symbol=None, settleCoin='USDT'):
+#     if bot.service == 'Binance':
+#         client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
+#         client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+#
+#     elif bot.service == 'ByBit':
+#         pass
 
 
 def get_order_book(bot, account, category, symbol):
@@ -106,12 +106,12 @@ def get_instruments_info(bot, account, category, symbol=None):
         pass
 
 
-def get_symbol_set():
-    # if bot.service == 'Binance':
-    #     client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-    #     client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
-    #
-    # elif bot.service == 'ByBit':
+def get_symbol_set(bot):
+    if bot.service == 'Binance':
+        client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
+        client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+
+    elif bot.service == 'ByBit':
         pass
 
 
@@ -151,38 +151,40 @@ def get_pnl(bot, account, category, symbol, start_time=0, end_time=0, limit=50):
         pass
 
 
-def set_leverage(account, category, symbol, leverage, bot=None):
-    if bot.service == 'Binance':
-        client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-        client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
-
-    elif bot.service == 'ByBit':
-        pass
-
-
-def get_query_account_coins_balance(account, symbol):
-    if account.service.name == 'Binance':
-        client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
-        return client.futures_cancel_all_open_orders(symbol=symbol)
-
-    elif account.service.name == 'ByBit':
-        endpoint = "/v5/asset/transfer/query-account-coins-balance"
-        method = "GET"
-        params = f"accountType={account.account_type}&coin=USDT"
-        response = json.loads(HTTP_Request(account, endpoint, method, params))
-        try:
-            return response['result']['balance']
-        except:
-            return None
+# def set_leverage(account, category, symbol, leverage, bot=None):
+#     if bot.service == 'Binance':
+#         client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
+#         client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+#
+#     elif bot.service == 'ByBit':
+#         pass
 
 
-def switch_position_mode(bot):
-    if bot.service == 'Binance':
-        client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-        client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+# def get_query_account_coins_balance(account, symbol):
+#     if account.service.name == 'Binance':
+#         client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
+#         response = client.futures_account_balance(symbol=symbol)
+#         response = [x for x in response if x['asset'] == 'USDT'][0]
+#         return response
+#
+#     elif account.service.name == 'ByBit':
+#         endpoint = "/v5/asset/transfer/query-account-coins-balance"
+#         method = "GET"
+#         params = f"accountType={account.account_type}&coin=USDT"
+#         response = json.loads(HTTP_Request(account, endpoint, method, params))
+#         try:
+#             return response['result']['balance'][0]
+#         except:
+#             return None
 
-    elif bot.service == 'ByBit':
-        pass
+
+# def switch_position_mode(bot):
+#     if bot.service == 'Binance':
+#         client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
+#         client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+#
+#     elif bot.service == 'ByBit':
+#         pass
 
 
 def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None):
@@ -193,14 +195,14 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
     elif bot.service == 'ByBit':
         pass
 
-
-def get_open_orders(bot):
-    if bot.service == 'Binance':
-        client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-        client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
-
-    elif bot.service == 'ByBit':
-        pass
+#
+# def get_open_orders(bot):
+#     if bot.service == 'Binance':
+#         client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
+#         client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+#
+#     elif bot.service == 'ByBit':
+#         pass
 
 
 def tg_error_message(bot, response):

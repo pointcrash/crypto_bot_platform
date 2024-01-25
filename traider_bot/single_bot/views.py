@@ -253,7 +253,7 @@ def bot_start(request, bot_id):
 
 
 def update_symbols_set(request):
-    get_update_symbols()
+    # get_update_symbols()
     return redirect(request.META.get('HTTP_REFERER'))
 
 
