@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from api.api_v5 import get_current_price
+from api.api_v5_bybit import get_current_price
 from decimal import Decimal, ROUND_DOWN
 
 from bots.models import Log

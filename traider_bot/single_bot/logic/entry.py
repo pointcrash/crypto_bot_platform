@@ -1,6 +1,6 @@
 import time
 
-from api.api_v5 import get_list, get_qty, get_side, get_position_price, cancel_all
+from api.api_v5_bybit import get_list, get_qty, get_side, get_position_price, cancel_all
 from bots.bot_logic import set_entry_point_by_market, entry_order_status_check, logging, set_entry_point, \
     create_bb_and_avg_obj, entry_order_buy_in_addition, func_get_symbol_list
 from bots.models import Take, AvgOrder

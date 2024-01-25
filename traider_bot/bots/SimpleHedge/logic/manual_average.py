@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from api.api_v5 import get_current_price, get_list, cancel_all
+from api.api_v5_bybit import get_current_price, get_list, cancel_all
 from bots.bot_logic import get_quantity_from_price, logging
 from orders.models import Order
 

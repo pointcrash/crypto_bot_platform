@@ -5,7 +5,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api.api_v5 import get_open_orders
+from api.api_v5_bybit import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.SimpleHedge.logic.manual_average import manual_average_for_simple_hedge
 from bots.bot_logic import clear_data_bot, logging, func_get_symbol_list

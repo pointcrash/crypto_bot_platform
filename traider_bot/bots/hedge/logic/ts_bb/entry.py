@@ -1,4 +1,4 @@
-from api.api_v5 import get_current_price, switch_position_mode, set_leverage, get_qty
+from api.api_v5_bybit import get_current_price, switch_position_mode, set_leverage, get_qty
 from bots.bot_logic import get_quantity_from_price, func_get_symbol_list
 from bots.hedge.logic.ts_bb.work import work_ts_bb_bot
 from orders.models import Order

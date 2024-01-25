@@ -1,38 +1,37 @@
 import json
 from decimal import Decimal
 
-from api.api_v5 import HTTP_Request
+from api.api_v5_bybit import HTTP_Request
 from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 from binance.client import Client
 
 
-def cancel_all(bot, account, category, symbol):
-    if bot.service == 'Binance':
-        client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
-
-        client.futures_cancel_all_open_orders(symbol=symbol)  # Отменит все ордера
-
-        pass
-    elif bot.service == 'ByBit':
-        endpoint = "/v5/order/cancel-all"
-        method = "POST"
-        params = {
-            'category': category,
-            'symbol': symbol.name,
-        }
-        params = json.dumps(params)
-        response = json.loads(HTTP_Request(account, endpoint, method, params))
-
-
-def cancel_order(bot, order_id):
-    if bot.service == 'Binance':
-        client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-        client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
-
-    elif bot.service == 'ByBit':
-        pass
-
+# def cancel_all(bot, account, category, symbol):
+#     if bot.service == 'Binance':
+#         client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
+#
+#         client.futures_cancel_all_open_orders(symbol=symbol)  # Отменит все ордера
+#
+#         pass
+#     elif bot.service == 'ByBit':
+#         endpoint = "/v5/order/cancel-all"
+#         method = "POST"
+#         params = {
+#             'category': category,
+#             'symbol': symbol.name,
+#         }
+#         params = json.dumps(params)
+#         response = json.loads(HTTP_Request(account, endpoint, method, params))
+#
+#
+# def cancel_order(bot, order_id):
+#     if bot.service == 'Binance':
+#         client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
+#         client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+#
+#     elif bot.service == 'ByBit':
+#         pass
 
 
 def amend_order(bot, order_id, data=None):
@@ -44,14 +43,13 @@ def amend_order(bot, order_id, data=None):
         pass
 
 
-
-def get_current_price(bot,account, category, symbol):
-    if bot.service == 'Binance':
-        client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-        client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
-
-    elif bot.service == 'ByBit':
-        pass
+# def get_current_price(bot, account, category, symbol):
+#     if bot.service == 'Binance':
+#         client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
+#         client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
+#
+#     elif bot.service == 'ByBit':
+#         pass
 
 
 def get_position_price(symbol_list):
@@ -162,13 +160,20 @@ def set_leverage(account, category, symbol, leverage, bot=None):
         pass
 
 
-def get_query_account_coins_balance(account):
-    # if bot.service == 'Binance':
-    #     client = Client(bot.account.API_TOKEN, bot.account.SECRET_KEY, testnet=True)
-    #     client.futures_cancel_all_open_orders(symbol=bot.symbol)  # Отменит все ордера
-    #
-    # elif bot.service == 'ByBit':
-        pass
+def get_query_account_coins_balance(account, symbol):
+    if account.service.name == 'Binance':
+        client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
+        return client.futures_cancel_all_open_orders(symbol=symbol)
+
+    elif account.service.name == 'ByBit':
+        endpoint = "/v5/asset/transfer/query-account-coins-balance"
+        method = "GET"
+        params = f"accountType={account.account_type}&coin=USDT"
+        response = json.loads(HTTP_Request(account, endpoint, method, params))
+        try:
+            return response['result']['balance']
+        except:
+            return None
 
 
 def switch_position_mode(bot):

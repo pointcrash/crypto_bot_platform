@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from bots_group.models import BotsGroup
-from main.models import Account
+from main.models import Account, ExchangeService
 
 
 class Symbol(models.Model):
@@ -64,7 +64,7 @@ class Bot(models.Model):
     )
 
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
+    service = models.ForeignKey(ExchangeService, on_delete=models.SET_NULL, null=True)
     account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
@@ -127,13 +127,6 @@ class Take(models.Model):
     take_number = models.SmallIntegerField(blank=True, null=True)
     order_link_id = models.CharField(default='', blank=True, null=True)
     is_filled = models.BooleanField(default=False, blank=True, null=True)
-
-
-class ExchangeService(models.Model):
-    name = models.CharField()
-
-    def __str__(self):
-        return self.name
 
 
 class Log(models.Model):
