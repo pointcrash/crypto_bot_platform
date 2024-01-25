@@ -178,20 +178,17 @@ def get_symbol_set():
     data_set = get_instruments_info(account, category="linear")
     symbol_set = {
         i['symbol']: {
-            i['symbol'],
-            i['priceScale'],
-            i['leverageFilter']['minLeverage'],
-            i['leverageFilter']['maxLeverage'],
-            i['leverageFilter']['leverageStep'],
-            i['priceFilter']['minPrice'],
-            i['priceFilter']['maxPrice'],
-            i['lotSizeFilter']['minOrderQty'],
-            i['lotSizeFilter']['maxOrderQty'],
-            i['priceFilter']['tickSize'],
-            i['lotSizeFilter']['qtyStep']
-        }
-                  for i in data_set['result']['list'] if
-                  i['symbol'].endswith('USDT')
+            'priceScale': i['priceScale'],
+            'minLeverage': i['leverageFilter']['minLeverage'],
+            'maxLeverage': i['leverageFilter']['maxLeverage'],
+            'leverageStep': i['leverageFilter']['leverageStep'],
+            'minPrice': i['priceFilter']['minPrice'],
+            'maxPrice': i['priceFilter']['maxPrice'],
+            'priceTickSize': i['priceFilter']['tickSize'],
+            'minQty': i['lotSizeFilter']['minOrderQty'],
+            'maxQty': i['lotSizeFilter']['maxOrderQty'],
+            'stepQtySize': i['lotSizeFilter']['qtyStep']
+        } for i in data_set['result']['list'] if i['symbol'].endswith('USDT')
     }
 
     return symbol_set
@@ -311,7 +308,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'tpSize': tpSize,
             'slSize': tpSize,
             'positionIdx': positionIdx,
-            }
+        }
     else:
         params = {
             'category': bot.category,
@@ -320,7 +317,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'stopLoss': stopLoss,
             'tpslMode': 'Full',
             'positionIdx': positionIdx,
-            }
+        }
 
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot=bot))
