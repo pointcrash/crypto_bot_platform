@@ -1,0 +1,7 @@
+---
+# Git repo's URL to be cloned
+repo_url: ""
+# To which directory the repo must be cloned
+repo_dest: "/root/bbb/bot-pyton"
+# Which bot repo branch must be cloned
+repo_branch: main

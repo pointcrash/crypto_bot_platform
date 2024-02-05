@@ -1,0 +1,6 @@
+---
+- name: Restart docker-compose with Makefile
+  make:
+    chdir: "{{ repo_dest }}"
+    target: restart
+

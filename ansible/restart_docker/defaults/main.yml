@@ -1,0 +1,3 @@
+---
+# To which directory the repo must be cloned
+repo_dest: "/root/bbb/bot-pyton"

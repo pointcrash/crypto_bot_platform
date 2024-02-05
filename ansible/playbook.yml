@@ -1,0 +1,8 @@
+---
+- name: Playbook to update Binance bot
+  hosts: all
+  become: yes
+
+  roles:
+    - pull_repo
+    - restart_docker
