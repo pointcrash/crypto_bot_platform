@@ -60,8 +60,8 @@ class Bot(models.Model):
         ('360', '360'),
         ('720', '720'),
         ('D', 'D'),
-        ('M', 'M'),
         ('W', 'W'),
+        ('M', 'M'),
     )
 
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)

@@ -7,7 +7,7 @@ import hmac
 
 from requests import RequestException
 
-from tg_bot.models import TelegramAccount
+# from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 
 httpClient = requests.Session()
@@ -43,9 +43,9 @@ def HTTP_Request(account, endPoint, method, payload, bot=None):
             return response.text
         except RequestException as e:
             if bot:
-                chat_id = TelegramAccount(owner=bot.owner).chat_id
+                # chat_id = TelegramAccount(owner=bot.owner).chat_id
                 message = f'Вызвано исключение RequestException: {e}'
-                send_telegram_message(chat_id, bot, message)
+                # send_telegram_message(chat_id, bot, message)
 
             # Обработка ошибки при отправке запроса или получении ответа
             continue
@@ -341,10 +341,10 @@ def tg_error_message(bot, response):
     response_data_retcode = str(response_data["retCode"])
     response_data_retmsg = str(response_data["retMsg"])
 
-    if len(response_data_retcode) == 6:
-        if response_data_retcode != '110025' and response_data_retcode != '110043':
-            tg = TelegramAccount.objects.filter(owner=bot.owner).first()
-            if tg:
-                chat_id = tg.chat_id
-                message = f'Код ошибки: "{response_data_retcode}"\nТекст ошибки: "{response_data_retmsg}"'
-                send_telegram_message(chat_id, bot, message)
+    # if len(response_data_retcode) == 6:
+    #     if response_data_retcode != '110025' and response_data_retcode != '110043':
+            # tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+            # if tg:
+            #     chat_id = tg.chat_id
+            #     message = f'Код ошибки: "{response_data_retcode}"\nТекст ошибки: "{response_data_retmsg}"'
+            #     send_telegram_message(chat_id, bot, message)

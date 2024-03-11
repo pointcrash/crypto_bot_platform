@@ -20,9 +20,10 @@ api_key_bybit = 'XlXhlUPG4GCBGRdFld'
 api_secret_bybit = 'JBpwCjzkzXbxriLdptaoLyLR2wvdNSz0NisU'
 
 
-def place_order(account, symbol, qty, side, order_type, timeInForce='GTC', price=None, ):
+def place_order(account, symbol, qty, side, order_type, timeInForce=None, price=None, ):
     if account.service.name == 'Binance':
-        positionSide = 'LONG' if side.lower() == 'buy' else 'SHORT'
+        # positionSide = 'LONG' if side.lower() == 'buy' else 'SHORT'
+        positionSide = 'SHORT' if side.lower() == 'buy' else 'LONG'
         client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
         return client.futures_create_order(
             symbol=symbol,
@@ -233,6 +234,28 @@ def get_query_account_coins_balance(account):
             return None
 
 
+# def get_exchange_information(account):
+#     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=True)
+#     symbols_raw_data = client.futures_exchange_info()
+#     symbol_set = {
+#         i['symbol']: {
+#             'minPrice': i['filters'][0]['minPrice'],
+#             'maxPrice': i['filters'][0]['maxPrice'],
+#             'priceTickSize': i['filters'][0]['tickSize'],
+#             'minQty': i['filters'][2]['minQty'],
+#             'maxQty': i['filters'][2]['maxQty'],
+#             'stepQtySize': i['filters'][2]['stepSize']
+#         } for i in symbols_raw_data['symbols'] if i['symbol'].endswith('USDT')
+#     }
+#
+#     leverage_raw_data = client.futures_leverage_bracket()
+#     for obj in leverage_raw_data:
+#         if obj['symbol'] in symbol_set:
+#             symbol_set[obj['symbol']]['maxLeverage'] = obj['brackets'][0]['initialLeverage']
+#
+#     return symbol_set
+
+
 if __name__ == '__main__':
     account_binance = Account.objects.get(pk=6)
     account_bybit = Account.objects.get(pk=1)
@@ -250,6 +273,14 @@ if __name__ == '__main__':
     #     order_type='Limit',
     #     price=42000,
     # ))
+
+    print(place_order(
+        account=account_binance,
+        symbol='BTCUSDT',
+        qty=0.02,
+        side='BUY',
+        order_type='MARKET',
+    ))
     #
     # print(get_position_inform(
     #     account=account_bybit,

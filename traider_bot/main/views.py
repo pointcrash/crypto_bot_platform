@@ -19,6 +19,7 @@ from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
 from main.models import Account, ActiveBot
 from .logic import calculate_pnl
+import requests
 
 
 def view_home(request):
@@ -174,6 +175,8 @@ def create_account(request):
             acc.owner = request.user
             form.save()
 
+            url = f"http://localhost/ws/conn/new_account/{acc.pk}"
+            requests.get(url)
             return redirect('account_list')
     else:
         form = AccountForm()
@@ -265,13 +268,16 @@ def profile_mode_switching(request, profile_id):
 
 def get_balance(request, acc_id):
     acc = Account.objects.get(pk=acc_id)
-    # print(get_query_account_coins_balance(acc))
-    balance = get_query_account_coins_balance(acc)
-    wb = balance['walletBalance']
-    tb = balance['transferBalance']
-    name = acc.name
+    try:
+        balance = get_query_account_coins_balance(acc)[0]
+        wb = balance['walletBalance']
+        tb = balance['transferBalance']
+    except Exception as e:
+        print(e)
+        print(f'Апи ключи аккаунта {acc.name} устарели, замените')
+        return JsonResponse({"wb": None, "tb": None, "name": acc.name})
 
-    return JsonResponse({"wb": wb, "tb": tb, "name": name})
+    return JsonResponse({"wb": wb, "tb": tb, "name": acc.name})
 
 
 @login_required
