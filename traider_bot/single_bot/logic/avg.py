@@ -1,4 +1,4 @@
-from api_v5 import get_current_price, get_order_status
+from api.api_v5_bybit import get_current_price, get_order_status
 from bots.bot_logic import get_quantity_from_price, logging
 from bots.models import Log
 from orders.models import Order

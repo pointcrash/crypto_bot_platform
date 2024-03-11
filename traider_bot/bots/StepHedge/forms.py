@@ -39,7 +39,7 @@ class BotForm(forms.ModelForm):
 
     class Meta:
         model = Bot
-        fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType',
+        fields = ['service', 'account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType',
                   'qty_kline', 'd', 'auto_avg', 'bb_avg_percent',
                   'deviation_from_lines',
                   'is_percent_deviation_from_lines', 'dfm',
@@ -49,6 +49,7 @@ class BotForm(forms.ModelForm):
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
             'account': forms.Select(attrs={'class': 'form-control'}),
+            'service': forms.Select(attrs={'class': 'form-control'}),
             'symbol': forms.Select(attrs={'class': 'form-control'}),
             'side': forms.Select(attrs={'class': 'form-control'}),
             'orderType': forms.Select(attrs={'class': 'form-control'}),

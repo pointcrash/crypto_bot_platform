@@ -1,4 +1,4 @@
-from api_v5 import get_qty, get_side, get_position_price
+from api.api_v5_bybit import get_qty, get_side, get_position_price
 from bots.bb_set_takes import set_takes
 from bots.bot_logic import create_bb_and_avg_obj, func_get_symbol_list
 from orders.models import Order

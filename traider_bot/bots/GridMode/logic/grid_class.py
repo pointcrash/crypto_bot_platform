@@ -1,4 +1,4 @@
-from api_v5 import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price
+from api.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price
 from bots.bot_logic import get_quantity_from_price, logging
 from orders.models import Order
 

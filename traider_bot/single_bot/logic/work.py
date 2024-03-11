@@ -2,7 +2,7 @@ import math
 import time
 from decimal import Decimal
 
-from api_v5 import switch_position_mode, set_leverage, cancel_all, get_current_price
+from api.api_v5_bybit import switch_position_mode, set_leverage, cancel_all, get_current_price
 from bots.bot_logic import count_decimal_places, logging, clear_data_bot
 from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder, Set0Psn, OppositePosition

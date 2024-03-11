@@ -2,11 +2,12 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from bots_group.models import BotsGroup
-from main.models import Account
+from main.models import Account, ExchangeService
 
 
 class Symbol(models.Model):
     name = models.CharField(max_length=20)
+    service = models.ForeignKey(ExchangeService, on_delete=models.SET_NULL, null=True)
     priceScale = models.CharField(max_length=20, null=True)
     minLeverage = models.CharField(max_length=20, null=True)
     maxLeverage = models.CharField(max_length=20, null=True)
@@ -59,11 +60,12 @@ class Bot(models.Model):
         ('360', '360'),
         ('720', '720'),
         ('D', 'D'),
-        ('M', 'M'),
         ('W', 'W'),
+        ('M', 'M'),
     )
 
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    service = models.ForeignKey(ExchangeService, on_delete=models.SET_NULL, null=True)
     account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
