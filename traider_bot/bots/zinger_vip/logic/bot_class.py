@@ -13,12 +13,22 @@ class WorkZingerVipClass:
         self.bot = bot
         self.symbol = bot.symbol
         self.bb = BollingerBands(bot)
-        self.position_info = None  # dict
+        self.position_info = {
+            'LONG': {
+                'side': 'LONG',
+                'qty': 0,
+                'entryPrice': 0,
+            }, 'SHORT': {
+                'side': 'SHORT',
+                'qty': 0,
+                'entryPrice': 0,
+            }
+        }  # dict
         self.current_price = None  # str
 
         self.percent = Decimal(0.1)
-        self.order_count = 5
-        self.order_list = []
+        self.order_count = 10
+        self.order_list = {'LONG': {}, 'SHORT': {}}
 
         self.locker_1 = threading.Lock()
 
@@ -32,7 +42,7 @@ class WorkZingerVipClass:
         except:
             pass
 
-        self.position_info = get_position_inform(self.bot)
+        # self.position_info = get_position_inform(self.bot)
 
     def open_psns_with_start(self):
         while not self.current_price:
@@ -55,16 +65,14 @@ class WorkZingerVipClass:
         place_batch_order(self.bot, order_list=[long_order, short_order])
 
     def place_reduction_orders(self):
-        if self.position_info:
-            order_list = []
-            for psn in self.position_info:
-                psn_side = psn['side']
+        for psn_side, psn in self.position_info.items():
+            if psn['qty']:
                 psn_qty = Decimal(psn['qty'])
                 psn_price = Decimal(psn['entryPrice'])
                 psn_cost = psn_price * psn_qty
+                print(psn_side)
 
                 if psn_side == 'LONG':
-                    long_orders = {}
                     for number_order in range(self.order_count):
                         order_price = psn_price * (1 + self.percent)
                         order_cost = order_price * psn_qty
@@ -72,39 +80,43 @@ class WorkZingerVipClass:
                         coin_sold_count = cost_diff / order_price
                         qty_after_sold = psn_qty - coin_sold_count
 
-                        long_orders[number_order] = {
-                            'order_price': order_price,
-                            'order_cost': order_cost,
-                            'cost_diff': cost_diff,
-                            'qty_after_sold': qty_after_sold,
-                            'coin_sold_count': coin_sold_count,
+                        order = {
+                            'order_price': round(order_price, 10),
+                            'order_cost': round(order_cost, 10),
+                            'cost_diff': round(cost_diff, 10),
+                            'qty_after_sold': round(qty_after_sold, 10),
+                            'coin_sold_count': round(coin_sold_count, 10),
                         }
+                        self.order_list['LONG'][number_order] = order
 
                         psn_qty = qty_after_sold
                         psn_price = order_price
                         psn_cost = psn_price * psn_qty
 
-                    self.order_list.append(long_orders)
-
-                else:
-                    short_orders = {}
+                elif psn_side == 'SHORT':
                     for number_order in range(self.order_count):
                         order_price = psn_price / (1 + self.percent)
+                        # order_price = psn_price - (psn_price * self.percent)
                         order_cost = order_price * psn_qty
-                        cost_after_reduction = order_cost - (order_cost * self.percent)
+                        cost_after_reduction = order_cost / (1 + self.percent)
+                        # cost_after_reduction = order_cost - (order_cost * self.percent)
                         qty_after_sold = cost_after_reduction / order_price
                         coin_sold_count = psn_qty - qty_after_sold
 
-                        short_orders[number_order] = {
-                            'order_price': order_price,
-                            'order_cost': order_cost,
-                            'cost_after_reduction': cost_after_reduction,
-                            'qty_after_sold': qty_after_sold,
-                            'coin_sold_count': coin_sold_count,
+                        order = {
+                            'order_price': round(order_price, 10),
+                            'order_cost': round(order_cost, 10),
+                            'cost_after_reduction': round(cost_after_reduction, 10),
+                            'qty_after_sold': round(qty_after_sold, 10),
+                            'coin_sold_count': round(coin_sold_count, 10),
                         }
+                        self.order_list['SHORT'][number_order] = order
 
                         psn_qty = qty_after_sold
                         psn_price = order_price
 
-                    self.order_list.append(short_orders)
-
+        for orders in self.order_list.values():
+            print()
+            for order in orders.values():
+                print(order)
+            print()

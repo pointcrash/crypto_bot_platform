@@ -20,8 +20,7 @@ def main():
     if not is_bot_active(bot.id):
         ActiveBot.objects.create(bot_id=bot.id)
     # bb_worker(bot)
-    # zinger_vip_worker(bot)
-    print(get_position_inform(bot))
+    zinger_vip_worker(bot)
 
 
 if __name__ == '__main__':

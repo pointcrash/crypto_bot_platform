@@ -57,13 +57,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'traider_bot.wsgi.application'
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'BTC_USDT_bot_db',
+#         'USER': 'admin',
+#         'PASSWORD': '74976',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'MyDB',
         'USER': 'admin',
         'PASSWORD': 'lksd23GBKwed.',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }
