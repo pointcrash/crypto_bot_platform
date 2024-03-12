@@ -1,7 +1,6 @@
 import threading
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from bots.bb.logic.logic import bb_worker_binance
 from bots.forms import BotForm
 from bots.models import Symbol
 from single_bot.logic.global_variables import lock
