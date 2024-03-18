@@ -2,6 +2,14 @@ FROM python:3.11
 
 COPY /bot-python/traider_bot/requirements.txt /bot-python/traider_bot/app/requirements.txt
 WORKDIR /bot-python/traider_bot/app
+
+# Создаем и активируем виртуальное окружение
+RUN pip install virtualenv
+RUN virtualenv venv
+SHELL ["/bin/bash", "-c"]
+RUN source venv/bin/activate
+
+
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
