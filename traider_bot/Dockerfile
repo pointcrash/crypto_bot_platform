@@ -4,6 +4,7 @@ COPY /ByBit_bot/traider_bot/requirements.txt /ByBit_bot/traider_bot/app/requirem
 WORKDIR /ByBit_bot/traider_bot/app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN pip install gunicorn
 
 COPY ./ByBit_bot/traider_bot /ByBit_bot/traider_bot/app
 
