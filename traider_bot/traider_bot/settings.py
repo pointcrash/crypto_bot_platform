@@ -8,7 +8,7 @@ SECRET_KEY = django_app_key
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
