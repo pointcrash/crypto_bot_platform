@@ -52,11 +52,9 @@ def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side
         'orderLinkId': orderLinkId,
     }
 
-    print(params)
     params = json.dumps(params)
     response = HTTP_Request(bot.account, endpoint, method, params)
-    print(response)
-    return response
+    return response['result']
 
 
 def bybit_cancel_all_orders(bot):

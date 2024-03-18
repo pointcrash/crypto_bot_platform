@@ -48,9 +48,13 @@ def place_order(bot, side, order_type, price, amount_usdt=None, qty=None, positi
 
 
 def place_batch_order(bot, order_list):
+
+    # Используем цену для расчета qty если оно не передано
     for order in order_list:
-        if not order.get('quantity') and order.get('price'):
-            order['quantity'] = str(get_quantity_from_price(bot, price=Decimal(order['price']), amount=bot.qty))
+        if not order.get('qty') and order.get('price'):
+            order['qty'] = str(get_quantity_from_price(bot, price=Decimal(order['price']), amount=bot.qty))
+
+            # Удаляем параметр price если это маркет-ордер
             if order['type'].upper() == 'MARKET':
                 order.pop('price')
 

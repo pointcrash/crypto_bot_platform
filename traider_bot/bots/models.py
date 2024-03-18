@@ -110,7 +110,7 @@ class Bot(models.Model):
     group = models.ForeignKey(BotsGroup, on_delete=models.SET_NULL, null=True, blank=True)
 
     repeat = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
 

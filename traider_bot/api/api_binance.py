@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+import requests
 from binance.client import Client
 
 api_key = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
@@ -22,7 +24,6 @@ def get_data_ago_to_ms(days):
 # print(client.futures_place_batch_order(batchOrders=[order1, order2]))  # Разместить несколько ордеров (max 5)
 # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='LONG', type='MARKET', quantity=0.02))  # Разместить ордер
 # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='SHORT', type='LIMIT', price=41000, timeInForce='GTC', quantity=0.02))  # Разместить ордер
-# print(client.futures_place_batch_order())  # Разместить несколько ордеров < 5
 # print(client.futures_get_all_orders(symbol='BTCUSDT'))  # Список ордеров
 # print(client.futures_get_order(symbol='BTCUSDT', orderId='3653110189'))  # Инфо по открытому ордеру
 # print(client.futures_cancel_order(symbol='BTCUSDT', orderId='3653110189'))  # Отменить ордер
@@ -39,7 +40,6 @@ def get_data_ago_to_ms(days):
 #     print(y)
 
 # print(client.futures_income_history(symbol='BTCUSDT', incomeType='FUNDING_FEE'))
-
 
 # print(client.futures_get_order(symbol='BTCUSDT'))  #
 def get_exchange_information():

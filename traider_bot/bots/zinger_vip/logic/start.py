@@ -31,10 +31,12 @@ def zinger_vip_worker(bot):
         ws_client.sub_to_mark_price(symbol=bot.symbol.name)
 
         ''' First open positions '''
-        worker_class.open_psns_with_start()
+        if not worker_class.check_opened_psn():
+            worker_class.open_psns_with_start()
 
         ''' Empty cycle '''
-        while is_bot_active(bot.id):
+        print(bot.is_active)
+        while bot.is_active:
             # print('TL = ', bb_worker_class.bb.tl, 'BL = ', bb_worker_class.bb.bl)
             # print(bb_worker_class.position_info, bb_worker_class.have_psn)
             # print('.')
@@ -52,7 +54,10 @@ def zinger_vip_worker(bot):
         except Exception as e:
             print('ERROR:', e)
             logging(bot, f'Error {e}')
-        if is_bot_active(bot.id):
-            ActiveBot.objects.filter(bot_id=bot.id).delete()
+        if bot.is_active:
+            bot.is_active = False
+            bot.save()
+        # if is_bot_active(bot.id):
+        #     ActiveBot.objects.filter(bot_id=bot.id).delete()
 
 
