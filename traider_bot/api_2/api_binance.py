@@ -55,6 +55,11 @@ def binance_place_order(bot, client, side, order_type, price, qty, position_side
 
 @with_binance_client
 def binance_place_batch_order(bot, client, order_list):
+    for order in order_list:
+        if not order.get('timeInForce') and order.get('type') == 'LIMIT':
+            order['timeInForce'] = 'GTC'
+        order['quantity'] = order.pop('qty')
+
     response = client.futures_place_batch_order(batchOrders=order_list)
     return response
 

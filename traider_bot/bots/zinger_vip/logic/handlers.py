@@ -27,42 +27,39 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 def handle_position_stream_message(msg, bot_class_obj):
     print(msg)
-    # print()
-    # with bot_class_obj.locker_1:
-    #     if msg['symbol'] == bot_class_obj.symbol:
-    #         if Decimal(msg['qty']) != 0:
-    #             if bot_class_obj.position_info:
-    #                 if bot_class_obj.position_info['qty'] == Decimal(msg['qty']):
-    #                     return
-    #             bot_class_obj.position_info = {
-    #                 'side': msg['side'],
-    #                 'qty': Decimal(msg['qty']),
-    #                 'entryPrice': Decimal(msg['entryPrice']),
-    #             }
-    #             with bot_class_obj.avg_locker:
-    #                 bot_class_obj.avg_obj.update_psn_info(bot_class_obj.position_info)
-    #             bot_class_obj.have_psn = True
-    #             bot_class_obj.replace_closing_orders()
-    #         else:
-    #             if bot_class_obj.position_info:
-    #                 if msg['side'] == bot_class_obj.position_info['side']:
-    #                     bot_class_obj.have_psn = False
-    #                     bot_class_obj.position_info = None
-    #                     bot_class_obj.replace_opening_orders()
+    if msg['symbol'] == bot_class_obj.symbol_name:
+        with bot_class_obj.psn_locker:
+            if Decimal(msg['qty']) != 0:
+                if bot_class_obj.position_info:
+                    if bot_class_obj.position_info[msg['side']]['qty'] == Decimal(msg['qty']):
+                        return
+                bot_class_obj.position_info[msg['side']] = {
+                    'side': msg['side'],
+                    'qty': Decimal(msg['qty']),
+                    'entryPrice': Decimal(msg['entryPrice']),
+                    'realisedPnl': Decimal(msg['realisedPnl']),
+                }
+
+                #  Рассчитываем цену выхода из цикла
+                end_cycle_price = bot_class_obj.calc_end_cycle_price()
+                if end_cycle_price:
+                    print(end_cycle_price)
 
 
 def handle_order_stream_message(msg, bot_class_obj):
+    print()
     print(msg)
     if msg['status'].upper() == 'FILLED':
         side = msg['psnSide']
-        bot_class_obj.position_info[side] = {
-            'side': side,
-            'qty': Decimal(msg['qty']),
-            'entryPrice': Decimal(msg['avgPrice']),
-        }
-        bot_class_obj.place_reduction_orders()
+        if msg['orderId'] in bot_class_obj.reduce_order_id_list[side]:
+            index = bot_class_obj.reduce_order_id_list[side].index(msg['orderId'])
+            if index != 0:
+                raise Exception(f'Исполненный ордер нарушает очередь. Место в списке {index}')
+            bot_class_obj.count_reduce_order_filled[side] += 1
+            bot_class_obj.reduce_order_id_list[side].pop(index)
+            bot_class_obj.place_next_reduction_order(side=side)
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
-    # print(msg)
+    print(msg)
     bot_class_obj.current_price = msg['markPrice']

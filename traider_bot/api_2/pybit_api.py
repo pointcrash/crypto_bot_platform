@@ -21,7 +21,7 @@ def bybit_place_batch_order(bot, order_list):
             "orderType": order['type'].capitalize(),
             "side": order['side'].capitalize(),
             "positionIdx": 1 if order['positionSide'] == 'LONG' else 2,
-            "qty": order['quantity'],
+            "qty": order['qty'],
         }
         if formatted_order['orderType'] == 'Limit':
             formatted_order['price'] = order['price']
@@ -29,7 +29,7 @@ def bybit_place_batch_order(bot, order_list):
 
     session = get_session(bot.account)
     response = session.place_batch_order(category=category, request=formatted_order_list)
-    return response
+    return response['result']['list']
 
 
 if __name__ == "__main__":
