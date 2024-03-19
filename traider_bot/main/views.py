@@ -175,7 +175,7 @@ def create_account(request):
             acc.owner = request.user
             form.save()
 
-            url = f"http://localhost:8008/ws/conn/new_account/{acc.pk}"
+            url = f"http://ws-manager:8008/ws/conn/new_account/{acc.pk}"
             requests.get(url)
             return redirect('account_list')
     else:
@@ -193,7 +193,7 @@ def edit_account(request, acc_id):
             acc = form.save(commit=False)
             form.save()
 
-            url = f"http://localhost:8008/ws/conn/update_account/{acc.pk}"
+            url = f"http://ws-manager:8008/ws/conn/update_account/{acc.pk}"
             requests.get(url)
 
             return redirect('account_list')
@@ -208,7 +208,7 @@ def delete_account(request, acc_id):
     acc = Account.objects.get(pk=acc_id)
     acc.delete()
 
-    url = f"http://localhost:8008/ws/conn/del_account/{acc_id}"
+    url = f"http://ws-manager:8008/ws/conn/del_account/{acc_id}"
     requests.get(url)
 
     return redirect('account_list')
