@@ -318,10 +318,10 @@ def all_symbols_update():
     for i in range(2):
         if i == 0:
             service = ExchangeService.objects.filter(name='ByBit').first()
-            account = Account.objects.filter(name='RomanByBitMainnet', service=service)
+            account = Account.objects.filter(name='RomanByBitMainnet', service=service).first()
         else:
             service = ExchangeService.objects.filter(name='Binance').first()
-            account = Account.objects.filter(name='RomanBinanceMainnet', service=service)
+            account = Account.objects.filter(name='RomanBinanceMainnet', service=service).first()
 
         symbol_set = get_exchange_information(account, service.name)
         print('Длинна списка монет: ', len(symbol_set))
