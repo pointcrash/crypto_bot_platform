@@ -13,7 +13,7 @@ from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive, terminate_thread
-from bots.bot_logic import get_update_symbols, clear_data_bot, func_get_symbol_list
+from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
 from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition, StepHedge
 from main.forms import AccountSelectForm
