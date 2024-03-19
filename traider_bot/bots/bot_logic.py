@@ -6,7 +6,7 @@ import os
 import django
 import pytz
 
-from api.api_binance import get_exchange_information
+from api_2.api_aggregator import get_exchange_information
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 from tg_bot.send_message import send_telegram_message
 
@@ -14,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
 from timezone.models import TimeZone
-from main.models import ActiveBot, ExchangeService
+from main.models import ActiveBot, ExchangeService, Account
 from tg_bot.models import TelegramAccount
 from bots.bb_auto_avg import BBAutoAverage
 from bots.bb_class import BollingerBands
@@ -250,7 +250,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
             lock.release()
 
 
-def get_update_symbols():
+def get_update_symbols_for_bybit():
     symbol_set = get_symbol_set()
     for symbol in symbol_set:
         coin = Symbol.objects.filter(name=symbol[0]).first()
@@ -312,6 +312,47 @@ def get_update_symbols_for_binance():
                 tickSize=symbol_set[symbol_name]['priceTickSize'],
                 qtyStep=symbol_set[symbol_name]['stepQtySize'],
             )
+
+
+def all_symbols_update():
+    for i in range(2):
+        if i == 0:
+            service = ExchangeService.objects.filter(name='ByBit').first()
+            account = Account.objects.filter(name='RomanByBitMainnet', service=service)
+        else:
+            service = ExchangeService.objects.filter(name='Binance').first()
+            account = Account.objects.filter(name='RomanBinanceMainnet', service=service)
+
+        symbol_set = get_exchange_information(account, service.name)
+        print('Длинна списка монет: ', len(symbol_set))
+        if not service:
+            return
+        for symbol_name in symbol_set:
+            coin = Symbol.objects.filter(name=symbol_name, service=service).first()
+            symbol_data = symbol_set[symbol_name]
+            if coin:
+                coin.priceScale = symbol_data['priceScale']
+                coin.maxLeverage = symbol_data['maxLeverage']
+                coin.minPrice = symbol_data['minPrice']
+                coin.maxPrice = symbol_data['maxPrice']
+                coin.minOrderQty = symbol_data['minQty']
+                coin.maxOrderQty = symbol_data['maxQty']
+                coin.tickSize = symbol_data['priceTickSize']
+                coin.qtyStep = symbol_data['stepQtySize']
+                coin.save()
+            else:
+                Symbol.objects.create(
+                    name=symbol_name,
+                    service=service,
+                    priceScale=symbol_data['priceScale'],
+                    maxLeverage=symbol_data['maxLeverage'],
+                    minPrice=symbol_data['minPrice'],
+                    maxPrice=symbol_data['maxPrice'],
+                    minOrderQty=symbol_data['minQty'],
+                    maxOrderQty=symbol_data['maxQty'],
+                    tickSize=symbol_data['priceTickSize'],
+                    qtyStep=symbol_data['stepQtySize'],
+                )
 
 
 def clear_symbols():

@@ -118,3 +118,10 @@ def account_balance(bot):
         'availableBalance': 707.96,
     }
     '''
+
+
+def get_exchange_information(account, service_name):
+    if service_name == 'Binance':
+        return get_binance_exchange_information(account)
+    elif service_name == 'ByBit':
+        return get_bybit_exchange_information(account)

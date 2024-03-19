@@ -11,4 +11,5 @@ urlpatterns = [
     path('delete/<int:acc_id>/', delete_account, name='delete_account'),
     path('get_balance/<int:acc_id>/', get_balance, name='get_balance'),
     path('strategies/', strategies_view, name='strategies'),
+    path('all_symbols_update/', update_symbols, name='all_symbols_update'),
 ]

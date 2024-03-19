@@ -9,6 +9,7 @@ from datetime import timedelta, datetime
 from django.utils import timezone
 
 from api.api_v5_bybit import get_query_account_coins_balance, get_list
+from bots.bot_logic import all_symbols_update
 from bots.models import Log, Bot, Symbol
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import global_list_bot_id
@@ -299,3 +300,11 @@ def cleaning_logs_view(request):
     logs.delete()
 
     return render(request, 'strategies/strategies.html')
+
+
+@login_required
+def update_symbols(request):
+    if request.user.is_superuser():
+        all_symbols_update()
+    return redirect(request.META.get('HTTP_REFERER'))
+

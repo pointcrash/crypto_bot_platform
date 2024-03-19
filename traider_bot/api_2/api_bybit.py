@@ -137,3 +137,34 @@ def bybit_account_balance(bot):
         'availableBalance': round(float(response['transferBalance']), 2),
     }
     return response
+
+
+def get_instruments_info(account, category, symbol=None):
+    endpoint = "/v5/market/instruments-info"
+    method = "GET"
+    if symbol is not None:
+        params = f"category={category}&symbol={symbol.name}"
+    else:
+        params = f"category={category}"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
+    return response
+
+
+def get_bybit_exchange_information(account):
+    data_set = get_instruments_info(account, category="linear")
+    symbol_set = {
+        i['symbol']: {
+            'priceScale': i['priceScale'],
+            'minLeverage': i['leverageFilter']['minLeverage'],
+            'maxLeverage': i['leverageFilter']['maxLeverage'],
+            'leverageStep': i['leverageFilter']['leverageStep'],
+            'minPrice': i['priceFilter']['minPrice'],
+            'maxPrice': i['priceFilter']['maxPrice'],
+            'priceTickSize': i['priceFilter']['tickSize'],
+            'minQty': i['lotSizeFilter']['minOrderQty'],
+            'maxQty': i['lotSizeFilter']['maxOrderQty'],
+            'stepQtySize': i['lotSizeFilter']['qtyStep']
+        } for i in data_set['result']['list'] if i['symbol'].endswith('USDT')
+    }
+
+    return symbol_set

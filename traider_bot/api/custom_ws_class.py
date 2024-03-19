@@ -85,7 +85,6 @@ def message_callback(message):
 
 if __name__ == "__main__":
     account_name = 'My Bibnance Account'
-    # account_name = 'ricce testnet'
     client = CustomWebSocketClient(message_callback, account_name, service_name='Binance')
     client.start()
     print('end')

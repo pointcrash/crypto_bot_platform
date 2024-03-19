@@ -109,3 +109,35 @@ def binance_account_balance(bot, client):
         'availableBalance': round(float(response['availableBalance']), 2),
     }
     return response
+
+
+def get_binance_exchange_information(account):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+
+    def count_decimal_places(number_str):
+        if '.' in number_str:
+            decimal_value = number_str.split(".")[1]
+            zero_count = decimal_value.split("1")[0]
+            return len(zero_count) + 1
+        else:
+            return 0
+
+    symbols_raw_data = client.futures_exchange_info()
+    symbol_set = {
+        i['symbol']: {
+            'minPrice': i['filters'][0]['minPrice'],
+            'maxPrice': i['filters'][0]['maxPrice'],
+            'priceTickSize': i['filters'][0]['tickSize'],
+            'priceScale': count_decimal_places(i['filters'][0]['tickSize']),
+            'minQty': i['filters'][2]['minQty'],
+            'maxQty': i['filters'][2]['maxQty'],
+            'stepQtySize': i['filters'][2]['stepSize']
+        } for i in symbols_raw_data['symbols'] if i['symbol'].endswith('USDT')
+    }
+
+    leverage_raw_data = client.futures_leverage_bracket()
+    for obj in leverage_raw_data:
+        if obj['symbol'] in symbol_set:
+            symbol_set[obj['symbol']]['maxLeverage'] = obj['brackets'][0]['initialLeverage']
+
+    return symbol_set
