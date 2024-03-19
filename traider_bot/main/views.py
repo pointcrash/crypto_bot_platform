@@ -304,7 +304,7 @@ def cleaning_logs_view(request):
 
 @login_required
 def update_symbols(request):
-    if request.user.is_superuser():
+    if request.user.is_superuser:
         all_symbols_update()
     return redirect(request.META.get('HTTP_REFERER'))
 
