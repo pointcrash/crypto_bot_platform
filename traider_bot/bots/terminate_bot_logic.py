@@ -28,9 +28,12 @@ def terminate_thread(bot_id, keep_active=False):
     except Exception as e:
         return f"Terminate error: {e}"
     finally:
+        bot.is_active = False
+        bot.save()
         if not keep_active:
-            bot.is_active = False
-            bot.save()
+            pass
+            # bot.is_active = False
+            # bot.save()
         if lock.locked():
             lock.release()
 
