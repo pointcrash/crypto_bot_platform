@@ -29,7 +29,7 @@ def bb_worker(bot):
         ws_client.sub_to_kline(symbol=bot.symbol.name, interval=bot.interval)
         ws_client.sub_to_mark_price(symbol=bot.symbol.name)
 
-        while bot.is_active:
+        while bot.is_active and ws_client.websocket.open:
             time.sleep(3)
 
     except Exception as e:
