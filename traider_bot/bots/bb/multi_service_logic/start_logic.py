@@ -1,11 +1,11 @@
 import time
+import traceback
 
 from api.custom_ws_class import CustomWebSocketClient
-from main.models import ActiveBot
 from .bb_worker_class import WorkBollingerBandsClass
 
 from .handlers_messages import bb_handler_wrapper
-from ...bot_logic import is_bot_active, logging
+from ...bot_logic import logging
 
 
 def bb_worker(bot):
@@ -20,8 +20,7 @@ def bb_worker(bot):
                                           )
         ws_client.start()
 
-        time.sleep(3)
-        # print('Conn status', ws_client.is_open())
+        time.sleep(5)
 
         ''' Change leverage and position mode '''
         bb_worker_class.preparatory_actions()
@@ -30,16 +29,15 @@ def bb_worker(bot):
         ws_client.sub_to_kline(symbol=bot.symbol.name, interval=bot.interval)
         ws_client.sub_to_mark_price(symbol=bot.symbol.name)
 
-        while is_bot_active(bot.id):
-            # print('TL = ', bb_worker_class.bb.tl, 'BL = ', bb_worker_class.bb.bl)
-            # print(bb_worker_class.position_info, bb_worker_class.have_psn)
-            # print('.')
+        while bot.is_active:
             time.sleep(3)
 
     except Exception as e:
-        print(e)
+        print(f"**Ошибка:** {e}")
+        print(f"**Аргументы ошибки:** {e.args}")
+        print(f"**Traceback:**")
+        traceback.print_exc()
         logging(bot, f'Error {e}')
-        # exit_by_exception(bot)
 
     finally:
         try:
@@ -48,7 +46,8 @@ def bb_worker(bot):
         except Exception as e:
             print('ERROR:', e)
             logging(bot, f'Error {e}')
-        if is_bot_active(bot.id):
-            ActiveBot.objects.filter(bot_id=bot.id).delete()
+        if bot.is_active:
+            bot.is_active = False
+            bot.save()
 
 

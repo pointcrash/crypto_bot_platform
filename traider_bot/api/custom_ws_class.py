@@ -8,7 +8,7 @@ import websockets
 
 class CustomWebSocketClient:
     def __init__(self, callback, account_name, service_name):
-        self.uri = "ws://localhost:8765"
+        self.uri = "ws://ws-manager:8765"
         self.callback = callback
         self.account_name = account_name
         self.service = service_name

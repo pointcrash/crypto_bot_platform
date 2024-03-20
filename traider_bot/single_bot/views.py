@@ -10,6 +10,7 @@ from api.api_v5_bybit import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
+from bots.bb.multi_service_logic.start_logic import bb_worker
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive, terminate_thread
@@ -201,59 +202,54 @@ def single_bot_detail(request, bot_id):
 def bot_start(request, bot_id):
     bot = Bot.objects.get(pk=bot_id)
     bot_thread = None
-    is_ts_start = IsTSStart.objects.filter(bot=bot)
+    # is_ts_start = IsTSStart.objects.filter(bot=bot)
 
-    if check_thread_alive(bot.pk):
-        if bot.work_model == 'Step Hedge':
-            terminate_thread(bot.pk)
-        else:
-            stop_bot_with_cancel_orders(bot)
+    # if check_thread_alive(bot.pk):
+    #     if bot.work_model == 'Step Hedge':
+    #         terminate_thread(bot.pk)
+    #     else:
+    #         stop_bot_with_cancel_orders(bot)
 
-    clear_data_bot(bot, clear_data=1)  # Очищаем данные ордеров и тейков которые использовал старый бот
+    # clear_data_bot(bot, clear_data=1)  # Очищаем данные ордеров и тейков которые использовал старый бот
 
     if bot.work_model == 'bb':
-        if bot.side == 'TS':
-            if is_ts_start:
-                bot_thread = threading.Thread(target=set_takes, args=(bot,))
-            else:
-                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-        else:
-            bot_thread = threading.Thread(target=set_takes, args=(bot,))
+        # if bot.side == 'TS':
+        #     if is_ts_start:
+        #         bot_thread = threading.Thread(target=set_takes, args=(bot,))
+        #     else:
+        #         bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+        # else:
+        bot_thread = threading.Thread(target=bb_worker, args=(bot,))
 
-    elif bot.work_model == 'grid':
-        if bot.side == 'TS':
-            if is_ts_start:
-                bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-            else:
-                bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-        else:
-            bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-
-    elif bot.work_model == 'SmpHg':
-        simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
-        bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
-        append_thread_or_check_duplicate(bot.pk)
-
-    elif bot.work_model == 'Step Hedge':
-        step_hedge = StepHedge.objects.filter(bot=bot).first()
-        bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
-        if not ActiveBot.objects.filter(bot_id=bot.pk):
-            ActiveBot.objects.create(bot_id=bot.pk)
+    # elif bot.work_model == 'grid':
+    #     if bot.side == 'TS':
+    #         if is_ts_start:
+    #             bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+    #         else:
+    #             bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
+    #     else:
+    #         bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+    #
+    # elif bot.work_model == 'SmpHg':
+    #     simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
+    #     bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
+    #     append_thread_or_check_duplicate(bot.pk)
+    #
+    # elif bot.work_model == 'Step Hedge':
+    #     step_hedge = StepHedge.objects.filter(bot=bot).first()
+    #     bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
+    #     if not ActiveBot.objects.filter(bot_id=bot.pk):
+    #         ActiveBot.objects.create(bot_id=bot.pk)
         # append_thread_or_check_duplicate(bot.pk)
 
     if bot_thread is not None:
         bot_thread.start()
         bot.is_active = True
         bot.save()
-        lock.acquire()
-        global_list_threads[bot.pk] = bot_thread
-        if lock.locked():
-            lock.release()
-    return redirect(request.META.get('HTTP_REFERER'))
-
-
-def update_symbols_set(request):
-    get_update_symbols()
+        # lock.acquire()
+        # global_list_threads[bot.pk] = bot_thread
+        # if lock.locked():
+        #     lock.release()
     return redirect(request.META.get('HTTP_REFERER'))
 
 

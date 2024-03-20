@@ -28,7 +28,6 @@ class Bot(models.Model):
         ('Buy', 'Buy'),
         ('Sell', 'Sell'),
         ('FB', 'First Band'),
-        ('TS', 'Two-Sided'),
     )
 
     CATEGORY_CHOICES = (

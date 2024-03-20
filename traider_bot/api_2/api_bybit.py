@@ -1,4 +1,5 @@
 import json
+import traceback
 import uuid
 from decimal import Decimal
 
@@ -26,10 +27,14 @@ def bybit_get_position_inform(bot):
     method = "GET"
     params = f"category=linear&symbol={bot.symbol.name}"
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    response = response['result']['list']
-    position_inform_list = format_data(response)
-
-    return position_inform_list
+    try:
+        response = response['result']['list']
+        position_inform_list = format_data(response)
+        return position_inform_list
+    except Exception as e:
+        print(e)
+        print(response)
+        raise Exception(traceback.print_exc())
 
 
 def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side=None):
@@ -53,8 +58,13 @@ def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side
     }
 
     params = json.dumps(params)
-    response = HTTP_Request(bot.account, endpoint, method, params)
-    return response['result']
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    try:
+        response = response['result']
+    except Exception as e:
+        print(e)
+        print(response)
+        raise Exception(traceback.print_exc())
 
 
 def bybit_cancel_all_orders(bot):
@@ -87,7 +97,11 @@ def bybit_get_open_orders(bot):
     method = "GET"
     params = f"category=linear&symbol={bot.symbol.name}"
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    return response['result']['list']
+    try:
+        response = response['result']['list']
+    except Exception as e:
+        print(e)
+        print(response)
 
 
 def bybit_get_current_price(bot, category='linear'):

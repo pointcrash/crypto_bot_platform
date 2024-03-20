@@ -125,18 +125,6 @@ class BotForm(forms.ModelForm):
         self.fields['take_on_ml_percent'].required = False
         self.fields['price'].required = False
 
-    #     self.fields['account'].label_from_instance = self.label_from_instance
-    #
-    # @staticmethod
-    # def label_from_instance(obj):
-    #     balance = get_query_account_coins_balance(obj)
-    #     try:
-    #         for elem in balance:
-    #             if elem['coin'] == 'USDT':
-    #                 return f"{obj.name} - {round(Decimal(elem['transferBalance']), 1)} USDT"
-    #     except:
-    #         return f"{obj.name} error"
-
     class Meta:
         model = Bot
         fields = ['account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType', 'qty',
@@ -144,7 +132,7 @@ class BotForm(forms.ModelForm):
                   'deviation_from_lines',
                   'is_percent_deviation_from_lines', 'dfm',
                   'chw', 'dfep', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
-                  'grid_avg_value', 'bin_order',  'price',  ]
+                  'grid_avg_value', 'bin_order',  'price', ]
 
         widgets = {
             'qty': forms.TextInput(attrs={'class': 'form-control'}),
@@ -225,9 +213,9 @@ class BotForm(forms.ModelForm):
             raise forms.ValidationError(
                 f"Допустимые значения '1st order investment': min = {Decimal(symbol.minOrderQty) / leverage}, max = {Decimal(symbol.maxOrderQty) / leverage}")
 
-        if leverage > Decimal(symbol.maxLeverage) or leverage < Decimal(symbol.minLeverage):
-            raise forms.ValidationError(
-                f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
+        # if leverage > Decimal(symbol.maxLeverage) or leverage < Decimal(symbol.minLeverage):
+        #     raise forms.ValidationError(
+        #         f"Допустимые значения плеча: min = {symbol.minLeverage}, max = {symbol.maxLeverage}")
         #
         # if side == 'TS':
         #     raise forms.ValidationError('Режим "TS" еще не реализован для стратегии Боллинджера')

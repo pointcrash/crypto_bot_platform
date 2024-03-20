@@ -41,9 +41,8 @@ class WorkBollingerBandsClass:
             self.replace_opening_orders()
 
     def replace_opening_orders(self):
-        print('replace_opening_orders')
         cancel_all_orders(self.bot)
-        if self.bot.side == 'TS':
+        if self.bot.side == 'FB':
             place_order(self.bot, side='Buy', order_type='Limit', price=self.bb.bl)
             place_order(self.bot, side='Sell', order_type='Limit', price=self.bb.tl)
         elif self.bot.side == 'Buy':
@@ -52,7 +51,6 @@ class WorkBollingerBandsClass:
             place_order(self.bot, side='Sell', order_type='Limit', price=self.bb.tl)
 
     def replace_closing_orders(self):
-        print('replace_closing_orders')
         cancel_all_orders(self.bot)
         position_side = self.position_info['side']
 

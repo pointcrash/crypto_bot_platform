@@ -39,8 +39,8 @@ def handle_message_kline_info(msg, bot_class_obj):
 def handle_position_stream_message(msg, bot_class_obj):
     print(msg)
     print()
-    with bot_class_obj.locker_1:
-        if msg['symbol'] == bot_class_obj.symbol:
+    if msg['symbol'] == bot_class_obj.symbol:
+        with bot_class_obj.locker_1:
             if Decimal(msg['qty']) != 0:
                 if bot_class_obj.position_info:
                     if bot_class_obj.position_info['qty'] == Decimal(msg['qty']):

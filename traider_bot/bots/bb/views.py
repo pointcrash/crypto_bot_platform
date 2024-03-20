@@ -1,9 +1,10 @@
 import threading
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+
+from bots.bb.multi_service_logic.start_logic import bb_worker
 from bots.forms import BotForm
 from bots.models import Symbol
-from single_bot.logic.global_variables import lock
 
 
 @login_required
@@ -16,15 +17,14 @@ def bb_bot_create(request):
         if bot_form.is_valid():
             bot = bot_form.save(commit=False)
             bot.symbol = Symbol.objects.filter(name=bot.symbol.name, service=bot.account.service).first()
-            print(bot.symbol.service)
-            print(bot.account.service)
             bot.work_model = 'bb'
             bot.owner = request.user
             bot.category = 'linear'
+            bot.is_active = True
             bot.save()
 
-            # bot_thread = threading.Thread(target=bb_worker_binance, args=(bot,))
-            # bot_thread.start()
+            bot_thread = threading.Thread(target=bb_worker, args=(bot,))
+            bot_thread.start()
 
             return redirect('single_bot_list')
     else:
