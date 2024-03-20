@@ -54,16 +54,19 @@ def single_bot_list(request):
     is_alive_list = []
     active_bot_ids = ActiveBot.objects.all().values_list('bot_id', flat=True)
 
-    lock.acquire()
-    try:
-        for bot_id in all_bots_pks:
-            bot_id = str(bot_id)
-            if bot_id in active_bot_ids:
-                is_alive_list.append(True)
-            else:
-                is_alive_list.append(False)
-    finally:
-        lock.release()
+    for bot in bots:
+        is_alive_list.append(bot.is_active)
+
+    # lock.acquire()
+    # try:
+    #     for bot_id in all_bots_pks:
+    #         bot_id = str(bot_id)
+    #         if bot_id in active_bot_ids:
+    #             is_alive_list.append(True)
+    #         else:
+    #             is_alive_list.append(False)
+    # finally:
+    #     lock.release()
     bots = zip(bots, is_alive_list, pnl_list)
 
     return render(request, 'bot_list.html', {
