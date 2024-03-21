@@ -9,8 +9,7 @@ def bb_handler_wrapper(bb_worker_class_obj):
             handle_position_stream_message(message, bb_worker_class_obj)
 
         elif message['topic'] == 'order':
-            pass
-            # handle_user_info_stream_message(message, bb_worker_class_obj)
+            handle_order_stream_message(message, bb_worker_class_obj)
 
         elif message['topic'] == 'markPrice':
             handle_mark_price_stream_message(message, bb_worker_class_obj)
@@ -23,17 +22,12 @@ def bb_handler_wrapper(bb_worker_class_obj):
     return bb_handle_stream_callback
 
 
-def handle_message_kline_info(msg, bot_class_obj):
+def handle_order_stream_message(msg, bot_class_obj):
     print(msg)
     print()
-    with bot_class_obj.locker_1:
-        close_prise = Decimal(msg['closePrice'])
-        bot_class_obj.bb.modify_close_price_list(close_prise)
-        bot_class_obj.bb.recalculate_lines()
-        if not bot_class_obj.have_psn:
-            bot_class_obj.replace_opening_orders()
-        else:
-            bot_class_obj.replace_closing_orders()
+    if msg['symbol'] == bot_class_obj.symbol:
+        if msg['orderId'] == bot_class_obj.ml_order_id:
+            bot_class_obj.ml_filled = True
 
 
 def handle_position_stream_message(msg, bot_class_obj):
@@ -59,7 +53,21 @@ def handle_position_stream_message(msg, bot_class_obj):
                     if msg['side'] == bot_class_obj.position_info['side']:
                         bot_class_obj.have_psn = False
                         bot_class_obj.position_info = None
+                        bot_class_obj.ml_filled = False
                         bot_class_obj.replace_opening_orders()
+
+
+def handle_message_kline_info(msg, bot_class_obj):
+    print(msg)
+    print()
+    with bot_class_obj.locker_1:
+        close_prise = Decimal(msg['closePrice'])
+        bot_class_obj.bb.modify_close_price_list(close_prise)
+        bot_class_obj.bb.recalculate_lines()
+        if not bot_class_obj.have_psn:
+            bot_class_obj.replace_opening_orders()
+        else:
+            bot_class_obj.replace_closing_orders()
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):

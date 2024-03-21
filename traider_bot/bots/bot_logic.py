@@ -61,7 +61,7 @@ def set_entry_point_by_market(bot):
                                     bot.symbol.minOrderQty, bot.isLeverage)
     )
 
-    logging(bot, f'create order by market')
+    custom_logging(bot, f'create order by market')
     if bot.side == 'Sell':
         bot.entry_order_sell = order.orderLinkId
         bot.save()
@@ -87,7 +87,7 @@ def set_buy_entry_point(bot, bl):
         price=price,
     )
 
-    logging(bot, f'create BUY-order. Price: {price}')
+    custom_logging(bot, f'create BUY-order. Price: {price}')
     bot.entry_order_by = buy_order.orderLinkId
     bot.save()
 
@@ -109,7 +109,7 @@ def set_sell_entry_point(bot, tl):
         price=price,
     )
 
-    logging(bot, f'create SELL-order. Price: {price}')
+    custom_logging(bot, f'create SELL-order. Price: {price}')
     bot.entry_order_sell = sell_order.orderLinkId
     bot.save()
 
@@ -150,7 +150,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 psn_price = get_position_price(symbol_list)[position_idx]
 
                 if entry_order_status_check(bot):
-                    logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
+                    custom_logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
                 else:
                     entry_order_buy_in_addition(bot)
                     symbol_list = func_get_symbol_list(bot)
@@ -175,7 +175,7 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                                 symbol_list = get_list(bot.account, bot.category, bot.symbol)
                                 i += 1
                                 time.sleep(1)
-                            logging(bot,
+                            custom_logging(bot,
                                     f'average. New margin: {get_qty(symbol_list)[position_idx] * get_position_price(symbol_list)[position_idx] / bot.isLeverage}')
                             first_cycle = False
                             if bot.take1:
@@ -385,7 +385,7 @@ def create_bb_and_avg_obj(bot, position_idx=0):
     return bb_obj, bb_avg_obj
 
 
-def logging(bot, text):
+def custom_logging(bot, text):
     user = bot.owner
     timezone = TimeZone.objects.filter(users=user).first()
     gmt0 = pytz.timezone('GMT')
@@ -441,7 +441,7 @@ def entry_order_buy_in_addition(bot):
                 orderType="Market",
                 qty=entry_order_by_amount
             )
-            logging(bot, f'Позиция докупилась на {entry_order_by_amount}')
+            custom_logging(bot, f'Позиция докупилась на {entry_order_by_amount}')
 
     if bot.entry_order_sell:
         # logging(bot, f'entry_order_sell_id - {bot.entry_order_sell}')
@@ -459,7 +459,7 @@ def entry_order_buy_in_addition(bot):
                 orderType="Market",
                 qty=entry_order_sell_amount
             )
-            logging(bot, f'Позиция докупилась на {entry_order_sell_amount}')
+            custom_logging(bot, f'Позиция докупилась на {entry_order_sell_amount}')
 
 
 def take1_status_check(bot):
@@ -470,7 +470,7 @@ def take1_status_check(bot):
         if status == 'Filled':
             pnl = get_pnl(bot.account, bot.category, bot.symbol)[0]['closedPnl']
             bot.pnl = bot.pnl + round(Decimal(pnl), 2)
-            logging(bot, f'take1 filled. P&L: {pnl}')
+            custom_logging(bot, f'take1 filled. P&L: {pnl}')
             bot.take1 = 'Filled'
             bot.save()
             return True
@@ -490,7 +490,7 @@ def take2_status_check(bot):
     if status == 'Filled':
         pnl = get_pnl(bot.account, bot.category, bot.symbol)[0]['closedPnl']
         bot.pnl = bot.pnl + round(Decimal(pnl), 2)
-        logging(bot, f'take2 filled. P&L: {pnl}')
+        custom_logging(bot, f'take2 filled. P&L: {pnl}')
         bot.take2 = 'Filled'
         bot.save()
         return True
@@ -596,7 +596,7 @@ def clear_data_bot(bot, clear_data=0):
 
 def actions_after_end_cycle(bot):
     bot_id = bot.pk
-    logging(bot, f'bot finished work. P&L: {bot.pnl}')
+    custom_logging(bot, f'bot finished work. P&L: {bot.pnl}')
     tg = TelegramAccount.objects.filter(owner=bot.owner).first()
     if tg:
         chat_id = tg.chat_id
@@ -615,7 +615,7 @@ def actions_after_end_cycle(bot):
                 lock.release()
     else:
         clear_data_bot(bot)
-        logging(bot, 'Bot start new cycle')
+        custom_logging(bot, 'Bot start new cycle')
 
 
 def func_get_symbol_list(bot):
@@ -642,11 +642,11 @@ def bin_order_buy_in_addition(bot, side):
             orderType="Market",
             qty=entry_order_by_amount
         )
-        logging(bot, 'BIN-order addition')
+        custom_logging(bot, 'BIN-order addition')
         return True
 
     elif status == 'Filled':
-        logging(bot, 'BIN-order is filled')
+        custom_logging(bot, 'BIN-order is filled')
         return True
 
 
@@ -669,3 +669,6 @@ def exit_by_exception(bot):
 
 def is_bot_active(bot_id):
     return ActiveBot.objects.filter(bot_id=bot_id).exists()
+
+
+

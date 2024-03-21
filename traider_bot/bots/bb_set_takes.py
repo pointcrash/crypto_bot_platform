@@ -3,7 +3,7 @@ import time
 from decimal import Decimal
 
 from api.api_v5_bybit import cancel_all, switch_position_mode, set_leverage, get_current_price, get_list
-from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
+from bots.bot_logic import calculation_entry_point, take1_status_check, custom_logging, \
     take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
     check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition
 from bots.models import Set0Psn, OppositePosition
@@ -208,9 +208,9 @@ def set_takes(bot):
                                 price=bin_line,
                             )
                             bot.bin_order_id = bin_order.orderLinkId
-                            logging(bot, f'open BIN-order. Price: {exit_line}')
+                            custom_logging(bot, f'open BIN-order. Price: {exit_line}')
 
-                        logging(bot, f'open take2 order. Price: {exit_line}')
+                        custom_logging(bot, f'open take2 order. Price: {exit_line}')
                         bot.take2 = take2.orderLinkId
                         bot.save()
 
@@ -239,7 +239,7 @@ def set_takes(bot):
                             is_take=True,
                         )
 
-                        logging(bot, f'open take1, take2 order. Price: {ml}, {exit_line}')
+                        custom_logging(bot, f'open take1, take2 order. Price: {ml}, {exit_line}')
                         bot.take1, bot.take2 = take1.orderLinkId, take2.orderLinkId
                         bot.save()
                 else:
@@ -258,7 +258,7 @@ def set_takes(bot):
             lock.acquire()
     except Exception as e:
         print(f'Error {e}')
-        logging(bot, f'Error {e}')
+        custom_logging(bot, f'Error {e}')
         lock.acquire()
         try:
             if bot_id in global_list_bot_id:

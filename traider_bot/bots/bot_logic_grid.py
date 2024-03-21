@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
 from api.api_v5_bybit import cancel_all, get_order_status, get_pnl, set_leverage, switch_position_mode
-from bots.bot_logic import calculation_entry_point, count_decimal_places, logging
+from bots.bot_logic import calculation_entry_point, count_decimal_places, custom_logging
 from orders.models import Order
 
 
@@ -57,7 +57,7 @@ def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
                         )
 
                         take_list[i-1] = take.orderLinkId
-                        logging(bot, f'created take_{i} Price:{price}')
+                        custom_logging(bot, f'created take_{i} Price:{price}')
 
                     else:
                         take = Order.objects.create(
@@ -72,12 +72,12 @@ def set_takes_for_grid_bot(bot, bb_obj, bb_avg_obj):
                             is_take=True,
                         )
                         take_list[i-1] = take.orderLinkId
-                        logging(bot, f'created take_{i} Price:{price}')
+                        custom_logging(bot, f'created take_{i} Price:{price}')
 
                         psn_qty = psn_qty - qty
 
                 else:
-                    logging(bot, f'take_{i} is filled.')
+                    custom_logging(bot, f'take_{i} is filled.')
                     take_list[i - 1] = 'Filled'
 
 
@@ -88,7 +88,7 @@ def take_status_check(bot, take):
         status = get_order_status(bot.account, bot.category, bot.symbol, take.order_link_id)
         if status == 'Filled':
             pnl = round(Decimal(get_pnl(bot.account, bot.category, bot.symbol)[0]["closedPnl"]), 2)
-            logging(bot, f'PNL: {bot.pnl} + {pnl}')
+            custom_logging(bot, f'PNL: {bot.pnl} + {pnl}')
             bot.pnl = bot.pnl + pnl
             bot.save()
             return True

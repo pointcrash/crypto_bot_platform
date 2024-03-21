@@ -1,5 +1,5 @@
 from api.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price
-from bots.bot_logic import get_quantity_from_price, logging
+from bots.bot_logic import get_quantity_from_price, custom_logging
 from orders.models import Order
 
 

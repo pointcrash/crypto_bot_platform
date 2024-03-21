@@ -13,6 +13,7 @@ class CustomWebSocketClient:
         self.account_name = account_name
         self.service = service_name
         self.websocket = None
+        self.loop = None
 
     def is_open(self):
         status = self.websocket.open
@@ -43,22 +44,23 @@ class CustomWebSocketClient:
             # async for message in self.websocket:
                 message = await self.websocket.recv()
                 message = json.loads(message)
-                # print(message)
                 self.callback(message)
         finally:
             if self.websocket.open:
                 await self.websocket.close()
 
     async def websocket_close(self):
-        await self.websocket.close()
+        if self.websocket and self.websocket.open:
+            await self.websocket.close()
 
     async def run(self):
         await self.connect()
         await self.receive_messages()
 
-    @staticmethod
-    def run_event_loop(function, **kwargs):
-        asyncio.run(function(**kwargs))
+    def run_event_loop(self, function, **kwargs):
+        # asyncio.run(function(**kwargs))
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_until_complete(function(**kwargs))
 
     def start_async_function_in_threads(self, function, **kwargs):
         thread = threading.Thread(target=self.run_event_loop, args=(function,), kwargs=kwargs)
@@ -66,6 +68,7 @@ class CustomWebSocketClient:
         return thread
 
     def start(self):
+        self.loop = asyncio.new_event_loop()
         self.start_async_function_in_threads(self.run)
 
     def close(self):

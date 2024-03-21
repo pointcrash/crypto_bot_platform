@@ -1,7 +1,7 @@
 import time
 from decimal import Decimal
 from api.api_v5_bybit import get_list, get_current_price, set_trading_stop, get_pnl
-from bots.bot_logic import get_quantity_from_price, logging
+from bots.bot_logic import get_quantity_from_price, custom_logging
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
@@ -43,7 +43,7 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
 
             # Действия в зависимости от наличия открытых позиций
             if not by_psn_qty and not sell_psn_qty:
-                logging(bot,
+                custom_logging(bot,
                         f'Обе позиции закрыты. Завершение работы...')
                 bot_id_remove_global_list(bot)
                 break
@@ -65,7 +65,7 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
                     if reduce_sl:
                         set_trading_stop(bot, position_idx_plus, takeProfit=str(count_dict['stop_price']),
                                          stopLoss=str(plus_psn_stop_loss))
-                        logging(bot, f'Переставили SL+, new={str(plus_psn_stop_loss)}, old={str(order_stop_loss)}')
+                        custom_logging(bot, f'Переставили SL+, new={str(plus_psn_stop_loss)}, old={str(order_stop_loss)}')
                         order_stop_loss = plus_psn_stop_loss
                 time.sleep(bot.time_sleep)
                 continue
@@ -86,7 +86,7 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
 
                     time.sleep(15)
                     losses_pnl = Decimal(get_pnl(bot.account, bot.category, bot.symbol.name, limit=1)[0]['closedPnl'])
-                    logging(bot, f'LOSSES_PNL = {losses_pnl}')
+                    custom_logging(bot, f'LOSSES_PNL = {losses_pnl}')
                     additional_losses = 0 if losses_pnl > 0 else losses_pnl
 
                     symbol_list = get_list(bot.account, symbol=bot.symbol)
@@ -95,7 +95,7 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
                     mark_price = Decimal(psn['markPrice'])
                     qty = get_quantity_from_price(count_dict['margin'], mark_price, bot.symbol.minOrderQty,
                                                   bot.isLeverage)
-                    logging(bot, f'Новые данные qty={qty}, margin={count_dict["margin"]}')
+                    custom_logging(bot, f'Новые данные qty={qty}, margin={count_dict["margin"]}')
 
                 sl_check = True
                 if order_side == 'Buy':

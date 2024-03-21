@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from api.api_v5_bybit import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.SimpleHedge.logic.manual_average import manual_average_for_simple_hedge
-from bots.bot_logic import clear_data_bot, logging, func_get_symbol_list
+from bots.bot_logic import clear_data_bot, custom_logging, func_get_symbol_list
 from bots.forms import BotForm, SimpleHedgeForm
 from bots.models import Bot, SimpleHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders
@@ -126,7 +126,7 @@ def averaging_simple_hedge_view(request, bot_id):
         amount = request.POST.get('amount')
         price = request.POST.get('price')
         if not amount.isdigit():
-            logging(bot, f'Введено неверное значение AMOUNT ({amount}) для усреднения')
+            custom_logging(bot, f'Введено неверное значение AMOUNT ({amount}) для усреднения')
             return redirect(request.META.get('HTTP_REFERER'))
 
         manual_average_for_simple_hedge(bot, amount, is_percent, price)

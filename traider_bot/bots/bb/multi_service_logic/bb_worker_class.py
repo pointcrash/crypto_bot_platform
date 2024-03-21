@@ -13,6 +13,8 @@ class WorkBollingerBandsClass:
         self.bb = BollingerBands(bot)
         self.avg_obj = BBAutoAverage(bot, self.bb)
         self.have_psn = False
+        self.ml_filled = False
+        self.ml_order_id = None
         self.position_info = None
 
         self.locker_1 = threading.Lock()
@@ -57,14 +59,15 @@ class WorkBollingerBandsClass:
         side, price = ('Sell', self.bb.tl) if position_side == 'LONG' else ('Buy', self.bb.bl)
         price = self.price_check(price, 2)
 
-        if self.bot.take_on_ml:
+        if self.bot.take_on_ml and not self.ml_filled:
             psn_qty = Decimal(self.position_info['qty'])
             ml_take_price = self.price_check(self.bb.ml, 1)
             ml_take_qty = Decimal(str(psn_qty * self.bot.take_on_ml_percent / 100)).quantize(
                 Decimal(self.bot.symbol.minOrderQty))
 
-            place_order(self.bot, side=side, position_side=position_side, order_type='Limit', qty=ml_take_qty,
-                        price=ml_take_price)
+            response = place_order(self.bot, side=side, position_side=position_side, order_type='Limit',
+                                   qty=ml_take_qty, price=ml_take_price)
+            self.ml_order_id = response['orderId']
 
             main_take_qty = psn_qty - ml_take_qty
         else:

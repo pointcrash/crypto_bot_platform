@@ -18,7 +18,7 @@ django.setup()
 
 from api.api_v5_bybit import get_order_status, get_pnl, set_leverage, switch_position_mode, get_list, get_qty, \
     get_position_price, get_current_price
-from bots.bot_logic import count_decimal_places, logging, get_quantity_from_price, create_bb_and_avg_obj
+from bots.bot_logic import count_decimal_places, custom_logging, get_quantity_from_price, create_bb_and_avg_obj
 from orders.models import Order
 
 
@@ -106,7 +106,7 @@ def set_takes_for_hedge_grid_bot(bot):
             new_pnl_list = get_pnl(bot.account, bot.category, bot.symbol.name, start_time)
             if start_pnl_list != new_pnl_list:
                 total_pnl += Decimal(new_pnl_list[0]["closedPnl"])
-                logging(bot, f'TP IS SUCCESS. Side: {new_pnl_list[0]["side"]} PNL: {round(Decimal(new_pnl_list[0]["closedPnl"]), 2)}')
+                custom_logging(bot, f'TP IS SUCCESS. Side: {new_pnl_list[0]["side"]} PNL: {round(Decimal(new_pnl_list[0]["closedPnl"]), 2)}')
                 start_pnl_list = new_pnl_list
 
             current_price = get_current_price(bot.account, bot.category, bot.symbol)
@@ -115,7 +115,7 @@ def set_takes_for_hedge_grid_bot(bot):
 
                 if margin_after_avg > bot.max_margin:
                     if ml0 != 1:
-                        logging(bot, f'MARGIN LIMIT -> {bot.max_margin}, margin after avg -> {round(margin_after_avg, 2)}')
+                        custom_logging(bot, f'MARGIN LIMIT -> {bot.max_margin}, margin after avg -> {round(margin_after_avg, 2)}')
                         ml0 = 1
                 else:
                     if not qty_list[1]:
@@ -132,7 +132,7 @@ def set_takes_for_hedge_grid_bot(bot):
                             # takeProfit=str(round(avg_price * (1 + bot.grid_profit_value / 100), round_number)),
 
                         )
-                        logging(bot,
+                        custom_logging(bot,
                                 f'position AVG. Side: "Buy". Margin: {round(qty_list[0] * price_list[0] / bot.isLeverage * Decimal(1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * Decimal(1 + bot.grid_profit_value / 100), round_number)}')
 
                         flag = True
@@ -142,7 +142,7 @@ def set_takes_for_hedge_grid_bot(bot):
 
                 if margin_after_avg > bot.max_margin:
                     if ml1 != 1:
-                        logging(bot, f'MARGIN LIMIT -> {bot.max_margin}, margin after avg -> {margin_after_avg}')
+                        custom_logging(bot, f'MARGIN LIMIT -> {bot.max_margin}, margin after avg -> {margin_after_avg}')
                         ml1 = 1
                 else:
                     if not qty_list[0]:
@@ -159,7 +159,7 @@ def set_takes_for_hedge_grid_bot(bot):
                             # takeProfit=str(round(avg_price * (1 - bot.grid_profit_value / 100), round_number)),
 
                         )
-                        logging(bot,
+                        custom_logging(bot,
                                 f'position AVG. Side: "Sell". Margin: {round(qty_list[1] * price_list[1] / bot.isLeverage * Decimal(1 + bot.bb_avg_percent / 100), 2)} TP: {round(avg_price * Decimal(1 - bot.grid_profit_value / 100), round_number)}')
 
                         flag = True
@@ -194,7 +194,7 @@ def take_status_check(bot, orderLinkId):
         if status == 'Filled':
             pnl = round(Decimal(get_pnl(bot.account, bot.category, bot.symbol)[0]["closedPnl"]), 2)
             bot.pnl = bot.pnl + pnl
-            logging(bot, f'take filled. P&L: {pnl}')
+            custom_logging(bot, f'take filled. P&L: {pnl}')
             return 'Filled'
 
 

@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from api.api_v5_bybit import get_list, get_qty, get_current_price
-from bots.bot_logic import get_quantity_from_price, logging
+from bots.bot_logic import get_quantity_from_price, custom_logging
 from orders.models import Order
 
 
@@ -33,7 +33,7 @@ def set_entry_point_by_market_for_hedge(bot):
             takeProfit=str(tp_limit_price),
         )
 
-        logging(bot, f'create order by market. Side: "{side}". Margin: {bot.qty}. TP: {tp_limit_price}')
+        custom_logging(bot, f'create order by market. Side: "{side}". Margin: {bot.qty}. TP: {tp_limit_price}')
         if bot.side == 'Sell':
             bot.entry_order_sell = order.orderLinkId
             bot.save()

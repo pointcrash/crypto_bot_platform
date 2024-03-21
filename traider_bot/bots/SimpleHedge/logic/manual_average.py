@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from api.api_v5_bybit import get_current_price, get_list, cancel_all
-from bots.bot_logic import get_quantity_from_price, logging
+from bots.bot_logic import get_quantity_from_price, custom_logging
 from orders.models import Order
 
 
@@ -40,7 +40,7 @@ def manual_average_for_simple_hedge(bot, amount, is_percent, price):
                 orderType="Market",
                 qty=qty,
             )
-            logging(bot, f'Позиция {side} усреднена на {amount} USDT = {qty} монет')
+            custom_logging(bot, f'Позиция {side} усреднена на {amount} USDT = {qty} монет')
 
     else:
         symbol_list = get_list(bot.account, symbol=bot.symbol)
@@ -63,8 +63,8 @@ def manual_average_for_simple_hedge(bot, amount, is_percent, price):
                         orderType="Market",
                         qty=qty,
                     )
-                    logging(bot, f'Позиция {side} усреднена на {qty} монет')
+                    custom_logging(bot, f'Позиция {side} усреднена на {qty} монет')
                 else:
-                    logging(bot, f'Попытка усреднить нулевую позицию {side}')
+                    custom_logging(bot, f'Попытка усреднить нулевую позицию {side}')
         else:
-            logging(bot, f'Нет открытых позиций по данной торговой паре')
+            custom_logging(bot, f'Нет открытых позиций по данной торговой паре')

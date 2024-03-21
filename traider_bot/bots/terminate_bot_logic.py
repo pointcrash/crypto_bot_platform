@@ -1,7 +1,7 @@
 import time
 
 from api.api_v5_bybit import cancel_all, get_list, get_side, get_qty
-from bots.bot_logic import logging, clear_data_bot
+from bots.bot_logic import custom_logging, clear_data_bot
 from bots.models import Bot
 from main.models import ActiveBot
 from orders.models import Order
@@ -84,13 +84,12 @@ def drop_position(bot):
 
 
 def stop_bot_with_cancel_orders(bot):
-    logging(bot, terminate_thread(bot.pk))
-    logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
+    custom_logging(bot, terminate_thread(bot.pk))
+    custom_logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
                                             'retMsg'] == 'OK' else 'error when canceling orders')
-    clear_data_bot(bot)
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
     drop_position(bot)
     stop_bot_with_cancel_orders(bot)
-    logging(bot, 'drop position')
+    custom_logging(bot, 'drop position')

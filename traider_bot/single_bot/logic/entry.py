@@ -1,7 +1,7 @@
 import time
 
 from api.api_v5_bybit import get_list, get_qty, get_side, get_position_price, cancel_all
-from bots.bot_logic import set_entry_point_by_market, entry_order_status_check, logging, set_entry_point, \
+from bots.bot_logic import set_entry_point_by_market, entry_order_status_check, custom_logging, set_entry_point, \
     create_bb_and_avg_obj, entry_order_buy_in_addition, func_get_symbol_list
 from bots.models import Take, AvgOrder
 from single_bot.logic.avg import to_avg_by_grid, get_status_avg_order, set_avg_order
@@ -39,7 +39,7 @@ def entry_position(bot, takes, position_idx):
                 psn_price = get_position_price(symbol_list)[position_idx]
 
                 if entry_order_status_check(bot):
-                    logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
+                    custom_logging(bot, f'position opened. Margin: {psn_qty * psn_price / bot.isLeverage}')
                 else:
                     entry_order_buy_in_addition(bot)
                     symbol_list = func_get_symbol_list(bot)
@@ -59,7 +59,7 @@ def entry_position(bot, takes, position_idx):
                             first_cycle = False
                         else:
                             if get_status_avg_order(bot, avg_order):
-                                logging(bot,
+                                custom_logging(bot,
                                         f'Position AVG. New Margin -> {round(psn_qty * psn_price / bot.isLeverage, 2)}')
                                 avg_order.delete()
                                 for take in takes:

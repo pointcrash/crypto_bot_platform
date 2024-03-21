@@ -3,7 +3,7 @@ import time
 from decimal import Decimal
 
 from api.api_v5_bybit import switch_position_mode, set_leverage, cancel_all, get_current_price
-from bots.bot_logic import count_decimal_places, logging, clear_data_bot
+from bots.bot_logic import count_decimal_places, custom_logging, clear_data_bot
 from bots.bot_logic_grid import take_status_check
 from bots.models import Take, AvgOrder, Set0Psn, OppositePosition
 from bots.SetZeroPsn.logic.need_s0p_start_check import need_set0psn_start_check
@@ -170,7 +170,7 @@ def bot_work_logic(bot):
             lock.acquire()
     except Exception as e:
         print(f'Error {e}')
-        logging(bot, f'Error {e}')
+        custom_logging(bot, f'Error {e}')
         lock.acquire()
         try:
             if bot_id in global_list_bot_id:
@@ -243,7 +243,7 @@ def check_change_psn_price(bot, main_price, psn_price):
 
 def actions_after_end_cycle(bot):
     bot_id = bot.pk
-    logging(bot, f'bot finished cycle. P&L: {bot.pnl}')
+    custom_logging(bot, f'bot finished cycle. P&L: {bot.pnl}')
     tg = TelegramAccount.objects.filter(owner=bot.owner).first()
     if tg:
         chat_id = tg.chat_id
@@ -265,7 +265,7 @@ def actions_after_end_cycle(bot):
     else:
         cancel_all(bot.account, bot.category, bot.symbol)
         clear_data_bot(bot)
-        logging(bot, 'New cycle start')
+        custom_logging(bot, 'New cycle start')
         return True
 
 
@@ -275,5 +275,5 @@ def check_takes_is_filled(bot, takes):
             take_status = take_status_check(bot, take)
             if take_status:
                 take.is_filled = True
-                logging(bot, f'take_{take.take_number} is filled.')
+                custom_logging(bot, f'take_{take.take_number} is filled.')
     Take.objects.bulk_update(takes, ['is_filled'])

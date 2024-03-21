@@ -1,5 +1,5 @@
 from api.api_v5_bybit import get_current_price, get_order_status
-from bots.bot_logic import get_quantity_from_price, logging
+from bots.bot_logic import get_quantity_from_price, custom_logging
 from bots.models import Log
 from orders.models import Order
 
@@ -23,12 +23,12 @@ def to_avg_by_grid(bot, side, psn_price, psn_qty):
                                                     bot.isLeverage),
                     )
 
-                    logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+                    custom_logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                     return True
                 else:
                     last_log = Log.objects.filter(bot=bot).last()
                     if 'MARGIN LIMIT!' not in last_log.content:
-                        logging(bot,
+                        custom_logging(bot,
                                 f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
             else:
                 order = Order.objects.create(
@@ -56,12 +56,12 @@ def to_avg_by_grid(bot, side, psn_price, psn_qty):
                                                     bot.isLeverage),
                     )
 
-                    logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+                    custom_logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                     return True
                 else:
                     last_log = Log.objects.filter(bot=bot).last()
                     if 'MARGIN LIMIT!' not in last_log.content:
-                        logging(bot,
+                        custom_logging(bot,
                                 f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
             else:
                 order = Order.objects.create(
@@ -74,7 +74,7 @@ def to_avg_by_grid(bot, side, psn_price, psn_qty):
                                                 bot.isLeverage),
                 )
 
-                logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+                custom_logging(bot, f'Position AVG. New Margin -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                 return True
         return False
 
@@ -100,7 +100,7 @@ def set_avg_order(bot, side, psn_price, psn_qty):
     if bot.max_margin and psn_currency_amount + avg_currency_amount > bot.max_margin:
         last_log = Log.objects.filter(bot=bot).last()
         if 'MARGIN LIMIT!' not in last_log.content:
-            logging(bot,
+            custom_logging(bot,
                     f'MARGIN LIMIT! Max margin -> {bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
 
         return 'MARGIN LIMIT!'

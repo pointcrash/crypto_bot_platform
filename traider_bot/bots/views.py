@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
-from bots.bot_logic import logging, clear_data_bot
+from bots.bot_logic import custom_logging, clear_data_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.models import Bot, SingleBot, IsTSStart
 from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, \
@@ -46,7 +46,7 @@ def terminate_bot(request, bot_id, event_number):
     single_bot.delete()
 
     if event_number == 1:
-        logging(bot, terminate_thread(bot.pk))
+        custom_logging(bot, terminate_thread(bot.pk))
 
     elif event_number == 2:
         stop_bot_with_cancel_orders(bot)

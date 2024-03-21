@@ -7,7 +7,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 from api.api_v5_bybit import get_list, get_current_price, set_trading_stop, get_order_status
-from bots.bot_logic import get_quantity_from_price, logging
+from bots.bot_logic import get_quantity_from_price, custom_logging
 from bots.models import Log, Bot
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from orders.models import Order
@@ -46,7 +46,7 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
 
             # Действия в зависимости от наличия открытых позиций
             if not by_psn_qty and not sell_psn_qty:
-                logging(bot,
+                custom_logging(bot,
                         f'Обе позиции закрыты. Завершение работы...')
                 if_not_psn_actions(bot)
                 break
@@ -60,10 +60,10 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                     last_log = Log.objects.filter(bot=bot).last()
                     f_line = f'Ордер id={orderLinkId} успешно выставлен qty={qty}, price={mark_price}, SL={str(order_stop_loss)}'
                     if f_line not in last_log.content:
-                        logging(bot, f_line)
+                        custom_logging(bot, f_line)
 
                 if order_status == 'Order not found' and not (by_psn_qty and sell_psn_qty):
-                    logging(bot, f'Ордер id={orderLinkId} не найден qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
+                    custom_logging(bot, f'Ордер id={orderLinkId} не найден qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
 
                     recalc = False
                     current_price = get_current_price(bot.account, bot.category, bot.symbol)
@@ -77,18 +77,18 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
 
                     if recalc or we_have_2psn_flag:
                         if recalc:
-                            logging(bot, f'recalc')
+                            custom_logging(bot, f'recalc')
                         if we_have_2psn_flag:
-                            logging(bot, f'we_have_2psn_flag')
+                            custom_logging(bot, f'we_have_2psn_flag')
                         additional_losses = 0
 
                         if we_have_2psn_flag:
                             if order_side == 'Buy':
                                 additional_losses = round((order_stop_loss - mark_price) * qty, 2)
-                                logging(bot, f'Считаем доп потери {additional_losses}')
+                                custom_logging(bot, f'Считаем доп потери {additional_losses}')
                             else:
                                 additional_losses = round((mark_price - order_stop_loss) * qty, 2)
-                                logging(bot, f'Считаем доп потери {additional_losses}')
+                                custom_logging(bot, f'Считаем доп потери {additional_losses}')
                             we_have_2psn_flag = False
 
                         symbol_list = get_list(bot.account, symbol=bot.symbol)
@@ -97,7 +97,7 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                         mark_price = Decimal(psn['markPrice'])
                         qty = get_quantity_from_price(count_dict['margin'], mark_price, bot.symbol.minOrderQty,
                                                       bot.isLeverage)
-                        logging(bot, f'Новые данные qty={qty}, entry_price={mark_price}, margin={count_dict["margin"]}')
+                        custom_logging(bot, f'Новые данные qty={qty}, entry_price={mark_price}, margin={count_dict["margin"]}')
 
                     orderLinkId = None
                     order_status = None
@@ -124,7 +124,7 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                         if reduce_sl:
                             set_trading_stop(bot, position_idx, takeProfit=str(count_dict['stop_price']),
                                              stopLoss=str(plus_psn_stop_loss))
-                            logging(bot, f'Переставили SL, new={str(plus_psn_stop_loss)}, old={str(order_stop_loss)}')
+                            custom_logging(bot, f'Переставили SL, new={str(plus_psn_stop_loss)}, old={str(order_stop_loss)}')
                             order_stop_loss = plus_psn_stop_loss
                 time.sleep(bot.time_sleep)
                 continue
@@ -149,7 +149,7 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                     stopLoss=str(order_stop_loss),
                 )
 
-                logging(bot, f'Отправлен ордер qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
+                custom_logging(bot, f'Отправлен ордер qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
 
                 orderLinkId = order.orderLinkId
 
