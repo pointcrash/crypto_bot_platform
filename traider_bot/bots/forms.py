@@ -4,7 +4,43 @@ from django import forms
 from api.api_v5_bybit import get_query_account_coins_balance, get_current_price
 from main.models import Account
 from .bot_logic import get_quantity_from_price
-from .models import Bot, Set0Psn, SimpleHedge, OppositePosition, StepHedge
+from .models import Bot, Set0Psn, SimpleHedge, OppositePosition, StepHedge, BotModel
+
+
+class BotModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        self.qty = kwargs.pop('initial', None)
+        super().__init__(*args, **kwargs)
+        if self.request:
+            if self.request.user.is_superuser:
+                self.fields['account'].queryset = Account.objects.all()
+            else:
+                self.fields['account'].queryset = Account.objects.filter(owner=self.request.user)
+
+    class Meta:
+        model = BotModel
+
+        fields = ['account', 'symbol', 'leverage', 'amount_long', 'amount_short', 'margin_type']
+
+        widgets = {
+            'account': forms.Select(attrs={'class': 'form-control'}),
+            'symbol': forms.Select(attrs={'class': 'form-control'}),
+            'leverage': forms.NumberInput(attrs={'class': 'form-control'}),
+            'amount_long': forms.NumberInput(attrs={'class': 'form-control'}),
+            'amount_short': forms.NumberInput(attrs={'class': 'form-control'}),
+            'margin_type': forms.Select(attrs={'class': 'form-control'}),
+
+        }
+
+        labels = {
+            'account': 'Аккаунт',
+            'symbol': 'Монета',
+            'leverage': 'Плечо',
+            'amount_long': 'Лонг USDT',
+            'amount_short': 'Шорт USDT',
+            'margin_type': 'Тип маржи',
+        }
 
 
 class SimpleHedgeForm(forms.ModelForm):

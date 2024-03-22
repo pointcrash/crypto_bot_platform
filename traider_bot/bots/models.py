@@ -185,7 +185,7 @@ class IsTSStart(models.Model):
     TS = models.BooleanField(default=False)
 
 
-class BollingerBandsBotModel(models.Model):
+class BBBotModel(models.Model):
     SIDE_CHOICES = (
         ('Buy', 'Buy'),
         ('Sell', 'Sell'),
@@ -213,7 +213,7 @@ class BollingerBandsBotModel(models.Model):
         ('W', 'W'),
         ('M', 'M'),
     )
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, related_name='bb', blank=True, null=True)
     side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='Auto')
     orderType = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='Limit', blank=True)
     qty_kline = models.IntegerField(default=20)
