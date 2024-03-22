@@ -8,7 +8,7 @@ from bots.bb.logic.start_logic import bb_worker
 from bots.bot_logic import func_get_symbol_list
 from bots.forms import BotForm
 from bots.models import Symbol, Bot
-from bots.terminate_bot_logic import terminate_bot_with_cancel_orders
+from bots.terminate_bot_logic import terminate_bot_with_cancel_orders, terminate_bot
 
 
 @login_required
@@ -48,8 +48,8 @@ def bb_bot_edit(request, bot_id):
         if bot_form.is_valid():
             bot = bot_form.save(commit=False)
             if bot.is_active:
-                terminate_bot_with_cancel_orders(bot)
-                time.sleep(2)
+                terminate_bot(bot)
+                time.sleep(7)
 
             bot.is_active = True
             bot.save()
@@ -59,4 +59,4 @@ def bb_bot_edit(request, bot_id):
     else:
         bot_form = BotForm(request=request, instance=bot)
 
-    return render(request, 'one_way/bb/bot_detail.html', {'form': bot_form, 'bot': bot})
+    return render(request, 'bb/edit.html', {'form': bot_form, 'bot': bot})

@@ -73,8 +73,10 @@
                     {% endif %}
                     {% if bot.work_model == 'grid' %}
 <!--                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
-                    {% elif bot.work_model == 'bb' or bot.work_model == 'set0psn' %}
-                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                    {% elif bot.work_model == 'bb'%}
+                        <a class="btn btn-primary btn-shadow" href="{% url 'bb_bot_edit' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                    {% elif bot.work_model == 'set0psn' %}
+<!--                        <a class="btn btn-primary btn-shadow" href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
                     {% elif bot.work_model == 'SmpHg' %}
 <!--                    <a class="btn btn-primary btn-shadow" href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
                     {% elif bot.work_model == 'Step Hedge' %}

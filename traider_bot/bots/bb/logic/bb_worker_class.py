@@ -1,3 +1,4 @@
+import logging
 import threading
 from decimal import Decimal
 
@@ -21,6 +22,7 @@ class WorkBollingerBandsClass:
         self.avg_locker = threading.Lock()
 
     def preparatory_actions(self):
+        logging.basicConfig(level=logging.DEBUG)
         try:
             change_position_mode(self.bot)
         except:

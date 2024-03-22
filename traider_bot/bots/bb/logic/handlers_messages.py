@@ -24,7 +24,7 @@ def handle_order_stream_message(msg, bot_class_obj):
     print(msg)
     print()
     if msg['symbol'] == bot_class_obj.symbol:
-        if msg['orderId'] == bot_class_obj.ml_order_id:
+        if msg['orderId'] == bot_class_obj.ml_order_id and msg['status'].upper() == 'FILLED':
             bot_class_obj.ml_filled = True
 
 

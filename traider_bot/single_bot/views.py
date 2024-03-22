@@ -10,7 +10,7 @@ from api.api_v5_bybit import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
-from bots.bb.multi_service_logic.start_logic import bb_worker
+from bots.bb.logic.start_logic import bb_worker
 from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive, terminate_thread

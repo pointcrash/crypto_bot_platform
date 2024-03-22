@@ -60,7 +60,7 @@ def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     try:
-        response = response['result']
+        return response['result']
     except Exception as e:
         print(e)
         print(response)

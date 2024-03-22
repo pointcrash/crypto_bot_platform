@@ -4,12 +4,12 @@ from bots.SimpleHedge.views import averaging_simple_hedge_view
 from bots.StepHedge.views import on_off_move_nipple
 from bots.one_way.views_grid import update_symbols_set
 from bots.SetZeroPsn.views import start_set_zero_psn_bot, stop_set_zero_psn_bot
-from bots.views import views_bots_type_choice, terminate_bot, delete_bot, reboot_bots
+from bots.views import views_bots_type_choice, delete_bot, reboot_bots, stop_bot
 
 urlpatterns = [
     path('<str:mode>', views_bots_type_choice, name='mode_choice'),
     #
-    path('terminate/<int:bot_id>/<int:event_number>/', terminate_bot, name='terminate_bot'),
+    path('terminate/<int:bot_id>/<int:event_number>/', stop_bot, name='terminate_bot'),
     path('delete/<int:bot_id>/<int:event_number>/', delete_bot, name='delete_bot'),
     path('update_symbols_set/', update_symbols_set, name='update_symbols_set'),
     path('reboot_bots/', reboot_bots, name='reboot_bots'),
