@@ -41,7 +41,8 @@ def bb_worker(bot):
 
     finally:
         try:
-            ws_client.exit()
+            if ws_client is not None:
+                ws_client.exit()
             print('End working bb bot')
         except Exception as e:
             print('ERROR:', e)

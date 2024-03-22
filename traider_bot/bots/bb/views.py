@@ -23,7 +23,7 @@ def bb_bot_create(request):
             bot.is_active = True
             bot.save()
 
-            bot_thread = threading.Thread(target=bb_worker, args=(bot.id,))
+            bot_thread = threading.Thread(target=bb_worker, args=(bot,))
             bot_thread.start()
 
             return redirect('single_bot_list')
