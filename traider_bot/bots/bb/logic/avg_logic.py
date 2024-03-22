@@ -9,10 +9,6 @@ from bots.models import Log
 from timezone.models import TimeZone
 
 
-# def get_USDT_from_qty(qty, price):
-#     return qty * price
-
-
 class BBAutoAverage:
     def __init__(self, bot, bb_obj):
         self.bot = bot
@@ -75,7 +71,7 @@ class BBAutoAverage:
             if psn_currency_amount + avg_currency_amount > self.max_margin:
                 last_log = Log.objects.filter(bot=self.bot).last()
                 if 'MARGIN LIMIT!' not in last_log.content:
-                    logging(self.bot,
+                    custom_logging(self.bot,
                             f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                 return False
             else:
@@ -92,13 +88,11 @@ class BBAutoAverage:
     def to_average(self, current_price):
         psn_currency_amount = self.psn_price * self.psn_qty / self.bot.isLeverage
         avg_currency_amount = Decimal(psn_currency_amount * self.bot.bb_avg_percent / 100)
-        # qty = get_quantity_from_price(avg_currency_amount, current_price, self.bot.symbol.minOrderQty,
-        #                               self.bot.isLeverage)
 
         place_order(self.bot, side=self.psn_side, order_type="Market", price=current_price,
                     amount_usdt=avg_currency_amount)
 
-        logging(self.bot, f'Усредняющий ордер резмещен на цене {current_price}')
+        custom_logging(self.bot, f'Усредняющий ордер резмещен на цене {current_price}')
 
     def update_psn_info(self, data):
         self.psn_price = data['entryPrice']
@@ -110,7 +104,7 @@ def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
     return (Decimal(str(qty_USDT * leverage)) / price).quantize(Decimal(minOrderQty), rounding=ROUND_DOWN)
 
 
-def logging(bot, text):
+def custom_logging(bot, text):
     user = bot.owner
     timezone = TimeZone.objects.filter(users=user).first()
     gmt0 = pytz.timezone('GMT')

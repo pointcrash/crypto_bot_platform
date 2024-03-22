@@ -23,6 +23,34 @@ class Symbol(models.Model):
         return self.name
 
 
+class BotModel(models.Model):
+    MARGIN_TYPE_CHOICES = (
+        ('CROSS', 'CROSS'),
+        ('ISOLATED', 'ISOLATED'),
+    )
+
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+    category = models.CharField(max_length=10, default='linear', blank=True)
+    symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
+    leverage = models.IntegerField(default=10)
+    amount_long = models.IntegerField()
+    amount_short = models.IntegerField(null=True, blank=True)
+    margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS')
+    work_model = models.CharField(max_length=10)
+    pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
+
+    is_active = models.BooleanField(default=False)
+    time_create = models.DateTimeField(auto_now_add=True, null=True)
+    time_update = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        unique_together = ['account', 'symbol']
+
+    def __str__(self):
+        return self.symbol.name
+
+
 class Bot(models.Model):
     SIDE_CHOICES = (
         ('Buy', 'Buy'),
@@ -155,6 +183,55 @@ class SingleBot(models.Model):
 class IsTSStart(models.Model):
     bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
     TS = models.BooleanField(default=False)
+
+
+class BollingerBandsBotModel(models.Model):
+    SIDE_CHOICES = (
+        ('Buy', 'Buy'),
+        ('Sell', 'Sell'),
+        ('FB', 'First Band'),
+    )
+
+    ORDER_TYPE_CHOICES = (
+        ('Limit', 'Limit'),
+        ('Market', 'Market'),
+        # Другие варианты типа ордера
+    )
+
+    KLINE_INTERVAL_CHOICES = (
+        ('1', '1'),
+        ('3', '3'),
+        ('5', '5'),
+        ('15', '15'),
+        ('30', '30'),
+        ('60', '60'),
+        ('120', '120'),
+        ('240', '240'),
+        ('360', '360'),
+        ('720', '720'),
+        ('D', 'D'),
+        ('W', 'W'),
+        ('M', 'M'),
+    )
+    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='Auto')
+    orderType = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='Limit', blank=True)
+    qty_kline = models.IntegerField(default=20)
+    interval = models.CharField(max_length=3, choices=KLINE_INTERVAL_CHOICES, default='15')
+    d = models.IntegerField(default=2)
+    take_on_ml = models.BooleanField(default=True)
+    take_on_ml_percent = models.DecimalField(max_digits=5, decimal_places=2, default=50)
+    auto_avg = models.BooleanField(default=False)
+    avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
+    is_deviation_from_lines = models.BooleanField(default=False)
+    percent_deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0)
+    dfm = models.DecimalField(max_digits=5, decimal_places=3, default=30)
+    chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
+    dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
+    max_margin = models.IntegerField(null=True, blank=True)
+
+    time_create = models.DateTimeField(auto_now_add=True, null=True)
+    time_update = models.DateTimeField(auto_now=True, null=True)
 
 
 class Set0Psn(models.Model):

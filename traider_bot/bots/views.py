@@ -7,8 +7,8 @@ from bots.bb_set_takes import set_takes
 from bots.bot_logic import custom_logging, clear_data_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.models import Bot, SingleBot, IsTSStart
-from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, \
-    stop_bot_with_cancel_orders_and_drop_positions
+from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
+    terminate_bot_with_cancel_orders_and_drop_positions
 from single_bot.logic.global_variables import global_list_threads, lock
 from single_bot.logic.work import bot_work_logic
 
@@ -40,19 +40,15 @@ def views_bots_type_choice(request, mode):
 
 
 @login_required
-def terminate_bot(request, bot_id, event_number):
+def stop_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
-    single_bot = SingleBot.objects.filter(bot=bot)
-    single_bot.delete()
 
     if event_number == 1:
-        custom_logging(bot, terminate_thread(bot.pk))
-
+        terminate_bot(bot)
     elif event_number == 2:
-        stop_bot_with_cancel_orders(bot)
-
+        terminate_bot_with_cancel_orders(bot)
     elif event_number == 3:
-        stop_bot_with_cancel_orders_and_drop_positions(bot)
+        terminate_bot_with_cancel_orders_and_drop_positions(bot)
 
     return redirect(request.META.get('HTTP_REFERER'))
 
@@ -62,13 +58,12 @@ def delete_bot(request, bot_id, event_number):
     bot = Bot.objects.get(pk=bot_id)
 
     if event_number == 1:
-        terminate_thread(bot.pk)
-
+        terminate_bot(bot)
     elif event_number == 2:
-        stop_bot_with_cancel_orders(bot)
-
+        terminate_bot_with_cancel_orders(bot)
     elif event_number == 3:
-        stop_bot_with_cancel_orders_and_drop_positions(bot)
+        terminate_bot_with_cancel_orders_and_drop_positions(bot)
+
     bot.delete()
 
     return redirect(request.META.get('HTTP_REFERER'))

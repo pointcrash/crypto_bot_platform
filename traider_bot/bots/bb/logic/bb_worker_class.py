@@ -2,7 +2,7 @@ import threading
 from decimal import Decimal
 
 from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, get_position_inform
-from bots.bb.multi_service_logic.avg_logic import BBAutoAverage
+from bots.bb.logic.avg_logic import BBAutoAverage
 from bots.bb_class import BollingerBands
 
 
