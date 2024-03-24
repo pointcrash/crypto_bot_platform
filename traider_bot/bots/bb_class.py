@@ -15,9 +15,9 @@ class BollingerBands:
         self.category = bot.category
         self.symbol = bot.symbol.name
         self.priceScale = int(bot.symbol.priceScale)
-        self.interval = bot.interval
-        self.qty_kline = bot.qty_kline
-        self.d = bot.d
+        self.interval = bot.bb.interval
+        self.qty_kline = bot.bb.qty_kline
+        self.d = bot.bb.d
         self.close_price_list = self.get_new_close_price_list
         self.ml = self.get_ml
         self.std_dev = self.get_std_dev
@@ -63,7 +63,6 @@ class BollingerBands:
     def modify_close_price_list(self, new_value):
         self.close_price_list.pop()
         self.close_price_list.insert(0, new_value)
-        print(self.close_price_list, len(self.close_price_list))
 
     def recalculate_lines(self):
         self.ml = self.get_ml

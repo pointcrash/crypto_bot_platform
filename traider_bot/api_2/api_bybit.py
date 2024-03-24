@@ -67,6 +67,34 @@ def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side
         raise Exception(traceback.print_exc())
 
 
+def bybit_place_conditional_order(bot, side, position_side, trigger_price, trigger_direction, qty):
+    positionIdx = 1 if position_side.upper() == 'LONG' else 2
+
+    endpoint = "/v5/order/create"
+    method = "POST"
+    orderLinkId = uuid.uuid4().hex
+    params = {
+        'category': 'linear',
+        'symbol': bot.symbol.name,
+        'side': side.capitalize(),
+        'positionIdx': positionIdx,
+        'orderType': 'MARKET',
+        'qty': str(qty),
+        'triggerPrice': str(trigger_price),
+        'triggerDirection': str(trigger_direction),
+        'orderLinkId': orderLinkId,
+    }
+
+    params = json.dumps(params)
+    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    try:
+        return response['result']
+    except Exception as e:
+        print(e)
+        print(response)
+        raise Exception(traceback.print_exc())
+
+
 def bybit_cancel_all_orders(bot):
     endpoint = "/v5/order/cancel-all"
     method = "POST"

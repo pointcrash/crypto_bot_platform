@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from api.api_v5_bybit import get_query_account_coins_balance, get_list
 from bots.bot_logic import all_symbols_update
-from bots.models import Log, Bot, Symbol
+from bots.models import Log, Bot, Symbol, BotModel
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
@@ -120,7 +120,7 @@ def account_position_list(request):
                 if symbol:
                     name_symbol_set.add(symbol.name)
                     count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize)
-                    bot = Bot.objects.filter(account=account, symbol=symbol).first()
+                    bot = BotModel.objects.filter(account=account, symbol=symbol).first()
                     psn['positionBalance'] = str(round(Decimal(psn['positionBalance']), 2))
                     psn['unrealisedPnl'] = str(round(Decimal(psn['unrealisedPnl']), 2))
                     if bot:
@@ -151,7 +151,7 @@ def recalculate_values(request):
             if psn['symbol'] == symbol_name:
                 symbol = Symbol.objects.filter(name=psn['symbol']).first()
                 count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize)
-                bot = Bot.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
+                bot = BotModel.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
                 if tb > count_dict[trend]['margin'] * Decimal('1.1'):
                     enough_balance = True
                 else:

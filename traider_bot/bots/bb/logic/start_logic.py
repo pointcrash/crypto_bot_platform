@@ -25,7 +25,7 @@ def bb_worker(bot):
 
         ''' Subscribe to topics '''
         ws_client.sub_to_user_info()
-        ws_client.sub_to_kline()
+        ws_client.sub_to_kline(interval=bot.bb.interval)
         ws_client.sub_to_mark_price()
 
         while bot.is_active and ws_client.is_connected():

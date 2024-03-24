@@ -14,15 +14,26 @@
         <form method="POST">
             {% csrf_token %}
             <div class="row justify-content-center">
-                {% if form.errors %}
+                {% if bot_form.errors %}
                 <div class="col-10 mx-auto alert alert-danger mt-2">
-                    {% for field_errors in form.errors.values %}
+                    {% for field_errors in bot_form.errors.values %}
                     {% for error in field_errors %}
                     {{ error }}
                     {% endfor %}
                     {% endfor %}
                 </div>
                 {% endif %}
+
+                {% if bb_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in bb_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <div class="card shadow col-12 col-xl-2 col-lg-5 p-3 m-2">
                     <h4 class="text-center">Настройки бота</h4>
 
@@ -36,7 +47,7 @@
                     {{ bot_form.leverage.label_tag }}
                     {{ bot_form.leverage }}
                     <br>
-                    {{ bot_form.amount_long.label_tag }}
+                    <p>USDT:</p>
                     {{ bot_form.amount_long }}
                     <br>
                 </div>
@@ -93,7 +104,7 @@
                         <p class="d-inline">{{ bb_form.auto_avg.label_tag }}</p>
                         {{ bb_form.auto_avg }} %:
                     </div>
-                    {{ bb_form.bb_avg_percent }}
+                    {{ bb_form.avg_percent }}
                     <br>
 
 <!--                    {{ bb_form.dfep.label_tag }}-->

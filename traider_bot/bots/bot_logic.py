@@ -390,7 +390,7 @@ def custom_logging(bot, text):
     timezone = TimeZone.objects.filter(users=user).first()
     gmt0 = pytz.timezone('GMT')
     date = datetime.now(gmt0).replace(microsecond=0)
-    bot_info = f'Bot {bot.pk} {bot.symbol.name} {bot.side} {bot.interval}'
+    bot_info = f'Bot {bot.pk} {bot.symbol.name}'
     gmt = 0
 
     if timezone:

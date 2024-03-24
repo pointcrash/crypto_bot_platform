@@ -8,7 +8,7 @@ from bots.bb.forms import BBForm
 from bots.bb.logic.start_logic import bb_worker
 from bots.bot_logic import func_get_symbol_list
 from bots.forms import BotForm, BotModelForm
-from bots.models import Symbol, Bot
+from bots.models import Symbol, Bot, BotModel
 from bots.terminate_bot_logic import terminate_bot_with_cancel_orders, terminate_bot
 
 
@@ -18,7 +18,13 @@ def bb_bot_create(request):
 
     if request.method == 'POST':
         bot_form = BotModelForm(request=request, data=request.POST)
-        bb_form = BBForm()
+        bb_form = BBForm(data=request.POST)
+
+        print(bot_form.is_valid())
+        print(bb_form.is_valid())
+        print("Ошибка валидации формы бота:", bot_form.errors)
+        print("Ошибка валидации формы bb:", bb_form.errors)
+        print("Ошибка валидации формы bb:", bb_form.non_field_errors())
 
         if bot_form.is_valid() and bb_form.is_valid():
             bot = bot_form.save(commit=False)
@@ -28,7 +34,9 @@ def bb_bot_create(request):
             bot.category = 'linear'
             bot.is_active = True
             bot.save()
+
             bb_model = bb_form.save(commit=False)
+            bb_model.bot = bot
             bb_model.save()
 
             bot_thread = threading.Thread(target=bb_worker, args=(bot,))
@@ -48,7 +56,7 @@ def bb_bot_create(request):
 
 @login_required
 def bb_bot_edit(request, bot_id):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
     if request.method == 'POST':
         bot_form = BotModelForm(request.POST, request=request, instance=bot)
         bb_form = BBForm(request.POST, instance=bot.bb)

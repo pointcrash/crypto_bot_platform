@@ -16,7 +16,7 @@ from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive, terminate_thread
 from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
-from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition, StepHedge
+from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition, StepHedge, BotModel
 from main.forms import AccountSelectForm
 from main.logic import calculate_pnl
 from main.models import ActiveBot
@@ -31,11 +31,11 @@ def single_bot_list(request):
     pnl_list = []
 
     if user.is_superuser:
-        bots = Bot.objects.all().order_by('pk')
-        all_bots_pks = Bot.objects.values_list('pk', flat=True).order_by('pk')
+        bots = BotModel.objects.all().order_by('pk')
+        all_bots_pks = BotModel.objects.values_list('pk', flat=True).order_by('pk')
     else:
-        bots = Bot.objects.filter(owner=user).order_by('pk')
-        all_bots_pks = Bot.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
+        bots = BotModel.objects.filter(owner=user).order_by('pk')
+        all_bots_pks = BotModel.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
 
     for bot in bots:
         # pnl = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
@@ -126,7 +126,7 @@ def single_bot_create(request):
 
 @login_required
 def single_bot_detail(request, bot_id):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
     set0psn = Set0Psn.objects.filter(bot=bot).first()
     opposite_psn = OppositePosition.objects.filter(bot=bot).first()
     symbol_list = func_get_symbol_list(bot)
@@ -203,7 +203,7 @@ def single_bot_detail(request, bot_id):
 
 
 def bot_start(request, bot_id):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
     bot_thread = None
     # is_ts_start = IsTSStart.objects.filter(bot=bot)
 

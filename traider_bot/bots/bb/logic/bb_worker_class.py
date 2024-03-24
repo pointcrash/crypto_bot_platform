@@ -16,6 +16,7 @@ class WorkBollingerBandsClass:
         self.have_psn = False
         self.ml_filled = False
         self.ml_order_id = None
+        self.main_order_id = None
         self.position_info = None
 
         self.locker_1 = threading.Lock()
@@ -46,25 +47,27 @@ class WorkBollingerBandsClass:
 
     def replace_opening_orders(self):
         cancel_all_orders(self.bot)
-        if self.bot.side == 'FB':
-            place_order(self.bot, side='Buy', order_type='Limit', price=self.bb.bl)
-            place_order(self.bot, side='Sell', order_type='Limit', price=self.bb.tl)
-        elif self.bot.side == 'Buy':
-            place_order(self.bot, side='Buy', order_type='Limit', price=self.bb.bl)
-        elif self.bot.side == 'Sell':
-            place_order(self.bot, side='Sell', order_type='Limit', price=self.bb.tl)
+        side = self.bot.bb.side
+        amount_usdt = self.bot.amount_long
+        if side == 'FB':
+            place_order(self.bot, side='Buy', order_type='Limit', price=self.bb.bl, amount_usdt=amount_usdt)
+            place_order(self.bot, side='Sell', order_type='Limit', price=self.bb.tl, amount_usdt=amount_usdt)
+        elif side == 'Buy':
+            place_order(self.bot, side='Buy', order_type='Limit', price=self.bb.bl, amount_usdt=amount_usdt)
+        elif side == 'Sell':
+            place_order(self.bot, side='Sell', order_type='Limit', price=self.bb.tl, amount_usdt=amount_usdt)
 
     def replace_closing_orders(self):
         cancel_all_orders(self.bot)
         position_side = self.position_info['side']
+        psn_qty = Decimal(self.position_info['qty'])
 
         side, price = ('Sell', self.bb.tl) if position_side == 'LONG' else ('Buy', self.bb.bl)
         price = self.price_check(price, 2)
 
-        if self.bot.take_on_ml and not self.ml_filled:
-            psn_qty = Decimal(self.position_info['qty'])
+        if self.bot.bb.take_on_ml and not self.ml_filled and psn_qty > Decimal(self.bot.symbol.minOrderQty):
             ml_take_price = self.price_check(self.bb.ml, 1)
-            ml_take_qty = Decimal(str(psn_qty * self.bot.take_on_ml_percent / 100)).quantize(
+            ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
                 Decimal(self.bot.symbol.minOrderQty))
 
             response = place_order(self.bot, side=side, position_side=position_side, order_type='Limit',
@@ -75,8 +78,10 @@ class WorkBollingerBandsClass:
         else:
             main_take_qty = Decimal(self.position_info['qty'])
 
-        place_order(self.bot, side=side, position_side=position_side, order_type='Limit', qty=main_take_qty,
-                    price=price)
+        response = place_order(self.bot, side=side, position_side=position_side, order_type='Limit', qty=main_take_qty,
+                               price=price)
+
+        self.main_order_id = response['orderId']
 
     def price_check(self, price, take_number):
         psn_side = self.position_info['side']

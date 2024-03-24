@@ -55,9 +55,9 @@ class CustomWSClient:
     def sub_to_user_info(self):
         self.ws.send(json.dumps({'title': 'conn', 'account': self.account_name}))
 
-    def sub_to_kline(self):
+    def sub_to_kline(self, interval):
         subscribe_message = {'title': 'sub', 'topic': 'kline', 'service': self.service, 'symbol': self.bot.symbol.name,
-                             'interval': self.bot.interval}
+                             'interval': interval}
         self.ws.send(json.dumps(subscribe_message))
 
     def sub_to_mark_price(self):

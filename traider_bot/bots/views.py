@@ -4,9 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb_set_takes import set_takes
-from bots.bot_logic import custom_logging, clear_data_bot
+from bots.bot_logic import clear_data_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.models import Bot, SingleBot, IsTSStart
+from bots.models import IsTSStart, BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
 from single_bot.logic.global_variables import global_list_threads, lock
@@ -18,14 +18,14 @@ def views_bots_type_choice(request, mode):
     category = 'linear' if mode == 'one-way' else 'inverse'
 
     if user.is_superuser:
-        grid_bots = Bot.objects.filter(work_model='grid', category=category)
+        grid_bots = BotModel.objects.filter(work_model='grid', category=category)
     else:
-        grid_bots = Bot.objects.filter(owner=user, work_model='grid', category=category)
+        grid_bots = BotModel.objects.filter(owner=user, work_model='grid', category=category)
 
     if user.is_superuser:
-        bb_bots = Bot.objects.filter(work_model='bb', category=category)
+        bb_bots = BotModel.objects.filter(work_model='bb', category=category)
     else:
-        bb_bots = Bot.objects.filter(owner=user, work_model='bb', category=category)
+        bb_bots = BotModel.objects.filter(owner=user, work_model='bb', category=category)
 
     if mode == 'hedge':
         title = 'Hedge Mode'
@@ -41,7 +41,7 @@ def views_bots_type_choice(request, mode):
 
 @login_required
 def stop_bot(request, bot_id, event_number):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
 
     if event_number == 1:
         terminate_bot(bot)
@@ -55,7 +55,7 @@ def stop_bot(request, bot_id, event_number):
 
 @login_required
 def delete_bot(request, bot_id, event_number):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
 
     if event_number == 1:
         terminate_bot(bot)
@@ -70,14 +70,12 @@ def delete_bot(request, bot_id, event_number):
 
 
 def reboot_bots(request):
-    bots = Bot.objects.all()
+    bots = BotModel.objects.all()
     for bot in bots:
         print(bot.is_active)
         if bot.is_active:
             bot_thread = None
             is_ts_start = IsTSStart.objects.filter(bot=bot)
-
-            clear_data_bot(bot, clear_data=1)  # Очищаем данные ордеров и тейков которые использовал старый бот
 
             if bot.work_model == 'bb':
                 if bot.side == 'TS':

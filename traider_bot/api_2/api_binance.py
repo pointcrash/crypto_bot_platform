@@ -47,8 +47,35 @@ def binance_place_order(bot, client, side, order_type, price, qty, position_side
         side=side.upper(),
         positionSide=position_side,
         type=order_type.upper(),
+        workingType='MARK_PRICE',
         price=price,
         timeInForce=timeInForce,
+        quantity=qty,
+    )
+
+
+@with_binance_client
+def binance_place_conditional_order(bot, client, side, position_side, trigger_price, trigger_direction, qty):
+    if trigger_direction == 1:
+        if side == 'SELL' and (position_side == 'LONG' or position_side == 'SHORT'):
+            order_type = 'TAKE_PROFIT_MARKET'
+        else:
+            order_type = 'STOP_MARKET'
+    else:
+        if side == 'BUY' and (position_side == 'LONG' or position_side == 'SHORT'):
+            order_type = 'TAKE_PROFIT_MARKET'
+        else:
+            order_type = 'STOP_MARKET'
+
+    if not position_side:
+        position_side = 'LONG' if side.lower() == 'buy' else 'SHORT'
+    return client.futures_create_order(
+        symbol=bot.symbol.name,
+        side=side,
+        positionSide=position_side,
+        type=order_type,
+        workingType='MARK_PRICE',
+        stopPrice=trigger_price,
         quantity=qty,
     )
 

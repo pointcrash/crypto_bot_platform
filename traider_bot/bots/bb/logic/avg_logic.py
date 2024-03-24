@@ -15,11 +15,11 @@ class BBAutoAverage:
         self.account = bot.account
         self.category = bot.category
         self.symbol = bot.symbol
-        self.avg_percent = bot.bb_avg_percent
-        self.dfm = bot.dfm
-        self.chw = bot.chw
-        self.dfep = bot.dfep
-        self.max_margin = bot.max_margin
+        self.avg_percent = bot.bb.avg_percent
+        self.dfm = bot.bb.dfm
+        self.chw = bot.bb.chw
+        self.dfep = bot.bb.dfep
+        self.max_margin = bot.bb.max_margin
         self.psn_price = None
         self.psn_side = None
         self.psn_qty = None
@@ -65,14 +65,14 @@ class BBAutoAverage:
         if not self.max_margin:
             return True
         else:
-            psn_currency_amount = self.psn_price * self.psn_qty / self.bot.isLeverage
-            avg_currency_amount = psn_currency_amount * self.bot.bb_avg_percent / 100
+            psn_currency_amount = self.psn_price * self.psn_qty / self.bot.leverage
+            avg_currency_amount = psn_currency_amount * self.avg_percent / 100
 
             if psn_currency_amount + avg_currency_amount > self.max_margin:
                 last_log = Log.objects.filter(bot=self.bot).last()
                 if 'MARGIN LIMIT!' not in last_log.content:
                     custom_logging(self.bot,
-                            f'MARGIN LIMIT! Max margin -> {self.bot.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+                            f'MARGIN LIMIT! Max margin -> {self.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                 return False
             else:
                 return True
@@ -86,8 +86,8 @@ class BBAutoAverage:
             return False
 
     def to_average(self, current_price):
-        psn_currency_amount = self.psn_price * self.psn_qty / self.bot.isLeverage
-        avg_currency_amount = Decimal(psn_currency_amount * self.bot.bb_avg_percent / 100)
+        psn_currency_amount = self.psn_price * self.psn_qty / self.bot.leverage
+        avg_currency_amount = Decimal(psn_currency_amount * self.avg_percent / 100)
 
         place_order(self.bot, side=self.psn_side, order_type="Market", price=current_price,
                     amount_usdt=avg_currency_amount)
@@ -109,7 +109,7 @@ def custom_logging(bot, text):
     timezone = TimeZone.objects.filter(users=user).first()
     gmt0 = pytz.timezone('GMT')
     date = datetime.now(gmt0).replace(microsecond=0)
-    bot_info = f'Bot {bot.pk} {bot.symbol.name} {bot.side} {bot.interval}'
+    bot_info = f'Bot {bot.pk} {bot.symbol.name}'
     gmt = 0
 
     if timezone:
