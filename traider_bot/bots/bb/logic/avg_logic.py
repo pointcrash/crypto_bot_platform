@@ -53,9 +53,9 @@ class BBAutoAverage:
         logging.debug(f'self.bb_obj.ml = {self.bb_obj.ml}')
         logging.debug(f'self.psn_price = {self.psn_side}')
         bb_price = None
-        if self.psn_side == 'BUY' and self.bb_obj.ml <= self.psn_price:
+        if self.psn_side == 'LONG' and self.bb_obj.ml <= self.psn_price:
             bb_price = self.bb_obj.bl
-        elif self.psn_side == 'Sell' and self.bb_obj.ml >= self.psn_price:
+        elif self.psn_side == 'SHORT' and self.bb_obj.ml >= self.psn_price:
             bb_price = self.bb_obj.tl
 
         custom_logging(self.bot, f'avg price received')
