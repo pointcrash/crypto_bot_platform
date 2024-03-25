@@ -26,10 +26,15 @@ class BBAutoAverage:
         self.bb_obj = bb_obj
 
     def _checking_rules(self, current_price, bb_price):
+        custom_logging(self.bot, f'start checking rules for average')
         if self._channel_width_check(current_price):
+            custom_logging(self.bot, f'ChW is completely')
             if self._dfm_check(current_price, bb_price):
+                custom_logging(self.bot, f'DFM is completely')
                 if self._margin_limit_check():
+                    custom_logging(self.bot, f'Margin limit is completely')
                     if self._dfep_check(current_price):
+                        custom_logging(self.bot, f'DFEP is completely')
                         return True
         return False
 

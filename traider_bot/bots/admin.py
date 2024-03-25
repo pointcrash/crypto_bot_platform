@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot, StepHedge
+from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot, StepHedge, BotModel
 
 
 @admin.register(Bot)
@@ -8,6 +8,13 @@ class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'symbol', 'account', 'side', 'is_active', 'qty', 'price', 'work_model',)
     list_display_links = ('id', 'symbol',)
     search_fields = ('symbol', 'orderType', 'side', 'is_active', 'work_model')
+
+
+@admin.register(BotModel)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'symbol', 'account', 'is_active', 'work_model',)
+    list_display_links = ('id', 'symbol',)
+    search_fields = ('symbol', 'is_active', 'work_model')
 
 
 @admin.register(Symbol)
@@ -50,9 +57,9 @@ class OrdersAdmin(admin.ModelAdmin):
 
 @admin.register(StepHedge)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bot', 'bot_id', 'bot_owner', )
+    list_display = ('id', 'bot', 'bot_id', 'bot_owner',)
     list_display_links = ('id', 'bot')
-    search_fields = ('bot', 'bot_id', 'bot_owner', )
+    search_fields = ('bot', 'bot_id', 'bot_owner',)
 
     @staticmethod
     def bot_id(obj):

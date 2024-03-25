@@ -20,13 +20,13 @@ def bb_worker(bot):
 
         time.sleep(5)
 
-        ''' Change leverage and position mode '''
-        bb_worker_class.preparatory_actions()
-
         ''' Subscribe to topics '''
         ws_client.sub_to_user_info()
         ws_client.sub_to_kline(interval=bot.bb.interval)
         ws_client.sub_to_mark_price()
+
+        ''' Change leverage and position mode '''
+        bb_worker_class.preparatory_actions()
 
         while bot.is_active and ws_client.is_connected():
             time.sleep(5)

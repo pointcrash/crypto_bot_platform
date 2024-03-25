@@ -41,7 +41,7 @@ def get_data_ago_to_ms(days):
 #     print(y)
 
 # print(client.futures_income_history(symbol='BTCUSDT', incomeType='FUNDING_FEE'))
-print(client.futures_create_order(symbol='BTCUSDT', side='SELL', positionSide='SHORT', type='STOP_MARKET', quantity=0.02, workingType='MARK_PRICE', stopPrice=Decimal(63000)))  # Разместить ордер
+# print(client.futures_create_order(symbol='BTCUSDT', side='SELL', positionSide='SHORT', type='STOP_MARKET', quantity=0.02, workingType='MARK_PRICE', stopPrice=Decimal(63000)))  # Разместить ордер
 
 # print(client.futures_get_order(symbol='BTCUSDT'))  #
 def get_exchange_information():
