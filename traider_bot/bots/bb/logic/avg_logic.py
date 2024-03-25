@@ -92,7 +92,7 @@ class BBAutoAverage:
                 last_log = Log.objects.filter(bot=self.bot).last()
                 if 'MARGIN LIMIT!' not in last_log.content:
                     custom_logging(self.bot,
-                            f'MARGIN LIMIT! Max margin -> {self.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
+                                   f'MARGIN LIMIT! Max margin -> {self.max_margin}, Margin after avg -> {round(psn_currency_amount + avg_currency_amount, 2)}')
                 return False
             else:
                 return True
@@ -109,8 +109,10 @@ class BBAutoAverage:
         psn_currency_amount = self.psn_price * self.psn_qty / self.bot.leverage
         avg_currency_amount = Decimal(psn_currency_amount * self.avg_percent / 100)
 
-        place_order(self.bot, side=self.psn_side, order_type="Market", price=current_price,
-                    amount_usdt=avg_currency_amount)
+        response = place_order(self.bot, side=self.psn_side, order_type="MARKET", price=current_price,
+                               amount_usdt=avg_currency_amount)
+        logging.debug(f'{response}')
+        custom_logging(self.bot, f'Усредняющий ордер резмещен {response}')
 
         custom_logging(self.bot, f'Усредняющий ордер резмещен на цене {current_price}')
 
