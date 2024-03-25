@@ -27,7 +27,7 @@ class BBForm(forms.ModelForm):
 
         labels = {
             'side': 'Направление',
-            'qty_kline': 'Количество сечей',
+            'qty_kline': 'Количество свечей',
             'interval': 'Интервал свечи',
             'd': 'Отклонение',
             'auto_avg': 'Авто-усреднение',

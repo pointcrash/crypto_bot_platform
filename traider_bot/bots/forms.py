@@ -35,7 +35,7 @@ class BotModelForm(forms.ModelForm):
 
         labels = {
             'account': 'Аккаунт',
-            'symbol': 'Монета',
+            'symbol': 'Торговая пара',
             'leverage': 'Плечо',
             'amount_long': 'Лонг USDT',
             'amount_short': 'Шорт USDT',

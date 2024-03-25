@@ -30,7 +30,7 @@ def view_home(request):
 @login_required
 def logs_list(request, bot_id):
     log_list = []
-    bot = Bot.objects.get(id=bot_id)
+    bot = BotModel.objects.get(id=bot_id)
     logs = Log.objects.filter(bot=bot_id).order_by('pk')
     user = request.user
     not_timezone = False
