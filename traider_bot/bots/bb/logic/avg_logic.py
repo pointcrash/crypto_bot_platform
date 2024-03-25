@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 import pytz
@@ -26,25 +27,39 @@ class BBAutoAverage:
         self.bb_obj = bb_obj
 
     def _checking_rules(self, current_price, bb_price):
+        logging.debug('start auto avg')
         custom_logging(self.bot, f'start checking rules for average')
         if self._channel_width_check(current_price):
+            logging.debug('start auto avg')
             custom_logging(self.bot, f'ChW is completely')
             if self._dfm_check(current_price, bb_price):
+                logging.debug('start auto avg')
                 custom_logging(self.bot, f'DFM is completely')
                 if self._margin_limit_check():
+                    logging.debug('start auto avg')
                     custom_logging(self.bot, f'Margin limit is completely')
                     if self._dfep_check(current_price):
+                        logging.debug('start auto avg')
                         custom_logging(self.bot, f'DFEP is completely')
                         return True
         return False
 
     def auto_avg(self, current_price: Decimal):
+        custom_logging(self.bot, f'self.psn_side {self.psn_side}')
+        custom_logging(self.bot, f'self.bb_obj.ml = {self.bb_obj.ml}')
+        custom_logging(self.bot, f'self.psn_price = {self.psn_side}')
+        logging.debug('start auto avg')
+        logging.debug(f'self.psn_side {self.psn_side}')
+        logging.debug(f'self.bb_obj.ml = {self.bb_obj.ml}')
+        logging.debug(f'self.psn_price = {self.psn_side}')
         bb_price = None
-        if self.psn_side == 'Buy' and self.bb_obj.ml <= self.psn_price:
+        if self.psn_side == 'BUY' and self.bb_obj.ml <= self.psn_price:
             bb_price = self.bb_obj.bl
         elif self.psn_side == 'Sell' and self.bb_obj.ml >= self.psn_price:
             bb_price = self.bb_obj.tl
 
+        custom_logging(self.bot, f'avg price received')
+        logging.debug('avg price received')
         if bb_price and self._checking_rules(current_price, bb_price) is True:
             self.to_average(current_price)
             return True

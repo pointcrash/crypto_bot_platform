@@ -86,6 +86,7 @@ class WorkBollingerBandsClass:
             #                        qty=ml_take_qty, price=ml_take_price)
             response = place_conditional_order(self.bot, side=side, position_side=position_side,
                                                trigger_price=ml_take_price, trigger_direction=td, qty=ml_take_qty)
+            # logging.debug(response)
             self.ml_order_id = response['orderId']
 
             main_take_qty = psn_qty - ml_take_qty
@@ -96,7 +97,7 @@ class WorkBollingerBandsClass:
         #                        price=price)
         response = place_conditional_order(self.bot, side=side, position_side=position_side,
                                            trigger_price=price, trigger_direction=td, qty=main_take_qty)
-
+        # logging.debug(response)
         self.main_order_id = response['orderId']
 
     def price_check(self, price, take_number):

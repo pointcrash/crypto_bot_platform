@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 
 
@@ -69,9 +70,11 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
-    # print(msg)
-    # print()
+    print(msg)
+    print()
     bot_class_obj.current_price = Decimal(msg['markPrice'])
     if bot_class_obj.have_psn is True:
+        logging.debug('get new price')
         with bot_class_obj.avg_locker:
+            logging.debug('auto avg next func')
             bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price)
