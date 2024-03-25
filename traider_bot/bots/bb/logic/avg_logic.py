@@ -108,9 +108,13 @@ class BBAutoAverage:
     def to_average(self, current_price):
         psn_currency_amount = self.psn_price * self.psn_qty / self.bot.leverage
         avg_currency_amount = Decimal(psn_currency_amount * self.avg_percent / 100)
+        side = 'BUY' if self.psn_side == 'LONG' else 'SELL'
 
-        response = place_order(self.bot, side=self.psn_side, order_type="MARKET", price=current_price,
-                               amount_usdt=avg_currency_amount)
+        # response = place_order(self.bot, side=side, position_side=self.psn_side, order_type="MARKET", price=current_price,
+        #                        amount_usdt=avg_currency_amount, qty=self.psn_qty)
+        response = place_order(self.bot, side=side, position_side=self.psn_side, order_type="MARKET",
+                               price=current_price,
+                               qty=self.psn_qty)
         logging.debug(f'{response}')
         custom_logging(self.bot, f'Усредняющий ордер резмещен {response}')
 
