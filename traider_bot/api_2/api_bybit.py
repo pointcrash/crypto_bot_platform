@@ -168,11 +168,11 @@ def bybit_change_position_mode_on_hedge(bot, category='linear'):
     return response
 
 
-def bybit_account_balance(bot):
+def bybit_account_balance(account):
     endpoint = "/v5/asset/transfer/query-account-coins-balance"
     method = "GET"
-    params = f"accountType={bot.account.account_type}&coin=USDT"
-    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    params = f"accountType={account.account_type}&coin=USDT"
+    response = json.loads(HTTP_Request(account, endpoint, method, params))
     response = response['result']['balance'][0]
     response = {
         'fullBalance': round(float(response['walletBalance']), 2),

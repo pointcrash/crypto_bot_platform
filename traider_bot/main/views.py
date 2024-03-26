@@ -9,6 +9,7 @@ from datetime import timedelta, datetime
 from django.utils import timezone
 
 from api.api_v5_bybit import get_query_account_coins_balance, get_list
+from api_2.api_aggregator import account_balance
 from bots.bot_logic import all_symbols_update
 from bots.models import Log, Bot, Symbol, BotModel
 from bots.SetZeroPsn.logic.psn_count import psn_count
@@ -275,17 +276,18 @@ def profile_mode_switching(request, profile_id):
 
 
 def get_balance(request, acc_id):
-    acc = Account.objects.get(pk=acc_id)
+    account = Account.objects.get(pk=acc_id)
     try:
-        balance = get_query_account_coins_balance(acc)[0]
-        wb = balance['walletBalance']
-        tb = balance['transferBalance']
+        balance = account_balance(account)
+        wb = balance['fullBalance']
+        tb = balance['availableBalance']
     except Exception as e:
+        wb = f'Ошибка получения баланса: {e}'
+        tb = f'Ошибка получения баланса'
         print(e)
-        print(f'Апи ключи аккаунта {acc.name} устарели, замените')
-        return JsonResponse({"wb": None, "tb": None, "name": acc.name})
+        print(f'Апи ключи аккаунта {account.name} устарели, замените')
 
-    return JsonResponse({"wb": wb, "tb": tb, "name": acc.name})
+    return JsonResponse({"wb": wb, "tb": tb, "name": account.name})
 
 
 @login_required

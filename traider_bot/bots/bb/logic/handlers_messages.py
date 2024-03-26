@@ -23,9 +23,6 @@ def bb_handler_wrapper(bb_worker_class_obj):
 
 
 def handle_order_stream_message(msg, bot_class_obj):
-    print(msg)
-    print()
-    # if msg['symbol'] == bot_class_obj.symbol:
     if msg['status'].upper() == 'FILLED':
         if msg['orderId'] == bot_class_obj.ml_order_id:
             bot_class_obj.ml_filled = True
@@ -37,9 +34,6 @@ def handle_order_stream_message(msg, bot_class_obj):
 
 
 def handle_position_stream_message(msg, bot_class_obj):
-    print(msg)
-    print()
-    # if msg['symbol'] == bot_class_obj.symbol:
     with bot_class_obj.locker_1:
         if Decimal(msg['qty']) != 0:
             if bot_class_obj.position_info:
@@ -57,8 +51,6 @@ def handle_position_stream_message(msg, bot_class_obj):
 
 
 def handle_message_kline_info(msg, bot_class_obj):
-    print(msg)
-    print()
     with bot_class_obj.locker_1:
         close_prise = Decimal(msg['closePrice'])
         bot_class_obj.bb.modify_close_price_list(close_prise)
@@ -70,11 +62,7 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
-    print(msg)
-    print()
     bot_class_obj.current_price = Decimal(msg['markPrice'])
     if bot_class_obj.have_psn is True:
-        logging.debug('get new price')
         with bot_class_obj.avg_locker:
-            logging.debug('auto avg next func')
             bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price)

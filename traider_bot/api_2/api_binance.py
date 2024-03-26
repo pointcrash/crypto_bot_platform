@@ -41,13 +41,12 @@ def binance_place_order(bot, client, side, order_type, price, qty, position_side
     if order_type.capitalize() == 'Market':
         price = None
     if not position_side:
-        position_side = 'LONG' if side.lower() == 'buy' else 'SHORT'
+        position_side = 'LONG' if side.upper() == 'BUY' else 'SHORT'
     return client.futures_create_order(
         symbol=bot.symbol.name,
         side=side.upper(),
         positionSide=position_side,
         type=order_type.upper(),
-        workingType='MARK_PRICE',
         price=price,
         timeInForce=timeInForce,
         quantity=qty,
@@ -68,13 +67,12 @@ def binance_place_conditional_order(bot, client, side, position_side, trigger_pr
             order_type = 'STOP_MARKET'
 
     if not position_side:
-        position_side = 'LONG' if side.lower() == 'buy' else 'SHORT'
+        position_side = 'LONG' if side.upper() == 'BUY' else 'SHORT'
     return client.futures_create_order(
         symbol=bot.symbol.name,
         side=side,
         positionSide=position_side,
         type=order_type,
-        workingType='MARK_PRICE',
         stopPrice=trigger_price,
         quantity=qty,
     )
@@ -127,8 +125,8 @@ def binance_change_position_mode_on_hedge(bot, client):
     return response
 
 
-@with_binance_client
-def binance_account_balance(bot, client):
+def binance_account_balance(account):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
     response = client.futures_account_balance()
     response = [x for x in response if x['asset'] == 'USDT'][0]
     response = {

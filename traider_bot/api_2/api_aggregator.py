@@ -108,11 +108,11 @@ def change_position_mode(bot):
         return bybit_change_position_mode_on_hedge(bot)
 
 
-def account_balance(bot):
-    if bot.account.service.name == 'Binance':
-        return binance_account_balance(bot)
-    elif bot.account.service.name == 'ByBit':
-        return bybit_account_balance(bot)
+def account_balance(account):
+    if account.service.name == 'Binance':
+        return binance_account_balance(account)
+    elif account.service.name == 'ByBit':
+        return bybit_account_balance(account)
 
     ''' Returned data:
     {   
