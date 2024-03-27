@@ -54,7 +54,7 @@ def single_bb_bot_create(request):
             if lock.locked():
                 lock.release()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = BotForm(request=request)
         set0psn_form = Set0PsnForm()
@@ -116,7 +116,7 @@ def single_bb_bot_detail(request, bot_id):
             if lock.locked():
                 lock.release()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = BotForm(request=request, instance=bot)
         if set0psn:

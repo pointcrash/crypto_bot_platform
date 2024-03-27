@@ -69,7 +69,7 @@ def hedge_grid_bot_detail(request, bot_id):
             bot_process.start()
             bot.process.pid = str(bot_process.pid)
             bot.process.save()
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         form = HedgeGridBotForm(request=request, instance=bot)  # Передаем экземпляр модели в форму
 

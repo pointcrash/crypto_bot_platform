@@ -21,7 +21,7 @@ def create_order_view(request, bot_id):
             order.symbol = bot.symbol.name
             order.save()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         form = OrderCreateForm()
 

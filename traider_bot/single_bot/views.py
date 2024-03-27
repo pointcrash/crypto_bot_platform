@@ -7,72 +7,15 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from api.api_v5_bybit import get_open_orders
-from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
-from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
-from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
 from bots.bb.logic.start_logic import bb_worker
-from bots.bb_set_takes import set_takes
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive, terminate_thread
+from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
 from bots.bot_logic import clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
-from bots.models import Bot, IsTSStart, Set0Psn, SimpleHedge, OppositePosition, StepHedge, BotModel
-from main.forms import AccountSelectForm
-from main.logic import calculate_pnl
-from main.models import ActiveBot
+from bots.models import Set0Psn, OppositePosition, BotModel
 
-from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
-from single_bot.logic.work import bot_work_logic, append_thread_or_check_duplicate
-
-
-@login_required
-def single_bot_list(request):
-    user = request.user
-    pnl_list = []
-
-    if user.is_superuser:
-        bots = BotModel.objects.all().order_by('pk')
-        all_bots_pks = BotModel.objects.values_list('pk', flat=True).order_by('pk')
-    else:
-        bots = BotModel.objects.filter(owner=user).order_by('pk')
-        all_bots_pks = BotModel.objects.filter(owner=user).values_list('pk', flat=True).order_by('pk')
-
-    for bot in bots:
-        # pnl = calculate_pnl(bot=bot, start_date=bot.time_create, end_date=datetime.now())
-        pnl_list.append(1)
-
-    if request.method == 'POST':
-        account_select_form = AccountSelectForm(request.POST, user=request.user)
-        if account_select_form.is_valid():
-            selected_account = account_select_form.cleaned_data['account']
-            if selected_account:
-                bots = bots.filter(account=selected_account)
-                all_bots_pks = bots.values_list('pk', flat=True).order_by('pk')
-    else:
-        account_select_form = AccountSelectForm(user=request.user)
-
-    is_alive_list = []
-    active_bot_ids = ActiveBot.objects.all().values_list('bot_id', flat=True)
-
-    for bot in bots:
-        is_alive_list.append(bot.is_active)
-
-    # lock.acquire()
-    # try:
-    #     for bot_id in all_bots_pks:
-    #         bot_id = str(bot_id)
-    #         if bot_id in active_bot_ids:
-    #             is_alive_list.append(True)
-    #         else:
-    #             is_alive_list.append(False)
-    # finally:
-    #     lock.release()
-    bots = zip(bots, is_alive_list, pnl_list)
-
-    return render(request, 'bot_list.html', {
-        'bots': bots,
-        'account_select_form': account_select_form,
-    })
+from single_bot.logic.global_variables import lock, global_list_threads
+from single_bot.logic.work import bot_work_logic
 
 
 @login_required
@@ -110,7 +53,7 @@ def single_bot_create(request):
             global_list_threads[bot.pk] = bot_thread
             lock.release()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = GridBotForm(request=request)
         set0psn_form = Set0PsnForm()
@@ -174,7 +117,7 @@ def single_bot_detail(request, bot_id):
             if lock.locked():
                 lock.release()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = GridBotForm(request=request, instance=bot)
         if set0psn:
@@ -205,54 +148,15 @@ def single_bot_detail(request, bot_id):
 def bot_start(request, bot_id):
     bot = BotModel.objects.get(pk=bot_id)
     bot_thread = None
-    # is_ts_start = IsTSStart.objects.filter(bot=bot)
-
-    # if check_thread_alive(bot.pk):
-    #     if bot.work_model == 'Step Hedge':
-    #         terminate_thread(bot.pk)
-    #     else:
-    #         stop_bot_with_cancel_orders(bot)
-
-    # clear_data_bot(bot, clear_data=1)  # Очищаем данные ордеров и тейков которые использовал старый бот
 
     if bot.work_model == 'bb':
-        # if bot.side == 'TS':
-        #     if is_ts_start:
-        #         bot_thread = threading.Thread(target=set_takes, args=(bot,))
-        #     else:
-        #         bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-        # else:
         bot.is_active = True
         bot.save()
         bot_thread = threading.Thread(target=bb_worker, args=(bot,))
 
-    # elif bot.work_model == 'grid':
-    #     if bot.side == 'TS':
-    #         if is_ts_start:
-    #             bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-    #         else:
-    #             bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-    #     else:
-    #         bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-    #
-    # elif bot.work_model == 'SmpHg':
-    #     simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
-    #     bot_thread = threading.Thread(target=simple_hedge_bot_main_logic, args=(bot, simple_hedge))
-    #     append_thread_or_check_duplicate(bot.pk)
-    #
-    # elif bot.work_model == 'Step Hedge':
-    #     step_hedge = StepHedge.objects.filter(bot=bot).first()
-    #     bot_thread = threading.Thread(target=ws_step_hedge_bot_main_logic, args=(bot, step_hedge))
-    #     if not ActiveBot.objects.filter(bot_id=bot.pk):
-    #         ActiveBot.objects.create(bot_id=bot.pk)
-        # append_thread_or_check_duplicate(bot.pk)
-
     if bot_thread is not None:
         bot_thread.start()
-        # lock.acquire()
-        # global_list_threads[bot.pk] = bot_thread
-        # if lock.locked():
-        #     lock.release()
+
     return redirect(request.META.get('HTTP_REFERER'))
 
 

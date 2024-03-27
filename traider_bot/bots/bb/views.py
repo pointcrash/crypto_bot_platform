@@ -35,7 +35,7 @@ def bb_bot_create(request):
             bot_thread = threading.Thread(target=bb_worker, args=(bot,))
             bot_thread.start()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = BotModelForm(request=request)
         bb_form = BBForm()
@@ -66,7 +66,7 @@ def bb_bot_edit(request, bot_id):
 
             bot_thread = threading.Thread(target=bb_worker, args=(bot,))
             bot_thread.start()
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = BotModelForm(request=request, instance=bot)
         bb_form = BBForm(instance=bot.bb)

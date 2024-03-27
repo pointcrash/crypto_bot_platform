@@ -53,7 +53,7 @@ def step_hedge_bot_create(request):
             if lock.locked():
                 lock.release()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = BotForm(request=request)
         step_hedge_form = StepHedgeForm()
@@ -96,7 +96,7 @@ def step_hedge_bot_detail(request, bot_id):
             # if lock.locked():
             #     lock.release()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         bot_form = BotForm(request=request, instance=bot)
         step_hedge_form = StepHedgeForm(instance=step_hedge)

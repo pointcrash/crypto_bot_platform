@@ -9,8 +9,34 @@ from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
 from bots.models import IsTSStart, BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
+from main.forms import AccountSelectForm
+from main.models import ActiveBot
 from single_bot.logic.global_variables import global_list_threads, lock
 from single_bot.logic.work import bot_work_logic
+
+
+@login_required
+def bot_list(request):
+    user = request.user
+
+    if user.is_superuser:
+        bots = BotModel.objects.all().order_by('pk')
+    else:
+        bots = BotModel.objects.filter(owner=user).order_by('pk')
+
+    if request.method == 'POST':
+        account_select_form = AccountSelectForm(request.POST, user=request.user)
+        if account_select_form.is_valid():
+            selected_account = account_select_form.cleaned_data['account']
+            if selected_account:
+                bots = bots.filter(account=selected_account)
+    else:
+        account_select_form = AccountSelectForm(user=request.user)
+
+    return render(request, 'bot_list.html', {
+        'bots': bots,
+        'account_select_form': account_select_form,
+    })
 
 
 def views_bots_type_choice(request, mode):
@@ -94,7 +120,6 @@ def reboot_bots(request):
                 else:
                     bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
 
-            print(bot_thread)
             if bot_thread is not None:
                 bot_thread.start()
                 bot.is_active = True
@@ -103,5 +128,4 @@ def reboot_bots(request):
                 global_list_threads[bot.pk] = bot_thread
                 if lock.locked():
                     lock.release()
-    return redirect('single_bot_list')
-
+    return redirect('bot_list')
