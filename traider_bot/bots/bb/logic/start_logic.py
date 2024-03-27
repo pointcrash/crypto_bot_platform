@@ -33,7 +33,8 @@ def bb_worker(bot):
             bot.refresh_from_db()
 
     except Exception as e:
-        bot.update(is_active=False)
+        bot.is_active = False
+        bot.save()
         traceback.print_exc()
         custom_logging(bot, f"**Ошибка:** {e}")
         custom_logging(bot, f"**Аргументы ошибки:** {e.args}")
