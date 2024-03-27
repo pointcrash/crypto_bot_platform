@@ -17,7 +17,7 @@ CORS_ALLOWED_ORIGINS = [
     # Другие доверенные источники здесь
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://*.bravo.almazor.co', 'https://*.209.38.180.77']
+CSRF_TRUSTED_ORIGINS = ['https://*.bravo.almazor.co', 'https://*.209.38.180.77', 'https://*.127.0.0.1']
 
 
 INSTALLED_APPS = [

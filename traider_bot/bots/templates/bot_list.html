@@ -11,7 +11,7 @@
 
 <div class="row">
     <div class="col-sm-12 col-lg-10 mx-auto">
-        <h1 class="text-center">Bots</h1>
+        <h1 class="text-center">Bots NEW</h1>
         <div class="d-flex flex-row">
             {% if request.user.is_superuser %}
 <!--            <a class="btn btn-outline-danger m-1 btn-shadow" href="{% url 'reboot_bots' %}">Reboot all bots</a>-->
@@ -58,11 +58,11 @@
                         {% if bot.work_model == 'bb' %}{{ bot.bb.side }}{% endif %}</td>
                     <td class="d-none d-md-table-cell">{{ bot.amount_long }}
                         {% if bot.amount_short %}/{{ bot.amount_short }}{% endif %}</td>
-                    <td>{% if bot.is_alive %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
+                    <td>{% if bot.is_active %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
                         {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}
                     </td>
                     <td>
-                    {% if bot.is_alive %}
+                    {% if bot.is_active %}
                     {% include 'modal_stop_bot.html' %}
                     {% else %}
                         <a href="{% url 'single_bot_start' bot_id=bot.pk %}" class="btn btn-success btn-shadow"><i class="fa-solid fa-play"></i></a>
