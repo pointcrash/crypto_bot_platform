@@ -2,6 +2,8 @@ from decimal import Decimal
 from functools import wraps
 from binance.client import Client
 
+from api_2.custom_logging_api import custom_logging
+
 
 def sort_position_inform(unsorted_list):
     sorted_list = sorted(unsorted_list, key=lambda x: x['side'])
@@ -31,7 +33,9 @@ def binance_get_position_inform(bot, client):
 
         return sort_position_inform(position_inform_list)
 
+    custom_logging(bot, f'binance_get_position_inform(symbol={bot.symbol.name})', 'REQUEST')
     response = client.futures_position_information(symbol=bot.symbol.name)
+    custom_logging(bot, response, 'RESPONSE')
     position_inform_list = format_data(response)
     return position_inform_list
 
@@ -42,7 +46,19 @@ def binance_place_order(bot, client, side, order_type, price, qty, position_side
         price = None
     if not position_side:
         position_side = 'LONG' if side.upper() == 'BUY' else 'SHORT'
-    return client.futures_create_order(
+
+    params = {
+        'symbol': bot.symbol.name,
+        'side': side.upper(),
+        'positionSide': position_side,
+        'type': order_type.upper(),
+        'price': price,
+        'timeInForce': timeInForce,
+        'quantity': qty,
+    }
+
+    custom_logging(bot, f'binance_place_order({params})', 'REQUEST')
+    response = client.futures_create_order(
         symbol=bot.symbol.name,
         side=side.upper(),
         positionSide=position_side,
@@ -51,6 +67,8 @@ def binance_place_order(bot, client, side, order_type, price, qty, position_side
         timeInForce=timeInForce,
         quantity=qty,
     )
+    custom_logging(bot, response, 'RESPONSE')
+    return response
 
 
 @with_binance_client
@@ -68,7 +86,19 @@ def binance_place_conditional_order(bot, client, side, position_side, trigger_pr
 
     if not position_side:
         position_side = 'LONG' if side.upper() == 'BUY' else 'SHORT'
-    return client.futures_create_order(
+
+    params = {
+        'symbol': bot.symbol.name,
+        'side': side,
+        'positionSide': position_side,
+        'type': order_type,
+        'stopPrice': trigger_price,
+        'quantity': qty,
+    }
+
+    custom_logging(bot, f'binance_place_conditional_order({params})', 'REQUEST')
+
+    response = client.futures_create_order(
         symbol=bot.symbol.name,
         side=side,
         positionSide=position_side,
@@ -76,6 +106,8 @@ def binance_place_conditional_order(bot, client, side, position_side, trigger_pr
         stopPrice=trigger_price,
         quantity=qty,
     )
+    custom_logging(bot, response, 'RESPONSE')
+    return response
 
 
 @with_binance_client
@@ -85,43 +117,57 @@ def binance_place_batch_order(bot, client, order_list):
             order['timeInForce'] = 'GTC'
         order['quantity'] = order.pop('qty')
 
+    custom_logging(bot, f'binance_place_batch_order({order_list})', 'REQUEST')
     response = client.futures_place_batch_order(batchOrders=order_list)
+    custom_logging(bot, response, 'RESPONSE')
     return response
 
 
 @with_binance_client
 def binance_cancel_all_orders(bot, client):
+    custom_logging(bot, f'binance_cancel_all_orders({bot.symbol.name})', 'REQUEST')
     response = client.futures_cancel_all_open_orders(symbol=bot.symbol.name)
+    custom_logging(bot, response, 'RESPONSE')
     return response
 
 
 @with_binance_client
 def binance_cancel_order(bot, client, order_id):
+    custom_logging(bot, f'binance_cancel_order({bot.symbol.name}, orderId={order_id})', 'REQUEST')
     response = client.futures_cancel_order(symbol=bot.symbol.name, orderId=order_id)
+    custom_logging(bot, response, 'RESPONSE')
     return response
 
 
 @with_binance_client
 def binance_get_open_orders(bot, client):
+    custom_logging(bot, f'binance_get_open_orders({bot.symbol.name})', 'REQUEST')
     response = client.futures_get_open_orders(symbol=bot.symbol.name)
+    custom_logging(bot, response, 'RESPONSE')
     return response
 
 
 @with_binance_client
 def binance_get_current_price(bot, client):
+    custom_logging(bot, f'binance_get_current_price({bot.symbol.name})', 'REQUEST')
     response = client.futures_symbol_ticker(symbol=bot.symbol.name)
-    response = Decimal(response["price"])
-    return response
+    custom_logging(bot, response, 'RESPONSE')
+    price = Decimal(response["price"])
+    return price
 
 
 @with_binance_client
 def binance_set_leverage(bot, client):
-    client.futures_change_leverage(symbol=bot.symbol.name, leverage=bot.isLeverage)
+    custom_logging(bot, f'binance_set_leverage({bot.symbol.name} leverage={bot.leverage})', 'REQUEST')
+    response = client.futures_change_leverage(symbol=bot.symbol.name, leverage=bot.leverage)
+    custom_logging(bot, response, 'RESPONSE')
 
 
 @with_binance_client
 def binance_change_position_mode_on_hedge(bot, client):
+    custom_logging(bot, f'binance_change_position_mode_on_hedge({bot.symbol.name})', 'REQUEST')
     response = client.futures_change_position_mode(symbol=bot.symbol.name, dualsideposition=True)
+    custom_logging(bot, response, 'RESPONSE')
     return response
 
 

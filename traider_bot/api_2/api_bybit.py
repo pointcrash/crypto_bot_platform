@@ -5,6 +5,7 @@ import uuid
 from decimal import Decimal
 
 from api.api_v5_bybit import HTTP_Request
+from api_2.custom_logging_api import custom_logging
 
 
 def sort_position_inform(unsorted_list):
@@ -27,7 +28,9 @@ def bybit_get_position_inform(bot):
     endpoint = "/v5/position/list"
     method = "GET"
     params = f"category=linear&symbol={bot.symbol.name}"
+    custom_logging(bot, f'bybit_get_position_inform({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
     try:
         response = response['result']['list']
         position_inform_list = format_data(response)
@@ -59,7 +62,9 @@ def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side
     }
 
     params = json.dumps(params)
+    custom_logging(bot, f'bybit_place_order({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
     if response['result']:
         return response['result']
     else:
@@ -87,7 +92,9 @@ def bybit_place_conditional_order(bot, side, position_side, trigger_price, trigg
     }
 
     params = json.dumps(params)
+    custom_logging(bot, f'bybit_place_conditional_order({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
     if response['result']:
         return response['result']
     else:
@@ -104,7 +111,9 @@ def bybit_cancel_all_orders(bot):
         'symbol': bot.symbol.name,
     }
     params = json.dumps(params)
+    custom_logging(bot, f'bybit_cancel_all_orders({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
     return response
 
 
@@ -117,7 +126,9 @@ def bybit_cancel_order(bot, order_id):
         'orderId': order_id,
     }
     params = json.dumps(params)
+    custom_logging(bot, f'bybit_cancel_order({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
     return response
 
 
@@ -125,7 +136,11 @@ def bybit_get_open_orders(bot):
     endpoint = "/v5/order/realtime"
     method = "GET"
     params = f"category=linear&symbol={bot.symbol.name}"
+
+    custom_logging(bot, f'bybit_get_open_orders({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
+
     try:
         response = response['result']['list']
     except Exception as e:
@@ -137,7 +152,11 @@ def bybit_get_current_price(bot, category='linear'):
     endpoint = "/v5/market/tickers"
     method = "GET"
     params = f"category={category}&symbol={bot.symbol.name}"
+
+    custom_logging(bot, f'bybit_get_current_price({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
+
     return Decimal(response["result"]["list"][0]["lastPrice"])
 
 
@@ -147,11 +166,15 @@ def bybit_set_leverage(bot, category='linear'):
     params = {
         'category': category,
         'symbol': bot.symbol.name,
-        'buyLeverage': str(bot.isLeverage),
-        'sellLeverage': str(bot.isLeverage),
+        'buyLeverage': str(bot.leverage),
+        'sellLeverage': str(bot.leverage),
     }
     params = json.dumps(params)
+
+    custom_logging(bot, f'bybit_set_leverage({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot))
+    custom_logging(bot, response, 'RESPONSE')
+
     return response
 
 
@@ -165,7 +188,11 @@ def bybit_change_position_mode_on_hedge(bot, category='linear'):
         'mode': mode,
     }
     params = json.dumps(params)
+
+    custom_logging(bot, f'bybit_change_position_mode_on_hedge({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+    custom_logging(bot, response, 'RESPONSE')
+
     return response
 
 
