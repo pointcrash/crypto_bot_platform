@@ -13,8 +13,11 @@ ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '127.0.0.1']
 
 CORS_ALLOWED_ORIGINS = [
     "https://bravo.almazor.co",
+    "https://209.38.180.77",
     # Другие доверенные источники здесь
 ]
+
+CSRF_TRUSTED_ORIGINS = ['https://*.bravo.almazor.co', 'https://*.209.38.180.77']
 
 
 INSTALLED_APPS = [
