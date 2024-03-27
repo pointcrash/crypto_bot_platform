@@ -53,11 +53,11 @@ class BBAutoAverage:
             return False
 
     def _dfm_check(self, current_price, bb):
-        if self.psn_side == 'Buy':
+        if self.psn_side == 'LONG':
             if current_price < self.bb_obj.ml:
                 if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
                     return True
-        else:
+        elif self.psn_side == 'SHORT':
             if current_price > self.bb_obj.ml:
                 if abs(current_price - self.bb_obj.ml) >= abs(bb - self.bb_obj.ml) * Decimal(self.dfm) / 100:
                     return True
@@ -92,16 +92,14 @@ class BBAutoAverage:
         side = 'BUY' if self.psn_side == 'LONG' else 'SELL'
         qty = Decimal(self.psn_qty) * self.avg_percent / 100
 
-        # response = place_order(self.bot, side=side, position_side=self.psn_side, order_type="MARKET", price=current_price,
-        #                        amount_usdt=avg_currency_amount, qty=self.psn_qty)
         response = place_order(self.bot, side=side, position_side=self.psn_side, order_type="MARKET", price=current_price, qty=qty)
         custom_logging(self.bot, f'Усредняющий ордер резмещен {response}')
         custom_logging(self.bot, f'Усредняющий ордер резмещен на цене {current_price}')
 
     def update_psn_info(self, data):
-        self.psn_price = data['entryPrice']
+        self.psn_price = Decimal(data['entryPrice'])
         self.psn_side = data['side']
-        self.psn_qty = data['qty']
+        self.psn_qty = Decimal(data['qty'])
 
 
 def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):

@@ -4,6 +4,7 @@ import uuid
 from decimal import Decimal
 
 from api.api_v5_bybit import HTTP_Request
+from bots.bot_logic import custom_logging
 
 
 def sort_position_inform(unsorted_list):
@@ -59,12 +60,12 @@ def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side
 
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    try:
+    if response['result']:
         return response['result']
-    except Exception as e:
-        print(e)
-        print(response)
-        raise Exception(traceback.print_exc())
+    else:
+        custom_logging(bot, params)
+        custom_logging(bot, response)
+        return response
 
 
 def bybit_place_conditional_order(bot, side, position_side, trigger_price, trigger_direction, qty):
@@ -87,12 +88,10 @@ def bybit_place_conditional_order(bot, side, position_side, trigger_price, trigg
 
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    try:
+    if response['result']:
         return response['result']
-    except Exception as e:
-        print(e)
-        print(response)
-        raise Exception(traceback.print_exc())
+    else:
+        custom_logging(bot, response)
 
 
 def bybit_cancel_all_orders(bot):
