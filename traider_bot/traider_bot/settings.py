@@ -11,6 +11,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '127.0.0.1']
 
+CORS_ALLOWED_ORIGINS = [
+    "https://bravo.almazor.co",
+    # Другие доверенные источники здесь
+]
+
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
