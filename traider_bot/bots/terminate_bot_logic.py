@@ -96,16 +96,18 @@ def stop_bot_with_cancel_orders_and_drop_positions(bot):
     custom_logging(bot, 'drop position')
 
 
-def terminate_bot(bot):
+def terminate_bot(bot, user=None):
     bot.is_active = False
     bot.save()
+    if user:
+        custom_logging(bot, f'Бот был деактивирован вручную пользователем "{user.name}"')
 
 
-def terminate_bot_with_cancel_orders(bot):
-    terminate_bot(bot)
+def terminate_bot_with_cancel_orders(bot, user=None):
+    terminate_bot(bot, user)
     cancel_all_orders(bot)
 
 
-def terminate_bot_with_cancel_orders_and_drop_positions(bot):
-    terminate_bot_with_cancel_orders(bot)
+def terminate_bot_with_cancel_orders_and_drop_positions(bot, user=None):
+    terminate_bot_with_cancel_orders(bot, user)
 

@@ -145,20 +145,5 @@ def single_bot_detail(request, bot_id):
                                                })
 
 
-def bot_start(request, bot_id):
-    bot = BotModel.objects.get(pk=bot_id)
-    bot_thread = None
-
-    if bot.work_model == 'bb':
-        bot.is_active = True
-        bot.save()
-        bot_thread = threading.Thread(target=bb_worker, args=(bot,))
-
-    if bot_thread is not None:
-        bot_thread.start()
-
-    return redirect(request.META.get('HTTP_REFERER'))
-
-
 def say_hello(request):
     return HttpResponse('<h1>Hello guys</h1>')

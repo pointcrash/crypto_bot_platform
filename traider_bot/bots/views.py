@@ -3,6 +3,7 @@ import threading
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+from bots.bb.logic.start_logic import bb_worker
 from bots.bb_set_takes import set_takes
 from bots.bot_logic import clear_data_bot
 from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
@@ -82,13 +83,14 @@ def stop_bot(request, bot_id, event_number):
 @login_required
 def delete_bot(request, bot_id, event_number):
     bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
 
     if event_number == 1:
-        terminate_bot(bot)
+        terminate_bot(bot, user)
     elif event_number == 2:
-        terminate_bot_with_cancel_orders(bot)
+        terminate_bot_with_cancel_orders(bot, user)
     elif event_number == 3:
-        terminate_bot_with_cancel_orders_and_drop_positions(bot)
+        terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
 
     bot.delete()
 
@@ -129,3 +131,18 @@ def reboot_bots(request):
                 if lock.locked():
                     lock.release()
     return redirect('bot_list')
+
+
+def bot_start(request, bot_id):
+    bot = BotModel.objects.get(pk=bot_id)
+    bot_thread = None
+
+    if bot.work_model == 'bb':
+        bot.is_active = True
+        bot.save()
+        bot_thread = threading.Thread(target=bb_worker, args=(bot,))
+
+    if bot_thread is not None:
+        bot_thread.start()
+
+    return redirect(request.META.get('HTTP_REFERER'))
