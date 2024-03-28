@@ -43,6 +43,7 @@ class WorkBollingerBandsClass:
         elif len(not_null_psn_list) == 1:
             self.have_psn = True
             self.position_info = not_null_psn_list[0]
+            self.position_info['qty'] = abs(Decimal(self.position_info['qty']))
             self.avg_obj.update_psn_info(self.position_info)
             self.replace_closing_orders()
         else:
@@ -70,9 +71,11 @@ class WorkBollingerBandsClass:
                                     trigger_direction=1, amount_usdt=amount_usdt)
 
     def replace_closing_orders(self):
+        print('replace_closing_orders')
         cancel_all_orders(self.bot)
         position_side = self.position_info['side']
-        psn_qty = Decimal(self.position_info['qty'])
+        psn_qty = self.position_info['qty']
+        print('psn_qty', psn_qty)
 
         side, price, td = ('SELL', self.bb.tl, 1) if position_side == 'LONG' else ('BUY', self.bb.bl, 2)
         price = self.price_check(price, 2)
@@ -81,6 +84,7 @@ class WorkBollingerBandsClass:
             ml_take_price = self.price_check(self.bb.ml, 1)
             ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
                 Decimal(self.bot.symbol.minOrderQty))
+            print('ml_take_qty', ml_take_qty)
 
             # response = place_order(self.bot, side=side, position_side=position_side, order_type='Limit',
             #                        qty=ml_take_qty, price=ml_take_price)
@@ -90,8 +94,10 @@ class WorkBollingerBandsClass:
             self.ml_order_id = response['orderId']
 
             main_take_qty = psn_qty - ml_take_qty
+            print('main_take_qty', main_take_qty)
         else:
             main_take_qty = Decimal(self.position_info['qty'])
+            print('main_take_qty', main_take_qty)
 
         # response = place_order(self.bot, side=side, position_side=position_side, order_type='Limit', qty=main_take_qty,
         #                        price=price)

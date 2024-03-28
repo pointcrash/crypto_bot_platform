@@ -41,7 +41,7 @@ def handle_position_stream_message(msg, bot_class_obj):
                     return
             bot_class_obj.position_info = {
                 'side': msg['side'],
-                'qty': Decimal(msg['qty']),
+                'qty': abs(Decimal(msg['qty'])),
                 'entryPrice': Decimal(msg['entryPrice']),
             }
             with bot_class_obj.avg_locker:

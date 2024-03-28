@@ -1,3 +1,4 @@
+import traceback
 from decimal import Decimal
 from functools import wraps
 from binance.client import Client
@@ -34,10 +35,13 @@ def binance_get_position_inform(bot, client):
         return sort_position_inform(position_inform_list)
 
     custom_logging(bot, f'binance_get_position_inform(symbol={bot.symbol.name})', 'REQUEST')
-    response = client.futures_position_information(symbol=bot.symbol.name)
-    custom_logging(bot, response, 'RESPONSE')
-    position_inform_list = format_data(response)
-    return position_inform_list
+    try:
+        response = client.futures_position_information(symbol=bot.symbol.name)
+        custom_logging(bot, response, 'RESPONSE')
+        position_inform_list = format_data(response)
+        return position_inform_list
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
@@ -58,17 +62,20 @@ def binance_place_order(bot, client, side, order_type, price, qty, position_side
     }
 
     custom_logging(bot, f'binance_place_order({params})', 'REQUEST')
-    response = client.futures_create_order(
-        symbol=bot.symbol.name,
-        side=side.upper(),
-        positionSide=position_side,
-        type=order_type.upper(),
-        price=price,
-        timeInForce=timeInForce,
-        quantity=qty,
-    )
-    custom_logging(bot, response, 'RESPONSE')
-    return response
+    try:
+        response = client.futures_create_order(
+            symbol=bot.symbol.name,
+            side=side.upper(),
+            positionSide=position_side,
+            type=order_type.upper(),
+            price=price,
+            timeInForce=timeInForce,
+            quantity=qty,
+        )
+        custom_logging(bot, response, 'RESPONSE')
+        return response
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
@@ -97,17 +104,19 @@ def binance_place_conditional_order(bot, client, side, position_side, trigger_pr
     }
 
     custom_logging(bot, f'binance_place_conditional_order({params})', 'REQUEST')
-
-    response = client.futures_create_order(
-        symbol=bot.symbol.name,
-        side=side,
-        positionSide=position_side,
-        type=order_type,
-        stopPrice=trigger_price,
-        quantity=qty,
-    )
-    custom_logging(bot, response, 'RESPONSE')
-    return response
+    try:
+        response = client.futures_create_order(
+            symbol=bot.symbol.name,
+            side=side,
+            positionSide=position_side,
+            type=order_type,
+            stopPrice=trigger_price,
+            quantity=qty,
+        )
+        custom_logging(bot, response, 'RESPONSE')
+        return response
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
@@ -118,58 +127,77 @@ def binance_place_batch_order(bot, client, order_list):
         order['quantity'] = order.pop('qty')
 
     custom_logging(bot, f'binance_place_batch_order({order_list})', 'REQUEST')
-    response = client.futures_place_batch_order(batchOrders=order_list)
-    custom_logging(bot, response, 'RESPONSE')
-    return response
+    try:
+        response = client.futures_place_batch_order(batchOrders=order_list)
+        custom_logging(bot, response, 'RESPONSE')
+        return response
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
 def binance_cancel_all_orders(bot, client):
     custom_logging(bot, f'binance_cancel_all_orders({bot.symbol.name})', 'REQUEST')
-    response = client.futures_cancel_all_open_orders(symbol=bot.symbol.name)
-    custom_logging(bot, response, 'RESPONSE')
-    return response
+    try:
+        response = client.futures_cancel_all_open_orders(symbol=bot.symbol.name)
+        custom_logging(bot, response, 'RESPONSE')
+        return response
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
 def binance_cancel_order(bot, client, order_id):
     custom_logging(bot, f'binance_cancel_order({bot.symbol.name}, orderId={order_id})', 'REQUEST')
-    response = client.futures_cancel_order(symbol=bot.symbol.name, orderId=order_id)
-    custom_logging(bot, response, 'RESPONSE')
-    return response
-
+    try:
+        response = client.futures_cancel_order(symbol=bot.symbol.name, orderId=order_id)
+        custom_logging(bot, response, 'RESPONSE')
+        return response
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 @with_binance_client
 def binance_get_open_orders(bot, client):
     custom_logging(bot, f'binance_get_open_orders({bot.symbol.name})', 'REQUEST')
-    response = client.futures_get_open_orders(symbol=bot.symbol.name)
-    custom_logging(bot, response, 'RESPONSE')
-    return response
+    try:
+        response = client.futures_get_open_orders(symbol=bot.symbol.name)
+        custom_logging(bot, response, 'RESPONSE')
+        return response
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
 def binance_get_current_price(bot, client):
     custom_logging(bot, f'binance_get_current_price({bot.symbol.name})', 'REQUEST')
-    response = client.futures_symbol_ticker(symbol=bot.symbol.name)
-    custom_logging(bot, response, 'RESPONSE')
-    price = Decimal(response["price"])
-    return price
+    try:
+        response = client.futures_symbol_ticker(symbol=bot.symbol.name)
+        custom_logging(bot, response, 'RESPONSE')
+        price = Decimal(response["price"])
+        return price
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
 def binance_set_leverage(bot, client):
     custom_logging(bot, f'binance_set_leverage({bot.symbol.name} leverage={bot.leverage})', 'REQUEST')
-    response = client.futures_change_leverage(symbol=bot.symbol.name, leverage=bot.leverage)
-    custom_logging(bot, response, 'RESPONSE')
+    try:
+        response = client.futures_change_leverage(symbol=bot.symbol.name, leverage=bot.leverage)
+        custom_logging(bot, response, 'RESPONSE')
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 
 @with_binance_client
 def binance_change_position_mode_on_hedge(bot, client):
     custom_logging(bot, f'binance_change_position_mode_on_hedge({bot.symbol.name})', 'REQUEST')
-    response = client.futures_change_position_mode(symbol=bot.symbol.name, dualsideposition=True)
-    custom_logging(bot, response, 'RESPONSE')
-    return response
-
+    try:
+        response = client.futures_change_position_mode(symbol=bot.symbol.name, dualsideposition=True)
+        custom_logging(bot, response, 'RESPONSE')
+        return response
+    except:
+        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
 def binance_account_balance(account):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
