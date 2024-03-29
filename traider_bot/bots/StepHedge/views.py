@@ -1,22 +1,19 @@
 import threading
 from datetime import datetime
-import time
 
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api.api_v5_bybit import get_open_orders
+from api_test.api_v5_bybit import get_open_orders
 from bots.StepHedge.forms import BotForm, StepHedgeForm
-from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
-from bots.bot_logic import clear_data_bot, func_get_symbol_list, is_bot_active
+from bots.general_functions import func_get_symbol_list, is_bot_active
 from bots.models import Bot, StepHedge
-from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders, terminate_thread
+from bots.terminate_bot_logic import terminate_thread
 from main.logic import calculate_pnl
 from main.models import ActiveBot
 from single_bot.logic.global_variables import lock, global_list_threads
-from single_bot.logic.work import append_thread_or_check_duplicate
 
 
 @login_required

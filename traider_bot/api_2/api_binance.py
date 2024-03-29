@@ -156,6 +156,7 @@ def binance_cancel_order(bot, client, order_id):
     except:
         custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
 
+
 @with_binance_client
 def binance_get_open_orders(bot, client):
     custom_logging(bot, f'binance_get_open_orders({bot.symbol.name})', 'REQUEST')
@@ -198,6 +199,7 @@ def binance_change_position_mode_on_hedge(bot, client):
         return response
     except:
         custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
+
 
 def binance_account_balance(account):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)

@@ -1,10 +1,11 @@
+import json
 import uuid
 from datetime import datetime, timedelta
 
 import pytz
 from django.db import models
 
-from api.api_v5_bybit import *
+from api_2.api_bybit import HTTP_Request
 from bots.models import Bot, Log
 from timezone.models import TimeZone
 

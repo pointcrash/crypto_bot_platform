@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from bots.bot_logic import custom_logging
+from bots.general_functions import custom_logging
 
 
 # def callback_func_choices(step_class_obj, topic,  message):

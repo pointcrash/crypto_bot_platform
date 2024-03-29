@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 
-from api.api_v5_bybit import get_list
+from api_test.api_v5_bybit import get_list
 from bots.models import Symbol, Bot
 from bots.SetZeroPsn.logic.create_bot_obj import create_set0osn_bot_obj
 from bots.SetZeroPsn.logic.psn_count import psn_count

@@ -5,7 +5,7 @@ from main.models import ActiveBot
 from .bot_class import WorkZingerVipClass
 from .handlers import zinger_vip_handler_wrapper
 
-from ...bot_logic import is_bot_active, custom_logging
+from ...general_functions import is_bot_active, custom_logging
 
 
 def zinger_vip_worker(bot):

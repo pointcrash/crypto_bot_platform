@@ -5,12 +5,12 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.utils import timezone
 
-from api.api_v5_bybit import get_query_account_coins_balance, get_list
 from api_2.api_aggregator import account_balance
-from bots.bot_logic import all_symbols_update
+from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
+from bots.general_functions import all_symbols_update
 from bots.models import Log, Bot, Symbol, BotModel
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import global_list_bot_id
@@ -19,7 +19,7 @@ from timezone.models import TimeZone
 from .forms import RegistrationForm, LoginForm, DateRangeForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
-from main.models import Account, ActiveBot
+from main.models import Account
 from .logic import calculate_pnl
 import requests
 

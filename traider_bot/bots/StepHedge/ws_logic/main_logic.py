@@ -4,10 +4,10 @@ from decimal import Decimal
 from pybit.unified_trading import WebSocket
 import time
 
-from api.api_v5_bybit import cancel_all
+from api_test.api_v5_bybit import cancel_all
 from bots.StepHedge.ws_logic.handlers_messages import handle_stream_callback
 from bots.StepHedge.ws_logic.ws_step_class import WSStepHedgeClassLogic
-from bots.bot_logic import custom_logging, exit_by_exception, is_bot_active
+from bots.general_functions import custom_logging, exit_by_exception, is_bot_active
 from bots.models import JsonObjectClass, StepHedge
 from main.models import ActiveBot
 

@@ -2,8 +2,8 @@ import json
 import uuid
 from decimal import Decimal
 
-from api.api_v5_bybit import HTTP_Request
-from bots.bot_logic import get_quantity_from_price
+from api_test.api_v5_bybit import HTTP_Request
+from bots.general_functions import get_quantity_from_price
 from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 from binance.client import Client

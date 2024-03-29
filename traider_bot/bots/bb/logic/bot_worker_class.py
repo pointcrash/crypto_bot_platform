@@ -6,7 +6,7 @@ from decimal import Decimal
 from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, \
     get_position_inform, place_conditional_order
 from bots.bb.logic.avg_logic import BBAutoAverage
-from bots.bb_class import BollingerBands
+from bots.bb.logic.bb_class import BollingerBands
 
 
 class WorkBollingerBandsClass:
@@ -71,11 +71,9 @@ class WorkBollingerBandsClass:
                                     trigger_direction=1, amount_usdt=amount_usdt)
 
     def replace_closing_orders(self):
-        print('replace_closing_orders')
         cancel_all_orders(self.bot)
         position_side = self.position_info['side']
         psn_qty = self.position_info['qty']
-        print('psn_qty', psn_qty)
 
         side, price, td = ('SELL', self.bb.tl, 1) if position_side == 'LONG' else ('BUY', self.bb.bl, 2)
         price = self.price_check(price, 2)
@@ -84,26 +82,17 @@ class WorkBollingerBandsClass:
             ml_take_price = self.price_check(self.bb.ml, 1)
             ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
                 Decimal(self.bot.symbol.minOrderQty))
-            print('ml_take_qty', ml_take_qty)
 
-            # response = place_order(self.bot, side=side, position_side=position_side, order_type='Limit',
-            #                        qty=ml_take_qty, price=ml_take_price)
             response = place_conditional_order(self.bot, side=side, position_side=position_side,
                                                trigger_price=ml_take_price, trigger_direction=td, qty=ml_take_qty)
-            # logging.debug(response)
             self.ml_order_id = response['orderId']
 
             main_take_qty = psn_qty - ml_take_qty
-            print('main_take_qty', main_take_qty)
         else:
             main_take_qty = Decimal(self.position_info['qty'])
-            print('main_take_qty', main_take_qty)
 
-        # response = place_order(self.bot, side=side, position_side=position_side, order_type='Limit', qty=main_take_qty,
-        #                        price=price)
         response = place_conditional_order(self.bot, side=side, position_side=position_side,
                                            trigger_price=price, trigger_direction=td, qty=main_take_qty)
-        # logging.debug(response)
         self.main_order_id = response['orderId']
 
     def price_check(self, price, take_number):

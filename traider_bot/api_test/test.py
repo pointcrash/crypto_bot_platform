@@ -9,9 +9,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
 from binance.client import Client
-from api.api_v5_bybit import HTTP_Request
-from main.models import Account, ExchangeService
-from bots.models import Bot, Symbol
+from api_test.api_v5_bybit import HTTP_Request
+from main.models import Account
+from bots.models import Bot
 
 api_key_binance = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
 api_secret_binance = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'

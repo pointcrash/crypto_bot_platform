@@ -4,16 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb.logic.start_logic import bb_worker
-from bots.bb_set_takes import set_takes
-from bots.bot_logic import clear_data_bot
-from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.models import IsTSStart, BotModel
+from bots.models import BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
 from main.forms import AccountSelectForm
-from main.models import ActiveBot
-from single_bot.logic.global_variables import global_list_threads, lock
-from single_bot.logic.work import bot_work_logic
 
 
 @login_required
@@ -95,42 +89,6 @@ def delete_bot(request, bot_id, event_number):
     bot.delete()
 
     return redirect(request.META.get('HTTP_REFERER'))
-
-
-def reboot_bots(request):
-    bots = BotModel.objects.all()
-    for bot in bots:
-        print(bot.is_active)
-        if bot.is_active:
-            bot_thread = None
-            is_ts_start = IsTSStart.objects.filter(bot=bot)
-
-            if bot.work_model == 'bb':
-                if bot.side == 'TS':
-                    if is_ts_start:
-                        bot_thread = threading.Thread(target=set_takes, args=(bot,))
-                    else:
-                        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-                else:
-                    bot_thread = threading.Thread(target=set_takes, args=(bot,))
-            elif bot.work_model == 'grid':
-                if bot.side == 'TS':
-                    if is_ts_start:
-                        bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-                    else:
-                        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-                else:
-                    bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-
-            if bot_thread is not None:
-                bot_thread.start()
-                bot.is_active = True
-                bot.save()
-                lock.acquire()
-                global_list_threads[bot.pk] = bot_thread
-                if lock.locked():
-                    lock.release()
-    return redirect('bot_list')
 
 
 def bot_start(request, bot_id):

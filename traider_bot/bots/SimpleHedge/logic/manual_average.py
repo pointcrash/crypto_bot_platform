@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from api.api_v5_bybit import get_current_price, get_list, cancel_all
-from bots.bot_logic import get_quantity_from_price, custom_logging
+from api_test.api_v5_bybit import get_current_price, get_list, cancel_all
+from bots.general_functions import get_quantity_from_price, custom_logging
 from orders.models import Order
 
 

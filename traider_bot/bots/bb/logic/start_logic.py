@@ -3,10 +3,10 @@ import time
 import traceback
 
 from api_2.custom_ws_class import CustomWSClient
-from .bb_worker_class import WorkBollingerBandsClass
+from .bot_worker_class import WorkBollingerBandsClass
 
 from .handlers_messages import bb_handler_wrapper
-from ...bot_logic import custom_logging
+from ...general_functions import custom_logging
 
 
 def bb_worker(bot):

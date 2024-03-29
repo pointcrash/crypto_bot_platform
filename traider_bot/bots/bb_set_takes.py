@@ -2,8 +2,8 @@ import time
 
 from decimal import Decimal
 
-from api.api_v5_bybit import cancel_all, switch_position_mode, set_leverage, get_current_price, get_list
-from bots.bot_logic import calculation_entry_point, take1_status_check, custom_logging, \
+from api_test.api_v5_bybit import cancel_all, switch_position_mode, set_leverage, get_current_price, get_list
+from bots.general_functions import calculation_entry_point, take1_status_check, custom_logging, \
     take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
     check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition
 from bots.models import Set0Psn, OppositePosition

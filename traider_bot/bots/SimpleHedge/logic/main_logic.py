@@ -1,7 +1,7 @@
 import time
 
 from bots.SimpleHedge.logic.smp_bot_class import SimpleHedgeClassLogic
-from bots.bot_logic import lock_release, custom_logging, exit_by_exception
+from bots.general_functions import lock_release, custom_logging, exit_by_exception
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
 

@@ -1,9 +1,9 @@
 import time
 from decimal import Decimal
 
-from api.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
+from api_test.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
     get_open_orders, cancel_order
-from bots.bot_logic import get_quantity_from_price
+from bots.general_functions import get_quantity_from_price
 from orders.models import Order
 
 

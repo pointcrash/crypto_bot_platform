@@ -1,9 +1,9 @@
 from decimal import Decimal
 from django import forms
 
-from api.api_v5_bybit import get_query_account_coins_balance, get_current_price
+from api_test.api_v5_bybit import get_query_account_coins_balance, get_current_price
 from main.models import Account
-from .bot_logic import get_quantity_from_price
+from .general_functions import get_quantity_from_price
 from .models import Bot, Set0Psn, SimpleHedge, OppositePosition, StepHedge, BotModel
 
 

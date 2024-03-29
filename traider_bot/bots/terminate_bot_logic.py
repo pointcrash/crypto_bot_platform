@@ -1,8 +1,8 @@
 import time
 
-from api.api_v5_bybit import cancel_all, get_list, get_side, get_qty
+from api_test.api_v5_bybit import cancel_all, get_list, get_side, get_qty
 from api_2.api_aggregator import cancel_all_orders
-from bots.bot_logic import custom_logging, clear_data_bot
+from bots.general_functions import custom_logging, clear_data_bot
 from bots.models import Bot
 from main.models import ActiveBot
 from orders.models import Order

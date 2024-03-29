@@ -6,8 +6,8 @@ import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
-from api.api_v5_bybit import get_list, get_current_price, set_trading_stop, get_order_status
-from bots.bot_logic import get_quantity_from_price, custom_logging
+from api_test.api_v5_bybit import get_list, get_current_price, set_trading_stop, get_order_status
+from bots.general_functions import get_quantity_from_price, custom_logging
 from bots.models import Log, Bot
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from orders.models import Order

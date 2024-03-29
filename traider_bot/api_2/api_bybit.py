@@ -2,10 +2,57 @@ import json
 import logging
 import traceback
 import uuid
-from decimal import Decimal
+import requests
+import time
+import hashlib
+import hmac
 
-from api.api_v5_bybit import HTTP_Request
+from decimal import Decimal
 from api_2.custom_logging_api import custom_logging
+from requests import RequestException
+
+httpClient = requests.Session()
+recv_window = str(5000)
+
+
+def HTTP_Request(account, endPoint, method, payload, bot=None):
+    i = 0
+    while i < 4:
+        i += 1
+        global time_stamp
+        time_stamp = str(int(time.time() * 10 ** 3))
+        signature = genSignature(account.SECRET_KEY, account.API_TOKEN, payload)
+        headers = {
+            'X-BAPI-API-KEY': account.API_TOKEN,
+            'X-BAPI-SIGN': signature,
+            'X-BAPI-SIGN-TYPE': '2',
+            'X-BAPI-TIMESTAMP': time_stamp,
+            'X-BAPI-RECV-WINDOW': recv_window,
+            'Content-Type': 'application/json'
+        }
+        try:
+            if method == "POST":
+                response = requests.post(account.url + endPoint, headers=headers, data=payload)
+            else:
+                response = requests.get(account.url + endPoint + "?" + payload, headers=headers)
+            response.raise_for_status()  # Проверка наличия ошибки в ответе
+
+            return response.text
+        except RequestException as e:
+            # Обработка ошибки при отправке запроса или получении ответа
+            continue
+        except Exception as e:
+            # Обработка других неожиданных ошибок
+            print(bot, type(bot))
+            print("An unexpected error occurred:", e)
+            continue
+
+
+def genSignature(secret_key, api_key, payload):
+    param_str = str(time_stamp) + api_key + recv_window + payload
+    hash = hmac.new(bytes(secret_key, "utf-8"), param_str.encode("utf-8"), hashlib.sha256)
+    signature = hash.hexdigest()
+    return signature
 
 
 def sort_position_inform(unsorted_list):

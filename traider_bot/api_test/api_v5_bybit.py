@@ -7,9 +7,6 @@ import hmac
 
 from requests import RequestException
 
-# from tg_bot.models import TelegramAccount
-from tg_bot.send_message import send_telegram_message
-
 httpClient = requests.Session()
 recv_window = str(5000)
 

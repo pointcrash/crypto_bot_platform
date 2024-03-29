@@ -75,29 +75,37 @@ def get_exchange_information():
 
 
 def format_kline_interval_to_binance(interval):
-    if interval == '1':
-        interval = '1m'
-    elif interval == '3':
-        interval = '3m'
-    elif interval == '5':
-        interval = '5m'
-    elif interval == '15':
-        interval = '15m'
-    elif interval == '30':
-        interval = '30m'
-    elif interval == '60':
-        interval = '1h'
-    elif interval == '120':
-        interval = '2h'
-    elif interval == '240':
-        interval = '4h'
-    elif interval == '360':
-        interval = '6h'
-    elif interval == '720':
-        interval = '8h'
-    elif interval == 'D':
-        interval = '1d'
-    else:
-        interval = None
+    interval_values = ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', 'D']
+    transformed_values = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '1d']
 
-    return interval
+    if interval in interval_values:
+        index = interval_values.index(interval)
+        return transformed_values[index]
+    else:
+        return None
+
+    # if interval == '1':
+    #     interval = '1m'
+    # elif interval == '3':
+    #     interval = '3m'
+    # elif interval == '5':
+    #     interval = '5m'
+    # elif interval == '15':
+    #     interval = '15m'
+    # elif interval == '30':
+    #     interval = '30m'
+    # elif interval == '60':
+    #     interval = '1h'
+    # elif interval == '120':
+    #     interval = '2h'
+    # elif interval == '240':
+    #     interval = '4h'
+    # elif interval == '360':
+    #     interval = '6h'
+    # elif interval == '720':
+    #     interval = '8h'
+    # elif interval == 'D':
+    #     interval = '1d'
+    # else:
+    #     interval = None
+    # return interval

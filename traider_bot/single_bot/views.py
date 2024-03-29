@@ -6,11 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
-from api.api_v5_bybit import get_open_orders
-from bots.bb.logic.start_logic import bb_worker
-from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
+from api_test.api_v5_bybit import get_open_orders
 from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
-from bots.bot_logic import clear_data_bot, func_get_symbol_list
+from bots.general_functions import clear_data_bot, func_get_symbol_list
 from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
 from bots.models import Set0Psn, OppositePosition, BotModel
 

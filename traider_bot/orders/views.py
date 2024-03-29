@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from api.api_v5_bybit import cancel_order
+from api_test.api_v5_bybit import cancel_order
 from bots.models import Bot
 from orders.forms import OrderCreateForm
 from orders.models import Order

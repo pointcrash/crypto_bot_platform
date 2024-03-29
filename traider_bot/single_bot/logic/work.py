@@ -2,9 +2,8 @@ import math
 import time
 from decimal import Decimal
 
-from api.api_v5_bybit import switch_position_mode, set_leverage, cancel_all, get_current_price
-from bots.bot_logic import count_decimal_places, custom_logging, clear_data_bot
-from bots.bot_logic_grid import take_status_check
+from api_test.api_v5_bybit import switch_position_mode, set_leverage, cancel_all, get_current_price
+from bots.general_functions import count_decimal_places, custom_logging, clear_data_bot
 from bots.models import Take, AvgOrder, Set0Psn, OppositePosition
 from bots.SetZeroPsn.logic.need_s0p_start_check import need_set0psn_start_check
 from orders.models import Order
@@ -270,10 +269,11 @@ def actions_after_end_cycle(bot):
 
 
 def check_takes_is_filled(bot, takes):
-    for take in takes:
-        if not take.is_filled:
-            take_status = take_status_check(bot, take)
-            if take_status:
-                take.is_filled = True
-                custom_logging(bot, f'take_{take.take_number} is filled.')
-    Take.objects.bulk_update(takes, ['is_filled'])
+    pass
+    # for take in takes:
+    #     if not take.is_filled:
+    #         take_status = take_status_check(bot, take)
+    #         if take_status:
+    #             take.is_filled = True
+    #             custom_logging(bot, f'take_{take.take_number} is filled.')
+    # Take.objects.bulk_update(takes, ['is_filled'])

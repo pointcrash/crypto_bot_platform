@@ -7,10 +7,10 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api.api_v5_bybit import get_open_orders
+from api_test.api_v5_bybit import get_open_orders
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
-from bots.bot_logic import clear_data_bot, func_get_symbol_list, is_bot_active, custom_logging
+from bots.general_functions import clear_data_bot, func_get_symbol_list, is_bot_active, custom_logging
 from bots.models import Bot, StepHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders, terminate_thread
 from bots_group.forms import BotForm, StepHedgeForm

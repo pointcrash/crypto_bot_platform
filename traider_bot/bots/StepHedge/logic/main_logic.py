@@ -1,7 +1,7 @@
 import time
 
 from bots.StepHedge.logic.step_hg_class import StepHedgeClassLogic
-from bots.bot_logic import lock_release, custom_logging, exit_by_exception
+from bots.general_functions import lock_release, custom_logging, exit_by_exception
 from main.models import ActiveBot
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
