@@ -32,7 +32,7 @@ def bb_bot_create(request):
             bb_model.bot = bot
             bb_model.save()
 
-            bot_thread = threading.Thread(target=bb_worker, args=(bot,))
+            bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
             bot_thread.start()
 
             return redirect('bot_list')
@@ -64,7 +64,7 @@ def bb_bot_edit(request, bot_id):
             bb_model.save()
             bot.save()
 
-            bot_thread = threading.Thread(target=bb_worker, args=(bot,))
+            bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
             bot_thread.start()
             return redirect('bot_list')
     else:

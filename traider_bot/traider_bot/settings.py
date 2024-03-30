@@ -19,7 +19,6 @@ CORS_ALLOWED_ORIGINS = [
 
 CSRF_TRUSTED_ORIGINS = ['https://*.bravo.almazor.co', 'https://*.209.38.180.77', 'https://*.127.0.0.1']
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -88,6 +87,51 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#         'verbose': {
+#             'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+#         },
+#         'simple': {
+#             'format': '%(asctime)s %(levelname)s %(message)s'
+#         },
+#     },
+#     'handlers': {
+#         'console_simple': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'simple',
+#         },
+#         'console_verbose': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'verbose',
+#         },
+#         'file_simple': {
+#             'class': 'logging.FileHandler',
+#             'filename': 'logs/django.log',
+#             'formatter': 'simple',
+#         },
+#         'file_verbose': {
+#             'class': 'logging.FileHandler',
+#             'filename': 'logs/django.log',
+#             'formatter': 'verbose',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console', 'file'],
+#             'level': 'INFO',
+#             'propagate': False,
+#         },
+#         'debug_logger': {
+#             'handlers': ['console_simple', 'file_verbose'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+#     },
+# }
 
 LOGIN_URL = "/login/"
 

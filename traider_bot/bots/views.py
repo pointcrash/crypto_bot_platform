@@ -98,7 +98,7 @@ def bot_start(request, bot_id):
     if bot.work_model == 'bb':
         bot.is_active = True
         bot.save()
-        bot_thread = threading.Thread(target=bb_worker, args=(bot,))
+        bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
     if bot_thread is not None:
         bot_thread.start()

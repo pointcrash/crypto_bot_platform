@@ -44,7 +44,7 @@
 <!--            </div>-->
 
             {% if bot.work_model == 'bb' %}
-            <a href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            <a href="{% url 'bb_bot_edit' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% elif bot.work_model == 'grid' %}
             <a href="{% url 'single_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
             {% elif bot.work_model == 'SmpHg' %}

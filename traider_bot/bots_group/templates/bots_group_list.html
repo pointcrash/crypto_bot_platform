@@ -25,7 +25,6 @@
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'simple_hedge_bot_create' %}">Simple Hedge</a>-->
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bot_create' %}">Grid Create</a>-->
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bb_bot_create' %}">BB Create</a>-->
-<!--            <a class="btn btn-warning m-1 btn-shadow" href="{% url 'update_symbols_set' %}">Refresh coins</a>-->
         </div>
 
         <div class="accordion mt-2" id="accordionPanelsStayOpenExample">
@@ -76,7 +75,7 @@
                                     {% if bot.work_model == 'grid' %}
                                     <a class="btn btn-primary btn-shadow" href="{% url 'single_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                                     {% elif bot.work_model == 'bb' or bot.work_model == 'set0psn' %}
-                                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+<!--                                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
                                     {% elif bot.work_model == 'SmpHg' %}
                                     <a class="btn btn-primary btn-shadow" href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                                     {% elif bot.work_model == 'Step Hedge' %}

@@ -25,7 +25,7 @@ class CustomWSClient:
 
     def start(self):
         self.wst = threading.Thread(
-            target=lambda: self.ws.run_forever())
+            target=lambda: self.ws.run_forever(), name=f'CustomWSClient_Thread_BotID_{self.bot.id}')
 
         # Configure as daemon; start.
         self.wst.daemon = True
