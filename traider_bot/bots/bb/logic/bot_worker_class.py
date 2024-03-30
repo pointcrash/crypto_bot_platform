@@ -19,6 +19,7 @@ class WorkBollingerBandsClass:
         self.current_price = None
         self.have_psn = False
         self.ml_filled = False
+        self.ml_qty = None
         self.ml_order_id = None
         self.main_order_id = None
         self.position_info = None
@@ -45,7 +46,7 @@ class WorkBollingerBandsClass:
             self.position_info = not_null_psn_list[0]
             self.position_info['qty'] = abs(Decimal(self.position_info['qty']))
             self.avg_obj.update_psn_info(self.position_info)
-            self.replace_closing_orders()
+            # self.replace_closing_orders()
         # else:
         #     self.replace_opening_orders()
 
@@ -99,7 +100,7 @@ class WorkBollingerBandsClass:
         psn_side = self.position_info['side']
         psn_price = Decimal(self.position_info['entryPrice'])
         tick_size = Decimal(self.bot.symbol.tickSize)
-        take_distance = tick_size * 3 if take_number == 1 else tick_size * 6
+        take_distance = tick_size * 6 if take_number == 1 else tick_size * 12
 
         if psn_side == 'LONG':
             if price < psn_price:
@@ -141,23 +142,38 @@ class WorkBollingerBandsClass:
         side, price, td = ('SELL', self.bb.tl, 1) if position_side == 'LONG' else ('BUY', self.bb.bl, 2)
         price = self.price_check(price, 2)
 
-        if (position_side == 'LONG' and self.current_price > self.bb.ml) or (position_side == 'SHORT' and self.current_price < self.bb.ml):
-            if self.bot.bb.take_on_ml and not self.ml_filled and psn_qty > Decimal(self.bot.symbol.minOrderQty):
-                ml_take_price = self.price_check(self.bb.ml, 1)
+        if self.bot.bb.take_on_ml and not self.ml_filled and psn_qty > Decimal(self.bot.symbol.minOrderQty):
+            ml_take_price = self.price_check(self.bb.ml, 1)
+            if (position_side == 'LONG' and self.current_price > ml_take_price) or (position_side == 'SHORT' and self.current_price < ml_take_price):
                 ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
                     Decimal(self.bot.symbol.minOrderQty))
 
                 response = place_order(self.bot, side=side, position_side=position_side, order_type='MARKET',
                                        price=ml_take_price, qty=ml_take_qty)
                 self.ml_order_id = response['orderId']
+                self.ml_qty = ml_take_qty
                 self.ml_filled = True
                 main_take_qty = psn_qty - ml_take_qty
 
-        if (position_side == 'LONG' and self.current_price > self.bb.tl) or (position_side == 'SHORT' and self.current_price < self.bb.bl):
+        if (position_side == 'LONG' and self.current_price > price) or (position_side == 'SHORT' and self.current_price < price):
             response = place_order(self.bot, side=side, position_side=position_side,
                                    price=price,  order_type='MARKET', qty=main_take_qty)
             self.main_order_id = response['orderId']
             self.have_psn = False
             self.ml_filled = False
 
+    def turn_after_ml(self):
+        if self.bot.bb.take_on_ml and self.ml_filled:
+            position_side = self.position_info['side']
+            response = None
+            if position_side == 'LONG':
+                if self.current_price < self.bb.bl:
+                    response = place_order(self.bot, side='BUY', price=self.current_price, order_type='MARKET', qty=self.ml_qty)
+            elif position_side == 'SHORT':
+                if self.current_price > self.bb.tl:
+                    response = place_order(self.bot, side='SELL', price=self.current_price, order_type='MARKET', qty=self.ml_qty)
+
+            _ = response['orderId']
+            self.ml_qty = None
+            self.ml_filled = False
 

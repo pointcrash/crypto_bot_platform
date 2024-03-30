@@ -3,12 +3,15 @@ import logging
 import threading
 import websocket
 
+from api_2.custom_logging_api import custom_logging
+
 
 class CustomWSClient:
     def __init__(self, callback=None, bot=None):
         self.url = "ws://ws-manager:8765"
         self.bot = bot
         self.callback = callback
+        self.logger = get_logger_for_bot_ws_msg(bot.id)
         self.account_name = bot.account.name
         self.service = bot.account.service.name
         self.ping_interval = 20
@@ -34,14 +37,13 @@ class CustomWSClient:
     def _on_message(self, ws, message):
         try:
             message = json.loads(message)
+            self.logger.debug(message)
             self.callback(message)
         except Exception as e:
-            logging.error(e)
-            logging.info(message)
+            custom_logging(self.bot, f'GET ERROR IN "_on_message" func: {e}')
 
     def _on_close(self, ws, close_code, reason):
         pass
-        # print('BotID', self.bot.id, "Connection closed")
 
     def _on_open(self, ws):
         print('BotID', self.bot.id, "Connection opened")
@@ -80,3 +82,17 @@ class CustomWSClient:
         while self.ws.sock:
             continue
         print('BotID', self.bot.id, "WebSocket connection closed.")
+
+
+def get_logger_for_bot_ws_msg(bot_id):
+    formatter = logging.Formatter('%(levelname)s [%(asctime)s] %(message)s')
+
+    logger = logging.getLogger(f'BOT_{bot_id}')
+    logger.setLevel(logging.DEBUG)
+
+    handler = logging.FileHandler(f'logs/bot_{bot_id}.log')
+    handler.setFormatter(formatter)
+    logger.handlers.clear()
+    logger.addHandler(handler)
+
+    return logger

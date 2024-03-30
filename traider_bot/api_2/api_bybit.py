@@ -1,5 +1,4 @@
 import json
-import logging
 import traceback
 import uuid
 import requests
@@ -115,8 +114,6 @@ def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side
     if response['result']:
         return response['result']
     else:
-        logging.error(bot.id)
-        logging.error(response)
         return response
 
 
@@ -145,8 +142,6 @@ def bybit_place_conditional_order(bot, side, position_side, trigger_price, trigg
     if response['result']:
         return response['result']
     else:
-        logging.error(bot.id)
-        logging.error(response)
         return response
 
 

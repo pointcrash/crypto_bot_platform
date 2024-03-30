@@ -1,4 +1,3 @@
-import logging
 from decimal import Decimal
 
 from api_2.custom_logging_api import custom_logging
@@ -26,8 +25,8 @@ def bb_handler_wrapper(bb_worker_class_obj):
 
 
 def handle_order_stream_message(msg, bot_class_obj):
-    bot_class_obj.logger.debug(msg)
-    pass
+    # bot_class_obj.logger.debug(msg)
+
     if msg['status'].upper() == 'FILLED':
         order_id = msg['orderId']
         custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
@@ -41,7 +40,8 @@ def handle_order_stream_message(msg, bot_class_obj):
 
 
 def handle_position_stream_message(msg, bot_class_obj):
-    bot_class_obj.logger.debug(msg)
+    # bot_class_obj.logger.debug(msg)
+
     with bot_class_obj.psn_locker:
         if Decimal(msg['qty']) != 0:
             if bot_class_obj.position_info:
@@ -64,7 +64,7 @@ def handle_position_stream_message(msg, bot_class_obj):
 
 
 def handle_message_kline_info(msg, bot_class_obj):
-    bot_class_obj.logger.debug(msg)
+    # bot_class_obj.logger.debug(msg)
     with bot_class_obj.psn_locker:
         close_prise = Decimal(msg['closePrice'])
         bot_class_obj.bb.modify_close_price_list(close_prise)
@@ -76,13 +76,14 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
-    bot_class_obj.logger.debug(msg)
+    # bot_class_obj.logger.debug(msg)
 
     bot_class_obj.current_price = Decimal(msg['markPrice'])
     if bot_class_obj.have_psn is True:
         with bot_class_obj.avg_locker:
             bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price)
-            bot_class_obj.place_closing_orders()
+        bot_class_obj.place_closing_orders()
+        bot_class_obj.turn_after_ml()
     else:
         with bot_class_obj.psn_locker:
             bot_class_obj.place_open_psn_order(bot_class_obj.current_price)

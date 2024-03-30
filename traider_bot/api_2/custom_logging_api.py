@@ -27,4 +27,7 @@ def custom_logging(bot, text, named=None):
         str_gmt = str(gmt)
 
     in_time = f'{date.time()} | {date.date()}'
-    Log.objects.create(bot=bot, content=f'{bot_info} {named.upper()} {text}', time=f'{in_time} (GMT {str_gmt})')
+    if named:
+        Log.objects.create(bot=bot, content=f'{bot_info} {named} {text}', time=f'{in_time} (GMT {str_gmt})')
+    else:
+        Log.objects.create(bot=bot, content=f'{bot_info} {text}', time=f'{in_time} (GMT {str_gmt})')

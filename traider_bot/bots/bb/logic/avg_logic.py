@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 
 import pytz
@@ -94,7 +93,6 @@ class BBAutoAverage:
 
         response = place_order(self.bot, side=side, position_side=self.psn_side, order_type="MARKET", price=current_price, qty=qty)
         custom_logging(self.bot, f'Усредняющий ордер резмещен {response}')
-        custom_logging(self.bot, f'Усредняющий ордер резмещен на цене {current_price}')
 
     def update_psn_info(self, data):
         self.psn_price = Decimal(data['entryPrice'])

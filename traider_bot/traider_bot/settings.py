@@ -88,50 +88,50 @@ DATABASES = {
     }
 }
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': True,
-#     'formatters': {
-#         'verbose': {
-#             'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
-#         },
-#         'simple': {
-#             'format': '%(asctime)s %(levelname)s %(message)s'
-#         },
-#     },
-#     'handlers': {
-#         'console_simple': {
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'simple',
-#         },
-#         'console_verbose': {
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'verbose',
-#         },
-#         'file_simple': {
-#             'class': 'logging.FileHandler',
-#             'filename': 'logs/django.log',
-#             'formatter': 'simple',
-#         },
-#         'file_verbose': {
-#             'class': 'logging.FileHandler',
-#             'filename': 'logs/django.log',
-#             'formatter': 'verbose',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console', 'file'],
-#             'level': 'INFO',
-#             'propagate': False,
-#         },
-#         'debug_logger': {
-#             'handlers': ['console_simple', 'file_verbose'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
-#     },
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+        'simple': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console_simple': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'console_verbose': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file_simple': {
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.log',
+            'formatter': 'simple',
+        },
+        'file_verbose': {
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console_simple'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'debug_logger': {
+            'handlers': ['console_simple', 'file_verbose'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
 
 LOGIN_URL = "/login/"
 
