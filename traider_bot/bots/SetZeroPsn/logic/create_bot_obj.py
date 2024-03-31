@@ -1,9 +1,9 @@
-from bots.models import Bot
+from bots.models import BotModel
 
 
 def create_set0osn_bot_obj(user, account, symbol, psn, count_dict):
     side = 'Buy' if psn['side'] == 'Sell' else 'Sell'
-    bot = Bot.objects.create(
+    bot = BotModel.objects.create(
         owner=user,
         account=account,
         category='inverse',

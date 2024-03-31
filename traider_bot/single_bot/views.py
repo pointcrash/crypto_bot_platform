@@ -1,19 +1,6 @@
-import threading
-from datetime import datetime
-
-from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
 
-from api_test.api_v5_bybit import get_open_orders
-from bots.terminate_bot_logic import stop_bot_with_cancel_orders, check_thread_alive
-from bots.general_functions import clear_data_bot, func_get_symbol_list
-from bots.forms import GridBotForm, Set0PsnForm, OppositePositionForm
-from bots.models import Set0Psn, OppositePosition, BotModel
-
-from single_bot.logic.global_variables import lock, global_list_threads
-from single_bot.logic.work import bot_work_logic
 
 
 @login_required
@@ -90,7 +77,6 @@ def single_bot_detail(request, bot_id):
     #
     #     if bot_form.is_valid() and set0psn_form.is_valid():
     #         bot = bot_form.save(commit=False)
-    #         clear_data_bot(bot)
     #
     #         set0psn_form.save(commit=False)
     #         set0psn.bot = bot

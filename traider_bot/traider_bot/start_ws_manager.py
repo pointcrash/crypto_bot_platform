@@ -13,7 +13,7 @@ def start_ws_manager():
 # def deactivating_bots():
 #     from django.db import transaction
 #     with transaction.atomic():
-#         Bot.objects.all().update_fields(is_active=False)
+#         BotModel.objects.all().update_fields(is_active=False)
 
 
 if __name__ == '__main__':

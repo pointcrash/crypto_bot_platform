@@ -9,7 +9,7 @@ from api_test.api_v5_bybit import get_open_orders
 from bots.StepHedge.forms import BotForm, StepHedgeForm
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
 from bots.general_functions import func_get_symbol_list, is_bot_active
-from bots.models import Bot, StepHedge
+from bots.models import StepHedge, BotModel
 from bots.terminate_bot_logic import terminate_thread
 from main.logic import calculate_pnl
 from main.models import ActiveBot
@@ -61,7 +61,7 @@ def step_hedge_bot_create(request):
 
 @login_required
 def step_hedge_bot_detail(request, bot_id):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
     step_hedge = StepHedge.objects.filter(bot=bot).first()
     symbol_list = func_get_symbol_list(bot)
     try:
@@ -126,7 +126,7 @@ def step_hedge_bot_detail(request, bot_id):
 
 
 def on_off_move_nipple(request, bot_id):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
     step_hedge = StepHedge.objects.filter(bot=bot).first()
     step_hedge.move_nipple = False if step_hedge.move_nipple is True else True
     step_hedge.save()

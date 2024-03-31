@@ -11,7 +11,7 @@ from django.utils import timezone
 from api_2.api_aggregator import account_balance
 from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
 from bots.general_functions import all_symbols_update
-from bots.models import Log, Bot, Symbol, BotModel
+from bots.models import Log, Symbol, BotModel
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
@@ -89,9 +89,9 @@ def view_logs_delete(request, bot_id):
 def logs_view(request):
     user = request.user
     if user.is_superuser:
-        bots = Bot.objects.all()
+        bots = BotModel.objects.all()
     else:
-        bots = Bot.objects.filter(owner=user)
+        bots = BotModel.objects.filter(owner=user)
     return render(request, 'logs_detail.html', {'bots': bots})
 
 

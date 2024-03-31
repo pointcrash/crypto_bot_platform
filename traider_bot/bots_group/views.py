@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect
 from api_test.api_v5_bybit import get_open_orders
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
-from bots.general_functions import clear_data_bot, func_get_symbol_list, is_bot_active, custom_logging
+from bots.general_functions import func_get_symbol_list, is_bot_active, custom_logging
 from bots.models import Bot, StepHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders, terminate_thread
 from bots_group.forms import BotForm, StepHedgeForm
@@ -120,7 +120,7 @@ def group_step_hedge_bot_create(request):
 
 # @login_required
 # def step_hedge_bot_detail(request, bot_id):
-#     bot = Bot.objects.get(pk=bot_id)
+#     bot = BotModel.objects.get(pk=bot_id)
 #     step_hedge = StepHedge.objects.filter(bot=bot).first()
 #     symbol_list = func_get_symbol_list(bot)
 #     try:

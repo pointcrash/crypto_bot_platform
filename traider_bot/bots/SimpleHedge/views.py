@@ -8,9 +8,9 @@ from django.shortcuts import render, redirect
 from api_test.api_v5_bybit import get_open_orders
 from bots.SimpleHedge.logic.main_logic import simple_hedge_bot_main_logic
 from bots.SimpleHedge.logic.manual_average import manual_average_for_simple_hedge
-from bots.general_functions import clear_data_bot, custom_logging, func_get_symbol_list
+from bots.general_functions import custom_logging, func_get_symbol_list
 from bots.forms import BotForm, SimpleHedgeForm
-from bots.models import Bot, SimpleHedge
+from bots.models import SimpleHedge, BotModel
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders
 from single_bot.logic.global_variables import lock, global_list_threads
 from single_bot.logic.work import append_thread_or_check_duplicate
@@ -59,7 +59,7 @@ def simple_hedge_bot_create(request):
 
 @login_required
 def simple_hedge_bot_detail(request, bot_id):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
     simple_hedge = SimpleHedge.objects.filter(bot=bot).first()
     symbol_list = func_get_symbol_list(bot)
     try:
@@ -74,7 +74,6 @@ def simple_hedge_bot_detail(request, bot_id):
         if bot_form.is_valid() and simple_hedge_form.is_valid():
 
             bot = bot_form.save(commit=False)
-            clear_data_bot(bot)
             simple_hedge = simple_hedge_form.save(commit=False)
             simple_hedge.tppp = simple_hedge.tppp.replace(',', '.') if ',' in simple_hedge.tppp else simple_hedge.tppp
             simple_hedge.tpap = simple_hedge.tpap.replace(',', '.') if ',' in simple_hedge.tpap else simple_hedge.tpap
@@ -119,7 +118,7 @@ def simple_hedge_bot_detail(request, bot_id):
 
 
 def averaging_simple_hedge_view(request, bot_id):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
     if request.method == 'POST':
         is_percent = request.POST.get('is_percent')
         is_percent = True if is_percent else False

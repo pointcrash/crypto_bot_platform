@@ -6,7 +6,7 @@ import pytz
 from django.db import models
 
 from api_2.api_bybit import HTTP_Request
-from bots.models import Bot, Log
+from bots.models import Bot, Log, BotModel
 from timezone.models import TimeZone
 
 
@@ -55,7 +55,7 @@ class Order(models.Model):
 
         params = json.dumps(params)
         response = HTTP_Request(self.bot.account, endpoint, method, params, bot=self.bot)
-        bot = Bot.objects.get(pk=self.bot.pk)
+        bot = BotModel.objects.get(pk=self.bot.pk)
         logging(bot, f'{params}')
         logging(bot, f'{response}')
         # print('Order ----')

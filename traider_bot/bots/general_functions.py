@@ -16,7 +16,7 @@ django.setup()
 from timezone.models import TimeZone
 from main.models import ActiveBot, ExchangeService, Account
 from tg_bot.models import TelegramAccount
-from bots.models import Symbol, Log, AvgOrder, Bot, Take, IsTSStart, JsonObjectClass
+from bots.models import Symbol, Log
 from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
@@ -180,7 +180,6 @@ def calculation_entry_point(bot, bb_obj, bb_avg_obj):
                 return psn, psn_qty, psn_side, psn_price, first_cycle
 
             if take2_status_check(bot):
-                actions_after_end_cycle(bot)
                 lock.acquire()
                 continue
 
@@ -362,23 +361,6 @@ def count_decimal_places(number):
     return decimal_places
 
 
-def create_bb_and_avg_obj(bot, position_idx=0):
-    if bot.work_model == 'grid' and bot.orderType == 'Market':
-        bb_obj = None
-    else:
-        bb_obj = BollingerBands(account=bot.account, category=bot.category, symbol_name=bot.symbol.name,
-                                symbol_priceScale=bot.symbol.priceScale, interval=bot.interval,
-                                qty_cline=bot.qty_kline, d=bot.d)
-
-    if bot.work_model == 'bb' and bot.auto_avg:
-        bb_avg_obj = BBAutoAverage(bot=bot, psn_price=0, psn_side=0, psn_qty=0,
-                                   bb_obj=bb_obj)
-    else:
-        bb_avg_obj = None
-
-    return bb_obj, bb_avg_obj
-
-
 def custom_logging(bot, text):
     user = bot.owner
     timezone = TimeZone.objects.filter(users=user).first()
@@ -517,99 +499,6 @@ def check_order_placement_time(bot, order_id):
 
         if int(time_difference_in_minutes) <= int(bot.interval):
             return True
-
-
-def clean_and_return_bot_object(bot_id):
-    bot_values_dict = Bot.objects.filter(pk=bot_id).values().first()
-    bot = Bot(
-        owner_id=bot_values_dict['owner_id'],
-        account_id=bot_values_dict['account_id'],
-        category=bot_values_dict['category'],
-        symbol_id=bot_values_dict['symbol_id'],
-        isLeverage=bot_values_dict['isLeverage'],
-        side=bot_values_dict['side'],
-        orderType=bot_values_dict['orderType'],
-        qty=bot_values_dict['qty'],
-        margin_type=bot_values_dict['margin_type'],
-        qty_kline=bot_values_dict['qty_kline'],
-        interval=bot_values_dict['interval'],
-        d=bot_values_dict['d'],
-        work_model=bot_values_dict['work_model'],
-        take_on_ml=bot_values_dict['take_on_ml'],
-        take_on_ml_percent=bot_values_dict['take_on_ml_percent'],
-        auto_avg=bot_values_dict['auto_avg'],
-        bb_avg_percent=bot_values_dict['bb_avg_percent'],
-        grid_avg_value=bot_values_dict['grid_avg_value'],
-        grid_profit_value=bot_values_dict['grid_profit_value'],
-        grid_take_count=bot_values_dict['grid_take_count'],
-        is_percent_deviation_from_lines=bot_values_dict['is_percent_deviation_from_lines'],
-        deviation_from_lines=bot_values_dict['deviation_from_lines'],
-        dfm=bot_values_dict['dfm'],
-        chw=bot_values_dict['chw'],
-        max_margin=bot_values_dict['max_margin'],
-        time_sleep=bot_values_dict['time_sleep'],
-        repeat=bot_values_dict['repeat'],
-    )
-
-    return bot
-
-
-def clear_data_bot(bot, clear_data=0):
-    from django.db import connections
-
-    json_obj = JsonObjectClass.objects.filter(bot=bot).first()
-    if json_obj:
-        json_obj.delete()
-
-    bot.entry_order_by = ''
-    bot.entry_order_by_amount = None
-    bot.entry_order_sell = ''
-    bot.entry_order_sell_amount = None
-    if bot.take1 != 'Filled' or bot.take2 == 'Filled':
-        bot.take1 = ''
-    bot.take2 = ''
-    bot.take2_amount = None
-    bot.bin_order_id = ''
-
-    if clear_data == 0:
-        bot.pnl = 0
-        avg_order = AvgOrder.objects.filter(bot=bot).first()
-        takes = Take.objects.filter(bot=bot)
-        if bot.side != 'TS':
-            is_ts_start = IsTSStart.objects.filter(bot=bot).first()
-            if is_ts_start:
-                is_ts_start.delete()
-        if takes:
-            takes.delete()
-        if avg_order:
-            avg_order.delete()
-
-    bot.save()
-    connections.close_all()
-
-
-def actions_after_end_cycle(bot):
-    bot_id = bot.pk
-    custom_logging(bot, f'bot finished work. P&L: {bot.pnl}')
-    tg = TelegramAccount.objects.filter(owner=bot.owner).first()
-    if tg:
-        chat_id = tg.chat_id
-        send_telegram_message(chat_id, bot, f'bot finished work. P&L: {bot.pnl}')
-
-    if not bot.repeat:
-        lock.acquire()
-        try:
-            global_list_bot_id.remove(bot_id)
-            bot.is_active = False
-            bot.save()
-            if bot_id not in global_list_bot_id:
-                del global_list_threads[bot_id]
-        finally:
-            if lock.locked():
-                lock.release()
-    else:
-        clear_data_bot(bot)
-        custom_logging(bot, 'Bot start new cycle')
 
 
 def func_get_symbol_list(bot):

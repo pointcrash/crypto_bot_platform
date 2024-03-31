@@ -11,7 +11,7 @@ django.setup()
 from binance.client import Client
 from api_test.api_v5_bybit import HTTP_Request
 from main.models import Account
-from bots.models import Bot
+from bots.models import BotModel
 
 api_key_binance = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
 api_secret_binance = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
@@ -259,8 +259,8 @@ def get_query_account_coins_balance(account):
 if __name__ == '__main__':
     account_binance = Account.objects.get(pk=6)
     account_bybit = Account.objects.get(pk=1)
-    binance_bot = Bot.objects.get(pk=529)
-    bybit_bot = Bot.objects.get(pk=530)
+    binance_bot = BotModel.objects.get(pk=529)
+    bybit_bot = BotModel.objects.get(pk=530)
     # print(s.lower())
     # print(s.upper())
     # print(s.capitalize())
