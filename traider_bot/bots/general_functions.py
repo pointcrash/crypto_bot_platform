@@ -20,7 +20,6 @@ from bots.models import Symbol, Log
 from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
-from orders.models import Order
 
 
 def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):
@@ -44,68 +43,15 @@ def get_position_idx(side):
 
 
 def set_entry_point_by_market(bot):
-    order = Order.objects.create(
-        bot=bot,
-        category=bot.category,
-        symbol=bot.symbol.name,
-        side=bot.side,
-        orderType="Market",
-        qty=get_quantity_from_price(bot.qty,
-                                    get_current_price(bot.account, bot.category, bot.symbol),
-                                    bot.symbol.minOrderQty, bot.isLeverage)
-    )
-
-    custom_logging(bot, f'create order by market')
-    if bot.side == 'Sell':
-        bot.entry_order_sell = order.orderLinkId
-        bot.save()
-    else:
-        bot.entry_order_by = order.orderLinkId
-        bot.save()
+    pass
 
 
 def set_buy_entry_point(bot, bl):
-    round_number = int(bot.symbol.priceScale)
-    if bot.is_percent_deviation_from_lines:
-        price = round(bl - bl * bot.deviation_from_lines / 100, round_number)
-    else:
-        price = round(bl - bot.deviation_from_lines, round_number)
-
-    buy_order = Order.objects.create(
-        bot=bot,
-        category=bot.category,
-        symbol=bot.symbol.name,
-        side="Buy",
-        orderType=bot.orderType,
-        qty=get_quantity_from_price(bot.qty, bl - Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty, bot.isLeverage),
-        price=price,
-    )
-
-    custom_logging(bot, f'create BUY-order. Price: {price}')
-    bot.entry_order_by = buy_order.orderLinkId
-    bot.save()
+    pass
 
 
 def set_sell_entry_point(bot, tl):
-    round_number = int(bot.symbol.priceScale)
-    if bot.is_percent_deviation_from_lines:
-        price = round(tl + tl * bot.deviation_from_lines / 100, round_number)
-    else:
-        price = round(tl + bot.deviation_from_lines, round_number)
-
-    sell_order = Order.objects.create(
-        bot=bot,
-        category=bot.category,
-        symbol=bot.symbol.name,
-        side="Sell",
-        orderType=bot.orderType,
-        qty=get_quantity_from_price(bot.qty, tl + Decimal(bot.symbol.minPrice), bot.symbol.minOrderQty, bot.isLeverage),
-        price=price,
-    )
-
-    custom_logging(bot, f'create SELL-order. Price: {price}')
-    bot.entry_order_sell = sell_order.orderLinkId
-    bot.save()
+    pass
 
 
 def set_entry_point(bot, tl, bl):
@@ -409,14 +355,6 @@ def entry_order_buy_in_addition(bot):
                 get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_by))
             # logging(bot, f'entry_order_by_amount - {entry_order_by_amount}')
 
-            order = Order.objects.create(
-                bot=bot,
-                category=bot.category,
-                symbol=bot.symbol.name,
-                side='Buy',
-                orderType="Market",
-                qty=entry_order_by_amount
-            )
             custom_logging(bot, f'Позиция докупилась на {entry_order_by_amount}')
 
     if bot.entry_order_sell:
@@ -427,14 +365,6 @@ def entry_order_buy_in_addition(bot):
             entry_order_sell_amount = Decimal(
                 get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.entry_order_sell))
             # logging(bot, f'entry_order_sell_amount - {entry_order_sell_amount}')
-            order = Order.objects.create(
-                bot=bot,
-                category=bot.category,
-                symbol=bot.symbol.name,
-                side='Sell',
-                orderType="Market",
-                qty=entry_order_sell_amount
-            )
             custom_logging(bot, f'Позиция докупилась на {entry_order_sell_amount}')
 
 
@@ -516,14 +446,6 @@ def bin_order_buy_in_addition(bot, side):
         entry_order_by_amount = Decimal(
             get_order_leaves_qty(bot.account, bot.category, bot.symbol, bot.bin_order_id))
 
-        order = Order.objects.create(
-            bot=bot,
-            category=bot.category,
-            symbol=bot.symbol.name,
-            side=side,
-            orderType="Market",
-            qty=entry_order_by_amount
-        )
         custom_logging(bot, 'BIN-order addition')
         return True
 

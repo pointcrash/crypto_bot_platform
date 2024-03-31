@@ -11,7 +11,6 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
-from orders.models import Order
 
 
 def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
@@ -103,30 +102,30 @@ def work_set0psn_bot_by_market(bot, mark_price, count_dict, trend):
                 else:
                     order_stop_loss = round(mark_price + (mark_price * leverage_trend), price_scale)
 
-                if qty >= max_order_qty:
-                    half_qty = qty / 2
-                    for _ in range(2):
-                        order = Order.objects.create(
-                            bot=bot,
-                            category=bot.category,
-                            symbol=bot.symbol.name,
-                            side=order_side,
-                            orderType="Market",
-                            qty=half_qty,
-                            takeProfit=str(count_dict['stop_price']),
-                            stopLoss=str(order_stop_loss),
-                        )
-                else:
-                    order = Order.objects.create(
-                        bot=bot,
-                        category=bot.category,
-                        symbol=bot.symbol.name,
-                        side=order_side,
-                        orderType="Market",
-                        qty=qty,
-                        takeProfit=str(count_dict['stop_price']),
-                        stopLoss=str(order_stop_loss),
-                    )
+                # if qty >= max_order_qty:
+                #     half_qty = qty / 2
+                    # for _ in range(2):
+                        # order = Order.objects.create(
+                        #     bot=bot,
+                        #     category=bot.category,
+                        #     symbol=bot.symbol.name,
+                        #     side=order_side,
+                        #     orderType="Market",
+                        #     qty=half_qty,
+                        #     takeProfit=str(count_dict['stop_price']),
+                        #     stopLoss=str(order_stop_loss),
+                        # )
+                # else:
+                    # order = Order.objects.create(
+                    #     bot=bot,
+                    #     category=bot.category,
+                    #     symbol=bot.symbol.name,
+                    #     side=order_side,
+                    #     orderType="Market",
+                    #     qty=qty,
+                    #     takeProfit=str(count_dict['stop_price']),
+                    #     stopLoss=str(order_stop_loss),
+                    # )
 
             lock.acquire()
     finally:

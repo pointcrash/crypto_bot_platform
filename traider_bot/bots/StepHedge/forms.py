@@ -1,6 +1,6 @@
 from django import forms
 
-from bots.models import Bot, StepHedge
+from bots.models import StepHedge, BotModel
 from main.models import Account
 
 
@@ -38,64 +38,65 @@ class BotForm(forms.ModelForm):
     #         return f"{obj.name} error"
 
     class Meta:
-        model = Bot
-        fields = ['service', 'account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType',
-                  'qty_kline', 'd', 'auto_avg', 'bb_avg_percent',
-                  'deviation_from_lines',
-                  'is_percent_deviation_from_lines', 'dfm',
-                  'chw', 'dfep', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
-                  'grid_avg_value', 'bin_order', 'price', ]
-
-        widgets = {
-            'qty': forms.TextInput(attrs={'class': 'form-control'}),
-            'account': forms.Select(attrs={'class': 'form-control'}),
-            'service': forms.Select(attrs={'class': 'form-control'}),
-            'symbol': forms.Select(attrs={'class': 'form-control'}),
-            'side': forms.Select(attrs={'class': 'form-control'}),
-            'orderType': forms.Select(attrs={'class': 'form-control'}),
-            'margin_type': forms.Select(attrs={'class': 'form-control'}),
-            'isLeverage': forms.NumberInput(attrs={'class': 'form-control', 'id': 'is_leverage'}),
-            'qty_kline': forms.NumberInput(attrs={'class': 'form-control'}),
-            'interval': forms.Select(attrs={'class': 'form-control'}),
-            'd': forms.NumberInput(attrs={'class': 'form-control'}),
-            'bb_avg_percent': forms.NumberInput(attrs={'class': 'form-control'}),
-            'take_on_ml_percent': forms.NumberInput(attrs={'class': 'form-control'}),
-            'deviation_from_lines': forms.NumberInput(attrs={'class': 'form-control'}),
-            'dfm': forms.NumberInput(attrs={'class': 'form-control'}),
-            'chw': forms.NumberInput(attrs={'class': 'form-control'}),
-            'dfep': forms.NumberInput(attrs={'class': 'form-control'}),
-            'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
-            'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
-            'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Market'}),
-        }
-
-        labels = {
-            'account': 'Account',
-            'symbol': 'Symbol',
-            'side': 'Side',
-            'margin_type': 'Margin',
-            'orderType': 'Order Type',
-            'isLeverage': 'Leverage',
-            'interval': 'Candle Interval',
-            'qty_kline': 'Periods',
-            'd': 'Deviation',
-            'auto_avg': 'Auto Average',
-            'take_on_ml': 'Middle Line',
-            'take_on_ml_percent': '%',
-            'bb_avg_percent': 'Average Percent',
-            'is_percent_deviation_from_lines': '%',
-            'deviation_from_lines': '(± BB Deviation)',
-            'dfm': 'DFM',
-            'chw': 'ChW',
-            'dfep': 'DFEP',
-            'max_margin': 'Max Margin',
-            'time_sleep': 'Request Rate (sec)',
-            'repeat': 'Repeat Cycle',
-            'grid_avg_value': 'Two-Sided mode: Profit/Avg Value (%)',
-            'bin_order': 'Turn after ML',
-            'price': 'Price',
-        }
+        model = BotModel
+        fields = '__all__'
+        # fields = ['service', 'account', 'symbol', 'side', 'interval', 'isLeverage', 'margin_type', 'orderType',
+        #           'qty_kline', 'd', 'auto_avg', 'bb_avg_percent',
+        #           'deviation_from_lines',
+        #           'is_percent_deviation_from_lines', 'dfm',
+        #           'chw', 'dfep', 'max_margin', 'take_on_ml', 'take_on_ml_percent', 'time_sleep', 'repeat',
+        #           'grid_avg_value', 'bin_order', 'price', ]
+        #
+        # widgets = {
+        #     'qty': forms.TextInput(attrs={'class': 'form-control'}),
+        #     'account': forms.Select(attrs={'class': 'form-control'}),
+        #     'service': forms.Select(attrs={'class': 'form-control'}),
+        #     'symbol': forms.Select(attrs={'class': 'form-control'}),
+        #     'side': forms.Select(attrs={'class': 'form-control'}),
+        #     'orderType': forms.Select(attrs={'class': 'form-control'}),
+        #     'margin_type': forms.Select(attrs={'class': 'form-control'}),
+        #     'isLeverage': forms.NumberInput(attrs={'class': 'form-control', 'id': 'is_leverage'}),
+        #     'qty_kline': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'interval': forms.Select(attrs={'class': 'form-control'}),
+        #     'd': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'bb_avg_percent': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'take_on_ml_percent': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'deviation_from_lines': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'dfm': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'chw': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'dfep': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'time_sleep': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'grid_avg_value': forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Market'}),
+        # }
+        #
+        # labels = {
+        #     'account': 'Account',
+        #     'symbol': 'Symbol',
+        #     'side': 'Side',
+        #     'margin_type': 'Margin',
+        #     'orderType': 'Order Type',
+        #     'isLeverage': 'Leverage',
+        #     'interval': 'Candle Interval',
+        #     'qty_kline': 'Periods',
+        #     'd': 'Deviation',
+        #     'auto_avg': 'Auto Average',
+        #     'take_on_ml': 'Middle Line',
+        #     'take_on_ml_percent': '%',
+        #     'bb_avg_percent': 'Average Percent',
+        #     'is_percent_deviation_from_lines': '%',
+        #     'deviation_from_lines': '(± BB Deviation)',
+        #     'dfm': 'DFM',
+        #     'chw': 'ChW',
+        #     'dfep': 'DFEP',
+        #     'max_margin': 'Max Margin',
+        #     'time_sleep': 'Request Rate (sec)',
+        #     'repeat': 'Repeat Cycle',
+        #     'grid_avg_value': 'Two-Sided mode: Profit/Avg Value (%)',
+        #     'bin_order': 'Turn after ML',
+        #     'price': 'Price',
+        # }
 
 
 class StepHedgeForm(forms.ModelForm):

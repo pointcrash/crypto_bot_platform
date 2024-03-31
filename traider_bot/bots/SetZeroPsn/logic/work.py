@@ -8,9 +8,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 from api_test.api_v5_bybit import get_list, get_current_price, set_trading_stop, get_order_status
 from bots.general_functions import get_quantity_from_price, custom_logging
-from bots.models import Log, Bot
+from bots.models import Log
 from bots.SetZeroPsn.logic.psn_count import psn_count
-from orders.models import Order
 from single_bot.logic.global_variables import lock, global_list_bot_id
 from single_bot.logic.work import append_thread_or_check_duplicate
 
@@ -137,17 +136,18 @@ def work_set_zero_psn_bot(bot, mark_price, count_dict, trend):
                     mark_price -= tick_size
                     order_stop_loss = round(mark_price + (mark_price * leverage_trend), price_scale)
 
-                order = Order.objects.create(
-                    bot=bot,
-                    category=bot.category,
-                    symbol=bot.symbol.name,
-                    side=order_side,
-                    orderType="Limit",
-                    qty=qty,
-                    price=mark_price,
-                    takeProfit=str(count_dict['stop_price']),
-                    stopLoss=str(order_stop_loss),
-                )
+                order = None
+                #     Order.objects.create(
+                #     bot=bot,
+                #     category=bot.category,
+                #     symbol=bot.symbol.name,
+                #     side=order_side,
+                #     orderType="Limit",
+                #     qty=qty,
+                #     price=mark_price,
+                #     takeProfit=str(count_dict['stop_price']),
+                #     stopLoss=str(order_stop_loss),
+                # )
 
                 custom_logging(bot, f'Отправлен ордер qty={qty}, price={mark_price}, SL={str(order_stop_loss)}')
 

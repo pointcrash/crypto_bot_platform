@@ -11,7 +11,7 @@ from api_test.api_v5_bybit import get_open_orders
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic
 from bots.general_functions import func_get_symbol_list, is_bot_active, custom_logging
-from bots.models import Bot, StepHedge
+from bots.models import StepHedge
 from bots.terminate_bot_logic import check_thread_alive, stop_bot_with_cancel_orders, terminate_thread
 from bots_group.forms import BotForm, StepHedgeForm
 from bots_group.models import BotsGroup

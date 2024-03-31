@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from api_test.api_v5_bybit import get_list, set_trading_stop, cancel_all
-from orders.models import Order
 
 
 def stopping_set_zero_psn_bot(bot, account, symbol):
@@ -19,15 +18,16 @@ def stopping_set_zero_psn_bot(bot, account, symbol):
 
     # Закрытие плюсовой позиции
     if side and position_idx:
-        drop_order = Order.objects.create(
-            bot=bot,
-            category=bot.category,
-            symbol=symbol.name,
-            side=side,
-            orderType='Market',
-            qty=qty,
-            positionIdx=position_idx,
-        )
+        pass
+        # drop_order = Order.objects.create(
+        #     bot=bot,
+        #     category=bot.category,
+        #     symbol=symbol.name,
+        #     side=side,
+        #     orderType='Market',
+        #     qty=qty,
+        #     positionIdx=position_idx,
+        # )
 
     # Инвертируем позицию и снимаем стоп лосс с минусовой позиции
     position_idx = '1' if position_idx == '2' else '2'
