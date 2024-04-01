@@ -95,7 +95,7 @@ def get_logger_for_bot_ws_msg(bot_id):
     logger = logging.getLogger(f'BOT_{bot_id}')
     logger.setLevel(logging.DEBUG)
 
-    handler = logging.FileHandler(f'logs/bot_{bot_id}.log')
+    handler = logging.FileHandler(f'logs/bots/ws_data/bot_{bot_id}.log')
     handler.setFormatter(formatter)
     logger.handlers.clear()
     logger.addHandler(handler)
