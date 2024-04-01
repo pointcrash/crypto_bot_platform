@@ -1,6 +1,8 @@
 import json
 import logging
 import threading
+import traceback
+
 import websocket
 
 from api_2.custom_logging_api import custom_logging
@@ -10,6 +12,7 @@ class CustomWSClient:
     def __init__(self, callback=None, bot=None):
         self.url = "ws://ws-manager:8765"
         self.bot = bot
+        self.symbol = bot.symbol.name
         self.callback = callback
         self.logger = get_logger_for_bot_ws_msg(bot.id)
         self.account_name = bot.account.name
@@ -37,10 +40,12 @@ class CustomWSClient:
     def _on_message(self, ws, message):
         try:
             message = json.loads(message)
-            self.logger.debug(message)
-            self.callback(message)
+            if message['symbol'] == self.symbol:
+                self.logger.debug(message)
+                self.callback(message)
         except Exception as e:
             custom_logging(self.bot, f'GET ERROR IN "_on_message" func: {e}')
+            custom_logging(self.bot, f"**Traceback:** {traceback.format_exc()}")
 
     def _on_close(self, ws, close_code, reason):
         pass

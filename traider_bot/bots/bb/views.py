@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 
 from bots.bb.forms import BBForm
 from bots.bb.logic.start_logic import bb_worker
-from bots.forms import BotModelForm
+from bots.forms import BotModelForm, BotModelEditForm
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
 
@@ -32,8 +32,8 @@ def bb_bot_create(request):
             bb_model.bot = bot
             bb_model.save()
 
-            bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
-            bot_thread.start()
+            # bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+            # bot_thread.start()
 
             return redirect('bot_list')
     else:
@@ -50,8 +50,10 @@ def bb_bot_create(request):
 @login_required
 def bb_bot_edit(request, bot_id):
     bot = BotModel.objects.get(pk=bot_id)
+    symbol = bot.symbol
+    account = bot.account
     if request.method == 'POST':
-        bot_form = BotModelForm(request.POST, request=request, instance=bot)
+        bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
         bb_form = BBForm(request.POST, instance=bot.bb)
         if bot_form.is_valid() and bb_form.is_valid():
             if bot.is_active:
@@ -61,6 +63,8 @@ def bb_bot_edit(request, bot_id):
             bb_model = bb_form.save(commit=False)
             bot = bot_form.save(commit=False)
             bot.is_active = True
+            bot.account = account
+            bot.symbol = symbol
             bb_model.save()
             bot.save()
 
@@ -71,4 +75,10 @@ def bb_bot_edit(request, bot_id):
         bot_form = BotModelForm(request=request, instance=bot)
         bb_form = BBForm(instance=bot.bb)
 
-    return render(request, 'bb/edit.html', {'bot_form': bot_form, 'bb_form': bb_form, 'bot': bot})
+    return render(request, 'bb/edit.html', {
+        'bot_form': bot_form,
+        'bb_form': bb_form,
+        'bot': bot,
+        'symbol': symbol,
+        'account': account,
+    })

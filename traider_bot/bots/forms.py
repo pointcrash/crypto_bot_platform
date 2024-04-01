@@ -43,6 +43,40 @@ class BotModelForm(forms.ModelForm):
         }
 
 
+class BotModelEditForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        self.qty = kwargs.pop('initial', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['account'].required = False
+        self.fields['symbol'].required = False
+
+    class Meta:
+        model = BotModel
+
+        fields = ['account', 'symbol', 'leverage', 'amount_long', 'amount_short', 'margin_type']
+
+        widgets = {
+            'account': forms.Select(attrs={'class': 'form-control'}),
+            'symbol': forms.Select(attrs={'class': 'form-control'}),
+            'leverage': forms.NumberInput(attrs={'class': 'form-control'}),
+            'amount_long': forms.NumberInput(attrs={'class': 'form-control'}),
+            'amount_short': forms.NumberInput(attrs={'class': 'form-control'}),
+            'margin_type': forms.Select(attrs={'class': 'form-control'}),
+
+        }
+
+        labels = {
+            'account': 'Аккаунт',
+            'symbol': 'Торговая пара',
+            'leverage': 'Плечо',
+            'amount_long': 'Лонг USDT',
+            'amount_short': 'Шорт USDT',
+            'margin_type': 'Тип маржи',
+        }
+
+
 class SimpleHedgeForm(forms.ModelForm):
     class Meta:
         model = SimpleHedge

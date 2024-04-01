@@ -9,7 +9,7 @@ SECRET_KEY = django_app_key
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '127.0.0.1']
+ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '164.92.182.43', '127.0.0.1']
 
 CORS_ALLOWED_ORIGINS = [
     "https://bravo.almazor.co",
@@ -90,7 +90,7 @@ DATABASES = {
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
@@ -123,12 +123,12 @@ LOGGING = {
         'django': {
             'handlers': ['console_simple'],
             'level': 'INFO',
-            'propagate': False,
+            'propagate': True,
         },
         'debug_logger': {
             'handlers': ['console_simple', 'file_verbose'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
     },
 }

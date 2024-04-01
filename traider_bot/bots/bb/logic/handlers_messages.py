@@ -5,21 +5,20 @@ from api_2.custom_logging_api import custom_logging
 
 def bb_handler_wrapper(bb_worker_class_obj):
     def bb_handle_stream_callback(message):
-        if message['symbol'] == bb_worker_class_obj.symbol:
-            if message['topic'] == 'position':
-                handle_position_stream_message(message, bb_worker_class_obj)
+        if message['topic'] == 'position':
+            handle_position_stream_message(message, bb_worker_class_obj)
 
-            elif message['topic'] == 'order':
-                handle_order_stream_message(message, bb_worker_class_obj)
+        elif message['topic'] == 'order':
+            handle_order_stream_message(message, bb_worker_class_obj)
 
-            elif message['topic'] == 'markPrice':
-                handle_mark_price_stream_message(message, bb_worker_class_obj)
+        elif message['topic'] == 'markPrice':
+            handle_mark_price_stream_message(message, bb_worker_class_obj)
 
-            elif message['topic'] == 'kline':
-                handle_message_kline_info(message, bb_worker_class_obj)
+        elif message['topic'] == 'kline':
+            handle_message_kline_info(message, bb_worker_class_obj)
 
-            else:
-                pass
+        else:
+            pass
 
     return bb_handle_stream_callback
 

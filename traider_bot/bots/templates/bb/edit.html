@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row">
     <div class="col-11 mx-auto">
-        <h2 class="text-center">Edit bot</h2>
+        <h2 class="text-center">Настройки Бота</h2>
         <form method="POST">
             {% csrf_token %}
             <div class="row justify-content-center">
@@ -32,10 +32,12 @@
 
                     <br>
                     {{ bot_form.account.label_tag }}
-                    {{ bot_form.account }}
+                    <input type="text" class="form-control" name="account" value="{{ account }}" readonly disabled>
+<!--                    {{ bot_form.account }}-->
                     <br>
                     {{ bot_form.symbol.label_tag }}
-                    {{ bot_form.symbol }}
+                    <input type="text" class="form-control" name="symbol" value="{{ symbol }}" readonly disabled>
+<!--                    {{ bot_form.symbol }}-->
                     <br>
                     {{ bot_form.leverage.label_tag }}
                     {{ bot_form.leverage }}
