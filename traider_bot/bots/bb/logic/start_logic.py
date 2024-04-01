@@ -1,4 +1,3 @@
-import logging
 import time
 import traceback
 
@@ -8,14 +7,11 @@ from .bot_worker_class import WorkBollingerBandsClass
 from .handlers_messages import bb_handler_wrapper
 from ...general_functions import custom_logging
 
-formatter = logging.Formatter('%(levelname)s [%(asctime)s] %(message)s')
-
 
 def bb_worker(bot):
     ws_client = None
-    logger = bot_get_logger(bot.id)
     try:
-        bb_worker_class = WorkBollingerBandsClass(bot, logger)
+        bb_worker_class = WorkBollingerBandsClass(bot)
 
         ''' Connection WS '''
         ws_client = CustomWSClient(callback=bb_handler_wrapper(bb_worker_class), bot=bot)
@@ -55,14 +51,4 @@ def bb_worker(bot):
             bot.save()
 
 
-def bot_get_logger(bot_id):
-    logger = logging.getLogger(f'BOT_{bot_id}')
-    logger.setLevel(logging.DEBUG)
-
-    handler = logging.FileHandler(f'logs/bot_{bot_id}.log')
-    handler.setFormatter(formatter)
-    logger.handlers.clear()
-    logger.addHandler(handler)
-
-    return logger
 

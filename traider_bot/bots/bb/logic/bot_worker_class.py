@@ -10,9 +10,8 @@ from bots.bb.logic.bb_class import BollingerBands
 
 
 class WorkBollingerBandsClass:
-    def __init__(self, bot, logger):
+    def __init__(self, bot):
         self.bot = bot
-        self.logger = logger
         self.symbol = bot.symbol.name
         self.bb = BollingerBands(bot)
         self.avg_obj = BBAutoAverage(bot, self.bb)
