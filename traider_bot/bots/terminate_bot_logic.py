@@ -26,7 +26,7 @@ def terminate_bot(bot, user=None):
     bot.is_active = False
     bot.save()
     if user:
-        custom_logging(bot, f'Бот был деактивирован вручную пользователем "{user.name}"')
+        custom_logging(bot, f'Бот был деактивирован вручную пользователем "{user.username}"')
 
 
 def terminate_bot_with_cancel_orders(bot, user=None):

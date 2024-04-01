@@ -57,6 +57,8 @@ def bb_bot_edit(request, bot_id):
         bb_form = BBForm(request.POST, instance=bot.bb)
         if bot_form.is_valid() and bb_form.is_valid():
             if bot.is_active:
+                bot.account = account
+                bot.symbol = symbol
                 terminate_bot(bot)
                 time.sleep(7)
 

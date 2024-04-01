@@ -63,13 +63,14 @@ def views_bots_type_choice(request, mode):
 @login_required
 def stop_bot(request, bot_id, event_number):
     bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
 
     if event_number == 1:
-        terminate_bot(bot)
+        terminate_bot(bot, user)
     elif event_number == 2:
-        terminate_bot_with_cancel_orders(bot)
+        terminate_bot_with_cancel_orders(bot, user)
     elif event_number == 3:
-        terminate_bot_with_cancel_orders_and_drop_positions(bot)
+        terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
 
     return redirect(request.META.get('HTTP_REFERER'))
 
