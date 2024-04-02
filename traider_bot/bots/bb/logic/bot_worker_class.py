@@ -172,7 +172,7 @@ class WorkBollingerBandsClass:
                 if self.current_price > self.bb.tl:
                     response = place_order(self.bot, side='SELL', price=self.current_price, order_type='MARKET', qty=self.ml_qty)
 
-            _ = response['orderId']
+            order_id = response['orderId']
             self.ml_qty = None
             self.ml_filled = False
 
