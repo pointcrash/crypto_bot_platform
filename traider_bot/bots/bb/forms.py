@@ -41,3 +41,17 @@ class BBForm(forms.ModelForm):
             'dfep': 'DFEP',
             'max_margin': 'Макс. маржа',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        average = cleaned_data.get("auto_avg")
+        take_on_ml = cleaned_data.get("take_on_ml")
+
+        if not take_on_ml:
+            cleaned_data["take_on_ml_percent"] = 0
+        if not average:
+            cleaned_data["bb_avg_percent"] = 0
+            cleaned_data["dfm"] = 0
+            cleaned_data["chw"] = 0
+
+        return cleaned_data

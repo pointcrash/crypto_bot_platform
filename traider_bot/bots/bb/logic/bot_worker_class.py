@@ -164,15 +164,18 @@ class WorkBollingerBandsClass:
     def turn_after_ml(self):
         if self.bot.bb.take_on_ml and self.ml_filled:
             position_side = self.position_info['side']
-            response = None
-            if position_side == 'LONG':
-                if self.current_price < self.bb.bl:
-                    response = place_order(self.bot, side='BUY', price=self.current_price, order_type='MARKET', qty=self.ml_qty)
-            elif position_side == 'SHORT':
-                if self.current_price > self.bb.tl:
-                    response = place_order(self.bot, side='SELL', price=self.current_price, order_type='MARKET', qty=self.ml_qty)
+            order_side = None
 
-            order_id = response['orderId']
-            self.ml_qty = None
-            self.ml_filled = False
+            if position_side == 'LONG' and self.current_price < self.bb.bl:
+                order_side = 'BUY'
+            elif position_side == 'SHORT' and self.current_price > self.bb.tl:
+                order_side = 'SELL'
+
+            if order_side:
+                response = place_order(self.bot, side=order_side, price=self.current_price, order_type='MARKET', qty=self.ml_qty)
+                order_id = response['orderId']
+                self.ml_qty = None
+                self.ml_filled = False
+
+
 

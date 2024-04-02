@@ -39,9 +39,8 @@ def handle_order_stream_message(msg, bot_class_obj):
 def handle_position_stream_message(msg, bot_class_obj):
     with bot_class_obj.psn_locker:
         if Decimal(msg['qty']) != 0:
-            if bot_class_obj.position_info:
-                if bot_class_obj.position_info['qty'] == Decimal(msg['qty']):
-                    return
+            if bot_class_obj.position_info.get('qty') == Decimal(msg['qty']):
+                return
             bot_class_obj.position_info = {
                 'side': msg['side'],
                 'qty': abs(Decimal(msg['qty'])),
@@ -49,11 +48,11 @@ def handle_position_stream_message(msg, bot_class_obj):
             }
             with bot_class_obj.avg_locker:
                 bot_class_obj.avg_obj.update_psn_info(bot_class_obj.position_info)
-        #     bot_class_obj.have_psn = True
-        # else:
-        #     if msg['side'] == bot_class_obj.position_info['side']:
-        #         bot_class_obj.position_info['qty'] = 0
-        #         bot_class_obj.have_psn = False
+            bot_class_obj.have_psn = True
+        else:
+            if msg['side'] == bot_class_obj.position_info['side']:
+                bot_class_obj.position_info['qty'] = 0
+                bot_class_obj.have_psn = False
 
         # bot_class_obj.replace_closing_orders()
 
