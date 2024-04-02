@@ -25,7 +25,7 @@ def bb_bot_create(request):
             bot.work_model = 'bb'
             bot.owner = request.user
             bot.category = 'linear'
-            bot.is_active = True
+            bot.is_active = False
             bot.save()
 
             bb_model = bb_form.save(commit=False)
