@@ -93,7 +93,7 @@ class BBBotModel(models.Model):
     d = models.IntegerField(default=2)
     take_on_ml = models.BooleanField(default=True)
     take_on_ml_percent = models.DecimalField(max_digits=5, decimal_places=2, default=50)
-    # take_on_ml_status = models.BooleanField(default=False, blank=True, null=True)
+    take_on_ml_status = models.BooleanField(default=False, blank=True, null=True)
     auto_avg = models.BooleanField(default=False)
     avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     is_deviation_from_lines = models.BooleanField(default=False, blank=True)
