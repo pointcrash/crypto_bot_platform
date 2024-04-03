@@ -60,7 +60,6 @@ def bb_bot_edit(request, bot_id):
                 bot.account = account
                 bot.symbol = symbol
                 terminate_bot(bot)
-                time.sleep(7)
 
             bb_model = bb_form.save(commit=False)
             bot = bot_form.save(commit=False)
