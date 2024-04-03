@@ -1,3 +1,4 @@
+import logging
 import threading
 
 from django.contrib.auth.decorators import login_required
@@ -8,6 +9,8 @@ from bots.models import BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
 from main.forms import AccountSelectForm
+
+logger = logging.getLogger('django')
 
 
 @login_required
@@ -23,9 +26,11 @@ def bot_list(request):
         account_select_form = AccountSelectForm(request.POST, user=request.user)
         if account_select_form.is_valid():
             selected_account = account_select_form.cleaned_data['account']
+            logger.info(f'{user} отсортировал список ботов по {selected_account}')
             if selected_account:
                 bots = bots.filter(account=selected_account)
     else:
+        logger.info(f'{user} открыл список ботов')
         account_select_form = AccountSelectForm(user=request.user)
 
     return render(request, 'bot_list.html', {
@@ -64,6 +69,8 @@ def views_bots_type_choice(request, mode):
 def stop_bot(request, bot_id, event_number):
     bot = BotModel.objects.get(pk=bot_id)
     user = request.user
+    logger.info(
+        f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
     if event_number == 1:
         terminate_bot(bot, user)
@@ -79,6 +86,8 @@ def stop_bot(request, bot_id, event_number):
 def delete_bot(request, bot_id, event_number):
     bot = BotModel.objects.get(pk=bot_id)
     user = request.user
+    logger.info(
+        f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
     if event_number == 1:
         terminate_bot(bot, user)
@@ -95,6 +104,9 @@ def delete_bot(request, bot_id, event_number):
 def bot_start(request, bot_id):
     bot = BotModel.objects.get(pk=bot_id)
     bot_thread = None
+    user = request.user
+    logger.info(
+        f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
 
     if bot.work_model == 'bb':
         bot.is_active = True

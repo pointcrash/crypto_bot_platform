@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 
@@ -10,10 +11,13 @@ from bots.forms import BotModelForm, BotModelEditForm
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
 
+logger = logging.getLogger('django')
+
 
 @login_required
 def bb_bot_create(request):
     title = 'Создание бота Боллинджера'
+    user = request.user
 
     if request.method == 'POST':
         bot_form = BotModelForm(request=request, data=request.POST)
@@ -34,6 +38,8 @@ def bb_bot_create(request):
 
             # bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
             # bot_thread.start()
+            logger.info(
+                f'{user} создал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
 
             return redirect('bot_list')
     else:
@@ -50,6 +56,8 @@ def bb_bot_create(request):
 @login_required
 def bb_bot_edit(request, bot_id):
     bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
+
     symbol = bot.symbol
     account = bot.account
     if request.method == 'POST':
@@ -71,6 +79,9 @@ def bb_bot_edit(request, bot_id):
 
             bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
             bot_thread.start()
+            logger.info(
+                f'{user} отредактировал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
             return redirect('bot_list')
     else:
         bot_form = BotModelForm(request=request, instance=bot)

@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from main.models import Account, ExchangeService
@@ -33,8 +34,8 @@ class BotModel(models.Model):
     category = models.CharField(max_length=10, default='linear', blank=True)
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
     leverage = models.IntegerField(default=10)
-    amount_long = models.IntegerField()
-    amount_short = models.IntegerField(null=True, blank=True)
+    amount_long = models.IntegerField(validators=[MinValueValidator(0)])
+    amount_short = models.IntegerField(validators=[MinValueValidator(0)], null=True, blank=True)
     margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS', blank=True)
     work_model = models.CharField(max_length=10)
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
@@ -50,11 +51,19 @@ class BotModel(models.Model):
         return self.symbol.name
 
 
+class SoftDeletedModelManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class Log(models.Model):
+    objects = SoftDeletedModelManager()
+
     bot = models.ForeignKey(BotModel, on_delete=models.SET_NULL, blank=True, null=True)
     content = models.CharField(blank=True, null=True)
     time = models.CharField(blank=True, null=True)
     time_create = models.DateTimeField(auto_now_add=True, null=True)
+    is_deleted = models.BooleanField(default=False)
 
 
 class BBBotModel(models.Model):

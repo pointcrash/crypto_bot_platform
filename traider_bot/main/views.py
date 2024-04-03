@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -22,6 +23,8 @@ from main.forms import AccountForm
 from main.models import Account
 from .logic import calculate_pnl
 import requests
+
+logger = logging.getLogger('django')
 
 
 def view_home(request):
@@ -69,6 +72,7 @@ def logs_list(request, bot_id):
     paginator = Paginator(log_list, logs_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    logger.info(f'{user} открыл логи бота ID: {bot_id}')
     return render(request, 'logs/logs.html', {
         'log_list': page_obj,
         'bot': bot,
@@ -81,8 +85,10 @@ def logs_list(request, bot_id):
 
 @login_required
 def view_logs_delete(request, bot_id):
+    user = request.user
     logs = Log.objects.filter(bot=bot_id)
     logs.delete()
+    logger.info(f'{user} удалил логи бота ID: {bot_id}')
     return redirect(request.META.get('HTTP_REFERER'))
 
 
@@ -102,6 +108,7 @@ def account_list(request):
         accounts = Account.objects.all()
     else:
         accounts = Account.objects.filter(owner=request.user)
+    logger.info(f'{user} открыл список аккаунтов')
     return render(request, 'account/accounts_list.html', {'accounts': accounts, })
 
 
@@ -133,7 +140,8 @@ def account_position_list(request):
                     else:
                         bot_symbol_list.append((account, '---', psn, count_dict, False))
 
-    return render(request, 'positions/positions_list.html', {'positions_list': bot_symbol_list, 'name_symbol_set': name_symbol_set})
+    return render(request, 'positions/positions_list.html',
+                  {'positions_list': bot_symbol_list, 'name_symbol_set': name_symbol_set})
 
 
 @csrf_exempt
@@ -170,6 +178,7 @@ def recalculate_values(request):
 
 @login_required
 def create_account(request):
+    user = request.user
     if request.method == 'POST':
         form = AccountForm(request.POST)
         if form.is_valid():
@@ -179,6 +188,7 @@ def create_account(request):
 
             url = f"http://ws-manager:8008/ws/conn/new_account/{acc.pk}"
             requests.get(url)
+            logger.info(f'{user} добавил новый аккаунт: {acc.pk} . {acc.name} . {acc.service.name}')
             return redirect('account_list')
     else:
         form = AccountForm()
@@ -188,6 +198,7 @@ def create_account(request):
 
 @login_required
 def edit_account(request, acc_id):
+    user = request.user
     account = Account.objects.get(pk=acc_id)
     if request.method == 'POST':
         form = AccountForm(request.POST, instance=account)
@@ -198,6 +209,7 @@ def edit_account(request, acc_id):
             url = f"http://ws-manager:8008/ws/conn/update_account/{acc.pk}"
             requests.get(url)
 
+            logger.info(f'{user} отредактировал аккаунт: {account.pk} . {account.name} . {account.service.name}')
             return redirect('account_list')
     else:
         form = AccountForm(instance=account)
@@ -207,7 +219,9 @@ def edit_account(request, acc_id):
 
 @login_required
 def delete_account(request, acc_id):
+    user = request.user
     acc = Account.objects.get(pk=acc_id)
+    logger.info(f'{user} удалил аккаунт: {acc.pk} . {acc.name} . {acc.service.name}')
     acc.delete()
 
     url = f"http://ws-manager:8008/ws/conn/del_account/{acc_id}"
@@ -309,4 +323,3 @@ def update_symbols(request):
     if request.user.is_superuser:
         all_symbols_update()
     return redirect(request.META.get('HTTP_REFERER'))
-
