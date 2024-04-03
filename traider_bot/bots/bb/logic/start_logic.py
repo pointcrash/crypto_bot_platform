@@ -40,6 +40,9 @@ def bb_worker(bot):
 
     finally:
         try:
+            bot.bb.take_on_ml_status = bb_worker_class.ml_filled
+            bot.bb.take_on_ml_qty = bb_worker_class.ml_qty
+            bot.save()
             if ws_client is not None:
                 ws_client.exit()
             print('End working bb bot')

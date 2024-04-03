@@ -15,10 +15,10 @@ class WorkBollingerBandsClass:
         self.symbol = bot.symbol.name
         self.bb = BollingerBands(bot)
         self.avg_obj = BBAutoAverage(bot, self.bb)
+        self.ml_filled = bot.bb.take_on_ml_status
+        self.ml_qty = bot.bb.take_on_ml_qty
         self.current_price = None
         self.have_psn = False
-        self.ml_filled = False
-        self.ml_qty = None
         self.ml_order_id = None
         self.main_order_id = None
         self.position_info = None

@@ -94,6 +94,7 @@ class BBBotModel(models.Model):
     take_on_ml = models.BooleanField(default=True)
     take_on_ml_percent = models.DecimalField(max_digits=5, decimal_places=2, default=50)
     take_on_ml_status = models.BooleanField(default=False, blank=True, null=True)
+    take_on_ml_qty = models.DecimalField(max_digits=10, decimal_places=10, default=0, blank=True, null=True)
     auto_avg = models.BooleanField(default=False)
     avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     is_deviation_from_lines = models.BooleanField(default=False, blank=True)
