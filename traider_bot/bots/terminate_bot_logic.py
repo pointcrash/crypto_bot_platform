@@ -25,9 +25,10 @@ def stop_bot_with_cancel_orders_and_drop_positions(bot):
 
 
 def terminate_bot(bot, user=None):
-    bot.is_active = False
-    bot.save()
-    time.sleep(7)
+    if bot.is_active:
+        bot.is_active = False
+        bot.save()
+        time.sleep(7)
 
     if user:
         custom_logging(bot, f'Бот был деактивирован вручную пользователем "{user.username}"')

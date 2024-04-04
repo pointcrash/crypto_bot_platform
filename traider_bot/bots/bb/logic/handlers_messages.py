@@ -26,7 +26,11 @@ def bb_handler_wrapper(bb_worker_class_obj):
 def handle_order_stream_message(msg, bot_class_obj):
     if msg['status'].upper() == 'FILLED':
         order_id = msg['orderId']
-        custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
+        if order_id == bot_class_obj.current_order_id:
+            bot_class_obj.current_order_id = ''
+            custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
+        else:
+            custom_logging(bot_class_obj.bot, f' CUSTOM ORDER FILLED ID {order_id}')
     #     if msg['orderId'] == bot_class_obj.ml_order_id:
     #         bot_class_obj.ml_filled = True
     #     elif msg['orderId'] == bot_class_obj.main_order_id:
@@ -70,14 +74,17 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
     bot_class_obj.current_price = Decimal(msg['markPrice'])
-    if bot_class_obj.have_psn is True:
-        with bot_class_obj.avg_locker:
-            bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price)
-        bot_class_obj.place_closing_orders()
-        bot_class_obj.turn_after_ml()
-    else:
-        with bot_class_obj.psn_locker:
-            bot_class_obj.place_open_psn_order(bot_class_obj.current_price)
+    if not bot_class_obj.current_order_id:
+        if bot_class_obj.have_psn is True:
+            with bot_class_obj.avg_locker:
+                if bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price):
+                    bot_class_obj.ml_filled = False
+                    bot_class_obj.ml_qty = 0
+            bot_class_obj.place_closing_orders()
+            bot_class_obj.turn_after_ml()
+        else:
+            with bot_class_obj.psn_locker:
+                bot_class_obj.place_open_psn_order(bot_class_obj.current_price)
 
 # def handle_mark_price_stream_message(msg, bot_class_obj):
 #     bot_class_obj.current_price = Decimal(msg['markPrice'])

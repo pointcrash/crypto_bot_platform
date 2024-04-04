@@ -58,12 +58,20 @@ class SoftDeletedModelManager(models.Manager):
 
 class Log(models.Model):
     objects = SoftDeletedModelManager()
+    soft_deleted_objects = models.Manager()
 
     bot = models.ForeignKey(BotModel, on_delete=models.SET_NULL, blank=True, null=True)
     content = models.CharField(blank=True, null=True)
     time = models.CharField(blank=True, null=True)
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     is_deleted = models.BooleanField(default=False)
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.save()
+
+    def hard_delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
 
 
 class BBBotModel(models.Model):
@@ -108,7 +116,7 @@ class BBBotModel(models.Model):
     avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     is_deviation_from_lines = models.BooleanField(default=False, blank=True)
     percent_deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0, blank=True)
-    dfm = models.DecimalField(max_digits=5, decimal_places=3, default=30)
+    dfm = models.DecimalField(max_digits=5, decimal_places=3, default=70)
     chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
     dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     max_margin = models.IntegerField(null=True, blank=True)

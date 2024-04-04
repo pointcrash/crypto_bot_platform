@@ -18,10 +18,11 @@ class WorkBollingerBandsClass:
         self.ml_filled = bot.bb.take_on_ml_status
         self.ml_qty = bot.bb.take_on_ml_qty
         self.current_price = None
+        self.current_order_id = ''
         self.have_psn = False
         self.ml_order_id = None
         self.main_order_id = None
-        self.position_info = None
+        self.position_info = dict()
 
         self.psn_locker = threading.Lock()
         self.avg_locker = threading.Lock()
@@ -49,51 +50,51 @@ class WorkBollingerBandsClass:
         # else:
         #     self.replace_opening_orders()
 
-    def replace_opening_orders(self):
-        cancel_all_orders(self.bot)
-        side = self.bot.bb.side
-        amount_usdt = self.bot.amount_long
-
-        while not self.current_price:
-            time.sleep(0.5)
-
-        if side == 'FB' or side == 'LONG':
-            if self.current_price <= self.bb.bl:
-                return place_order(self.bot, side='BUY', order_type='MARKET', price=self.current_price,
-                                   amount_usdt=amount_usdt)
-            place_conditional_order(self.bot, side='BUY', position_side='LONG', trigger_price=self.bb.bl,
-                                    trigger_direction=2, amount_usdt=amount_usdt)
-        if side == 'FB' or side == 'SHORT':
-            if self.current_price >= self.bb.tl:
-                return place_order(self.bot, side='SELL', order_type='MARKET', price=self.current_price,
-                                   amount_usdt=amount_usdt)
-            place_conditional_order(self.bot, side='SELL', position_side='SHORT', trigger_price=self.bb.tl,
-                                    trigger_direction=1, amount_usdt=amount_usdt)
-
-    def replace_closing_orders(self):
-        cancel_all_orders(self.bot)
-        position_side = self.position_info['side']
-        psn_qty = self.position_info['qty']
-
-        side, price, td = ('SELL', self.bb.tl, 1) if position_side == 'LONG' else ('BUY', self.bb.bl, 2)
-        price = self.price_check(price, 2)
-
-        if self.bot.bb.take_on_ml and not self.ml_filled and psn_qty > Decimal(self.bot.symbol.minOrderQty):
-            ml_take_price = self.price_check(self.bb.ml, 1)
-            ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
-                Decimal(self.bot.symbol.minOrderQty))
-
-            response = place_conditional_order(self.bot, side=side, position_side=position_side,
-                                               trigger_price=ml_take_price, trigger_direction=td, qty=ml_take_qty)
-            self.ml_order_id = response['orderId']
-
-            main_take_qty = psn_qty - ml_take_qty
-        else:
-            main_take_qty = Decimal(self.position_info['qty'])
-
-        response = place_conditional_order(self.bot, side=side, position_side=position_side,
-                                           trigger_price=price, trigger_direction=td, qty=main_take_qty)
-        self.main_order_id = response['orderId']
+    # def replace_opening_orders(self):
+    #     cancel_all_orders(self.bot)
+    #     side = self.bot.bb.side
+    #     amount_usdt = self.bot.amount_long
+    #
+    #     while not self.current_price:
+    #         time.sleep(0.5)
+    #
+    #     if side == 'FB' or side == 'LONG':
+    #         if self.current_price <= self.bb.bl:
+    #             return place_order(self.bot, side='BUY', order_type='MARKET', price=self.current_price,
+    #                                amount_usdt=amount_usdt)
+    #         place_conditional_order(self.bot, side='BUY', position_side='LONG', trigger_price=self.bb.bl,
+    #                                 trigger_direction=2, amount_usdt=amount_usdt)
+    #     if side == 'FB' or side == 'SHORT':
+    #         if self.current_price >= self.bb.tl:
+    #             return place_order(self.bot, side='SELL', order_type='MARKET', price=self.current_price,
+    #                                amount_usdt=amount_usdt)
+    #         place_conditional_order(self.bot, side='SELL', position_side='SHORT', trigger_price=self.bb.tl,
+    #                                 trigger_direction=1, amount_usdt=amount_usdt)
+    #
+    # def replace_closing_orders(self):
+    #     cancel_all_orders(self.bot)
+    #     position_side = self.position_info['side']
+    #     psn_qty = self.position_info['qty']
+    #
+    #     side, price, td = ('SELL', self.bb.tl, 1) if position_side == 'LONG' else ('BUY', self.bb.bl, 2)
+    #     price = self.price_check(price, 2)
+    #
+    #     if self.bot.bb.take_on_ml and not self.ml_filled and psn_qty > Decimal(self.bot.symbol.minOrderQty):
+    #         ml_take_price = self.price_check(self.bb.ml, 1)
+    #         ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
+    #             Decimal(self.bot.symbol.minOrderQty))
+    #
+    #         response = place_conditional_order(self.bot, side=side, position_side=position_side,
+    #                                            trigger_price=ml_take_price, trigger_direction=td, qty=ml_take_qty)
+    #         self.ml_order_id = response['orderId']
+    #
+    #         main_take_qty = psn_qty - ml_take_qty
+    #     else:
+    #         main_take_qty = Decimal(self.position_info['qty'])
+    #
+    #     response = place_conditional_order(self.bot, side=side, position_side=position_side,
+    #                                        trigger_price=price, trigger_direction=td, qty=main_take_qty)
+    #     self.main_order_id = response['orderId']
 
     def price_check(self, price, take_number):
         psn_side = self.position_info['side']
@@ -119,6 +120,7 @@ class WorkBollingerBandsClass:
                 response = place_order(self.bot, side='BUY', order_type='MARKET', price=current_price,
                                        amount_usdt=amount_usdt)
                 if response.get('orderId'):
+                    self.current_order_id = response.get('orderId')
                     self.have_psn = True
                 else:
                     custom_logging(self.bot, response, named='response')
@@ -128,6 +130,7 @@ class WorkBollingerBandsClass:
                 response = place_order(self.bot, side='SELL', order_type='MARKET', price=current_price,
                                        amount_usdt=amount_usdt)
                 if response.get('orderId'):
+                    self.current_order_id = response.get('orderId')
                     self.have_psn = True
                 else:
                     custom_logging(self.bot, response, named='response')
@@ -150,6 +153,7 @@ class WorkBollingerBandsClass:
                 response = place_order(self.bot, side=side, position_side=position_side, order_type='MARKET',
                                        price=ml_take_price, qty=ml_take_qty)
                 self.ml_order_id = response['orderId']
+                self.current_order_id = response.get('orderId')
                 self.ml_qty = ml_take_qty
                 self.ml_filled = True
                 main_take_qty = psn_qty - ml_take_qty
@@ -158,6 +162,7 @@ class WorkBollingerBandsClass:
             response = place_order(self.bot, side=side, position_side=position_side,
                                    price=price,  order_type='MARKET', qty=main_take_qty)
             self.main_order_id = response['orderId']
+            self.current_order_id = response.get('orderId')
             self.have_psn = False
             self.ml_filled = False
 
@@ -174,6 +179,7 @@ class WorkBollingerBandsClass:
             if order_side:
                 response = place_order(self.bot, side=order_side, price=self.current_price, order_type='MARKET', qty=self.ml_qty)
                 order_id = response['orderId']
+                self.current_order_id = response.get('orderId')
                 self.ml_qty = None
                 self.ml_filled = False
 
