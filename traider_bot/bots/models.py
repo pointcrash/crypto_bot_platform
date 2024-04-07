@@ -141,19 +141,20 @@ class SimpleHedge(models.Model):
 
 
 class StepHedge(models.Model):
-    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
-    short1invest = models.CharField(max_length=20, null=True)
-    long1invest = models.CharField(max_length=20, null=True)
-    tp_pnl_percent = models.CharField(max_length=20, null=True)
-    tp_pnl_percent_long = models.CharField(max_length=20, null=True)
-    pnl_short_avg = models.CharField(max_length=20, null=True)
-    pnl_long_avg = models.CharField(max_length=20, null=True)
-    margin_short_avg = models.CharField(max_length=20, null=True)
-    margin_long_avg = models.CharField(max_length=20, null=True)
-    qty_steps = models.IntegerField(default=30, null=True)
-    qty_steps_diff = models.IntegerField(default=10)
-    add_tp = models.BooleanField(default=False)
-    is_nipple_active = models.BooleanField(default=True)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True, related_name='zinger')
+    short1invest = models.IntegerField(blank=True, null=True)
+    long1invest = models.IntegerField(blank=True, null=True)
+    income_percent = models.DecimalField(max_digits=4, decimal_places=1, default=6)
+    tp_pnl_percent_short = models.DecimalField(max_digits=4, decimal_places=1)
+    tp_pnl_percent_long = models.DecimalField(max_digits=4, decimal_places=1)
+    pnl_short_avg = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    pnl_long_avg = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    margin_short_avg = models.IntegerField(blank=True, null=True)
+    margin_long_avg = models.IntegerField(blank=True, null=True)
+    qty_steps = models.IntegerField(default=30, blank=True)
+    qty_steps_diff = models.IntegerField(default=10, blank=True)
+    add_tp = models.BooleanField(default=False, blank=True)
+    is_nipple_active = models.BooleanField(default=True, blank=True, null=True)
     move_nipple = models.BooleanField(blank=True, null=True)
 
     def set_move_nipple_value(self):

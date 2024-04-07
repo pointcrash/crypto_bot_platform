@@ -12,4 +12,5 @@ urlpatterns = [
     path('get_balance/<int:acc_id>/', get_balance, name='get_balance'),
     path('strategies/', strategies_view, name='strategies'),
     path('all_symbols_update/', update_symbols, name='all_symbols_update'),
+    path('restart_all_bots/', restart_all_bots, name='restart_all_bots'),
 ]

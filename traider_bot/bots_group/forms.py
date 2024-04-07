@@ -88,13 +88,13 @@ class BotForm(forms.ModelForm):
 class StepHedgeForm(forms.ModelForm):
     class Meta:
         model = StepHedge
-        fields = ['short1invest', 'long1invest', 'tp_pnl_percent', 'tp_pnl_percent_long', 'pnl_short_avg', 'pnl_long_avg',
+        fields = ['short1invest', 'long1invest', 'tp_pnl_percent_short', 'tp_pnl_percent_long', 'pnl_short_avg', 'pnl_long_avg',
                   'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff', 'is_nipple_active', ]
 
         widgets = {
             'short1invest': forms.TextInput(attrs={'class': 'form-control'}),
             'long1invest': forms.TextInput(attrs={'class': 'form-control'}),
-            'tp_pnl_percent': forms.TextInput(attrs={'class': 'form-control', 'id': 'tp_pnl_percent'}),
+            'tp_pnl_percent_short': forms.TextInput(attrs={'class': 'form-control', 'id': 'tp_pnl_percent'}),
             'tp_pnl_percent_long': forms.TextInput(attrs={'class': 'form-control', 'id': 'tp_pnl_percent_long'}),
             'pnl_short_avg': forms.TextInput(attrs={'class': 'form-control'}),
             'pnl_long_avg': forms.TextInput(attrs={'class': 'form-control'}),
@@ -108,7 +108,7 @@ class StepHedgeForm(forms.ModelForm):
         labels = {
             'short1invest': 'SHORT - 1ST ORDER INVESTMENTS',
             'long1invest': 'LONG - 1ST ORDER INVESTMENTS',
-            'tp_pnl_percent': '% PnL (short)',
+            'tp_pnl_percent_short': '% PnL (short)',
             'tp_pnl_percent_long': '% PnL (long)',
             'pnl_short_avg': '% PnL Short average',
             'pnl_long_avg': '% PnL Long average',

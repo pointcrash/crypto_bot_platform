@@ -2,30 +2,29 @@ import time
 import traceback
 
 from api_2.custom_ws_class import CustomWSClient
-from .bot_worker_class import WorkBollingerBandsClass
+from .handlers_messages import zinger_handler_wrapper
+from .worker_class import WorkZingerClass
 
-from .handlers_messages import bb_handler_wrapper
 from ...general_functions import custom_logging
 
 
-def bb_worker(bot):
+def zinger_worker(bot):
     ws_client = None
     try:
-        bb_worker_class = WorkBollingerBandsClass(bot)
+        worker_class = WorkZingerClass(bot)
 
         ''' Connection WS '''
-        ws_client = CustomWSClient(callback=bb_handler_wrapper(bb_worker_class), bot=bot)
+        ws_client = CustomWSClient(callback=zinger_handler_wrapper(worker_class), bot=bot)
         ws_client.start()
 
         time.sleep(5)
 
         ''' Subscribe to topics '''
         ws_client.sub_to_user_info()
-        ws_client.sub_to_kline(interval=bot.bb.interval)
         ws_client.sub_to_mark_price()
 
         ''' Change leverage and position mode '''
-        bb_worker_class.preparatory_actions()
+        worker_class.preparatory_actions()
 
         while bot.is_active and ws_client.is_connected():
             time.sleep(5)
@@ -40,13 +39,9 @@ def bb_worker(bot):
 
     finally:
         try:
-            bb = bot.bb
-            bb.take_on_ml_status = bb_worker_class.ml_filled
-            bb.take_on_ml_qty = bb_worker_class.ml_qty
-            bb.save()
             if ws_client is not None:
                 ws_client.exit()
-            print('End working bb bot')
+            print('End working ZINGER bot')
         except Exception as e:
             print('ERROR:', e)
             custom_logging(bot, f'Error {e}')

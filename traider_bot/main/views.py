@@ -1,4 +1,6 @@
 import logging
+import threading
+import time
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -11,9 +13,11 @@ from django.utils import timezone
 
 from api_2.api_aggregator import account_balance
 from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
+from bots.bb.logic.start_logic import bb_worker
 from bots.general_functions import all_symbols_update
 from bots.models import Log, Symbol, BotModel
 from bots.SetZeroPsn.logic.psn_count import psn_count
+from bots.zinger.logic.start_logic import zinger_worker
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
@@ -323,3 +327,25 @@ def update_symbols(request):
     if request.user.is_superuser:
         all_symbols_update()
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def restart_all_bots(request):
+    active_bots = BotModel.objects.filter(is_active=True)
+    bot_thread = None
+    for bot in active_bots:
+        bot.is_active = False
+        bot.save()
+    time.sleep(7)
+    for bot in active_bots:
+        bot.is_active = True
+        bot.save()
+
+        if bot.work_model == 'bb':
+            bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+
+        elif bot.work_model == 'zinger':
+            bot_thread = threading.Thread(target=zinger_worker, args=(bot,), name=f'BotThread_{bot.id}')
+
+        if bot_thread is not None:
+            bot_thread.start()

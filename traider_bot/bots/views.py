@@ -8,6 +8,7 @@ from bots.bb.logic.start_logic import bb_worker
 from bots.models import BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
+from bots.zinger.logic.start_logic import zinger_worker
 from main.forms import AccountSelectForm
 
 logger = logging.getLogger('django')
@@ -112,6 +113,11 @@ def bot_start(request, bot_id):
         bot.is_active = True
         bot.save()
         bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+
+    elif bot.work_model == 'zinger':
+        bot.is_active = True
+        bot.save()
+        bot_thread = threading.Thread(target=zinger_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
     if bot_thread is not None:
         bot_thread.start()
