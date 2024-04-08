@@ -127,7 +127,7 @@ def get_position_inform(account, symbol):
                 'entryPrice': position['avgPrice'],
                 'markPrice': position['markPrice'],
                 'unrealisedPnl': position['unrealisedPnl'],
-                'side': 'LONG' if position['side'] == 'Buy' else 'SHORT',
+                'side': 'LONG' if int(position['positionIdx']) == 1 else 'SHORT',
             } for position in position_list]
         return sort_function(position_inform_list)
 

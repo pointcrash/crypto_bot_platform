@@ -67,7 +67,7 @@ def bybit_get_position_inform(bot):
             'entryPrice': position['avgPrice'],
             'markPrice': position['markPrice'],
             'unrealisedPnl': position['unrealisedPnl'],
-            'side': 'LONG' if position['side'] == 'Buy' else 'SHORT',
+            'side': 'LONG' if int(position['positionIdx']) == 1 else 'SHORT',
         } for position in position_list]
         return sort_position_inform(position_inform_list)
 

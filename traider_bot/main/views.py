@@ -349,3 +349,5 @@ def restart_all_bots(request):
 
         if bot_thread is not None:
             bot_thread.start()
+
+    return redirect(request.META.get('HTTP_REFERER'))

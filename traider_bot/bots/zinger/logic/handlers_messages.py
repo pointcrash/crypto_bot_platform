@@ -23,16 +23,16 @@ def zinger_handler_wrapper(bb_worker_class_obj):
 def handle_order_stream_message(msg, bot_class_obj):
     with bot_class_obj.order_locker:
         custom_logging(bot_class_obj.bot, f'ORDER {msg["orderId"]} {msg["status"]}')
-        psn_side = msg['psnSide']
-        psn_price = Decimal(msg['avgPrice'])
-        psn_qty = Decimal(msg['qty'])
-        if msg['orderId'] == bot_class_obj.open_order_id_list[psn_side]:
-            if msg['status'] == 'FILLED':
+
+        if msg['status'] == 'FILLED':
+            psn_side = msg['psnSide']
+            psn_price = Decimal(msg['avgPrice'])
+            psn_qty = Decimal(msg['qty'])
+
+            if msg['orderId'] == bot_class_obj.open_order_id_list[psn_side]:
                 bot_class_obj.place_tp_orders(psn_side, psn_price, psn_qty)
-        elif msg['orderId'] == bot_class_obj.tp_order_id_list[psn_side]:
-            if msg['status'] == 'NEW':
-                pass
-            elif msg['status'] == 'FILLED':
+
+            elif msg['orderId'] == bot_class_obj.tp_order_id_list[psn_side]:
                 bot_class_obj.nipple_side = psn_side
                 bot_class_obj.realizedPnl += bot_class_obj.unrealizedPnl[psn_side]
                 bot_class_obj.place_second_open_order(psn_side, psn_qty)
