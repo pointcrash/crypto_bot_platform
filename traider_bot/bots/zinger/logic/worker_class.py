@@ -93,6 +93,8 @@ class WorkZingerClass:
 
         qty = psn_qty - (psn_qty * percent / self.bot.leverage / 100)
         qty = qty.quantize(Decimal(self.bot.symbol.qtyStep), rounding=ROUND_HALF_UP)
+        if qty == psn_qty and qty > Decimal(self.bot.symbol.minOrderQty):
+            qty -= Decimal(self.bot.symbol.qtyStep)
         response = place_order(self.bot, side=side, order_type='MARKET', price=self.current_price, qty=qty)
         self.open_order_id_list[psn_side] = response['orderId']
         print(self.open_order_id_list)
