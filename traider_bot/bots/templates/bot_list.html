@@ -26,6 +26,7 @@
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bot_create' %}">Grid Create</a>-->
             <a class="btn btn-primary m-1 btn-shadow" href="{% url 'bb_bot_create' %}">BB Create</a>
             <a class="btn btn-warning m-1 btn-shadow" href="{% url 'all_symbols_update' %}">Refresh coins</a>
+            <a class="btn btn-dark m-1 btn-shadow" href="{% url 'all_symbols_update' %}">Dark button</a>
             {% if user.is_superuser %}
             <a class="btn btn-danger m-1 btn-shadow" href="{% url 'restart_all_bots' %}">RestartAllBots</a>
             {% endif %}
