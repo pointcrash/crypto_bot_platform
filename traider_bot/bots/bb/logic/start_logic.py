@@ -40,16 +40,17 @@ def bb_worker(bot):
 
     finally:
         try:
+            if ws_client is not None:
+                ws_client.exit()
             bb = bot.bb
             bb.take_on_ml_status = bb_worker_class.ml_filled
             bb.take_on_ml_qty = bb_worker_class.ml_qty
             bb.save()
-            if ws_client is not None:
-                ws_client.exit()
             print('End working bb bot')
         except Exception as e:
             print('ERROR:', e)
-            custom_logging(bot, f'Error {e}')
+            custom_logging(bot, f'Ошибка: {e}')
+            custom_logging(bot, f'Traceback {traceback.format_exc()}')
         if bot.is_active:
             bot.is_active = False
             bot.save()
