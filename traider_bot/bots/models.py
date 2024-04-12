@@ -147,6 +147,7 @@ class StepHedge(models.Model):
     income_percent = models.DecimalField(max_digits=4, decimal_places=1, default=6)
     tp_pnl_percent_short = models.DecimalField(max_digits=4, decimal_places=1)
     tp_pnl_percent_long = models.DecimalField(max_digits=4, decimal_places=1)
+    realized_pnl = models.DecimalField(max_digits=20, decimal_places=10, default=0)
     pnl_short_avg = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     pnl_long_avg = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     margin_short_avg = models.IntegerField(blank=True, null=True)
@@ -154,7 +155,7 @@ class StepHedge(models.Model):
     qty_steps = models.IntegerField(default=30, blank=True)
     qty_steps_diff = models.IntegerField(default=10, blank=True)
     add_tp = models.BooleanField(default=False, blank=True)
-    is_nipple_active = models.BooleanField(default=True, blank=True, null=True)
+    is_nipple_active = models.BooleanField(default=False, blank=True, null=True)
     move_nipple = models.BooleanField(blank=True, null=True)
 
     def set_move_nipple_value(self):

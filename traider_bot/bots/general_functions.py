@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import time
 from decimal import Decimal, ROUND_DOWN
+from django.core.cache import cache
 
 import os
 import django
@@ -8,14 +9,12 @@ import pytz
 
 from api_2.api_aggregator import get_exchange_information
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
-from tg_bot.send_message import send_telegram_message
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
 from timezone.models import TimeZone
 from main.models import ActiveBot, ExchangeService, Account
-from tg_bot.models import TelegramAccount
 from bots.models import Symbol, Log
 from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
@@ -475,4 +474,7 @@ def is_bot_active(bot_id):
     return ActiveBot.objects.filter(bot_id=bot_id).exists()
 
 
-
+def clear_cache_bot_data(bot_id):
+    bot_cache_keys = [key for key in cache.keys(f'bot{bot_id}*')]
+    for key in bot_cache_keys:
+        cache.delete(key)

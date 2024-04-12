@@ -55,8 +55,7 @@
                     <td class="d-none d-sm-table-cell">{{ bot.work_model }}</td>
                     <td class="d-none d-sm-table-cell">
                         {% if bot.work_model == 'bb' %}{{ bot.bb.side }}{% endif %}</td>
-                    <td class="d-none d-md-table-cell">{{ bot.amount_long }}
-                        {% if bot.amount_short %}/{{ bot.amount_short }}{% endif %}</td>
+                    <td class="d-none d-md-table-cell">{{ bot.amount_long }}{% if bot.amount_short %}/{{ bot.amount_short }}{% endif %}</td>
                     <td>{% if bot.is_active %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
                         {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}
                     </td>

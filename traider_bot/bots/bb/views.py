@@ -3,6 +3,7 @@ import threading
 import time
 
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.shortcuts import render, redirect
 
 from bots.bb.forms import BBForm
@@ -87,10 +88,17 @@ def bb_bot_edit(request, bot_id):
         bot_form = BotModelForm(request=request, instance=bot)
         bb_form = BBForm(instance=bot.bb)
 
+    bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
+    bot_cached_data = dict()
+    for key in bot_cache_keys:
+        new_key = key.split('_')[1]
+        bot_cached_data[new_key] = cache.get(key)
+
     return render(request, 'bb/edit.html', {
         'bot_form': bot_form,
         'bb_form': bb_form,
         'bot': bot,
         'symbol': symbol,
         'account': account,
+        'bot_cached_data': bot_cached_data,
     })

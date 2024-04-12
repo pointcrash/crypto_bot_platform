@@ -1,6 +1,9 @@
+import logging
 import threading
 import time
 from decimal import Decimal
+
+from django.core.cache import cache
 
 from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, \
     get_position_inform, place_conditional_order
@@ -26,6 +29,23 @@ class WorkBollingerBandsClass:
 
         self.psn_locker = threading.Lock()
         self.avg_locker = threading.Lock()
+        self.logger = self.get_logger_for_bot_ws_msg(bot.id)
+
+    def cached_data(self, key, value):
+        cache.set(f'bot{self.bot.id}_{key}', str(value), timeout=3600)
+
+    def get_logger_for_bot_ws_msg(self, bot_id):
+        formatter = logging.Formatter('%(message)s')
+
+        logger = logging.getLogger(f'BOT_{bot_id}_METRICS')
+        logger.setLevel(logging.DEBUG)
+
+        handler = logging.FileHandler(f'logs/bots/ws_data/bot_{bot_id}_metrics.log')
+        handler.setFormatter(formatter)
+        logger.handlers.clear()
+        logger.addHandler(handler)
+
+        return logger
 
     def preparatory_actions(self):
         try:
@@ -146,7 +166,8 @@ class WorkBollingerBandsClass:
 
         if self.bot.bb.take_on_ml and not self.ml_filled and psn_qty > Decimal(self.bot.symbol.minOrderQty):
             ml_take_price = self.price_check(self.bb.ml, 1)
-            if (position_side == 'LONG' and self.current_price > ml_take_price) or (position_side == 'SHORT' and self.current_price < ml_take_price):
+            if (position_side == 'LONG' and self.current_price > ml_take_price) or (
+                    position_side == 'SHORT' and self.current_price < ml_take_price):
                 ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
                     Decimal(self.bot.symbol.minOrderQty))
 
@@ -158,9 +179,10 @@ class WorkBollingerBandsClass:
                 self.ml_filled = True
                 main_take_qty = psn_qty - ml_take_qty
 
-        if (position_side == 'LONG' and self.current_price > price) or (position_side == 'SHORT' and self.current_price < price):
+        if (position_side == 'LONG' and self.current_price > price) or (
+                position_side == 'SHORT' and self.current_price < price):
             response = place_order(self.bot, side=side, position_side=position_side,
-                                   price=price,  order_type='MARKET', qty=main_take_qty)
+                                   price=price, order_type='MARKET', qty=main_take_qty)
             self.main_order_id = response['orderId']
             self.current_order_id = response.get('orderId')
             self.have_psn = False
@@ -177,11 +199,9 @@ class WorkBollingerBandsClass:
                 order_side = 'SELL'
 
             if order_side:
-                response = place_order(self.bot, side=order_side, price=self.current_price, order_type='MARKET', qty=self.ml_qty)
+                response = place_order(self.bot, side=order_side, price=self.current_price, order_type='MARKET',
+                                       qty=self.ml_qty)
                 order_id = response['orderId']
                 self.current_order_id = response.get('orderId')
                 self.ml_qty = None
                 self.ml_filled = False
-
-
-

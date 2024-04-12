@@ -1,3 +1,5 @@
+import logging
+import time
 from decimal import Decimal
 
 from api_2.custom_logging_api import custom_logging
@@ -57,6 +59,7 @@ def handle_position_stream_message(msg, bot_class_obj):
             if msg['side'] == bot_class_obj.position_info['side']:
                 bot_class_obj.position_info['qty'] = 0
                 bot_class_obj.have_psn = False
+        bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
 
         # bot_class_obj.replace_closing_orders()
 
@@ -66,6 +69,10 @@ def handle_message_kline_info(msg, bot_class_obj):
         close_prise = Decimal(msg['closePrice'])
         bot_class_obj.bb.modify_close_price_list(close_prise)
         bot_class_obj.bb.recalculate_lines()
+        bot_class_obj.cached_data(key='tl', value=bot_class_obj.bb.tl)
+        bot_class_obj.cached_data(key='ml', value=bot_class_obj.bb.ml)
+        bot_class_obj.cached_data(key='bl', value=bot_class_obj.bb.bl)
+        bot_class_obj.cached_data(key='closePriceList', value=bot_class_obj.bb.close_price_list)
         # if not bot_class_obj.have_psn:
         #     bot_class_obj.replace_opening_orders()
         # else:
@@ -73,7 +80,10 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
+    start_time = time.time()
+
     bot_class_obj.current_price = Decimal(msg['markPrice'])
+    bot_class_obj.cached_data(key='currentPrice', value=bot_class_obj.current_price)
     if not bot_class_obj.current_order_id:
         if bot_class_obj.have_psn is True:
             with bot_class_obj.avg_locker:
@@ -85,6 +95,10 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
         else:
             with bot_class_obj.psn_locker:
                 bot_class_obj.place_open_psn_order(bot_class_obj.current_price)
+
+    end_time = time.time()
+    execution_time = end_time - start_time
+    bot_class_obj.logger.debug(execution_time)
 
 # def handle_mark_price_stream_message(msg, bot_class_obj):
 #     bot_class_obj.current_price = Decimal(msg['markPrice'])
