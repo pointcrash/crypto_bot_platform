@@ -86,7 +86,7 @@ class WorkZingerClassMarket:
             order_price = (psn_cost + self.tp_income_long) / psn_qty
         elif psn_side == 'SHORT':
             side = 'BUY'
-            order_price = abs((-psn_cost + self.tp_income_long) / psn_qty)
+            order_price = abs((-psn_cost + self.tp_income_short) / psn_qty)
         else:
             raise Exception(f'Not correct side position_info: {psn_side}')
 
