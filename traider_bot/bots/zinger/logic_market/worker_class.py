@@ -95,11 +95,11 @@ class WorkZingerClassMarket:
 
         prices = [psn_price, order_price]
         self.multiplication_factor[psn_side] = max(prices) / min(prices)
-        with self.order_locker:
-            response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price,
-                                   qty=psn_qty)
-            self.tp_order_id_list[psn_side] = response['orderId']
-            self.unrealizedPnl[psn_side] = abs(psn_price - order_price) * psn_qty
+        response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price,
+                               qty=psn_qty)
+        self.tp_order_id_list[psn_side] = response['orderId']
+        self.unrealizedPnl[psn_side] = abs(psn_price - order_price) * psn_qty
+
         self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
         self.cached_data(key='multFactor', value=self.multiplication_factor)
 
