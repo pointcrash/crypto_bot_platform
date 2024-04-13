@@ -145,6 +145,7 @@ class WorkZingerClassMarket:
 
             elif self.current_price >= order_data['price']:
                 self.place_second_open_order(order_data['psn_side'], order_data['psn_qty'])
+                self.nipple_data_list.pop('LONG')
 
         if self.nipple_data_list.get('SHORT'):
             order_data = self.nipple_data_list['SHORT']
@@ -154,6 +155,7 @@ class WorkZingerClassMarket:
 
             elif self.current_price <= order_data['price']:
                 self.place_second_open_order(order_data['psn_side'], order_data['psn_qty'])
+                self.nipple_data_list.pop('SHORT')
 
     def calc_pnl(self):
         current_pnl = copy.copy(self.realizedPnl)
