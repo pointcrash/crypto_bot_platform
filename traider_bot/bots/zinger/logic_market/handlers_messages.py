@@ -49,6 +49,7 @@ def handle_position_stream_message(msg, bot_class_obj):
             'entryPrice': Decimal(msg['entryPrice']),
             'unrealisedPnl': Decimal(msg['unrealisedPnl']),
         }
+        bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
