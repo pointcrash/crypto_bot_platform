@@ -113,7 +113,7 @@ class WorkZingerClassMarket:
         else:
             raise Exception(f'Not correct side position_info: {psn_side}')
 
-        qty = psn_qty / self.multiplication_factor
+        qty = psn_qty / self.multiplication_factor[psn_side]
         # qty = psn_qty - (psn_qty * percent / self.bot.leverage / 100)
         qty = qty.quantize(Decimal(self.bot.symbol.qtyStep), rounding=ROUND_HALF_UP)
         if qty == psn_qty and qty > Decimal(self.bot.symbol.minOrderQty):
