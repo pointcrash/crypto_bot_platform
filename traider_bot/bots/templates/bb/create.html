@@ -107,8 +107,6 @@
                     {{ bb_form.avg_percent }}
                     <br>
 
-<!--                    {{ bb_form.dfep.label_tag }}-->
-<!--                    {{ bb_form.dfep }}-->
                     <div class="row">
                         <div class="col-6">
                     {{ bb_form.dfm.label_tag }}
@@ -119,6 +117,23 @@
                     {{ bb_form.chw }}
                         </div>
                     </div>
+                    <br>
+
+                    <div class="d-inline">
+                        <p class="d-inline">{{ bb_form.hard_avg.label_tag }}</p>
+                        {{ bb_form.hard_avg }}
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                    {{ bb_form.hard_avg_type.label_tag }}
+                    {{ bb_form.hard_avg_type }}
+                        </div>
+                        <div class="col-6">
+                    {{ bb_form.hard_avg_percent.label_tag }}
+                    {{ bb_form.hard_avg_percent }}
+                        </div>
+                    </div>
+
                     {{ bb_form.max_margin.label_tag }}
                     {{ bb_form.max_margin }}
                     <br>

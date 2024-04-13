@@ -177,6 +177,7 @@ class WorkBollingerBandsClass:
                 self.current_order_id = response.get('orderId')
                 self.ml_qty = ml_take_qty
                 self.ml_filled = True
+                self.ml_status_save()
                 main_take_qty = psn_qty - ml_take_qty
 
         if (position_side == 'LONG' and self.current_price > price) or (
@@ -186,7 +187,9 @@ class WorkBollingerBandsClass:
             self.main_order_id = response['orderId']
             self.current_order_id = response.get('orderId')
             self.have_psn = False
+            self.ml_qty = 0
             self.ml_filled = False
+            self.ml_status_save()
 
     def turn_after_ml(self):
         if self.bot.bb.take_on_ml and self.ml_filled:
@@ -203,5 +206,12 @@ class WorkBollingerBandsClass:
                                        qty=self.ml_qty)
                 order_id = response['orderId']
                 self.current_order_id = response.get('orderId')
-                self.ml_qty = None
+                self.ml_qty = 0
                 self.ml_filled = False
+                self.ml_status_save()
+
+    def ml_status_save(self):
+        bot_bb = self.bot.bb
+        bot_bb.take_on_ml_status = self.ml_filled
+        bot_bb.take_on_ml_qty = self.ml_qty
+        bot_bb.save()

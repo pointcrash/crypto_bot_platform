@@ -14,7 +14,7 @@ class WorkZingerClassMarket:
         self.bot = bot
         self.zinger = bot.zinger
         self.symbol = bot.symbol.name
-        self.tick_size = bot.symbol.tickSize
+        self.tick_size = Decimal(bot.symbol.tickSize)
         self.current_price = None
         self.open_order_id_list = dict()
         self.nipple_data_list = dict()
@@ -139,8 +139,8 @@ class WorkZingerClassMarket:
 
         if self.nipple_data_list.get('LONG'):
             order_data = self.nipple_data_list['LONG']
-            if order_data['price'] - self.current_price > 30 * self.tick_size:
-                self.nipple_data_list['LONG']['price'] = self.current_price + 30 * self.tick_size
+            if order_data['price'] - self.current_price > self.zinger.qty_steps * self.tick_size:
+                self.nipple_data_list['LONG']['price'] = self.current_price + self.zinger.qty_steps * self.tick_size
                 self.cached_data(key=f'2OpOrPrLONG', value=self.nipple_data_list['LONG']['price'])
 
             elif self.current_price >= order_data['price']:
@@ -148,8 +148,8 @@ class WorkZingerClassMarket:
 
         if self.nipple_data_list.get('SHORT'):
             order_data = self.nipple_data_list['SHORT']
-            if self.current_price - order_data['price'] > 30 * self.tick_size:
-                self.nipple_data_list['SHORT']['price'] = self.current_price - 30 * self.tick_size
+            if self.current_price - order_data['price'] > self.zinger.qty_steps * self.tick_size:
+                self.nipple_data_list['SHORT']['price'] = self.current_price - self.zinger.qty_steps * self.tick_size
                 self.cached_data(key=f'2OpOrPrSHORT', value=self.nipple_data_list['SHORT']['price'])
 
             elif self.current_price <= order_data['price']:
@@ -159,9 +159,16 @@ class WorkZingerClassMarket:
         current_pnl = copy.copy(self.realizedPnl)
         for psn_side, psn in self.position_info.items():
             if psn_side == 'LONG':
-                current_pnl += (self.current_price - psn['entryPrice']) * psn['qty']
+                pnl_long = (self.current_price - psn['entryPrice']) * psn['qty']
+                # current_pnl += (self.current_price - psn['entryPrice']) * psn['qty']
+                current_pnl += pnl_long
+                self.cached_data(key=f'pnlLong', value=pnl_long)
+
             elif psn_side == 'SHORT':
-                current_pnl += (psn['entryPrice'] - self.current_price) * psn['qty']
+                pnl_short = (psn['entryPrice'] - self.current_price) * psn['qty']
+                # current_pnl += (psn['entryPrice'] - self.current_price) * psn['qty']
+                current_pnl += pnl_short
+                self.cached_data(key=f'pnlShort', value=pnl_short)
         self.cached_data(key=f'currentPnl', value=current_pnl)
         return current_pnl
 
@@ -180,5 +187,6 @@ class WorkZingerClassMarket:
 
     def update_realized_pnl(self, psn_side):
         self.realizedPnl += self.unrealizedPnl[psn_side]
+        self.cached_data(key=f'realizedPnl', value=self.realizedPnl)
         self.zinger.realized_pnl = self.realizedPnl
         self.zinger.save()

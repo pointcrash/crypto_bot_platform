@@ -25,6 +25,8 @@ class BBAutoAverage:
         self.psn_qty = None
         self.bb_obj = bb_obj
 
+        self.have_permission = True
+
     def _checking_rules(self, current_price, bb_price):
         if self._channel_width_check(current_price):
             if self._dfm_check(current_price, bb_price):
@@ -33,16 +35,42 @@ class BBAutoAverage:
                         return True
         return False
 
+    def _checking_hard_avg_rules(self, current_price):
+        if self.bot.bb.hard_avg_type == 'pnl':
+            qty = self.psn_qty
+            qty = -qty if self.psn_side == 'SHORT' else qty
+
+            psn_cost = self.psn_price * qty
+            cur_psn_cost = current_price * qty
+            pnl = cur_psn_cost - psn_cost
+            if pnl <= -(self.bot.amount_long * self.bot.bb.hard_avg_percent / 100):
+                return True
+        elif self.bot.bb.hard_avg_type == 'percent':
+            change_percent = (current_price - self.psn_price) / self.psn_price * 100
+            change_percent = -change_percent if self.psn_side == 'LONG' else change_percent
+            if change_percent > self.bot.bb.hard_avg_percent:
+                return True
+
     def auto_avg(self, current_price: Decimal):
         bb_price = None
-        if self.psn_side == 'LONG' and self.bb_obj.ml <= self.psn_price:
-            bb_price = self.bb_obj.bl
-        elif self.psn_side == 'SHORT' and self.bb_obj.ml >= self.psn_price:
-            bb_price = self.bb_obj.tl
+        if self.bot.bb.auto_avg:
+            if self.psn_side == 'LONG' and self.bb_obj.ml <= self.psn_price:
+                bb_price = self.bb_obj.bl
+            elif self.psn_side == 'SHORT' and self.bb_obj.ml >= self.psn_price:
+                bb_price = self.bb_obj.tl
 
-        if bb_price and self._checking_rules(current_price, bb_price) is True:
-            self.to_average(current_price)
-            return True
+        if self.have_permission:
+            if bb_price and self._checking_rules(current_price, bb_price) is True:
+                self.to_average(current_price)
+                self.have_permission = False
+                return True
+
+            elif self.bot.bb.hard_avg:
+                if self._checking_hard_avg_rules(current_price) and self._margin_limit_check():
+                    self.to_average(current_price)
+                    self.have_permission = False
+                    return True
+
         return False
 
     def _channel_width_check(self, current_price):
@@ -98,6 +126,7 @@ class BBAutoAverage:
         self.psn_price = Decimal(data['entryPrice'])
         self.psn_side = data['side']
         self.psn_qty = Decimal(data['qty'])
+        self.have_permission = True
 
 
 def get_quantity_from_price(qty_USDT, price, minOrderQty, leverage):

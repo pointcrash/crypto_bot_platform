@@ -19,13 +19,15 @@ def bb_worker(bot):
 
         time.sleep(5)
 
-        ''' Subscribe to topics '''
+        ''' Subscribe to klines, position and order info topics '''
         ws_client.sub_to_user_info()
         ws_client.sub_to_kline(interval=bot.bb.interval)
-        ws_client.sub_to_mark_price()
 
         ''' Change leverage and position mode '''
         bb_worker_class.preparatory_actions()
+
+        ''' Subscribe to mark price topic '''
+        ws_client.sub_to_mark_price()
 
         while bot.is_active and ws_client.is_connected():
             time.sleep(5)
@@ -42,11 +44,6 @@ def bb_worker(bot):
         try:
             if ws_client is not None:
                 ws_client.exit()
-
-            bb = bot.bb
-            bb.take_on_ml_status = bb_worker_class.ml_filled
-            bb.take_on_ml_qty = bb_worker_class.ml_qty
-            bb.save()
 
             clear_cache_bot_data(bot.id)
             print('End working bb bot')

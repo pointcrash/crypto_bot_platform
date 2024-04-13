@@ -9,7 +9,7 @@ class BBForm(forms.ModelForm):
 
         fields = ['side', 'qty_kline', 'interval', 'd', 'take_on_ml', 'take_on_ml_percent', 'auto_avg',
                   'avg_percent', 'is_deviation_from_lines', 'percent_deviation_from_lines', 'dfm', 'chw', 'dfep',
-                  'max_margin']
+                  'max_margin', 'hard_avg', 'hard_avg_type', 'hard_avg_percent', ]
 
         widgets = {
             'side': forms.Select(attrs={'class': 'form-control'}),
@@ -23,6 +23,9 @@ class BBForm(forms.ModelForm):
             'chw': forms.NumberInput(attrs={'class': 'form-control'}),
             'dfep': forms.NumberInput(attrs={'class': 'form-control'}),
             'max_margin': forms.NumberInput(attrs={'class': 'form-control'}),
+
+            'hard_avg_type': forms.Select(attrs={'class': 'form-control'}),
+            'hard_avg_percent': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
         labels = {
@@ -40,6 +43,10 @@ class BBForm(forms.ModelForm):
             'chw': 'Ширина канала',
             'dfep': 'DFEP',
             'max_margin': 'Макс. маржа',
+
+            'hard_avg': 'Простое усреднение',
+            'hard_avg_type': 'Условие',
+            'hard_avg_percent': 'Процент',
         }
 
     def clean(self):

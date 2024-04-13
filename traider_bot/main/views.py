@@ -333,11 +333,14 @@ def update_symbols(request):
 def restart_all_bots(request):
     active_bots = BotModel.objects.filter(is_active=True)
     bot_thread = None
+    bot_id_list = []
     for bot in active_bots:
+        bot_id_list.append(bot.id)
         bot.is_active = False
         bot.save()
     time.sleep(7)
-    for bot in active_bots:
+    for bot_id in bot_id_list:
+        bot = BotModel.objects.get(id=bot_id)
         bot.is_active = True
         bot.save()
 

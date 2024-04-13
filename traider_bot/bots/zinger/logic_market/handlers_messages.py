@@ -55,6 +55,8 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
     bot_class_obj.current_price = Decimal(msg['markPrice'])
     bot_class_obj.cached_data(key='currentPrice', value=msg['markPrice'])
 
+    bot_class_obj.nipple()
+
     current_pnl = bot_class_obj.calc_pnl()
     if current_pnl > bot_class_obj.required_income:
         bot_class_obj.end_cycle(current_pnl)

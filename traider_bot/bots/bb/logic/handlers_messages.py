@@ -90,6 +90,7 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
                 if bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price):
                     bot_class_obj.ml_filled = False
                     bot_class_obj.ml_qty = 0
+                    bot_class_obj.ml_status_save()
             bot_class_obj.place_closing_orders()
             bot_class_obj.turn_after_ml()
         else:

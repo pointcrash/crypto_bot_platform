@@ -87,6 +87,11 @@ class BBBotModel(models.Model):
         # Другие варианты типа ордера
     )
 
+    HARD_AVG_TYPE_CHOICES = (
+        ('pnl', 'Убытки (PnL)'),
+        ('percent', 'Изменение цены'),
+    )
+
     KLINE_INTERVAL_CHOICES = (
         ('1', '1'),
         ('3', '3'),
@@ -120,6 +125,10 @@ class BBBotModel(models.Model):
     chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
     dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     max_margin = models.IntegerField(null=True, blank=True)
+
+    hard_avg = models.BooleanField(default=False)
+    hard_avg_type = models.CharField(choices=HARD_AVG_TYPE_CHOICES, null=True, blank=True)
+    hard_avg_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
