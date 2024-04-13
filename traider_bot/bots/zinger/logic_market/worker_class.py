@@ -121,7 +121,11 @@ class WorkZingerClassMarket:
         return side, qty
 
     def calc_second_open_order_price_by_nipple(self, psn_side, psn_qty, price):
-        order_price = price + self.zinger.qty_steps * self.tick_size
+        if psn_side == 'LONG':
+            order_price = price + self.zinger.qty_steps * self.tick_size
+        elif psn_side == 'SHORT':
+            order_price = price - self.zinger.qty_steps * self.tick_size
+
         self.cached_data(key=f'2OpOrPr{psn_side}', value=order_price)
 
         self.nipple_data_list[psn_side] = {'psn_side': psn_side, 'psn_qty': psn_qty, 'price': order_price}
