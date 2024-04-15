@@ -6,7 +6,7 @@ from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from api_v5 import get_open_orders
+from api.api_v5_bybit import get_open_orders
 from bots.StepHedge.forms import BotForm, StepHedgeForm
 from bots.StepHedge.logic.main_logic import step_hedge_bot_main_logic
 from bots.StepHedge.ws_logic.main_logic import ws_step_hedge_bot_main_logic

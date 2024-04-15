@@ -12,9 +12,9 @@ class OrdersAdmin(admin.ModelAdmin):
 
 @admin.register(Symbol)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'priceScale', 'minLeverage', 'maxLeverage', 'minPrice', 'maxPrice', 'minOrderQty',)
+    list_display = ('id', 'name', 'service', 'priceScale', 'maxLeverage', 'minPrice', 'maxPrice', 'minOrderQty',)
     list_display_links = ('id', 'name',)
-    search_fields = ('id', 'name',)
+    search_fields = ('id', 'name', 'service__name',)
 
 
 @admin.register(Log)

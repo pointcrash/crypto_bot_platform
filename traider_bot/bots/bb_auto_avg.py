@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from api_v5 import get_current_price
+from api.api_v5_bybit import get_current_price
 from decimal import Decimal, ROUND_DOWN
 
 from bots.models import Log
@@ -17,7 +17,7 @@ def get_USDT_from_qty(qty, price):
 
 
 class BBAutoAverage:
-    def __init__(self, bot, psn_price, psn_side, psn_qty, bb_obj):
+    def __init__(self, bot, psn_info, bb_obj):
         self.bot = bot
         self.account = bot.account
         self.category = bot.category
@@ -27,9 +27,9 @@ class BBAutoAverage:
         self.chw = bot.chw
         self.dfep = bot.dfep
         self.max_margin = bot.max_margin
-        self.psn_price = psn_price
-        self.psn_side = psn_side
-        self.psn_qty = psn_qty
+        self.psn_price = psn_info['price']
+        self.psn_side = psn_info['side']
+        self.psn_qty = psn_info['qty']
         self.bb_obj = bb_obj
 
     def auto_avg(self):

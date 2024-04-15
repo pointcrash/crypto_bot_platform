@@ -7,7 +7,7 @@ import hmac
 
 from requests import RequestException
 
-from tg_bot.models import TelegramAccount
+# from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 
 httpClient = requests.Session()
@@ -43,9 +43,9 @@ def HTTP_Request(account, endPoint, method, payload, bot=None):
             return response.text
         except RequestException as e:
             if bot:
-                chat_id = TelegramAccount(owner=bot.owner).chat_id
+                # chat_id = TelegramAccount(owner=bot.owner).chat_id
                 message = f'Вызвано исключение RequestException: {e}'
-                send_telegram_message(chat_id, bot, message)
+                # send_telegram_message(chat_id, bot, message)
 
             # Обработка ошибки при отправке запроса или получении ответа
             continue
@@ -175,30 +175,21 @@ def get_symbol_set():
     from main.models import Account
 
     account = Account.objects.filter(name='Roman').first()
-
-    # account_data = {
-    #     "name": "John Doe",
-    #     "API_TOKEN": "EY0sr8jAA83IuRIbza",
-    #     "SECRET_KEY": "Wc0SOczSJvS5cjZRIM8wpgnbDvxCP57shoiA",
-    #     "is_mainnet": True,
-    #     "url": "https://api.bybit.com"
-    # }
-    #
-    # account = Account(
-    #     name=account_data["name"],
-    #     API_TOKEN=account_data["API_TOKEN"],
-    #     SECRET_KEY=account_data["SECRET_KEY"],
-    #     is_mainnet=account_data["is_mainnet"],
-    #     url=account_data["url"]
-    # )
-
     data_set = get_instruments_info(account, category="linear")
-    symbol_set = [(i['symbol'], i['priceScale'], i['leverageFilter']['minLeverage'], i['leverageFilter']['maxLeverage'],
-                   i['leverageFilter']['leverageStep'], i['priceFilter']['minPrice'], i['priceFilter']['maxPrice'],
-                   i['lotSizeFilter']['minOrderQty'], i['lotSizeFilter']['maxOrderQty'], i['priceFilter']['tickSize'],
-                   i['lotSizeFilter']['qtyStep'])
-                  for i in data_set['result']['list'] if
-                  i['symbol'].endswith('USDT')]
+    symbol_set = {
+        i['symbol']: {
+            'priceScale': i['priceScale'],
+            'minLeverage': i['leverageFilter']['minLeverage'],
+            'maxLeverage': i['leverageFilter']['maxLeverage'],
+            'leverageStep': i['leverageFilter']['leverageStep'],
+            'minPrice': i['priceFilter']['minPrice'],
+            'maxPrice': i['priceFilter']['maxPrice'],
+            'priceTickSize': i['priceFilter']['tickSize'],
+            'minQty': i['lotSizeFilter']['minOrderQty'],
+            'maxQty': i['lotSizeFilter']['maxOrderQty'],
+            'stepQtySize': i['lotSizeFilter']['qtyStep']
+        } for i in data_set['result']['list'] if i['symbol'].endswith('USDT')
+    }
 
     return symbol_set
 
@@ -317,7 +308,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'tpSize': tpSize,
             'slSize': tpSize,
             'positionIdx': positionIdx,
-            }
+        }
     else:
         params = {
             'category': bot.category,
@@ -326,7 +317,7 @@ def set_trading_stop(bot, positionIdx, takeProfit='0', stopLoss='0', tpSize=None
             'stopLoss': stopLoss,
             'tpslMode': 'Full',
             'positionIdx': positionIdx,
-            }
+        }
 
     params = json.dumps(params)
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params, bot=bot))
@@ -350,10 +341,10 @@ def tg_error_message(bot, response):
     response_data_retcode = str(response_data["retCode"])
     response_data_retmsg = str(response_data["retMsg"])
 
-    if len(response_data_retcode) == 6:
-        if response_data_retcode != '110025' and response_data_retcode != '110043':
-            tg = TelegramAccount.objects.filter(owner=bot.owner).first()
-            if tg:
-                chat_id = tg.chat_id
-                message = f'Код ошибки: "{response_data_retcode}"\nТекст ошибки: "{response_data_retmsg}"'
-                send_telegram_message(chat_id, bot, message)
+    # if len(response_data_retcode) == 6:
+    #     if response_data_retcode != '110025' and response_data_retcode != '110043':
+            # tg = TelegramAccount.objects.filter(owner=bot.owner).first()
+            # if tg:
+            #     chat_id = tg.chat_id
+            #     message = f'Код ошибки: "{response_data_retcode}"\nТекст ошибки: "{response_data_retmsg}"'
+            #     send_telegram_message(chat_id, bot, message)

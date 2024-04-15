@@ -1,6 +1,6 @@
 import time
 
-from api_v5 import cancel_all, get_list, get_side, get_qty
+from api.api_v5_bybit import cancel_all, get_list, get_side, get_qty
 from bots.bot_logic import logging, clear_data_bot
 from bots.models import Bot
 from main.models import ActiveBot

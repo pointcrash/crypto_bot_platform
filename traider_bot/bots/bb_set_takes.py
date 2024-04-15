@@ -2,7 +2,7 @@ import time
 
 from decimal import Decimal
 
-from api_v5 import cancel_all, switch_position_mode, set_leverage, get_current_price, get_list
+from api.api_v5_bybit import cancel_all, switch_position_mode, set_leverage, get_current_price, get_list
 from bots.bot_logic import calculation_entry_point, take1_status_check, logging, \
     take2_status_check, create_bb_and_avg_obj, order_leaves_qty_check, order_placement_verification, \
     check_order_placement_time, actions_after_end_cycle, bin_order_buy_in_addition

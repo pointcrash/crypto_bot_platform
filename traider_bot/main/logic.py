@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from api_v5 import get_pnl
+from api.api_v5_bybit import get_pnl
 
 
 def calculate_pnl(bot, start_date, end_date):

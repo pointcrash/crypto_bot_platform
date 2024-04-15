@@ -15,6 +15,7 @@ urlpatterns = [
     path('reboot_bots/', reboot_bots, name='reboot_bots'),
     #
     path('hedge/', include('bots.hedge.urls')),
+    path('bb/', include('bots.bb.urls')),
     path('one_way/', include('bots.one_way.urls')),
     path('start_set_zero_psn_bot/<int:acc_id>/<str:symbol_name>/<int:trend>', start_set_zero_psn_bot, name='start_set_zero_psn_bot'),
     path('stop_set_zero_psn_bot/<int:acc_id>/<str:symbol_name>/', stop_set_zero_psn_bot, name='stop_set_zero_psn_bot'),
