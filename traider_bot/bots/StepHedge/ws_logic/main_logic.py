@@ -4,10 +4,10 @@ from decimal import Decimal
 from pybit.unified_trading import WebSocket
 import time
 
-from api.api_v5_bybit import cancel_all
+from api_test.api_v5_bybit import cancel_all
 from bots.StepHedge.ws_logic.handlers_messages import handle_stream_callback
 from bots.StepHedge.ws_logic.ws_step_class import WSStepHedgeClassLogic
-from bots.bot_logic import logging, exit_by_exception, is_bot_active
+from bots.general_functions import custom_logging, exit_by_exception, is_bot_active
 from bots.models import JsonObjectClass, StepHedge
 from main.models import ActiveBot
 
@@ -64,12 +64,12 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
         # Обновляем книгу ордеров до отмены ордеров
         status_req_order_book = step_class_obj.update_order_book()
         if status_req_order_book not in 'OK':
-            logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
+            custom_logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
             raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
         # Обновляем список позиций
         step_class_obj.update_symbol_list()
         if step_class_obj.symbol_list is None:
-            logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+            custom_logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
             raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
         for position_number in range(2):
@@ -120,22 +120,22 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
                 while not ws_public.is_connected():
                     if c > 100:
                         if not ws_private.is_connected():
-                            logging(bot, 'PRIVATE DISCONNECT TOO')
+                            custom_logging(bot, 'PRIVATE DISCONNECT TOO')
                         raise ConnectionError('Reconnection PUBLIC attempt limit exceeded')
                     time.sleep(1)
                     c += 1
-                logging(bot, 'DISCONNECT PUBLIC RECONNECTING')
+                custom_logging(bot, 'DISCONNECT PUBLIC RECONNECTING')
 
             if not ws_private.is_connected():
                 c = 0
                 while not ws_private.is_connected():
                     if c > 100:
                         if not ws_public.is_connected():
-                            logging(bot, 'PUBLIC DISCONNECT TOO')
+                            custom_logging(bot, 'PUBLIC DISCONNECT TOO')
                         raise ConnectionError('Reconnection PRIVATE attempt limit exceeded')
                     time.sleep(1)
                     c += 1
-                logging(bot, 'DISCONNECT PRIVATE RECONNECTING')
+                custom_logging(bot, 'DISCONNECT PRIVATE RECONNECTING')
 
             # Используем блокировку потока пока не выставиться следующий ордер
             step_class_obj.locker_3.acquire()
@@ -143,12 +143,12 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             # Обновляем книгу ордеров
             status_req_order_book = step_class_obj.update_order_book()
             if status_req_order_book not in 'OK':
-                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
+                custom_logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
             elif len(step_class_obj.order_book) > 4:
                 filtered_list = [order for order in step_class_obj.order_book if order.get('orderType') != 'Limit']
                 if len(filtered_list) > 4:
-                    logging(bot, f'{step_class_obj.order_book}')
+                    custom_logging(bot, f'{step_class_obj.order_book}')
                     raise Exception('len orderbook > 4')
 
             # Проверка наличия выставленных ордеров
@@ -167,7 +167,7 @@ def ws_step_hedge_bot_main_logic(bot, step_hg):
             # print()
             sleep_function(10, bot_id)
     except Exception as e:
-        logging(bot, f'Error {e}')
+        custom_logging(bot, f'Error {e}')
         exit_by_exception(bot)
 
     finally:

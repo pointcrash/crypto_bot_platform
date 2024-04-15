@@ -1,16 +1,15 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from api.api_v5_bybit import cancel_order
-from bots.models import Bot
+from api_test.api_v5_bybit import cancel_order
+from bots.models import BotModel
 from orders.forms import OrderCreateForm
-from orders.models import Order
 
 
 @login_required
 def create_order_view(request, bot_id):
     title = 'Create order'
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
 
     if request.method == 'POST':
         form = OrderCreateForm(data=request.POST)
@@ -21,7 +20,7 @@ def create_order_view(request, bot_id):
             order.symbol = bot.symbol.name
             order.save()
 
-            return redirect('single_bot_list')
+            return redirect('bot_list')
     else:
         form = OrderCreateForm()
 
@@ -30,12 +29,12 @@ def create_order_view(request, bot_id):
 
 @login_required
 def cancel_order_view(request, bot_id, order_id):
-    bot = Bot.objects.get(pk=bot_id)
-    order = Order.objects.filter(orderLinkId=order_id)
+    bot = BotModel.objects.get(pk=bot_id)
+    # order = Order.objects.filter(orderLinkId=order_id)
 
-    cancel_order(bot, order_id)
-
-    if order:
-        order.delete()
+    # cancel_order(bot, order_id)
+    #
+    # if order:
+    #     order.delete()
 
     return redirect(request.META.get('HTTP_REFERER'))

@@ -1,7 +1,7 @@
 import time
 
 from bots.StepHedge.logic.step_hg_class import StepHedgeClassLogic
-from bots.bot_logic import lock_release, logging, exit_by_exception
+from bots.general_functions import lock_release, custom_logging, exit_by_exception
 from main.models import ActiveBot
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
@@ -32,12 +32,12 @@ def step_hedge_bot_main_logic(bot, step_hg):
             # Обновляем книгу ордеров до отмены ордеров
             status_req_order_book = step_class_obj.update_order_book()
             if status_req_order_book not in 'OK':
-                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
+                custom_logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {step_class_obj.order_book}')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
             # Обновляем список позиций
             step_class_obj.update_symbol_list()
             if step_class_obj.symbol_list is None:
-                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+                custom_logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
             for position_number in range(2):
@@ -71,7 +71,7 @@ def step_hedge_bot_main_logic(bot, step_hg):
 
             lock.acquire()
     except Exception as e:
-        logging(bot, f'Error {e}')
+        custom_logging(bot, f'Error {e}')
         lock.acquire()
         try:
             exit_by_exception(bot)

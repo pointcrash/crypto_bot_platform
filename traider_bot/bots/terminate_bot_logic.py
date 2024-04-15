@@ -1,93 +1,44 @@
 import time
 
-from api.api_v5_bybit import cancel_all, get_list, get_side, get_qty
-from bots.bot_logic import logging, clear_data_bot
-from bots.models import Bot
-from main.models import ActiveBot
-from orders.models import Order
-from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
+from api_2.api_aggregator import cancel_all_orders
+from bots.general_functions import custom_logging
 
 
 def terminate_thread(bot_id, keep_active=False):
-    bot = Bot.objects.get(pk=bot_id)
-    if ActiveBot.objects.filter(bot_id=bot_id):
-        ActiveBot.objects.filter(bot_id=bot_id).delete()
-        time.sleep(5)
-    lock.acquire()
-    try:
-        if bot_id in global_list_bot_id:
-            global_list_bot_id.remove(bot_id)
-            if bot_id not in global_list_bot_id:
-                thread = global_list_threads[bot_id]
-                if lock.locked():
-                    lock.release()
-                thread.join()
-                lock.acquire()
-                del global_list_threads[bot_id]
-                return f"Terminate successful {bot_id}"
-    except Exception as e:
-        return f"Terminate error: {e}"
-    finally:
-        if not keep_active:
-            bot.is_active = False
-            bot.save()
-        if lock.locked():
-            lock.release()
+    pass
 
 
 def check_thread_alive(bot_id):
-    lock.acquire()
-    try:
-        if bot_id in global_list_bot_id:
-            return True
-        else:
-            return False
-    finally:
-        if lock.locked():
-            lock.release()
+    pass
 
 
 def drop_position(bot):
-    symbol_list = get_list(bot.account, bot.category, bot.symbol)
-    psn_qty = get_qty(symbol_list)
-    psn_side = get_side(symbol_list)
-
-    if type([]) == type(psn_qty):
-        for qty, side in zip(psn_qty, psn_side):
-            if qty:
-                order_side = "Buy" if side == "Sell" else "Sell"
-
-                drop_order = Order.objects.create(
-                    bot=bot,
-                    category=bot.category,
-                    symbol=bot.symbol.name,
-                    side=order_side,
-                    orderType='Market',
-                    qty=qty,
-                    is_take=True,
-                )
-    else:
-        order_side = "Buy" if psn_side == "Sell" else "Sell"
-
-        drop_order = Order.objects.create(
-            bot=bot,
-            category=bot.category,
-            symbol=bot.symbol.name,
-            side=order_side,
-            orderType='Market',
-            qty=psn_qty,
-            is_take=True,
-        )
+    pass
 
 
 def stop_bot_with_cancel_orders(bot):
-    logging(bot, terminate_thread(bot.pk))
-    logging(bot, 'cancel all orders' if cancel_all(bot.account, bot.category, bot.symbol)[
-                                            'retMsg'] == 'OK' else 'error when canceling orders')
-    clear_data_bot(bot)
+    pass
 
 
 def stop_bot_with_cancel_orders_and_drop_positions(bot):
-    drop_position(bot)
-    stop_bot_with_cancel_orders(bot)
-    logging(bot, 'drop position')
+    pass
+
+
+def terminate_bot(bot, user=None):
+    if bot.is_active:
+        bot.is_active = False
+        bot.save()
+        time.sleep(7)
+
+    if user:
+        custom_logging(bot, f'Бот был деактивирован вручную пользователем "{user.username}"')
+
+
+def terminate_bot_with_cancel_orders(bot, user=None):
+    terminate_bot(bot, user)
+    cancel_all_orders(bot)
+
+
+def terminate_bot_with_cancel_orders_and_drop_positions(bot, user=None):
+    terminate_bot_with_cancel_orders(bot, user)
+

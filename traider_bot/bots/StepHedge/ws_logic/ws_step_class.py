@@ -2,11 +2,9 @@ import threading
 import time
 from decimal import Decimal
 
-from api.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
-    get_open_orders, cancel_order, amend_order
-from bots.bot_logic import get_quantity_from_price, logging
-from bots.models import JsonObjectClass
-from orders.models import Order
+from api_test.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
+    get_open_orders, amend_order
+from bots.general_functions import get_quantity_from_price, custom_logging
 from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 
@@ -108,14 +106,15 @@ class WSStepHedgeClassLogic:
             self.entry_qty[1 if order_side == 'Buy' else 2] = qty
 
             if qty:
-                order = Order.objects.create(
-                    bot=self.bot,
-                    category=self.category,
-                    symbol=self.symbol.name,
-                    side=order_side,
-                    orderType="Market",
-                    qty=qty,
-                )
+                pass
+                # order = Order.objects.create(
+                #     bot=self.bot,
+                #     category=self.category,
+                #     symbol=self.symbol.name,
+                #     side=order_side,
+                #     orderType="Market",
+                #     qty=qty,
+                # )
 
     def buy_by_limit(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -125,18 +124,18 @@ class WSStepHedgeClassLogic:
                 qty = get_quantity_from_price(Decimal(self.step_hg.long1invest), self.price, self.symbol.minOrderQty, self.leverage)
             else:
                 qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), self.price, self.symbol.minOrderQty, self.leverage)
-            logging(self.bot, f'buy_by_limit, trigger_direction = {trigger_direction}')
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-                price=str(self.price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(self.price),
-            )
+            custom_logging(self.bot, f'buy_by_limit, trigger_direction = {trigger_direction}')
+            # order = Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=qty,
+            #     price=str(self.price),
+            #     triggerDirection=trigger_direction,
+            #     triggerPrice=str(self.price),
+            # )
 
     # def buy_by_market_limit_order(self):
     #     current_price = get_current_price(self.account, self.category, self.symbol)
@@ -215,15 +214,15 @@ class WSStepHedgeClassLogic:
             avg_qty = qty * Decimal(self.step_hg.margin_long_avg) / 100
         else:
             avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=side,
-            price=str(self.avg_trigger_price[position_idx]),
-            orderType="Limit",
-            qty=avg_qty,
-        )
+        # order = Order.objects.create(
+        #     bot=self.bot,
+        #     category=self.category,
+        #     symbol=self.symbol.name,
+        #     side=side,
+        #     price=str(self.avg_trigger_price[position_idx]),
+        #     orderType="Limit",
+        #     qty=avg_qty,
+        # )
 
     def ws_limit_average_psn(self, position_idx):
         qty = Decimal(self.ws_symbol_list[position_idx]['size'])
@@ -233,15 +232,15 @@ class WSStepHedgeClassLogic:
                 avg_qty = qty * Decimal(self.step_hg.margin_long_avg) / 100
             else:
                 avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=side,
-                price=str(self.avg_trigger_price[position_idx]),
-                orderType="Limit",
-                qty=avg_qty,
-            )
+            # order = Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=side,
+            #     price=str(self.avg_trigger_price[position_idx]),
+            #     orderType="Limit",
+            #     qty=avg_qty,
+            # )
 
     def average_psn(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
@@ -255,14 +254,14 @@ class WSStepHedgeClassLogic:
             # qty = get_quantity_from_price(Decimal(self.step_hg.short1invest), current_price, self.symbol.minOrderQty, self.leverage)
             avg_qty = qty * Decimal(self.step_hg.margin_short_avg) / 100
 
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=side,
-            orderType="Market",
-            qty=avg_qty,
-        )
+        # order = Order.objects.create(
+        #     bot=self.bot,
+        #     category=self.category,
+        #     symbol=self.symbol.name,
+        #     side=side,
+        #     orderType="Market",
+        #     qty=avg_qty,
+        # )
         # cancel_all(self.account, self.category, self.symbol)
 
     def checking_opened_new_psn_order(self, position_number):
@@ -292,18 +291,18 @@ class WSStepHedgeClassLogic:
         trigger_direction = 1 if price > current_price else 2
         order_side = 'Buy' if position_idx == 1 else 'Sell'
         self.new_psn_price_dict[position_idx] = price
-        logging(self.bot, f'place_new_psn_order, trigger_direction = {trigger_direction}')
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=order_side,
-            orderType="Market",
-            qty=qty,
-            price=str(price),
-            triggerDirection=trigger_direction,
-            triggerPrice=str(price),
-        )
+        custom_logging(self.bot, f'place_new_psn_order, trigger_direction = {trigger_direction}')
+        # order = Order.objects.create(
+        #     bot=self.bot,
+        #     category=self.category,
+        #     symbol=self.symbol.name,
+        #     side=order_side,
+        #     orderType="Market",
+        #     qty=qty,
+        #     price=str(price),
+        #     triggerDirection=trigger_direction,
+        #     triggerPrice=str(price),
+        # )
 
     def distance_between_price_and_order_check(self, position_number):
         position_idx = self.symbol_list[position_number]['positionIdx']
@@ -369,18 +368,18 @@ class WSStepHedgeClassLogic:
             trigger_direction = 1 if price > current_price else 2
             order_side = 'Buy' if position_idx == 1 else 'Sell'
             self.new_psn_price_dict[position_idx] = price
-            logging(self.bot, f'place_nipple_on_tp, trigger_direction = {trigger_direction}')
-            Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-                price=str(price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(price),
-            )
+            custom_logging(self.bot, f'place_nipple_on_tp, trigger_direction = {trigger_direction}')
+            # Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=qty,
+            #     price=str(price),
+            #     triggerDirection=trigger_direction,
+            #     triggerPrice=str(price),
+            # )
 
     def ws_place_tp_order(self, order, status='Filled'):
         position_idx = order['positionIdx']
@@ -432,32 +431,32 @@ class WSStepHedgeClassLogic:
             trigger_direction = 1 if price > current_price else 2
             order_side = 'Buy' if position_idx == 1 else 'Sell'
             self.new_psn_price_dict[position_idx] = price
-            logging(self.bot, f'ws_place_new_psn_order, trigger_direction = {trigger_direction}')
-            Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-                price=str(price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(price),
-            )
+            custom_logging(self.bot, f'ws_place_new_psn_order, trigger_direction = {trigger_direction}')
+            # Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=qty,
+            #     price=str(price),
+            #     triggerDirection=trigger_direction,
+            #     triggerPrice=str(price),
+            # )
         elif status == 'Deactivated':
             price = Decimal(order['triggerPrice'])
             self.new_psn_price_dict[position_idx] = price
-            Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order['side'],
-                orderType="Market",
-                qty=order['qty'],
-                price=order['triggerPrice'],
-                triggerDirection=order['triggerDirection'],
-                triggerPrice=order['triggerPrice'],
-            )
+            # Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order['side'],
+            #     orderType="Market",
+            #     qty=order['qty'],
+            #     price=order['triggerPrice'],
+            #     triggerDirection=order['triggerDirection'],
+            #     triggerPrice=order['triggerPrice'],
+            # )
         # print('PLACE ORDER AFTER -', order['orderId'])
         # print()
 
@@ -471,18 +470,18 @@ class WSStepHedgeClassLogic:
 
         trigger_direction = 1 if price > current_price else 2
         order_side = 'Buy' if position_idx == 1 else 'Sell'
-        logging(self.bot, f'ws_replace_new_psn_order, trigger_direction = {trigger_direction}')
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=order_side,
-            orderType="Market",
-            qty=qty,
-            price=str(price),
-            triggerDirection=trigger_direction,
-            triggerPrice=str(price),
-        )
+        custom_logging(self.bot, f'ws_replace_new_psn_order, trigger_direction = {trigger_direction}')
+        # order = Order.objects.create(
+        #     bot=self.bot,
+        #     category=self.category,
+        #     symbol=self.symbol.name,
+        #     side=order_side,
+        #     orderType="Market",
+        #     qty=qty,
+        #     price=str(price),
+        #     triggerDirection=trigger_direction,
+        #     triggerPrice=str(price),
+        # )
 
     def ws_average_psn_by_market(self, position_idx):
         qty = Decimal(self.ws_symbol_list[position_idx]['size'])
@@ -498,30 +497,30 @@ class WSStepHedgeClassLogic:
             total_margin = current_margin + avg_margin
 
             if total_margin < self.bot.max_margin:
-                order = Order.objects.create(
-                    bot=self.bot,
-                    category=self.category,
-                    symbol=self.symbol.name,
-                    side=side,
-                    orderType="Market",
-                    qty=avg_qty,
-                )
+                # order = Order.objects.create(
+                #     bot=self.bot,
+                #     category=self.category,
+                #     symbol=self.symbol.name,
+                #     side=side,
+                #     orderType="Market",
+                #     qty=avg_qty,
+                # )
 
                 message = f'Позиция {side} была усреднена на {avg_qty} {self.symbol.name}'
                 self.send_telegram_notice(message)
 
             else:
-                logging(self.bot,
+                custom_logging(self.bot,
                         f'Margin limit reached. Current limit {self.bot.max_margin}. Margin after avg {total_margin}')
         else:
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=side,
-                orderType="Market",
-                qty=avg_qty,
-            )
+            # order = Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=side,
+            #     orderType="Market",
+            #     qty=avg_qty,
+            # )
 
             message = f'Позиция {side} была усреднена на {avg_qty} {self.symbol.name}'
             self.send_telegram_notice(message)

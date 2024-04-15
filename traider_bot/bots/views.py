@@ -1,16 +1,44 @@
+import logging
 import threading
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from bots.bb_set_takes import set_takes
-from bots.bot_logic import logging, clear_data_bot
-from bots.hedge.logic.work import set_takes_for_hedge_grid_bot
-from bots.models import Bot, SingleBot, IsTSStart
-from bots.terminate_bot_logic import terminate_thread, stop_bot_with_cancel_orders, \
-    stop_bot_with_cancel_orders_and_drop_positions
-from single_bot.logic.global_variables import global_list_threads, lock
-from single_bot.logic.work import bot_work_logic
+from bots.bb.logic.start_logic import bb_worker
+from bots.models import BotModel
+from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
+    terminate_bot_with_cancel_orders_and_drop_positions
+from bots.zinger.logic.start_logic import zinger_worker
+from bots.zinger.logic_market.start_logic import zinger_worker_market
+from main.forms import AccountSelectForm
+
+logger = logging.getLogger('django')
+
+
+@login_required
+def bot_list(request):
+    user = request.user
+
+    if user.is_superuser:
+        bots = BotModel.objects.all().order_by('pk')
+    else:
+        bots = BotModel.objects.filter(owner=user).order_by('pk')
+
+    if request.method == 'POST':
+        account_select_form = AccountSelectForm(request.POST, user=request.user)
+        if account_select_form.is_valid():
+            selected_account = account_select_form.cleaned_data['account']
+            logger.info(f'{user} отсортировал список ботов по {selected_account}')
+            if selected_account:
+                bots = bots.filter(account=selected_account)
+    else:
+        logger.info(f'{user} открыл список ботов')
+        account_select_form = AccountSelectForm(user=request.user)
+
+    return render(request, 'bot_list.html', {
+        'bots': bots,
+        'account_select_form': account_select_form,
+    })
 
 
 def views_bots_type_choice(request, mode):
@@ -18,14 +46,14 @@ def views_bots_type_choice(request, mode):
     category = 'linear' if mode == 'one-way' else 'inverse'
 
     if user.is_superuser:
-        grid_bots = Bot.objects.filter(work_model='grid', category=category)
+        grid_bots = BotModel.objects.filter(work_model='grid', category=category)
     else:
-        grid_bots = Bot.objects.filter(owner=user, work_model='grid', category=category)
+        grid_bots = BotModel.objects.filter(owner=user, work_model='grid', category=category)
 
     if user.is_superuser:
-        bb_bots = Bot.objects.filter(work_model='bb', category=category)
+        bb_bots = BotModel.objects.filter(work_model='bb', category=category)
     else:
-        bb_bots = Bot.objects.filter(owner=user, work_model='bb', category=category)
+        bb_bots = BotModel.objects.filter(owner=user, work_model='bb', category=category)
 
     if mode == 'hedge':
         title = 'Hedge Mode'
@@ -40,75 +68,60 @@ def views_bots_type_choice(request, mode):
 
 
 @login_required
-def terminate_bot(request, bot_id, event_number):
-    bot = Bot.objects.get(pk=bot_id)
-    single_bot = SingleBot.objects.filter(bot=bot)
-    single_bot.delete()
+def stop_bot(request, bot_id, event_number):
+    bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
+    logger.info(
+        f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
     if event_number == 1:
-        logging(bot, terminate_thread(bot.pk))
-
+        terminate_bot(bot, user)
     elif event_number == 2:
-        stop_bot_with_cancel_orders(bot)
-
+        terminate_bot_with_cancel_orders(bot, user)
     elif event_number == 3:
-        stop_bot_with_cancel_orders_and_drop_positions(bot)
+        terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
 
     return redirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
 def delete_bot(request, bot_id, event_number):
-    bot = Bot.objects.get(pk=bot_id)
+    bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
+    logger.info(
+        f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
     if event_number == 1:
-        terminate_thread(bot.pk)
-
+        terminate_bot(bot, user)
     elif event_number == 2:
-        stop_bot_with_cancel_orders(bot)
-
+        terminate_bot_with_cancel_orders(bot, user)
     elif event_number == 3:
-        stop_bot_with_cancel_orders_and_drop_positions(bot)
+        terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
+
     bot.delete()
 
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-def reboot_bots(request):
-    bots = Bot.objects.all()
-    for bot in bots:
-        print(bot.is_active)
-        if bot.is_active:
-            bot_thread = None
-            is_ts_start = IsTSStart.objects.filter(bot=bot)
+def bot_start(request, bot_id):
+    bot = BotModel.objects.get(pk=bot_id)
+    bot_thread = None
+    user = request.user
+    logger.info(
+        f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
 
-            clear_data_bot(bot, clear_data=1)  # Очищаем данные ордеров и тейков которые использовал старый бот
+    if bot.work_model == 'bb':
+        bot.is_active = True
+        bot.save()
+        bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
-            if bot.work_model == 'bb':
-                if bot.side == 'TS':
-                    if is_ts_start:
-                        bot_thread = threading.Thread(target=set_takes, args=(bot,))
-                    else:
-                        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-                else:
-                    bot_thread = threading.Thread(target=set_takes, args=(bot,))
-            elif bot.work_model == 'grid':
-                if bot.side == 'TS':
-                    if is_ts_start:
-                        bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
-                    else:
-                        bot_thread = threading.Thread(target=set_takes_for_hedge_grid_bot, args=(bot,))
-                else:
-                    bot_thread = threading.Thread(target=bot_work_logic, args=(bot,))
+    elif bot.work_model == 'zinger':
+        bot.is_active = True
+        bot.save()
+        bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
+        # bot_thread = threading.Thread(target=zinger_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
-            print(bot_thread)
-            if bot_thread is not None:
-                bot_thread.start()
-                bot.is_active = True
-                bot.save()
-                lock.acquire()
-                global_list_threads[bot.pk] = bot_thread
-                if lock.locked():
-                    lock.release()
-    return redirect('single_bot_list')
+    if bot_thread is not None:
+        bot_thread.start()
 
+    return redirect(request.META.get('HTTP_REFERER'))

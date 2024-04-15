@@ -3,8 +3,8 @@ from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 
-from api.api_v5_bybit import get_list
-from bots.models import Symbol, Bot
+from api_test.api_v5_bybit import get_list
+from bots.models import Symbol, BotModel
 from bots.SetZeroPsn.logic.create_bot_obj import create_set0osn_bot_obj
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from bots.SetZeroPsn.logic.stop import stopping_set_zero_psn_bot
@@ -25,7 +25,7 @@ def start_set_zero_psn_bot(request, acc_id, symbol_name, trend):
     psn = symbol_list[0] if float(symbol_list[0]['size']) != 0 else symbol_list[1]
     count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize)[str(trend)]
 
-    bot = Bot.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
+    bot = BotModel.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
     if bot:
         stop_bot_with_cancel_orders(bot)
         bot.delete()
@@ -46,7 +46,7 @@ def start_set_zero_psn_bot(request, acc_id, symbol_name, trend):
 def stop_set_zero_psn_bot(request, acc_id, symbol_name):
     account = Account.objects.filter(pk=acc_id).first()
     symbol = Symbol.objects.filter(name=symbol_name).first()
-    bot = Bot.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
+    bot = BotModel.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
 
     # stopping_set_zero_psn_bot(bot, account, symbol)
     terminate_thread(bot.pk)

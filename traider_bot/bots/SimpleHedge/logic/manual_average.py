@@ -1,8 +1,7 @@
 from decimal import Decimal
 
-from api.api_v5_bybit import get_current_price, get_list, cancel_all
-from bots.bot_logic import get_quantity_from_price, logging
-from orders.models import Order
+from api_test.api_v5_bybit import get_current_price, get_list, cancel_all
+from bots.general_functions import get_quantity_from_price, custom_logging
 
 
 def manual_average_for_simple_hedge(bot, amount, is_percent, price):
@@ -14,33 +13,33 @@ def manual_average_for_simple_hedge(bot, amount, is_percent, price):
         first_order_qty = get_quantity_from_price(bot.qty, price, bot.symbol.minOrderQty, bot.isLeverage)
         trigger_direction = 1 if price > current_price else 2
 
-        for order_side in ['Buy', 'Sell']:
-            order = Order.objects.create(
-                bot=bot,
-                category=bot.category,
-                symbol=bot.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=first_order_qty,
-                price=str(price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(price),
-            )
+        # for order_side in ['Buy', 'Sell']:
+        #     order = Order.objects.create(
+        #         bot=bot,
+        #         category=bot.category,
+        #         symbol=bot.symbol.name,
+        #         side=order_side,
+        #         orderType="Market",
+        #         qty=first_order_qty,
+        #         price=str(price),
+        #         triggerDirection=trigger_direction,
+        #         triggerPrice=str(price),
+        #     )
         return
 
     amount = Decimal(amount)
     if not is_percent:
         qty = get_quantity_from_price(float(amount), current_price, bot.symbol.minOrderQty, bot.isLeverage)
         for side in ['Buy', 'Sell']:
-            order = Order.objects.create(
-                bot=bot,
-                category=bot.category,
-                symbol=bot.symbol.name,
-                side=side,
-                orderType="Market",
-                qty=qty,
-            )
-            logging(bot, f'Позиция {side} усреднена на {amount} USDT = {qty} монет')
+            # order = Order.objects.create(
+            #     bot=bot,
+            #     category=bot.category,
+            #     symbol=bot.symbol.name,
+            #     side=side,
+            #     orderType="Market",
+            #     qty=qty,
+            # )
+            custom_logging(bot, f'Позиция {side} усреднена на {amount} USDT = {qty} монет')
 
     else:
         symbol_list = get_list(bot.account, symbol=bot.symbol)
@@ -55,16 +54,16 @@ def manual_average_for_simple_hedge(bot, amount, is_percent, price):
                         decimal_part = []
                     decimal_places = len(decimal_part)
                     qty = round(qty * amount / 100, decimal_places)
-                    order = Order.objects.create(
-                        bot=bot,
-                        category=bot.category,
-                        symbol=bot.symbol.name,
-                        side=side,
-                        orderType="Market",
-                        qty=qty,
-                    )
-                    logging(bot, f'Позиция {side} усреднена на {qty} монет')
+                    # order = Order.objects.create(
+                    #     bot=bot,
+                    #     category=bot.category,
+                    #     symbol=bot.symbol.name,
+                    #     side=side,
+                    #     orderType="Market",
+                    #     qty=qty,
+                    # )
+                    custom_logging(bot, f'Позиция {side} усреднена на {qty} монет')
                 else:
-                    logging(bot, f'Попытка усреднить нулевую позицию {side}')
+                    custom_logging(bot, f'Попытка усреднить нулевую позицию {side}')
         else:
-            logging(bot, f'Нет открытых позиций по данной торговой паре')
+            custom_logging(bot, f'Нет открытых позиций по данной торговой паре')

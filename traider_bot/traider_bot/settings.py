@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from config import django_app_key
@@ -8,7 +9,15 @@ SECRET_KEY = django_app_key
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '164.92.182.43', '127.0.0.1']
+
+CORS_ALLOWED_ORIGINS = [
+    "https://bravo.almazor.co",
+    "https://209.38.180.77",
+    # Другие доверенные источники здесь
+]
+
+CSRF_TRUSTED_ORIGINS = ['https://*.bravo.almazor.co', 'https://*.209.38.180.77', 'https://*.127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -79,6 +88,62 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/0',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+        'simple': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console_simple': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'console_verbose': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file_simple': {
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.log',
+            'formatter': 'simple',
+        },
+        'file_verbose': {
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console_simple', 'file_verbose'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'debug_logger': {
+            'handlers': ['console_simple', 'file_verbose'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 LOGIN_URL = "/login/"
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -104,6 +169,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

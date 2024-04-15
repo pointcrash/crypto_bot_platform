@@ -5,7 +5,7 @@ from main.models import ActiveBot
 from .bot_class import WorkZingerVipClass
 from .handlers import zinger_vip_handler_wrapper
 
-from ...bot_logic import is_bot_active, logging
+from ...general_functions import is_bot_active, custom_logging
 
 
 def zinger_vip_worker(bot):
@@ -44,7 +44,7 @@ def zinger_vip_worker(bot):
 
     except Exception as e:
         print(e)
-        logging(bot, f'Error {e}')
+        custom_logging(bot, f'Error {e}')
         # exit_by_exception(bot)
 
     finally:
@@ -53,7 +53,7 @@ def zinger_vip_worker(bot):
             print('End working bb bot')
         except Exception as e:
             print('ERROR:', e)
-            logging(bot, f'Error {e}')
+            custom_logging(bot, f'Error {e}')
         if bot.is_active:
             bot.is_active = False
             bot.save()

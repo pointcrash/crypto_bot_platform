@@ -13,9 +13,6 @@
     <div class="col-sm-12 col-lg-10 mx-auto">
         <h1 class="text-center">Bots Groups</h1>
         <div class="d-flex flex-row mt-5">
-            {% if request.user.is_superuser %}
-<!--            <a class="btn btn-outline-danger m-1 btn-shadow" href="{% url 'reboot_bots' %}">Reboot all bots</a>-->
-            {% endif %}
             <!-- Поле ввода "Account" -->
 <!--            <div class="form-group mx-2">-->
 <!--                <form method="POST" class="d-flex flex-row">-->
@@ -28,7 +25,6 @@
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'simple_hedge_bot_create' %}">Simple Hedge</a>-->
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bot_create' %}">Grid Create</a>-->
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bb_bot_create' %}">BB Create</a>-->
-<!--            <a class="btn btn-warning m-1 btn-shadow" href="{% url 'update_symbols_set' %}">Refresh coins</a>-->
         </div>
 
         <div class="accordion mt-2" id="accordionPanelsStayOpenExample">
@@ -74,12 +70,12 @@
                                     {% if is_active_bot %}
                                     {% include 'modal_stop_bot.html' %}
                                     {% else %}
-                                        <a href="{% url 'single_bot_start' bot_id=bot.pk %}" class="btn btn-success btn-shadow"><i class="fa-solid fa-play"></i></a>
+                                        <a href="{% url 'bot_start' bot_id=bot.pk %}" class="btn btn-success btn-shadow"><i class="fa-solid fa-play"></i></a>
                                     {% endif %}
                                     {% if bot.work_model == 'grid' %}
                                     <a class="btn btn-primary btn-shadow" href="{% url 'single_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                                     {% elif bot.work_model == 'bb' or bot.work_model == 'set0psn' %}
-                                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+<!--                                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
                                     {% elif bot.work_model == 'SmpHg' %}
                                     <a class="btn btn-primary btn-shadow" href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                                     {% elif bot.work_model == 'Step Hedge' %}

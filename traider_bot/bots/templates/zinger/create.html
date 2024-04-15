@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+
+<div class="row">
+    <div class="col-11 mx-auto">
+        <h2 class="text-center">{{ title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                {% if bot_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in bot_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if zinger_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in zinger_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="card shadow col-12 col-xl-2 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Настройки бота</h4>
+
+                    <br>
+                    {{ bot_form.account.label_tag }}
+                    {{ bot_form.account }}
+                    <br>
+                    {{ bot_form.symbol.label_tag }}
+                    {{ bot_form.symbol }}
+                    <br>
+                    {{ bot_form.leverage.label_tag }}
+                    {{ bot_form.leverage }}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ bot_form.amount_long.label_tag }}
+                            {{ bot_form.amount_long }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ bot_form.amount_short.label_tag }}
+                            {{ bot_form.amount_short }}
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    {{ zinger_form.side.label_tag }}
+                    {{ zinger_form.side }}
+                    <br>
+                    {{ zinger_form.interval.label_tag }}
+                    {{ zinger_form.interval }}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ zinger_form.tp_pnl_percent_long.label_tag }}
+                            {{ zinger_form.tp_pnl_percent_long }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ zinger_form.tp_pnl_percent_short.label_tag }}
+                            {{ zinger_form.tp_pnl_percent_short }}
+                        </div>
+                    </div>
+                    <br>
+                    {{ zinger_form.income_percent.label_tag }}
+                    {{ zinger_form.income_percent }}
+                    <br>
+                    <br>
+                    <div class="d-inline">
+                        <p class="d-inline">{{ zinger_form.is_nipple_active.label_tag }}</p>
+                        {{ zinger_form.is_nipple_active }}
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ zinger_form.qty_steps.label_tag }}
+                            {{ zinger_form.qty_steps }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ zinger_form.qty_steps_diff.label_tag }}
+                            {{ zinger_form.qty_steps_diff }}
+                        </div>
+                    </div>
+                    <hr>
+<!--                    <h4 class="text-center">Profit Orders</h4>-->
+<!--                    <div class="d-inline">-->
+<!--                        {{ zinger_form.take_on_ml.label_tag }}-->
+<!--                        <div class="d-inline mx-1">{{ zinger_form.take_on_ml }}</div>-->
+<!--                        {{ zinger_form.take_on_ml_percent.label_tag }}-->
+<!--                        {{ zinger_form.take_on_ml_percent }}-->
+<!--                    </div>-->
+<!--                    <br>-->
+<!--                    {{ form.grid_avg_value.label_tag }}-->
+<!--                    {{ form.grid_avg_value }}-->
+<!--                    <hr>-->
+<!--                    <h4 class="text-center">Bollinger Bands Settings</h4>-->
+<!--                    {{ form.qty_kline.label_tag }}-->
+<!--                    {{ form.qty_kline }}-->
+<!--                    {{ form.d.label_tag }}-->
+<!--                    {{ form.d }}-->
+                </div>
+<!--                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">-->
+<!--                    <h4 class="text-center">Усреднение</h4>-->
+<!--                    <br>-->
+<!--                    <div class="d-inline">-->
+<!--                        <p class="d-inline">{{ zinger_form.auto_avg.label_tag }}</p>-->
+<!--                        {{ zinger_form.auto_avg }} %:-->
+<!--                    </div>-->
+<!--                    {{ zinger_form.avg_percent }}-->
+<!--                    <br>-->
+
+<!--&lt;!&ndash;                    {{ zinger_form.dfep.label_tag }}&ndash;&gt;-->
+<!--&lt;!&ndash;                    {{ zinger_form.dfep }}&ndash;&gt;-->
+<!--                    <div class="row">-->
+<!--                        <div class="col-6">-->
+<!--                    {{ zinger_form.dfm.label_tag }}-->
+<!--                    {{ zinger_form.dfm }}-->
+<!--                        </div>-->
+<!--                        <div class="col-6">-->
+<!--                    {{ zinger_form.chw.label_tag }}-->
+<!--                    {{ zinger_form.chw }}-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    {{ zinger_form.max_margin.label_tag }}-->
+<!--                    {{ zinger_form.max_margin }}-->
+<!--                    <br>-->
+<!--                </div>-->
+            </div>
+            <div class="col-5 col-sm-3 mx-auto mb-5">
+            <button type="submit" class="col-12 btn-shadow btn btn-success mt-3">Сохранить Бота</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

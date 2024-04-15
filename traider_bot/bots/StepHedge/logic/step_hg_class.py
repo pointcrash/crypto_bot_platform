@@ -1,10 +1,9 @@
 import time
 from decimal import Decimal
 
-from api.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
+from api_test.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
     get_open_orders, cancel_order, amend_order
-from bots.bot_logic import get_quantity_from_price
-from orders.models import Order
+from bots.general_functions import get_quantity_from_price
 
 
 class StepHedgeClassLogic:
@@ -79,14 +78,14 @@ class StepHedgeClassLogic:
                 qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
             self.entry_qty[1 if order_side == 'Buy' else 2] = qty
 
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-            )
+            # order = Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=qty,
+            # )
 
     def buy_by_limit(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -96,17 +95,17 @@ class StepHedgeClassLogic:
                 qty = get_quantity_from_price(self.long1invest, self.price, self.symbol.minOrderQty, self.leverage)
             else:
                 qty = get_quantity_from_price(self.short1invest, self.price, self.symbol.minOrderQty, self.leverage)
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-                price=str(self.price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(self.price),
-            )
+            # order = Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=qty,
+            #     price=str(self.price),
+            #     triggerDirection=trigger_direction,
+            #     triggerPrice=str(self.price),
+            # )
 
     # def buy_by_market_limit_order(self):
     #     current_price = get_current_price(self.account, self.category, self.symbol)
@@ -176,14 +175,14 @@ class StepHedgeClassLogic:
             # qty = get_quantity_from_price(self.short1invest, current_price, self.symbol.minOrderQty, self.leverage)
             avg_qty = qty * self.margin_short_avg / 100
 
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=side,
-            orderType="Market",
-            qty=avg_qty,
-        )
+        # order = Order.objects.create(
+        #     bot=self.bot,
+        #     category=self.category,
+        #     symbol=self.symbol.name,
+        #     side=side,
+        #     orderType="Market",
+        #     qty=avg_qty,
+        # )
         # cancel_all(self.account, self.category, self.symbol)
 
     def checking_opened_new_psn_order(self, position_number):
@@ -214,17 +213,17 @@ class StepHedgeClassLogic:
             trigger_direction = 1 if price > current_price else 2
             order_side = 'Buy' if position_idx == 1 else 'Sell'
             self.new_psn_price_dict[position_number] = price
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-                price=str(price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(price),
-            )
+            # order = Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=qty,
+            #     price=str(price),
+            #     triggerDirection=trigger_direction,
+            #     triggerPrice=str(price),
+            # )
 
     def distance_between_price_and_order_check(self, position_number):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -289,17 +288,17 @@ class StepHedgeClassLogic:
             trigger_direction = 1 if price > current_price else 2
             order_side = 'Buy' if position_idx == 1 else 'Sell'
             self.new_psn_price_dict[position_number] = price
-            Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=qty,
-                price=str(price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(price),
-            )
+            # Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=qty,
+            #     price=str(price),
+            #     triggerDirection=trigger_direction,
+            #     triggerPrice=str(price),
+            # )
 
 
 

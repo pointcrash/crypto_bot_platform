@@ -1,3 +1,6 @@
+import logging
+import threading
+import time
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -5,21 +8,27 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.utils import timezone
 
-from api.api_v5_bybit import get_query_account_coins_balance, get_list
-from bots.models import Log, Bot, Symbol
+from api_2.api_aggregator import account_balance
+from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
+from bots.bb.logic.start_logic import bb_worker
+from bots.general_functions import all_symbols_update
+from bots.models import Log, Symbol, BotModel
 from bots.SetZeroPsn.logic.psn_count import psn_count
+from bots.zinger.logic.start_logic import zinger_worker
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
 from .forms import RegistrationForm, LoginForm, DateRangeForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
-from main.models import Account, ActiveBot
+from main.models import Account
 from .logic import calculate_pnl
 import requests
+
+logger = logging.getLogger('django')
 
 
 def view_home(request):
@@ -29,7 +38,7 @@ def view_home(request):
 @login_required
 def logs_list(request, bot_id):
     log_list = []
-    bot = Bot.objects.get(id=bot_id)
+    bot = BotModel.objects.get(id=bot_id)
     logs = Log.objects.filter(bot=bot_id).order_by('pk')
     user = request.user
     not_timezone = False
@@ -67,6 +76,7 @@ def logs_list(request, bot_id):
     paginator = Paginator(log_list, logs_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    logger.info(f'{user} открыл логи бота ID: {bot_id}')
     return render(request, 'logs/logs.html', {
         'log_list': page_obj,
         'bot': bot,
@@ -79,17 +89,19 @@ def logs_list(request, bot_id):
 
 @login_required
 def view_logs_delete(request, bot_id):
+    user = request.user
     logs = Log.objects.filter(bot=bot_id)
     logs.delete()
+    logger.info(f'{user} удалил логи бота ID: {bot_id}')
     return redirect(request.META.get('HTTP_REFERER'))
 
 
 def logs_view(request):
     user = request.user
     if user.is_superuser:
-        bots = Bot.objects.all()
+        bots = BotModel.objects.all()
     else:
-        bots = Bot.objects.filter(owner=user)
+        bots = BotModel.objects.filter(owner=user)
     return render(request, 'logs_detail.html', {'bots': bots})
 
 
@@ -100,6 +112,7 @@ def account_list(request):
         accounts = Account.objects.all()
     else:
         accounts = Account.objects.filter(owner=request.user)
+    logger.info(f'{user} открыл список аккаунтов')
     return render(request, 'account/accounts_list.html', {'accounts': accounts, })
 
 
@@ -119,7 +132,7 @@ def account_position_list(request):
                 if symbol:
                     name_symbol_set.add(symbol.name)
                     count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize)
-                    bot = Bot.objects.filter(account=account, symbol=symbol).first()
+                    bot = BotModel.objects.filter(account=account, symbol=symbol).first()
                     psn['positionBalance'] = str(round(Decimal(psn['positionBalance']), 2))
                     psn['unrealisedPnl'] = str(round(Decimal(psn['unrealisedPnl']), 2))
                     if bot:
@@ -131,7 +144,8 @@ def account_position_list(request):
                     else:
                         bot_symbol_list.append((account, '---', psn, count_dict, False))
 
-    return render(request, 'positions/positions_list.html', {'positions_list': bot_symbol_list, 'name_symbol_set': name_symbol_set})
+    return render(request, 'positions/positions_list.html',
+                  {'positions_list': bot_symbol_list, 'name_symbol_set': name_symbol_set})
 
 
 @csrf_exempt
@@ -150,7 +164,7 @@ def recalculate_values(request):
             if psn['symbol'] == symbol_name:
                 symbol = Symbol.objects.filter(name=psn['symbol']).first()
                 count_dict = psn_count(psn, int(symbol.priceScale), symbol.tickSize)
-                bot = Bot.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
+                bot = BotModel.objects.filter(account=account, symbol=symbol).first()  # Add validation bot
                 if tb > count_dict[trend]['margin'] * Decimal('1.1'):
                     enough_balance = True
                 else:
@@ -168,6 +182,7 @@ def recalculate_values(request):
 
 @login_required
 def create_account(request):
+    user = request.user
     if request.method == 'POST':
         form = AccountForm(request.POST)
         if form.is_valid():
@@ -175,8 +190,9 @@ def create_account(request):
             acc.owner = request.user
             form.save()
 
-            url = f"http://localhost:8008/ws/conn/new_account/{acc.pk}"
+            url = f"http://ws-manager:8008/ws/conn/new_account/{acc.pk}"
             requests.get(url)
+            logger.info(f'{user} добавил новый аккаунт: {acc.pk} . {acc.name} . {acc.service.name}')
             return redirect('account_list')
     else:
         form = AccountForm()
@@ -186,6 +202,7 @@ def create_account(request):
 
 @login_required
 def edit_account(request, acc_id):
+    user = request.user
     account = Account.objects.get(pk=acc_id)
     if request.method == 'POST':
         form = AccountForm(request.POST, instance=account)
@@ -193,9 +210,10 @@ def edit_account(request, acc_id):
             acc = form.save(commit=False)
             form.save()
 
-            url = f"http://localhost:8008/ws/conn/update_account/{acc.pk}"
+            url = f"http://ws-manager:8008/ws/conn/update_account/{acc.pk}"
             requests.get(url)
 
+            logger.info(f'{user} отредактировал аккаунт: {account.pk} . {account.name} . {account.service.name}')
             return redirect('account_list')
     else:
         form = AccountForm(instance=account)
@@ -205,10 +223,12 @@ def edit_account(request, acc_id):
 
 @login_required
 def delete_account(request, acc_id):
+    user = request.user
     acc = Account.objects.get(pk=acc_id)
+    logger.info(f'{user} удалил аккаунт: {acc.pk} . {acc.name} . {acc.service.name}')
     acc.delete()
 
-    url = f"http://localhost:8008/ws/conn/del_account/{acc_id}"
+    url = f"http://ws-manager:8008/ws/conn/del_account/{acc_id}"
     requests.get(url)
 
     return redirect('account_list')
@@ -274,17 +294,18 @@ def profile_mode_switching(request, profile_id):
 
 
 def get_balance(request, acc_id):
-    acc = Account.objects.get(pk=acc_id)
+    account = Account.objects.get(pk=acc_id)
     try:
-        balance = get_query_account_coins_balance(acc)[0]
-        wb = balance['walletBalance']
-        tb = balance['transferBalance']
+        balance = account_balance(account)
+        wb = balance['fullBalance']
+        tb = balance['availableBalance']
     except Exception as e:
+        wb = f'Ошибка получения баланса: {e}'
+        tb = f'Ошибка получения баланса'
         print(e)
-        print(f'Апи ключи аккаунта {acc.name} устарели, замените')
-        return JsonResponse({"wb": None, "tb": None, "name": acc.name})
+        print(f'Апи ключи аккаунта {account.name} устарели, замените')
 
-    return JsonResponse({"wb": wb, "tb": tb, "name": acc.name})
+    return JsonResponse({"wb": wb, "tb": tb, "name": account.name})
 
 
 @login_required
@@ -299,3 +320,37 @@ def cleaning_logs_view(request):
     logs.delete()
 
     return render(request, 'strategies/strategies.html')
+
+
+@login_required
+def update_symbols(request):
+    if request.user.is_superuser:
+        all_symbols_update()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def restart_all_bots(request):
+    active_bots = BotModel.objects.filter(is_active=True)
+    bot_thread = None
+    bot_id_list = []
+    for bot in active_bots:
+        bot_id_list.append(bot.id)
+        bot.is_active = False
+        bot.save()
+    time.sleep(7)
+    for bot_id in bot_id_list:
+        bot = BotModel.objects.get(id=bot_id)
+        bot.is_active = True
+        bot.save()
+
+        if bot.work_model == 'bb':
+            bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+
+        elif bot.work_model == 'zinger':
+            bot_thread = threading.Thread(target=zinger_worker, args=(bot,), name=f'BotThread_{bot.id}')
+
+        if bot_thread is not None:
+            bot_thread.start()
+
+    return redirect(request.META.get('HTTP_REFERER'))

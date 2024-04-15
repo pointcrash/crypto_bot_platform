@@ -1,113 +1,104 @@
+import logging
 import threading
+import time
+
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.shortcuts import render, redirect
-from bots.forms import BotForm
-from bots.models import Symbol
-from single_bot.logic.global_variables import lock
+
+from bots.bb.forms import BBForm
+from bots.bb.logic.start_logic import bb_worker
+from bots.forms import BotModelForm, BotModelEditForm
+from bots.models import Symbol, BotModel
+from bots.terminate_bot_logic import terminate_bot
+
+logger = logging.getLogger('django')
 
 
 @login_required
 def bb_bot_create(request):
-    title = 'Create BB Bot'
+    title = 'Создание бота Боллинджера'
+    user = request.user
 
     if request.method == 'POST':
-        bot_form = BotForm(request=request, data=request.POST)
+        bot_form = BotModelForm(request=request, data=request.POST)
+        bb_form = BBForm(data=request.POST)
 
-        if bot_form.is_valid():
+        if bot_form.is_valid() and bb_form.is_valid():
             bot = bot_form.save(commit=False)
             bot.symbol = Symbol.objects.filter(name=bot.symbol.name, service=bot.account.service).first()
-            print(bot.symbol.service)
-            print(bot.account.service)
             bot.work_model = 'bb'
             bot.owner = request.user
             bot.category = 'linear'
+            bot.is_active = False
             bot.save()
 
-            # bot_thread = threading.Thread(target=bb_worker_binance, args=(bot,))
-            # bot_thread.start()
+            bb_model = bb_form.save(commit=False)
+            bb_model.bot = bot
+            bb_model.save()
 
-            return redirect('single_bot_list')
+            # bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+            # bot_thread.start()
+            logger.info(
+                f'{user} создал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
+            return redirect('bot_list')
     else:
-        bot_form = BotForm(request=request)
+        bot_form = BotModelForm(request=request)
+        bb_form = BBForm()
 
     return render(request, 'bb/create.html', {
-        'form': bot_form,
+        'bot_form': bot_form,
+        'bb_form': bb_form,
         'title': title,
     })
 
 
-# @login_required
-# def single_bb_bot_detail(request, bot_id):
-#     bot = Bot.objects.get(pk=bot_id)
-#     set0psn = Set0Psn.objects.filter(bot=bot).first()
-#     opposite_psn = OppositePosition.objects.filter(bot=bot).first()
-#     symbol_list = func_get_symbol_list(bot)
-#     symbol_list = symbol_list[0] if float(symbol_list[0]['size']) > 0 else symbol_list[1]
-#     if request.method == 'POST':
-#         bot_form = BotForm(request.POST, request=request, instance=bot)
-#         if set0psn:
-#             set0psn_form = Set0PsnForm(data=request.POST, instance=set0psn)
-#         else:
-#             set0psn_form = Set0PsnForm(data=request.POST)
-#         if opposite_psn:
-#             opposite_psn_form = OppositePositionForm(data=request.POST, instance=opposite_psn)
-#         else:
-#             opposite_psn_form = OppositePositionForm(data=request.POST)
-#
-#         if bot_form.is_valid() and set0psn_form.is_valid() and opposite_psn_form.is_valid():
-#
-#             bot = bot_form.save(commit=False)
-#             clear_data_bot(bot)
-#
-#             set0psn_form.save(commit=False)
-#             set0psn.bot = bot
-#             set0psn.save()
-#
-#             opposite_psn = opposite_psn_form.save(commit=False)
-#             opposite_psn.bot = bot
-#             opposite_psn.save()
-#
-#             if check_thread_alive(bot.pk):
-#                 stop_bot_with_cancel_orders(bot)
-#
-#             if bot.side == 'TS':
-#                 bot_thread = threading.Thread(target=entry_ts_bb_bot, args=(bot,))
-#             else:
-#                 bot_thread = threading.Thread(target=set_takes, args=(bot,))
-#
-#             bot_thread.start()
-#             bot.is_active = True
-#             bot.save()
-#
-#             lock.acquire()
-#             global_list_threads[bot.pk] = bot_thread
-#             if lock.locked():
-#                 lock.release()
-#
-#             return redirect('single_bot_list')
-#     else:
-#         bot_form = BotForm(request=request, instance=bot)
-#         if set0psn:
-#             set0psn_form = Set0PsnForm(instance=set0psn)
-#         else:
-#             set0psn_form = Set0PsnForm()
-#         if opposite_psn:
-#             opposite_psn_form = OppositePositionForm(instance=opposite_psn)
-#         else:
-#             opposite_psn_form = OppositePositionForm()
-#
-#     order_list_status, order_list = get_open_orders(bot)
-#     for order in order_list:
-#         time = int(order['updatedTime'])
-#         dt_object = datetime.fromtimestamp(time / 1000.0)
-#         formatted_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
-#         order['updatedTime'] = formatted_date
-#
-#     return render(request, 'one_way/bb/bot_detail.html', {
-#                                                                         'form': bot_form,
-#                                                                         'set0psn_form': set0psn_form,
-#                                                                         'opposite_psn_form': opposite_psn_form,
-#                                                                         'bot': bot,
-#                                                                         'symbol_list': symbol_list,
-#                                                                         'order_list': order_list,
-#                                                                     })
+@login_required
+def bb_bot_edit(request, bot_id):
+    bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
+
+    symbol = bot.symbol
+    account = bot.account
+    if request.method == 'POST':
+        bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
+        bb_form = BBForm(request.POST, instance=bot.bb)
+        if bot_form.is_valid() and bb_form.is_valid():
+            if bot.is_active:
+                bot.account = account
+                bot.symbol = symbol
+                terminate_bot(bot)
+
+            bb_model = bb_form.save(commit=False)
+            bot = bot_form.save(commit=False)
+            bot.is_active = True
+            bot.account = account
+            bot.symbol = symbol
+            bb_model.save()
+            bot.save()
+
+            bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+            bot_thread.start()
+            logger.info(
+                f'{user} отредактировал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
+            return redirect('bot_list')
+    else:
+        bot_form = BotModelForm(request=request, instance=bot)
+        bb_form = BBForm(instance=bot.bb)
+
+    bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
+    bot_cached_data = dict()
+    for key in bot_cache_keys:
+        new_key = key.split('_')[1]
+        bot_cached_data[new_key] = cache.get(key)
+
+    return render(request, 'bb/edit.html', {
+        'bot_form': bot_form,
+        'bb_form': bb_form,
+        'bot': bot,
+        'symbol': symbol,
+        'account': account,
+        'bot_cached_data': bot_cached_data,
+    })

@@ -1,10 +1,9 @@
 import time
 from decimal import Decimal
 
-from api.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
+from api_test.api_v5_bybit import get_list, cancel_all, switch_position_mode, set_leverage, get_current_price, set_trading_stop, \
     get_open_orders, cancel_order
-from bots.bot_logic import get_quantity_from_price
-from orders.models import Order
+from bots.general_functions import get_quantity_from_price
 
 
 class SimpleHedgeClassLogic:
@@ -112,15 +111,15 @@ class SimpleHedgeClassLogic:
         self.first_order_qty = get_quantity_from_price(self.bot.qty, current_price, self.symbol.minOrderQty, self.leverage)
         self.calculate_tp_size()
 
-        for order_side in ['Buy', 'Sell']:
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=self.first_order_qty,
-            )
+        # for order_side in ['Buy', 'Sell']:
+        #     order = Order.objects.create(
+        #         bot=self.bot,
+        #         category=self.category,
+        #         symbol=self.symbol.name,
+        #         side=order_side,
+        #         orderType="Market",
+        #         qty=self.first_order_qty,
+        #     )
 
     def buy_by_limit(self):
         current_price = get_current_price(self.account, self.category, self.symbol)
@@ -129,17 +128,18 @@ class SimpleHedgeClassLogic:
         self.calculate_tp_size()
 
         for order_side in ['Buy', 'Sell']:
-            order = Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side=order_side,
-                orderType="Market",
-                qty=self.first_order_qty,
-                price=str(self.price),
-                triggerDirection=trigger_direction,
-                triggerPrice=str(self.price),
-            )
+            pass
+            # order = Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side=order_side,
+            #     orderType="Market",
+            #     qty=self.first_order_qty,
+            #     price=str(self.price),
+            #     triggerDirection=trigger_direction,
+            #     triggerPrice=str(self.price),
+            # )
 
     def take_position_status(self, position_number):
         position_size = Decimal(self.symbol_list[position_number]['size'])
@@ -160,15 +160,15 @@ class SimpleHedgeClassLogic:
         price = self.symbol_list[position_number]['avgPrice']
         self.add_psn_flag[position_number] = True
 
-        order = Order.objects.create(
-            bot=self.bot,
-            category=self.category,
-            symbol=self.symbol.name,
-            side=side,
-            orderType="Limit",
-            qty=avg_qty,
-            price=price,
-        )
+        # order = Order.objects.create(
+        #     bot=self.bot,
+        #     category=self.category,
+        #     symbol=self.symbol.name,
+        #     side=side,
+        #     orderType="Limit",
+        #     qty=avg_qty,
+        #     price=price,
+        # )
 
     def higher_position(self, position_number):
         position_idx_avg = self.symbol_list[position_number]['positionIdx']
@@ -204,29 +204,29 @@ class SimpleHedgeClassLogic:
         if position_number == 0:
             tp_price = round(Decimal(self.symbol_list[0]['avgPrice']) * (1 + Decimal(self.smp_hg.tppp) / 100),
                              self.round_number)
-            if current_price >= tp_price:
-                Order.objects.create(
-                    bot=self.bot,
-                    category=self.category,
-                    symbol=self.symbol.name,
-                    side='Sell',
-                    orderType='Market',
-                    qty=self.tp_size,
-                    is_take=True,
-                )
+            # if current_price >= tp_price:
+            #     Order.objects.create(
+            #         bot=self.bot,
+            #         category=self.category,
+            #         symbol=self.symbol.name,
+            #         side='Sell',
+            #         orderType='Market',
+            #         qty=self.tp_size,
+            #         is_take=True,
+            #     )
         else:
             tp_price = round(Decimal(self.symbol_list[1]['avgPrice']) * (1 - Decimal(self.smp_hg.tppp) / 100),
                              self.round_number)
-            if current_price <= tp_price:
-                Order.objects.create(
-                    bot=self.bot,
-                    category=self.category,
-                    symbol=self.symbol.name,
-                    side='Buy',
-                    orderType='Market',
-                    qty=self.tp_size,
-                    is_take=True,
-                )
+            # if current_price <= tp_price:
+            #     Order.objects.create(
+            #         bot=self.bot,
+            #         category=self.category,
+            #         symbol=self.symbol.name,
+            #         side='Buy',
+            #         orderType='Market',
+            #         qty=self.tp_size,
+            #         is_take=True,
+            #     )
 
     def cancel_tp_orders(self, position_number):
         if self.order_book and len(self.order_book) > 0:
@@ -261,15 +261,15 @@ class SimpleHedgeClassLogic:
                 price = avg_price - difference * 2
             else:
                 price = avg_price + difference * 2
-            Order.objects.create(
-                bot=self.bot,
-                category=self.category,
-                symbol=self.symbol.name,
-                side='Buy' if position_idx == 1 else 'Sell',
-                orderType='Limit',
-                qty=qty,
-                price=price
-            )
+            # Order.objects.create(
+            #     bot=self.bot,
+            #     category=self.category,
+            #     symbol=self.symbol.name,
+            #     side='Buy' if position_idx == 1 else 'Sell',
+            #     orderType='Limit',
+            #     qty=qty,
+            #     price=price
+            # )
 
 
 

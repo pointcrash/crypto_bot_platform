@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+
+<div class="row">
+    <div class="col-sm-12 col-lg-10 mx-auto">
+        <h1 class="text-center">Bots</h1>
+        <div class="d-flex flex-row">
+            <!-- Поле ввода "Account" -->
+            <div class="form-group mx-2">
+                <form method="POST" class="d-flex flex-row">
+                    {% csrf_token %}
+                    {{ account_select_form.account }}
+                    <button type="submit" class="ms-1 btn btn-outline-secondary">Select</button>
+                </form>
+            </div>
+            <a class="btn btn-primary ms-auto m-1 btn-shadow" href="{% url 'zinger_bot_create' %}">Zinger</a>
+<!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'simple_hedge_bot_create' %}">Simple Hedge</a>-->
+<!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bot_create' %}">Grid Create</a>-->
+            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'bb_bot_create' %}">BB Create</a>
+            <a class="btn btn-warning m-1 btn-shadow" href="{% url 'all_symbols_update' %}">Refresh coins</a>
+            {% if user.is_superuser %}
+            <a class="btn btn-danger m-1 btn-shadow" href="{% url 'restart_all_bots' %}">RestartAllBots</a>
+            {% endif %}
+        </div>
+
+        <div class="card mt-2 border-0 shadow mx-2 p-2">
+            <table class="table" style="vertical-align: middle">
+                <thead>
+                <tr class="">
+                    <th>Bot ID</th>
+                    <th>Account</th>
+                    <th>Symbol</th>
+                    <th class="d-none d-sm-table-cell">Strategy</th>
+                    <th class="d-none d-sm-table-cell">Side</th>
+                    <th class="d-none d-md-table-cell">USDT$</th>
+                    <th>Is alive</th>
+                    <th style="color: black">Actions</th>
+<!--                    <th class="text-center">PNL</th>-->
+                </tr>
+                </thead>
+                <tbody>
+                {% for bot in bots %}
+                <tr class="">
+                    <td>{{ bot.pk }}</td>
+                    <td>{{ bot.account }}</td>
+                    <td>{{ bot.symbol }}</td>
+                    <td class="d-none d-sm-table-cell">{{ bot.work_model }}</td>
+                    <td class="d-none d-sm-table-cell">
+                        {% if bot.work_model == 'bb' %}{{ bot.bb.side }}{% endif %}</td>
+                    <td class="d-none d-md-table-cell">{{ bot.amount_long }}{% if bot.amount_short %}/{{ bot.amount_short }}{% endif %}</td>
+                    <td>{% if bot.is_active %}<i class="fa-solid fa-circle" style="color: #14c220;"></i>
+                        {% else %}<i class="fa-solid fa-circle" style="color: #ff0000;"></i>{% endif %}
+                    </td>
+                    <td>
+                    {% if bot.is_active %}
+                    {% include 'modal_stop_bot.html' %}
+                    {% else %}
+                        <a href="{% url 'bot_start' bot_id=bot.pk %}" class="btn btn-success btn-shadow"><i class="fa-solid fa-play"></i></a>
+                    {% endif %}
+                    {% if bot.work_model == 'grid' %}
+<!--                    <a class="btn btn-primary btn-shadow" href="{% url 'single_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
+                    {% elif bot.work_model == 'bb'%}
+                        <a class="btn btn-primary btn-shadow" href="{% url 'bb_bot_edit' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                    {% elif bot.work_model == 'set0psn' %}
+<!--                        <a class="btn btn-primary btn-shadow" href="{% url 'bb_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
+                    {% elif bot.work_model == 'SmpHg' %}
+<!--                    <a class="btn btn-primary btn-shadow" href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>-->
+                    {% elif bot.work_model == 'zinger' %}
+                    <a class="btn btn-primary btn-shadow" href="{% url 'zinger_bot_edit' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                    {% endif %}
+
+                    <a class="btn  btn-secondary btn-shadow" href="{% url 'logs_detail' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>
+                    <button type="button" class="btn btn-danger btn-shadow" data-bs-toggle="modal"
+                    data-bs-target="#deleteBotModal{{bot.pk}}"><i class="fa-solid fa-trash"></i>
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteBotModal{{bot.pk}}" tabindex="-1" aria-labelledby="deleteBotModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="deleteBotModalLabel">{{ bot.symbol }}</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6>Choose way to delete:</h6>
+                                </div>
+                                <div class="modal-footer">
+                                    <a type="button"
+                                       href="{% url 'delete_bot' bot_id=bot.pk event_number=1 %}"
+                                       class="btn btn-warning col-12">Delete and stop bot only</a>
+                                    <a type="button"
+                                       href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
+                                       class="btn btn-warning col-12">Delete bot with cancel all orders</a>
+<!--                                    <a type="button"-->
+<!--                                       href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"-->
+<!--                                       class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by-->
+<!--                                        Market-->
+<!--                                    </a>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

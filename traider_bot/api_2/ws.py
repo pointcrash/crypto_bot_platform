@@ -1,7 +1,6 @@
 from binance import ThreadedWebsocketManager
 from pybit.unified_trading import WebSocket
-from bots.bb.logic.handlers_messages import bb_handle_stream_callback
-from bots.bot_logic import get_update_symbols_for_binance, clear_symbols
+from bots.general_functions import clear_symbols
 
 
 def connect_to_ws(bot, exchange_service_name):

@@ -6,7 +6,7 @@ from api_2.pybit_api import bybit_place_batch_order
 
 
 def get_quantity_from_price(bot, price, amount):
-    return (Decimal(str(amount * bot.isLeverage)) / price).quantize(Decimal(bot.symbol.minOrderQty), rounding=ROUND_DOWN)
+    return (Decimal(str(amount * bot.leverage)) / price).quantize(Decimal(bot.symbol.minOrderQty), rounding=ROUND_DOWN)
 
 
 def get_position_inform(bot):
@@ -36,7 +36,6 @@ def place_order(bot, side, order_type, price, amount_usdt=None, qty=None, positi
     if order_type.upper() == 'LIMIT' and not timeInForce:
         timeInForce = 'GTC'
     if not qty:
-        amount_usdt = bot.qty if not amount_usdt else amount_usdt
         qty = get_quantity_from_price(bot, price, amount_usdt)
 
     if bot.account.service.name == 'Binance':
@@ -47,17 +46,20 @@ def place_order(bot, side, order_type, price, amount_usdt=None, qty=None, positi
                                  price=price, qty=qty, position_side=position_side)
 
 
+def place_conditional_order(bot, side, position_side, trigger_price, trigger_direction, qty=None, amount_usdt=None):
+    if not qty:
+        qty = get_quantity_from_price(bot, trigger_price, amount_usdt)
+
+    if bot.account.service.name == 'Binance':
+        return binance_place_conditional_order(bot=bot, side=side, position_side=position_side,
+                                               trigger_price=trigger_price, trigger_direction=trigger_direction,
+                                               qty=qty)
+    elif bot.account.service.name == 'ByBit':
+        return bybit_place_conditional_order(bot=bot, side=side, position_side=position_side,
+                                             trigger_price=trigger_price, trigger_direction=trigger_direction, qty=qty)
+
+
 def place_batch_order(bot, order_list):
-
-    # Используем цену для расчета qty если оно не передано
-    for order in order_list:
-        if not order.get('qty') and order.get('price'):
-            order['qty'] = str(get_quantity_from_price(bot, price=Decimal(order['price']), amount=bot.qty))
-
-            # Удаляем параметр price если это маркет-ордер
-            if order['type'].upper() == 'MARKET':
-                order.pop('price')
-
     if bot.account.service.name == 'Binance':
         return binance_place_batch_order(bot, order_list)
     elif bot.account.service.name == 'ByBit':
@@ -106,11 +108,11 @@ def change_position_mode(bot):
         return bybit_change_position_mode_on_hedge(bot)
 
 
-def account_balance(bot):
-    if bot.account.service.name == 'Binance':
-        return binance_account_balance(bot)
-    elif bot.account.service.name == 'ByBit':
-        return bybit_account_balance(bot)
+def account_balance(account):
+    if account.service.name == 'Binance':
+        return binance_account_balance(account)
+    elif account.service.name == 'ByBit':
+        return bybit_account_balance(account)
 
     ''' Returned data:
     {   
@@ -118,3 +120,10 @@ def account_balance(bot):
         'availableBalance': 707.96,
     }
     '''
+
+
+def get_exchange_information(account, service_name):
+    if service_name == 'Binance':
+        return get_binance_exchange_information(account)
+    elif service_name == 'ByBit':
+        return get_bybit_exchange_information(account)

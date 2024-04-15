@@ -2,10 +2,8 @@ import threading
 import time
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
 
-from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, \
+from api_2.api_aggregator import change_position_mode, set_leverage, place_order, \
     get_position_inform, place_batch_order
-from bots.bb.multi_service_logic.avg_logic import BBAutoAverage
-from bots.bb_class import BollingerBands
 from bots.zinger_vip.logic.reduce_order_classes import ShortReduceOrder, LongReduceOrder
 
 
@@ -14,7 +12,6 @@ class WorkZingerVipClass:
         self.bot = bot
         self.symbol = bot.symbol
         self.symbol_name = bot.symbol.name
-        self.bb = BollingerBands(bot)
         self.position_info = {
             'LONG': {
                 'side': 'LONG',

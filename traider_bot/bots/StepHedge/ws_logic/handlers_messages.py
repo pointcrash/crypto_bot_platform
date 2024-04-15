@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from bots.bot_logic import logging
+from bots.general_functions import custom_logging
 
 
 # def callback_func_choices(step_class_obj, topic,  message):
@@ -114,7 +114,7 @@ def handle_order_stream_message(message, step_class_obj):
             # print()
         except Exception as e:
             print(f'ОШИБКА В КАЛБЕК ОРДЕРЕ {e}')
-            logging(step_class_obj.bot, f'ОШИБКА В КАЛБЕК ОРДЕРЕ {e}')
+            custom_logging(step_class_obj.bot, f'ОШИБКА В КАЛБЕК ОРДЕРЕ {e}')
             raise ValueError('')
 
 

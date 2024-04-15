@@ -1,13 +1,13 @@
 from django.contrib import admin
 
-from .models import Bot, Symbol, Log, Process, Take, AvgOrder, SingleBot, StepHedge
+from .models import Symbol, Log, StepHedge, BotModel, BBBotModel
 
 
-@admin.register(Bot)
+@admin.register(BotModel)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'symbol', 'account', 'side', 'is_active', 'qty', 'price', 'work_model',)
+    list_display = ('id', 'symbol', 'account', 'is_active', 'work_model',)
     list_display_links = ('id', 'symbol',)
-    search_fields = ('symbol', 'orderType', 'side', 'is_active', 'work_model')
+    search_fields = ('symbol', 'is_active', 'work_model')
 
 
 @admin.register(Symbol)
@@ -24,35 +24,26 @@ class OrdersAdmin(admin.ModelAdmin):
     search_fields = ('content', 'time')
 
 
-@admin.register(Process)
-class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'pid', 'bot',)
-    list_display_links = ('id', 'pid', 'bot',)
-
-
-@admin.register(Take)
-class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bot', 'take_number', 'order_link_id', 'is_filled',)
-    list_display_links = ('id', 'bot', 'order_link_id',)
-
-
-@admin.register(AvgOrder)
-class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bot', 'order_link_id', 'is_filled',)
-    list_display_links = ('id', 'bot', 'order_link_id',)
-
-
-@admin.register(SingleBot)
-class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bot', 'single')
-    list_display_links = ('id', 'bot')
-
-
 @admin.register(StepHedge)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bot', 'bot_id', 'bot_owner', )
+    list_display = ('id', 'bot', 'bot_id', 'bot_owner',)
     list_display_links = ('id', 'bot')
-    search_fields = ('bot', 'bot_id', 'bot_owner', )
+    search_fields = ('bot', 'bot_id', 'bot_owner',)
+
+    @staticmethod
+    def bot_id(obj):
+        return obj.bot.pk
+
+    @staticmethod
+    def bot_owner(obj):
+        return obj.bot.account
+
+
+@admin.register(BBBotModel)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'bot', 'bot_id', 'bot_owner', 'side', 'interval', 'max_margin',)
+    list_display_links = ('id', 'bot')
+    search_fields = ('bot', 'bot_id', 'bot_owner',)
 
     @staticmethod
     def bot_id(obj):

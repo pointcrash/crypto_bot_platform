@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db import models
 
-from bots_group.models import BotsGroup
 from main.models import Account, ExchangeService
 
 
@@ -23,17 +23,62 @@ class Symbol(models.Model):
         return self.name
 
 
-class Bot(models.Model):
+class BotModel(models.Model):
+    MARGIN_TYPE_CHOICES = (
+        ('CROSS', 'CROSS'),
+        ('ISOLATED', 'ISOLATED'),
+    )
+
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+    category = models.CharField(max_length=10, default='linear', blank=True)
+    symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
+    leverage = models.IntegerField(default=10)
+    amount_long = models.IntegerField(validators=[MinValueValidator(0)])
+    amount_short = models.IntegerField(validators=[MinValueValidator(0)], null=True, blank=True)
+    margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS', blank=True)
+    work_model = models.CharField(max_length=10)
+    pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
+
+    is_active = models.BooleanField(default=False)
+    time_create = models.DateTimeField(auto_now_add=True, null=True)
+    time_update = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        unique_together = ['account', 'symbol']
+
+    def __str__(self):
+        return self.symbol.name
+
+
+class SoftDeletedModelManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class Log(models.Model):
+    objects = SoftDeletedModelManager()
+    soft_deleted_objects = models.Manager()
+
+    bot = models.ForeignKey(BotModel, on_delete=models.SET_NULL, blank=True, null=True)
+    content = models.CharField(blank=True, null=True)
+    time = models.CharField(blank=True, null=True)
+    time_create = models.DateTimeField(auto_now_add=True, null=True)
+    is_deleted = models.BooleanField(default=False)
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.save()
+
+    def hard_delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+
+
+class BBBotModel(models.Model):
     SIDE_CHOICES = (
         ('Buy', 'Buy'),
         ('Sell', 'Sell'),
         ('FB', 'First Band'),
-        ('TS', 'Two-Sided'),
-    )
-
-    CATEGORY_CHOICES = (
-        ('linear', 'linear'),
-        ('inverse', 'inverse'),
     )
 
     ORDER_TYPE_CHOICES = (
@@ -42,10 +87,9 @@ class Bot(models.Model):
         # Другие варианты типа ордера
     )
 
-    MARGIN_TYPE_CHOICES = (
-        ('CROSS', 'CROSS'),
-        ('ISOLATED', 'ISOLATED'),
-        # Другие варианты типа ордера
+    HARD_AVG_TYPE_CHOICES = (
+        ('pnl', 'Убытки (PnL)'),
+        ('percent', 'Изменение цены'),
     )
 
     KLINE_INTERVAL_CHOICES = (
@@ -63,103 +107,35 @@ class Bot(models.Model):
         ('W', 'W'),
         ('M', 'M'),
     )
-
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    service = models.ForeignKey(ExchangeService, on_delete=models.SET_NULL, null=True)
-    account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
-    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='linear')
-    symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
-    isLeverage = models.IntegerField(default=10)
-    side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='Auto')
-    orderType = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='Limit')
-    qty = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
-    margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS')
-    qty_kline = models.IntegerField(blank=True, null=True, default=20)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, related_name='bb', blank=True, null=True)
+    side = models.CharField(max_length=4, choices=SIDE_CHOICES, default='FB')
+    orderType = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='Limit', blank=True)
+    qty_kline = models.IntegerField(default=20)
     interval = models.CharField(max_length=3, choices=KLINE_INTERVAL_CHOICES, default='15')
-    d = models.IntegerField(blank=True, null=True, default=2)
-    process_id = models.CharField(max_length=255, blank=True, null=True, default=None)
-    work_model = models.CharField(max_length=10, null=True, blank=True)
+    d = models.IntegerField(default=2)
     take_on_ml = models.BooleanField(default=True)
     take_on_ml_percent = models.DecimalField(max_digits=5, decimal_places=2, default=50)
-    auto_avg = models.BooleanField(default=True)
-    bb_avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
-    grid_avg_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
-    grid_profit_value = models.DecimalField(max_digits=5, decimal_places=3, default=1)
-    grid_take_count = models.IntegerField(default=2)
-    is_percent_deviation_from_lines = models.BooleanField(default=False)
-    deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0)
-    dfm = models.DecimalField(max_digits=5, decimal_places=3, default=30)
+    take_on_ml_status = models.BooleanField(default=False, blank=True, null=True)
+    take_on_ml_qty = models.DecimalField(max_digits=10, decimal_places=5, default=0, blank=True, null=True)
+    auto_avg = models.BooleanField(default=False)
+    avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
+    is_deviation_from_lines = models.BooleanField(default=False, blank=True)
+    percent_deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0, blank=True)
+    dfm = models.DecimalField(max_digits=5, decimal_places=3, default=70)
     chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
     dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     max_margin = models.IntegerField(null=True, blank=True)
-    time_sleep = models.IntegerField(default=5, null=True, blank=True)
-    firs_take_is_done = models.BooleanField(default=False)
 
-    entry_order_sell = models.CharField(blank=True, null=True)
-    entry_order_sell_amount = models.DecimalField(max_digits=10, decimal_places=10, blank=True, null=True)
-    entry_order_by = models.CharField(blank=True, null=True)
-    entry_order_by_amount = models.DecimalField(max_digits=10, decimal_places=10, blank=True, null=True)
-    take1 = models.CharField(blank=True, null=True)
-    take2 = models.CharField(blank=True, null=True)
-    take2_amount = models.DecimalField(max_digits=10, decimal_places=10, blank=True, null=True)
-    bin_order = models.BooleanField(default=True)
-    bin_order_id = models.CharField(blank=True, null=True)
-    pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
+    hard_avg = models.BooleanField(default=False)
+    hard_avg_type = models.CharField(choices=HARD_AVG_TYPE_CHOICES, null=True, blank=True)
+    hard_avg_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
-    group = models.ForeignKey(BotsGroup, on_delete=models.SET_NULL, null=True, blank=True)
-
-    repeat = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
 
-    # def save(self, *args, **kwargs):
-    #     super().save(*args, **kwargs)
-    class Meta:
-        unique_together = ['account', 'symbol']
-
-    def __str__(self):
-        return self.symbol.name
-
-
-class Take(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    take_number = models.SmallIntegerField(blank=True, null=True)
-    order_link_id = models.CharField(default='', blank=True, null=True)
-    is_filled = models.BooleanField(default=False, blank=True, null=True)
-
-
-class Log(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.SET_NULL, blank=True, null=True)
-    content = models.CharField(blank=True, null=True)
-    time = models.CharField(blank=True, null=True)
-    time_create = models.DateTimeField(auto_now_add=True, null=True)
-
-
-class Process(models.Model):
-    pid = models.CharField(blank=True, null=True, default=None)
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE)
-
-
-class AvgOrder(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    order_link_id = models.CharField(default='', blank=True, null=True)
-    is_filled = models.BooleanField(default=False, blank=True, null=True)
-
-
-class SingleBot(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    single = models.BooleanField(default=False)
-
-
-class IsTSStart(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    TS = models.BooleanField(default=False)
-
 
 class Set0Psn(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
     set0psn = models.BooleanField(default=False)
     trend = models.IntegerField(blank=True, null=True)
     limit_pnl_loss_s0n = models.CharField(blank=True, null=True)
@@ -167,26 +143,28 @@ class Set0Psn(models.Model):
 
 
 class SimpleHedge(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
     tppp = models.CharField(blank=True, null=True)
     tpap = models.CharField(blank=True, null=True)
     tp_count = models.IntegerField(blank=True, null=True, default=1)
 
 
 class StepHedge(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
-    short1invest = models.CharField(max_length=20, null=True)
-    long1invest = models.CharField(max_length=20, null=True)
-    tp_pnl_percent = models.CharField(max_length=20, null=True)
-    tp_pnl_percent_long = models.CharField(max_length=20, null=True)
-    pnl_short_avg = models.CharField(max_length=20, null=True)
-    pnl_long_avg = models.CharField(max_length=20, null=True)
-    margin_short_avg = models.CharField(max_length=20, null=True)
-    margin_long_avg = models.CharField(max_length=20, null=True)
-    qty_steps = models.IntegerField(default=30, null=True)
-    qty_steps_diff = models.IntegerField(default=10)
-    add_tp = models.BooleanField(default=False)
-    is_nipple_active = models.BooleanField(default=True)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True, related_name='zinger')
+    short1invest = models.IntegerField(blank=True, null=True)
+    long1invest = models.IntegerField(blank=True, null=True)
+    income_percent = models.DecimalField(max_digits=4, decimal_places=1, default=6)
+    tp_pnl_percent_short = models.DecimalField(max_digits=4, decimal_places=1)
+    tp_pnl_percent_long = models.DecimalField(max_digits=4, decimal_places=1)
+    realized_pnl = models.DecimalField(max_digits=20, decimal_places=10, default=0)
+    pnl_short_avg = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    pnl_long_avg = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    margin_short_avg = models.IntegerField(blank=True, null=True)
+    margin_long_avg = models.IntegerField(blank=True, null=True)
+    qty_steps = models.IntegerField(default=30, blank=True)
+    qty_steps_diff = models.IntegerField(default=10, blank=True)
+    add_tp = models.BooleanField(default=False, blank=True)
+    is_nipple_active = models.BooleanField(default=False, blank=True, null=True)
     move_nipple = models.BooleanField(blank=True, null=True)
 
     def set_move_nipple_value(self):
@@ -199,7 +177,7 @@ class StepHedge(models.Model):
 
 
 class OppositePosition(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
     activate_opp = models.BooleanField(default=False)
     limit_pnl_loss_opp = models.CharField(blank=True, null=True)
     psn_qty_percent_opp = models.CharField(blank=True, null=True)
@@ -207,6 +185,6 @@ class OppositePosition(models.Model):
 
 
 class JsonObjectClass(models.Model):
-    bot = models.OneToOneField(Bot, on_delete=models.CASCADE, blank=True, null=True)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
     bot_mode = models.CharField(blank=True, null=True)
     data = models.JSONField(blank=True, null=True)

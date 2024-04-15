@@ -1,7 +1,7 @@
 import time
 
 from bots.SimpleHedge.logic.smp_bot_class import SimpleHedgeClassLogic
-from bots.bot_logic import lock_release, logging, exit_by_exception
+from bots.general_functions import lock_release, custom_logging, exit_by_exception
 from single_bot.logic.global_variables import lock, global_list_bot_id
 
 
@@ -30,12 +30,12 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
             # Обновляем книгу ордеров до отмены ордеров
             status_req_order_book = smp_class_obj.update_order_book()
             if status_req_order_book not in 'OK':
-                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {smp_class_obj.order_book}')
+                custom_logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ -- {smp_class_obj.order_book}')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ СПИСКА ОРДЕРОВ')
             # Обновляем список позиций
             smp_class_obj.update_symbol_list()
             if smp_class_obj.symbol_list is None:
-                logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
+                custom_logging(bot, f'ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
                 raise Exception('ОШИБКА ПОЛУЧЕНИЯ "SYMBOL LIST"')
 
             # # Проверяем равенство цен открытых позиций
@@ -57,7 +57,7 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
                 time.sleep(1)
 
                 if position_status == 'Error':
-                    logging(bot, f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
+                    custom_logging(bot, f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
                     raise Exception(f'ОДНА ИЛИ ОБЕ ПОЗИЦИИ РАВНЫ 0 -- {smp_class_obj.symbol_list}')
 
                 elif position_status == '>':
@@ -88,7 +88,7 @@ def simple_hedge_bot_main_logic(bot, smp_hg):
             time.sleep(3)
             lock.acquire()
     except Exception as e:
-        logging(bot, f'Error {e}')
+        custom_logging(bot, f'Error {e}')
         lock.acquire()
         try:
             exit_by_exception(bot)

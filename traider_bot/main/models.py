@@ -9,7 +9,7 @@ class Account(models.Model):
     )
 
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
-    name = models.CharField()
+    name = models.CharField(unique=True)
     service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
     API_TOKEN = models.CharField()
     SECRET_KEY = models.CharField()
@@ -37,5 +37,3 @@ class ExchangeService(models.Model):
 
     def __str__(self):
         return self.name
-
-
