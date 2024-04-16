@@ -64,5 +64,6 @@ def main():
 #     twm.start_symbol_mark_price_socket(callback=handle_socket_message_markPrise, symbol=symbol, fast=True)
 #     twm.join()
 
+
 if __name__ == "__main__":
     main()
