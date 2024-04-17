@@ -4,6 +4,8 @@ from decimal import Decimal
 import requests
 from binance.client import Client
 
+from api_2.formattres import order_formatters
+
 api_key = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
 api_secret = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
 
@@ -26,6 +28,7 @@ def get_data_ago_to_ms(days):
 # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='LONG', type='MARKET', quantity=0.02))  # Разместить ордер
 # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='SHORT', type='LIMIT', price=41000, timeInForce='GTC', quantity=0.02))  # Разместить ордер
 # print(client.futures_get_all_orders(symbol='BTCUSDT'))  # Список ордеров
+# print(client.futures_get_open_orders(symbol='BTCUSDT'))  # Список ордеров
 # print(client.futures_get_order(symbol='BTCUSDT', orderId='3653110189'))  # Инфо по открытому ордеру
 # print(client.futures_cancel_order(symbol='BTCUSDT', orderId='3653110189'))  # Отменить ордер
 # print(client.futures_cancel_all_open_orders(symbol='BTCUSDT'))
@@ -83,29 +86,3 @@ def format_kline_interval_to_binance(interval):
         return transformed_values[index]
     else:
         return None
-
-    # if interval == '1':
-    #     interval = '1m'
-    # elif interval == '3':
-    #     interval = '3m'
-    # elif interval == '5':
-    #     interval = '5m'
-    # elif interval == '15':
-    #     interval = '15m'
-    # elif interval == '30':
-    #     interval = '30m'
-    # elif interval == '60':
-    #     interval = '1h'
-    # elif interval == '120':
-    #     interval = '2h'
-    # elif interval == '240':
-    #     interval = '4h'
-    # elif interval == '360':
-    #     interval = '6h'
-    # elif interval == '720':
-    #     interval = '8h'
-    # elif interval == 'D':
-    #     interval = '1d'
-    # else:
-    #     interval = None
-    # return interval

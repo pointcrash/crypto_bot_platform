@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.shortcuts import render, redirect
 
+from api_2.api_aggregator import get_open_orders, get_position_inform
+from api_2.formattres import order_formatters
 from bots.bb.forms import BBForm
 from bots.bb.logic.start_logic import bb_worker
 from bots.forms import BotModelForm, BotModelEditForm
@@ -94,6 +96,13 @@ def bb_bot_edit(request, bot_id):
         new_key = key.split('_')[1]
         bot_cached_data[new_key] = cache.get(key)
 
+    ''' GET POSITION INFO '''
+    positions = get_position_inform(bot)
+
+    ''' GET OPEN ORDERS '''
+    raw_orders = get_open_orders(bot)
+    orders = [order_formatters(order) for order in raw_orders] if raw_orders else None
+
     return render(request, 'bb/edit.html', {
         'bot_form': bot_form,
         'bb_form': bb_form,
@@ -101,4 +110,6 @@ def bb_bot_edit(request, bot_id):
         'symbol': symbol,
         'account': account,
         'bot_cached_data': bot_cached_data,
+        'orders': orders,
+        'positions': positions,
     })

@@ -1,5 +1,7 @@
 from pybit.unified_trading import HTTP
 
+from api_2.formattres import order_formatters
+
 
 def get_session(account):
     session = HTTP(
@@ -38,25 +40,35 @@ if __name__ == "__main__":
         api_key="WNiu8gV3qoUyjT05WB",
         api_secret="xPNX24SbCF7OJHyUxQxGdb2XOpsnaetIOgrU",
     )
-
-    print(test_session.place_batch_order(
+    response = (test_session.get_open_orders(
         category="linear",
-        request=[
-            {
-                "category": "linear",
-                "symbol": "BTCUSDT",
-                "orderType": "Market",
-                "side": "Buy",
-                "positionIdx": 1,
-                "qty": '0.02',
-            },
-            {
-                "category": "linear",
-                "symbol": "BTCUSDT",
-                "orderType": "Market",
-                "side": "Sell",
-                "positionIdx": 2,
-                "qty": '0.02',
-            }
-        ]
+        symbol="ETHUSDT",
+        openOnly=0,
     ))
+
+    for order in response['result']['list']:
+        print(order_formatters(order))
+
+    # print(test_session.place_batch_order(
+    #     category="linear",
+    #     request=[
+    #         {
+    #             "category": "linear",
+    #             "symbol": "BTCUSDT",
+    #             "orderType": "Market",
+    #             "side": "Buy",
+    #             "positionIdx": 1,
+    #             "qty": '0.02',
+    #         },
+    #         {
+    #             "category": "linear",
+    #             "symbol": "BTCUSDT",
+    #             "orderType": "Market",
+    #             "side": "Sell",
+    #             "positionIdx": 2,
+    #             "qty": '0.02',
+    #         }
+    #     ]
+    # ))
+
+
