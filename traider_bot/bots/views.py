@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -8,7 +9,6 @@ from bots.bb.logic.start_logic import bb_worker
 from bots.models import BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
-from bots.zinger.logic.start_logic import zinger_worker
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 from main.forms import AccountSelectForm
 
@@ -103,6 +103,7 @@ def delete_bot(request, bot_id, event_number):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@login_required
 def bot_start(request, bot_id):
     bot = BotModel.objects.get(pk=bot_id)
     bot_thread = None
@@ -123,5 +124,18 @@ def bot_start(request, bot_id):
 
     if bot_thread is not None:
         bot_thread.start()
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def deactivate_all_my_bots(request):
+    user = request.user
+    bots = BotModel.objects.filter(owner=user)
+
+    for bot in bots:
+        bot.is_active = False
+        bot.save()
+        time.sleep(7)
 
     return redirect(request.META.get('HTTP_REFERER'))

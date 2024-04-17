@@ -21,13 +21,14 @@
                     <button type="submit" class="ms-1 btn btn-outline-secondary">Select</button>
                 </form>
             </div>
-            <a class="btn btn-primary ms-auto m-1 btn-shadow" href="{% url 'zinger_bot_create' %}">Zinger</a>
+            <a class="btn btn-primary ms-auto m-1 btn-shadow" href="{% url 'zinger_bot_create' %}">Зингер</a>
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'simple_hedge_bot_create' %}">Simple Hedge</a>-->
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bot_create' %}">Grid Create</a>-->
-            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'bb_bot_create' %}">BB Create</a>
-            <a class="btn btn-warning m-1 btn-shadow" href="{% url 'all_symbols_update' %}">Refresh coins</a>
+            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'bb_bot_create' %}">Боллинджер</a>
+            <a class="btn btn-warning m-1 btn-shadow" href="{% url 'all_symbols_update' %}">Обновить монеты</a>
+            <a class="btn btn-danger m-1 btn-shadow" href="{% url 'deactivate_all_my_bots' %}">Остановить Всех</a>
             {% if user.is_superuser %}
-            <a class="btn btn-danger m-1 btn-shadow" href="{% url 'restart_all_bots' %}">RestartAllBots</a>
+            <a class="btn btn-danger m-1 btn-shadow" href="{% url 'restart_all_bots' %}">Рестарт Все</a>
             {% endif %}
         </div>
 
@@ -35,14 +36,14 @@
             <table class="table" style="vertical-align: middle">
                 <thead>
                 <tr class="">
-                    <th>Bot ID</th>
-                    <th>Account</th>
-                    <th>Symbol</th>
-                    <th class="d-none d-sm-table-cell">Strategy</th>
-                    <th class="d-none d-sm-table-cell">Side</th>
+                    <th>Бот ID</th>
+                    <th>Аккаунт</th>
+                    <th>Пара</th>
+                    <th class="d-none d-sm-table-cell">Стратегия</th>
+                    <th class="d-none d-sm-table-cell">Сторона</th>
                     <th class="d-none d-md-table-cell">USDT$</th>
-                    <th>Is alive</th>
-                    <th style="color: black">Actions</th>
+                    <th>Работает</th>
+                    <th style="color: black">Управление</th>
 <!--                    <th class="text-center">PNL</th>-->
                 </tr>
                 </thead>

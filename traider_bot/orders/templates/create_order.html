@@ -2,14 +2,14 @@
 
 {% block content %}
 <div class="row">
-    <div class="container text-center">
-    <h4>Current Price {{symbol}}: <span id="price">Loading...</span></h4>
-    <input type="hidden" id="symbol" value="{{symbol}}">
-    </div>
+<!--    <div class="container text-center">-->
+<!--    <h4>Current Price {{symbol}}: <span id="price">Loading...</span></h4>-->
+<!--    <input type="hidden" id="symbol" value="{{symbol}}">-->
+<!--    </div>-->
     <div class="col-3 mx-auto">
         <div class="card">
             <div class="card-header">
-                <h3 class="text-center">Create order</h3>
+                <h3 class="text-center">Создать ордер</h3>
             </div>
             <div class="card-body">
                 <form method="POST">
@@ -17,7 +17,7 @@
 
                 {{ form.as_p }}
 
-                <button type="submit" class="btn btn-success">Create</button>
+                <button type="submit" class="btn btn-success">Разместить</button>
                 </form>
             </div>
         </div>
@@ -25,34 +25,34 @@
     </div>
 </div>
 
-<script>
-    const socket = new WebSocket('wss://stream.bybit.com/v5/public/linear');
-    const symbol = document.getElementById('symbol').value;
+<!--<script>-->
+<!--    const socket = new WebSocket('wss://stream.bybit.com/v5/public/linear');-->
+<!--    const symbol = document.getElementById('symbol').value;-->
 
-    socket.addEventListener('open', (event) => {
-        console.log('WebSocket соединение установлено:', event);
+<!--    socket.addEventListener('open', (event) => {-->
+<!--        console.log('WebSocket соединение установлено:', event);-->
 
-        const subscribeRequest = {
-            op: 'subscribe',
-            args: [`orderbook.1.${symbol}`]
-        };
+<!--        const subscribeRequest = {-->
+<!--            op: 'subscribe',-->
+<!--            args: [`orderbook.1.${symbol}`]-->
+<!--        };-->
 
-        socket.send(JSON.stringify(subscribeRequest));
-    });
+<!--        socket.send(JSON.stringify(subscribeRequest));-->
+<!--    });-->
 
-    socket.addEventListener('message', function(event) {
-        const data = JSON.parse(event.data);
-        const price = data['data']['b'][0][0];
+<!--    socket.addEventListener('message', function(event) {-->
+<!--        const data = JSON.parse(event.data);-->
+<!--        const price = data['data']['b'][0][0];-->
 
-        document.getElementById('price').textContent = price;
-    });
+<!--        document.getElementById('price').textContent = price;-->
+<!--    });-->
 
-    socket.addEventListener('close', (event) => {
-        console.log('WebSocket соединение закрыто:', event);
-    });
+<!--    socket.addEventListener('close', (event) => {-->
+<!--        console.log('WebSocket соединение закрыто:', event);-->
+<!--    });-->
 
-    socket.addEventListener('error', (event) => {
-        console.error('Произошла ошибка WebSocket:', event);
-    });
-</script>
+<!--    socket.addEventListener('error', (event) => {-->
+<!--        console.error('Произошла ошибка WebSocket:', event);-->
+<!--    });-->
+<!--</script>-->
 {% endblock %}

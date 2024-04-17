@@ -1,3 +1,5 @@
+
+
 def order_formatters(order):
     formated_order = {'symbol': order['symbol'], 'orderId': order['orderId'], 'price': order['price']}
 
