@@ -11,25 +11,32 @@ def get_quantity_from_price(bot, price, amount):
 
 def get_position_inform(bot):
     if bot.account.service.name == 'Binance':
-        return binance_get_position_inform(bot)
+        psn_list = binance_get_position_inform(bot)
 
     elif bot.account.service.name == 'ByBit':
-        return bybit_get_position_inform(bot)
+        psn_list = bybit_get_position_inform(bot)
 
-    ''' Returned data:
-        [{'symbol': 'BTCUSDT',
-        'qty': '0.02',
-        'entryPrice': '43257.245100',
-        'markPrice': '41257.282100',
-        'unrealisedPnl': '-13.542300',
-        'side': 'LONG'},
-        {'symbol': 'BTCUSDT',
-        'qty': '0.00',
-        'entryPrice': '0',
-        'markPrice': '0',
-        'unrealisedPnl': '0',
-        'side': 'SHORT'}]
-    '''
+    for psn in psn_list:
+        psn['markPrice'] = str(float(psn['markPrice']))
+        psn['entryPrice'] = str(float(psn['entryPrice']))
+        psn['unrealisedPnl'] = str(round(float(psn['unrealisedPnl']), 2))
+    return psn_list
+
+
+''' Returned data:
+    [{'symbol': 'BTCUSDT',
+    'qty': '0.02',
+    'entryPrice': '43257.245100',
+    'markPrice': '41257.282100',
+    'unrealisedPnl': '-13.542300',
+    'side': 'LONG'},
+    {'symbol': 'BTCUSDT',
+    'qty': '0.00',
+    'entryPrice': '0',
+    'markPrice': '0',
+    'unrealisedPnl': '0',
+    'side': 'SHORT'}]
+'''
 
 
 def place_order(bot, side, order_type, price, amount_usdt=None, qty=None, position_side=None, timeInForce=None):

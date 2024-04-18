@@ -6,6 +6,7 @@ from django.core.cache import cache
 from django.shortcuts import render, redirect
 
 from bots.forms import BotModelForm, BotModelEditForm
+from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
 from bots.zinger.forms import ZingerForm
@@ -92,6 +93,8 @@ def zinger_bot_edit(request, bot_id):
         new_key = key.split('_')[1]
         bot_cached_data[new_key] = cache.get(key)
 
+    positions, orders = get_cur_positions_and_orders_info(bot)
+
     return render(request, 'zinger/edit.html', {
         'bot_form': bot_form,
         'zinger_form': zinger_form,
@@ -99,4 +102,6 @@ def zinger_bot_edit(request, bot_id):
         'symbol': symbol,
         'account': account,
         'bot_cached_data': bot_cached_data,
+        'positions': positions,
+        'orders': orders,
     })

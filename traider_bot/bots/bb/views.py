@@ -11,6 +11,7 @@ from api_2.formattres import order_formatters
 from bots.bb.forms import BBForm
 from bots.bb.logic.start_logic import bb_worker
 from bots.forms import BotModelForm, BotModelEditForm
+from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
 
@@ -96,12 +97,19 @@ def bb_bot_edit(request, bot_id):
         new_key = key.split('_')[1]
         bot_cached_data[new_key] = cache.get(key)
 
-    ''' GET POSITION INFO '''
-    positions = get_position_inform(bot)
+    positions, orders = get_cur_positions_and_orders_info(bot)
 
-    ''' GET OPEN ORDERS '''
-    raw_orders = get_open_orders(bot)
-    orders = [order_formatters(order) for order in raw_orders] if raw_orders else None
+    # ''' GET POSITION INFO '''
+    # positions = get_position_inform(bot)
+    #
+    # for position in positions:
+    #     position['leverage'] = bot.leverage
+    #     position['cost'] = round(float(position['qty']) * float(position['markPrice']), 2)
+    #     position['margin'] = round(position['cost'] / position['leverage'], 2)
+    #
+    # ''' GET OPEN ORDERS '''
+    # raw_orders = get_open_orders(bot)
+    # orders = [order_formatters(order) for order in raw_orders] if raw_orders else None
 
     return render(request, 'bb/edit.html', {
         'bot_form': bot_form,
