@@ -19,7 +19,8 @@ def get_position_inform(bot):
     for psn in psn_list:
         psn['markPrice'] = str(float(psn['markPrice']))
         psn['entryPrice'] = str(float(psn['entryPrice']))
-        psn['unrealisedPnl'] = str(round(float(psn['unrealisedPnl']), 2))
+        if psn.get('unrealisedPnl'):
+            psn['unrealisedPnl'] = str(round(float(psn['unrealisedPnl']), 2))
     return psn_list
 
 
