@@ -1,3 +1,5 @@
+import uuid
+
 from pybit.unified_trading import HTTP
 
 from api_2.formattres import order_formatters
@@ -34,20 +36,34 @@ def bybit_place_batch_order(bot, order_list):
     return response['result']['list']
 
 
-if __name__ == "__main__":
-    test_session = HTTP(
-        testnet=True,
-        api_key="WNiu8gV3qoUyjT05WB",
-        api_secret="xPNX24SbCF7OJHyUxQxGdb2XOpsnaetIOgrU",
-    )
-    response = (test_session.get_open_orders(
-        category="linear",
-        symbol="ETHUSDT",
-        openOnly=0,
-    ))
+def create_internal_transfer(account, coin, amount, from_account_type, to_account_type):
+    session = get_session(account)
 
-    for order in response['result']['list']:
-        print(order_formatters(order))
+    response = session.create_internal_transfer(
+        transferId=uuid.uuid4(),
+        coin=coin,
+        amount=amount,
+        fromAccountType=from_account_type,
+        toAccountType=to_account_type,
+    )
+    return response
+
+
+if __name__ == "__main__":
+    pass
+    # test_session = HTTP(
+    #     testnet=True,
+    #     api_key="WNiu8gV3qoUyjT05WB",
+    #     api_secret="xPNX24SbCF7OJHyUxQxGdb2XOpsnaetIOgrU",
+    # )
+    # response = (test_session.get_open_orders(
+    #     category="linear",
+    #     symbol="ETHUSDT",
+    #     openOnly=0,
+    # ))
+    #
+    # for order in response['result']['list']:
+    #     print(order_formatters(order))
 
     # print(test_session.place_batch_order(
     #     category="linear",
@@ -70,5 +86,3 @@ if __name__ == "__main__":
     #         }
     #     ]
     # ))
-
-

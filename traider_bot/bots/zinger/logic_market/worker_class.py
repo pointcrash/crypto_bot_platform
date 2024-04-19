@@ -5,7 +5,7 @@ import time
 from django.core.cache import cache
 from decimal import Decimal, ROUND_HALF_UP
 
-from api_2.api_aggregator import change_position_mode, set_leverage, place_order, get_position_inform
+from api_2.api_aggregator import change_position_mode, set_leverage, place_order, get_position_inform, cancel_all_orders
 from api_2.custom_logging_api import custom_logging
 
 
@@ -39,6 +39,8 @@ class WorkZingerClassMarket:
         return (self.bot.amount_long + self.bot.amount_short) * (self.zinger.income_percent / 100)
 
     def preparatory_actions(self):
+        cancel_all_orders(self.bot)
+
         try:
             change_position_mode(self.bot)
         except:
@@ -47,6 +49,7 @@ class WorkZingerClassMarket:
             set_leverage(self.bot)
         except:
             pass
+
         if not self.check_opened_psn():
             for side in ['BUY', 'SELL']:
                 with self.order_locker:
@@ -75,33 +78,37 @@ class WorkZingerClassMarket:
             time.sleep(0.1)
 
         amount_usdt = self.bot.amount_long if side == 'BUY' else self.bot.amount_short
-        response = place_order(self.bot, side=side, order_type='MARKET', price=self.current_price,
-                               amount_usdt=amount_usdt)
-        return response['orderId']
+        if amount_usdt != 0:
+            response = place_order(self.bot, side=side, order_type='MARKET', price=self.current_price,
+                                   amount_usdt=amount_usdt)
+            return response['orderId']
 
     def place_tp_orders(self, psn_side, psn_price, psn_qty):
-        psn_cost = psn_qty * psn_price
-        if psn_side == 'LONG':
-            side = 'SELL'
-            order_price = (psn_cost + self.tp_income_long) / psn_qty
-        elif psn_side == 'SHORT':
-            side = 'BUY'
-            order_price = abs((-psn_cost + self.tp_income_short) / psn_qty)
-        else:
-            raise Exception(f'Not correct side position_info: {psn_side}')
+        amount_usdt = self.bot.amount_long if psn_side == 'LONG' else self.bot.amount_short
+        if amount_usdt != 0:
 
-        # order_price = order_price.quantize(Decimal(self.bot.symbol.tickSize), rounding=ROUND_HALF_UP)
-        order_price = round(order_price, int(self.bot.symbol.priceScale))
+            psn_cost = psn_qty * psn_price
+            if psn_side == 'LONG':
+                side = 'SELL'
+                order_price = (psn_cost + self.tp_income_long) / psn_qty
+            elif psn_side == 'SHORT':
+                side = 'BUY'
+                order_price = abs((-psn_cost + self.tp_income_short) / psn_qty)
+            else:
+                raise Exception(f'Not correct side position_info: {psn_side}')
 
-        prices = [psn_price, order_price]
-        self.multiplication_factor[psn_side] = max(prices) / min(prices)
-        response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price,
-                               qty=psn_qty)
-        self.tp_order_id_list[psn_side] = response['orderId']
-        self.unrealizedPnl[psn_side] = abs(psn_price - order_price) * psn_qty
+            # order_price = order_price.quantize(Decimal(self.bot.symbol.tickSize), rounding=ROUND_HALF_UP)
+            order_price = round(order_price, int(self.bot.symbol.priceScale))
 
-        self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
-        self.cached_data(key='multFactor', value=self.multiplication_factor)
+            prices = [psn_price, order_price]
+            self.multiplication_factor[psn_side] = max(prices) / min(prices)
+            response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price,
+                                   qty=psn_qty)
+            self.tp_order_id_list[psn_side] = response['orderId']
+            self.unrealizedPnl[psn_side] = abs(psn_price - order_price) * psn_qty
+
+            self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
+            self.cached_data(key='multFactor', value=self.multiplication_factor)
 
     def get_side_and_qty_for_second_orders(self, psn_side, psn_qty):
         if psn_side == 'LONG':
