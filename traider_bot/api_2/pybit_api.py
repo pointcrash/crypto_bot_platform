@@ -1,3 +1,4 @@
+import time
 import uuid
 
 from pybit.unified_trading import HTTP
@@ -36,26 +37,67 @@ def bybit_place_batch_order(bot, order_list):
     return response['result']['list']
 
 
-def create_internal_transfer(account, coin, amount, from_account_type, to_account_type):
+def bybit_internal_transfer(account, symbol, amount, from_account_type, to_account_type):
     session = get_session(account)
 
     response = session.create_internal_transfer(
-        transferId=uuid.uuid4(),
-        coin=coin,
-        amount=amount,
+        transferId=str(uuid.uuid4()),
+        coin=symbol,
+        amount=str(amount),
         fromAccountType=from_account_type,
         toAccountType=to_account_type,
     )
     return response
 
 
+def bybit_withdraw(account, symbol, chain, force_chain, address, amount):
+    session = get_session(account)
+
+    response = session.withdraw(
+        coin=symbol,
+        chain=chain,
+        address=address,
+        amount=amount,
+        forceChain=force_chain,
+        accountType="FUND",
+        timestamp=int(time.time()) * 1000,
+    )
+    return response
+
+
+# def create_universal_transfer(
+#         account, symbol, amount, from_member_id, to_member_id, from_account_type, to_account_type):
+#     session = get_session(account)
+#
+#     response = session.create_universal_transfer(
+#         transferId=str(uuid.uuid4()),
+#         coin=symbol,
+#         amount=str(amount),
+#         fromMemberId=from_member_id,
+#         toMemberId=to_member_id,
+#         fromAccountType=from_account_type,
+#         toAccountType=to_account_type,
+#     )
+#     return response
+
+
 if __name__ == "__main__":
-    pass
-    # test_session = HTTP(
-    #     testnet=True,
-    #     api_key="WNiu8gV3qoUyjT05WB",
-    #     api_secret="xPNX24SbCF7OJHyUxQxGdb2XOpsnaetIOgrU",
-    # )
+    test_session = HTTP(
+        testnet=False,
+        api_key="xcXVA47NndHFNDBqJ9",
+        api_secret="71Xj99PBSljGv8wOer2iRnBt7xF2J6UsF7Ex",
+    )
+
+    print(test_session.withdraw(
+        coin="USDT",
+        chain="TRX",
+        address="TLjWZpgjsovzZdH55vvMuMu1gheVSj6nU3",
+        amount="5",
+        timestamp=int(time.time()) * 1000,
+        forceChain=1,
+        accountType="FUND",
+    ))
+
     # response = (test_session.get_open_orders(
     #     category="linear",
     #     symbol="ETHUSDT",

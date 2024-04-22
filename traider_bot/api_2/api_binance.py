@@ -212,6 +212,27 @@ def binance_account_balance(account):
     return response
 
 
+def binance_internal_transfer(account, symbol, amount, from_account_type, to_account_type):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+    if from_account_type == 'FUND' and to_account_type == 'UNIFIED':
+        transfer_type = 1
+    elif from_account_type == 'UNIFIED' and to_account_type == 'FUND':
+        transfer_type = 2
+    else:
+        transfer_type = None
+
+    response = client.futures_account_transfer(asset=symbol, amount=amount, type=transfer_type)
+
+    return response
+
+
+def binance_withdraw(account, symbol, amount, chain, address):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+    response = client.withdraw(coin=symbol, network=chain, address=address, amount=amount)
+
+    return response
+
+
 def get_binance_exchange_information(account):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
 

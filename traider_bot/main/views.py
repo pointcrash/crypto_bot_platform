@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
 from django.utils import timezone
 
-from api_2.api_aggregator import account_balance
+from api_2.api_aggregator import account_balance, internal_transfer
 from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
 from bots.bb.logic.start_logic import bb_worker
 from bots.general_functions import all_symbols_update
@@ -21,7 +21,7 @@ from bots.zinger.logic.start_logic import zinger_worker
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
-from .forms import RegistrationForm, LoginForm, DateRangeForm
+from .forms import RegistrationForm, LoginForm, DateRangeForm, InternalTransferForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
 from main.models import Account
@@ -354,3 +354,24 @@ def restart_all_bots(request):
             bot_thread.start()
 
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def internal_transfer_view(request, acc_id):
+    account = Account.objects.get(pk=acc_id)
+
+    if request.method == 'POST':
+        form = InternalTransferForm(request.POST)
+        if form.is_valid():
+            from_account_type = form.cleaned_data['fromAccountType']
+            to_account_type = form.cleaned_data['toAccountType']
+            symbol = form.cleaned_data['symbol']
+            amount = form.cleaned_data['amount']
+            internal_transfer(account=account, symbol=symbol, amount=amount, from_account_type=from_account_type,
+                              to_account_type=to_account_type)
+
+            return redirect('account_list')
+    else:
+        form = InternalTransferForm()
+
+    return render(request, 'account/internal_transfer.html', {'form': form})

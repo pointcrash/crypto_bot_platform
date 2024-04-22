@@ -2,7 +2,7 @@ from decimal import ROUND_DOWN
 
 from api_2.api_bybit import *
 from api_2.api_binance import *
-from api_2.pybit_api import bybit_place_batch_order
+from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer
 
 
 def get_quantity_from_price(bot, price, amount):
@@ -21,6 +21,9 @@ def get_position_inform(bot):
         psn['entryPrice'] = str(float(psn['entryPrice']))
         if psn.get('unrealisedPnl'):
             psn['unrealisedPnl'] = str(round(float(psn['unrealisedPnl']), 2))
+        else:
+            psn['unrealisedPnl'] = '0'
+
     return psn_list
 
 
@@ -135,3 +138,10 @@ def get_exchange_information(account, service_name):
         return get_binance_exchange_information(account)
     elif service_name == 'ByBit':
         return get_bybit_exchange_information(account)
+
+
+def internal_transfer(account, symbol, amount, from_account_type, to_account_type):
+    if account.service.name == 'Binance':
+        return binance_internal_transfer(account, symbol, amount, from_account_type, to_account_type)
+    elif account.service.name == 'ByBit':
+        return bybit_internal_transfer(account, symbol, amount, from_account_type, to_account_type)
