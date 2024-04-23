@@ -14,6 +14,7 @@ from bots.forms import BotModelForm, BotModelEditForm
 from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
+from orders.forms import OrderCustomForm
 
 logger = logging.getLogger('django')
 
@@ -68,6 +69,8 @@ def bb_bot_edit(request, bot_id):
     if request.method == 'POST':
         bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
         bb_form = BBForm(request.POST, instance=bot.bb)
+        order_form = OrderCustomForm(request.POST)
+
         if bot_form.is_valid() and bb_form.is_valid():
             if bot.is_active:
                 bot.account = account
@@ -91,6 +94,7 @@ def bb_bot_edit(request, bot_id):
     else:
         bot_form = BotModelForm(request=request, instance=bot)
         bb_form = BBForm(instance=bot.bb)
+        order_form = OrderCustomForm()
 
     bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
     bot_cached_data = dict()
@@ -104,6 +108,7 @@ def bb_bot_edit(request, bot_id):
         'bot_settings_template': bot_settings_template,
         'bot_form': bot_form,
         'bb_form': bb_form,
+        'order_form': order_form,
         'bot': bot,
         'symbol': symbol,
         'account': account,

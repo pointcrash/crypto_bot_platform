@@ -12,6 +12,7 @@ from bots.terminate_bot_logic import terminate_bot
 from bots.zinger.forms import ZingerForm
 from bots.zinger.logic.start_logic import zinger_worker
 from bots.zinger.logic_market.start_logic import zinger_worker_market
+from orders.forms import OrderCustomForm
 
 logger = logging.getLogger('django')
 
@@ -64,6 +65,8 @@ def zinger_bot_edit(request, bot_id):
     if request.method == 'POST':
         bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
         zinger_form = ZingerForm(request.POST, instance=bot.zinger)
+        order_form = OrderCustomForm(request.POST)
+
         if bot_form.is_valid() and zinger_form.is_valid():
             if bot.is_active:
                 bot.account = account
@@ -87,6 +90,7 @@ def zinger_bot_edit(request, bot_id):
     else:
         bot_form = BotModelForm(request=request, instance=bot)
         zinger_form = ZingerForm(instance=bot.zinger)
+        order_form = OrderCustomForm()
 
     bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
     bot_cached_data = dict()
@@ -100,6 +104,7 @@ def zinger_bot_edit(request, bot_id):
         'bot_settings_template': bot_settings_template,
         'bot_form': bot_form,
         'zinger_form': zinger_form,
+        'order_form': order_form,
         'bot': bot,
         'symbol': symbol,
         'account': account,

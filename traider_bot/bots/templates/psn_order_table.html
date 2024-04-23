@@ -92,7 +92,7 @@
             </table>
         </div>
         <div class="tab-pane fade" id="table2" role="tabpanel" aria-labelledby="table2-tab">
-<!--            <a class="ms-auto" href="{% url 'create_order' bot_id=bot.id %}">Новый ордер</a>-->
+<!--            <a class="ms-auto" href="{% url 'create_order_url' bot_id=bot.id %}">Новый ордер</a>-->
             <table class="table text-light" style="background-color:#131722">
                 <thead>
                 <tr>
@@ -135,6 +135,47 @@
                 {% endif %}
                 </tbody>
             </table>
+
+            <form method="POST" action="{% url 'create_order_url' bot_id=bot.id %}" class="text-light">
+                    {% csrf_token %}
+
+                <div class="row p-1">
+                    <div class="col mt-auto">
+                        {{ order_form.psnSide.label_tag }}
+                        {{ order_form.psnSide }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        {{ order_form.side.label_tag }}
+                        {{ order_form.side }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        {{ order_form.qty.label_tag }}
+                        {{ order_form.qty }}
+                    </div>
+
+<!--                    <div class="col mt-auto">-->
+<!--                        {{ order_form.price.label_tag }}-->
+<!--                        {{ order_form.price }}-->
+<!--                    </div>-->
+
+                    <div class="col mt-auto">
+                        {{ order_form.triggerPrice.label_tag }}
+                        {{ order_form.triggerPrice }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        {{ order_form.type.label_tag }}
+                        {{ order_form.type }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        <button type="submit" class="btn btn-secondary">Разместить</button>
+                    </div>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>

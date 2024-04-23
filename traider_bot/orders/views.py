@@ -24,19 +24,31 @@ def place_custom_order_view(request, bot_id):
         form = OrderCustomForm(request.POST)
         if form.is_valid():
             qty = Decimal(form.cleaned_data['qty'])
-            price = Decimal(form.cleaned_data['triggerPrice']) if form.cleaned_data['triggerPrice'] else None
+            # price = Decimal(form.cleaned_data['triggerPrice']) if form.cleaned_data['triggerPrice'] else None
             trigger_price = Decimal(form.cleaned_data['triggerPrice']) if form.cleaned_data['triggerPrice'] else None
             order_type = form.cleaned_data['type']
             side = form.cleaned_data['side']
             psn_side = form.cleaned_data['psnSide']
 
-            if trigger_price:
+            if side == 'OPEN':
+                if psn_side == 'LONG':
+                    side = 'BUY'
+                elif psn_side == 'SHORT':
+                    side = 'SELL'
+
+            elif side == 'CLOSE':
+                if psn_side == 'LONG':
+                    side = 'SELL'
+                elif psn_side == 'SHORT':
+                    side = 'BUY'
+
+            if trigger_price and order_type == 'MARKET':
                 cur_price = get_current_price(bot)
                 trigger_direction = 1 if cur_price < trigger_price else 2
                 response = place_conditional_order(bot=bot, side=side, position_side=psn_side, qty=qty,
-                                                   trigger_price=price, trigger_direction=trigger_direction)
+                                                   trigger_price=trigger_price, trigger_direction=trigger_direction)
             else:
-                response = place_order(bot=bot, side=side, position_side=psn_side, qty=qty, price=price,
+                response = place_order(bot=bot, side=side, position_side=psn_side, qty=qty, price=trigger_price,
                                        order_type=order_type)
 
             if bot.work_model == 'bb':
