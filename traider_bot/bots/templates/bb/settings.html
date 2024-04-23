@@ -1,0 +1,164 @@
+<div class="row">
+    <div class="col-12 mx-auto">
+        <h2 class="text-center">Настройки Бота</h2>
+        <p>{{ bot_cached_data }}</p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                {% if bot_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in bot_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if bb_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_errors in bb_form.errors.values %}
+                    {% for error in field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="card shadow col-12 col-xl-2 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Настройки бота</h4>
+
+                    <br>
+                    {{ bot_form.account.label_tag }}
+                    <input type="text" class="form-control" name="account" value="{{ account }}" readonly disabled>
+<!--                    {{ bot_form.account }}-->
+                    <br>
+                    {{ bot_form.symbol.label_tag }}
+                    <input type="text" class="form-control" name="symbol" value="{{ symbol }}" readonly disabled>
+<!--                    {{ bot_form.symbol }}-->
+                    <br>
+                    {{ bot_form.leverage.label_tag }}
+                    {{ bot_form.leverage }}
+                    <br>
+                    <p>USDT:</p>
+                    {{ bot_form.amount_long }}
+                    <br>
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    {{ bb_form.side.label_tag }}
+                    {{ bb_form.side }}
+                    <br>
+                    {{ bb_form.interval.label_tag }}
+                    {{ bb_form.interval }}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ bb_form.qty_kline.label_tag }}
+                            {{ bb_form.qty_kline }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ bb_form.d.label_tag }}
+                            {{ bb_form.d }}
+                        </div>
+                    </div>
+                    <br>
+<!--                    <div class="row">-->
+<!--                        <div class="col-6">-->
+<!--                            {{ bb_form.is_deviation_from_lines.label_tag }}-->
+<!--                            <div class="d-inline mx-1">{{ bb_form.is_deviation_from_lines }}</div>-->
+<!--                        </div>-->
+<!--                        <div class="col-6 mt-auto">-->
+<!--                            {{ bb_form.percent_deviation_from_lines.label_tag }}-->
+<!--                            {{ bb_form.percent_deviation_from_lines }}-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <hr>
+                    <div class="d-inline">
+                        {{ bb_form.take_on_ml.label_tag }}
+                        <div class="d-inline mx-1">{{ bb_form.take_on_ml }}</div>
+                        {{ bb_form.take_on_ml_percent.label_tag }}
+                        {{ bb_form.take_on_ml_percent }}
+                    </div>
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Усреднение</h4>
+                    <br>
+                    <div class="d-inline">
+                        <p class="d-inline">{{ bb_form.auto_avg.label_tag }}</p>
+                        {{ bb_form.auto_avg }} %:
+                    </div>
+                    {{ bb_form.avg_percent }}
+                    <br>
+
+                    <div class="row">
+                        <div class="col-6">
+                    {{ bb_form.dfm.label_tag }}
+                    {{ bb_form.dfm }}
+                        </div>
+                        <div class="col-6">
+                    {{ bb_form.chw.label_tag }}
+                    {{ bb_form.chw }}
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="d-inline">
+                        <p class="d-inline">{{ bb_form.hard_avg.label_tag }}</p>
+                        {{ bb_form.hard_avg }}
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                    {{ bb_form.hard_avg_type.label_tag }}
+                    {{ bb_form.hard_avg_type }}
+                        </div>
+                        <div class="col-6">
+                    {{ bb_form.hard_avg_percent.label_tag }}
+                    {{ bb_form.hard_avg_percent }}
+                        </div>
+                    </div>
+
+                    {{ bb_form.max_margin.label_tag }}
+                    {{ bb_form.max_margin }}
+                    <br>
+                </div>
+            </div>
+            <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
+                <div class="row justify-content-center">
+                    <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
+                            data-bs-target="#deleteBotModal">Delete Bot
+                    </button>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="deleteBotModal" tabindex="-1" aria-labelledby="stopBotModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="deleteBotModalLabel">{{ bot.symbol }}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6>Choose way to delete:</h6>
+                        </div>
+                        <div class="modal-footer">
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=1 %}"
+                               class="btn btn-warning col-12">Delete and stop bot only</a>
+                            <a type="button"
+                               href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
+                               class="btn btn-warning col-12">Delete bot with cancel all orders</a>
+<!--                            <a type="button"-->
+<!--                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"-->
+<!--                               class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by-->
+<!--                                Market-->
+<!--                            </a>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

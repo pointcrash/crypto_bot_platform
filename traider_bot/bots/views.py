@@ -100,7 +100,7 @@ def delete_bot(request, bot_id, event_number):
 
     bot.delete()
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect('bot_list')
 
 
 @login_required

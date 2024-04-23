@@ -1,5 +1,3 @@
-
-
 def order_formatters(order):
     formated_order = {'symbol': order['symbol'], 'orderId': order['orderId'], 'price': order['price']}
 
@@ -63,4 +61,22 @@ def order_formatters(order):
     else:
         formated_order['reduceOnly'] = ''
 
+    formated_order = open_close_format(formated_order)
+
     return formated_order
+
+
+def open_close_format(order):
+    if order['psnSide'] == 'LONG':
+        if order['side'] == 'BUY':
+            order['side'] = 'OPEN'
+        elif order['side'] == 'SELL':
+            order['side'] = 'CLOSE'
+
+    elif order['psnSide'] == 'SHORT':
+        if order['side'] == 'BUY':
+            order['side'] = 'CLOSE'
+        elif order['side'] == 'SELL':
+            order['side'] = 'OPEN'
+
+    return order

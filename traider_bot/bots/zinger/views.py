@@ -55,6 +55,7 @@ def zinger_bot_create(request):
 
 @login_required
 def zinger_bot_edit(request, bot_id):
+    bot_settings_template = 'zinger/settings.html'
     bot = BotModel.objects.get(pk=bot_id)
     user = request.user
 
@@ -95,7 +96,8 @@ def zinger_bot_edit(request, bot_id):
 
     positions, orders = get_cur_positions_and_orders_info(bot)
 
-    return render(request, 'zinger/edit.html', {
+    return render(request, 'bots_info_page.html', {
+        'bot_settings_template': bot_settings_template,
         'bot_form': bot_form,
         'zinger_form': zinger_form,
         'bot': bot,

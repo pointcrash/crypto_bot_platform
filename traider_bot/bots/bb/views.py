@@ -59,6 +59,7 @@ def bb_bot_create(request):
 
 @login_required
 def bb_bot_edit(request, bot_id):
+    bot_settings_template = 'bb/settings.html'
     bot = BotModel.objects.get(pk=bot_id)
     user = request.user
 
@@ -99,19 +100,8 @@ def bb_bot_edit(request, bot_id):
 
     positions, orders = get_cur_positions_and_orders_info(bot)
 
-    # ''' GET POSITION INFO '''
-    # positions = get_position_inform(bot)
-    #
-    # for position in positions:
-    #     position['leverage'] = bot.leverage
-    #     position['cost'] = round(float(position['qty']) * float(position['markPrice']), 2)
-    #     position['margin'] = round(position['cost'] / position['leverage'], 2)
-    #
-    # ''' GET OPEN ORDERS '''
-    # raw_orders = get_open_orders(bot)
-    # orders = [order_formatters(order) for order in raw_orders] if raw_orders else None
-
-    return render(request, 'bb/edit.html', {
+    return render(request, 'bots_info_page.html', {
+        'bot_settings_template': bot_settings_template,
         'bot_form': bot_form,
         'bb_form': bb_form,
         'bot': bot,
