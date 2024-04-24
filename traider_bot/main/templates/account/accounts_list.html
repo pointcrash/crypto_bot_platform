@@ -10,9 +10,10 @@
 
 <div class="container">
     <div class="row text-end">
-        <div class="col-12 col-lg-10">
+        <div class="col-11">
             <h1 class="text-center">Аккаунты</h1>
-            <a href="{% url 'create_account' %}" class="btn btn-primary btn-shadow">Добавить аккаунт</a>
+            <a href="{% url 'whitelist' %}" class="btn btn-outline-primary btn-shadow border-0">Адресная книга</a>
+            <a href="{% url 'create_account' %}" class="btn btn-primary btn-shadow border-0">Добавить аккаунт</a>
             <div class="card mt-2 border-0 shadow p-3">
                 <table class="table" style="vertical-align: middle">
                     <thead>
@@ -22,6 +23,7 @@
                         <th class="d-none d-sm-table-cell">Сеть</th>
                         <th>Баланс</th>
                         <th>Перевод</th>
+                        <th>Вывод</th>
                         <th style="color: orange">Редактировать</th>
                         <th style="color: red">Удалить</th>
                     </tr>
@@ -36,7 +38,7 @@
                         </td>
                         <td>
                             <button id="{{ account.pk }}"
-                                    class="get-balance-button btn btn-sm btn-secondary px-3 btn-shadow">Баланс
+                                    class="get-balance-button btn btn-sm btn-light px-3 btn-shadow"><i class="fa-solid fa-wallet" style="color: #74C0FC;"></i>
                             </button>
                             <!-- Модальное окно для отображения баланса аккаунта -->
                             <div class="modal" id="balanceModal" tabindex="-1" role="dialog">
@@ -55,7 +57,10 @@
                         </td>
 
                         <td>
-                            <a class="btn btn-sm btn-success px-3 btn-shadow" href="{% url 'internal_transfer' acc_id=account.pk %}"><i class="fa-solid fa-right-left"></i></a>
+                            {% include 'account/modal_internal_transfer.html' %}
+                        </td>
+                        <td>
+                            <a href="{% url 'withdraw' acc_id=account.pk %}" class="btn btn-sm btn-outline-success btn-shadow border-0"><i class="fa-solid fa-reply-all mx-2"></i></a>
                         </td>
 
                         <!--                        <td class="border">{{ tb }}</td>-->
@@ -93,6 +98,30 @@
             console.error("Ошибка при получении баланса:", error);
           });
       });
+    });
+</script>
+
+<script>
+    const transferButtons = document.querySelectorAll('.internal-transfer-btn');
+    transferButtons.forEach(transferButton => {
+      transferButton.addEventListener('click', () => {
+        const transferAccountId = transferButton.id.replace(/\D/g, '');
+        fetch(`/accounts/get_account_assets/${transferAccountId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const fundBalance = data.fund_balance;
+                const futuresBalance = data.futures_balance;
+                const fundBalanceElement = document.querySelector(`#fundBalance${transferAccountId}`);
+                const futuresBalanceElement = document.querySelector(`#futuresBalance${transferAccountId}`);
+                if (fundBalanceElement && futuresBalanceElement) {
+                    fundBalanceElement.textContent = fundBalance;
+                    futuresBalanceElement.textContent = futuresBalance;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching balance:', error);
+            });
+        });
     });
 </script>
 {% endblock %}

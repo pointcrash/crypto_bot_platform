@@ -2,7 +2,7 @@ from decimal import ROUND_DOWN
 
 from api_2.api_bybit import *
 from api_2.api_binance import *
-from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer
+from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets
 
 
 def get_quantity_from_price(bot, price, amount):
@@ -119,11 +119,11 @@ def change_position_mode(bot):
         return bybit_change_position_mode_on_hedge(bot)
 
 
-def account_balance(account):
+def get_futures_account_balance(account):
     if account.service.name == 'Binance':
         return binance_account_balance(account)
     elif account.service.name == 'ByBit':
-        return bybit_account_balance(account)
+        return bybit_get_unified_account_balance(account)
 
     ''' Returned data:
     {   
@@ -133,6 +133,20 @@ def account_balance(account):
     '''
 
 
+# def fund_account_balance(account):
+#     if account.service.name == 'Binance':
+#         return binance_account_balance(account)
+#     elif account.service.name == 'ByBit':
+#         return bybit_account_balance(account)
+#
+#     ''' Returned data:
+#     {
+#         'fullBalance': 1454.82,
+#         'availableBalance': 707.96,
+#     }
+#     '''
+
+
 def get_exchange_information(account, service_name):
     if service_name == 'Binance':
         return get_binance_exchange_information(account)
@@ -140,8 +154,22 @@ def get_exchange_information(account, service_name):
         return get_bybit_exchange_information(account)
 
 
+def get_user_assets(account, symbol):
+    if account.service.name == 'Binance':
+        return binance_get_user_asset(account, symbol)
+    elif account.service.name == 'ByBit':
+        return bybit_get_user_assets(account, symbol)
+
+
 def internal_transfer(account, symbol, amount, from_account_type, to_account_type):
     if account.service.name == 'Binance':
         return binance_internal_transfer(account, symbol, amount, from_account_type, to_account_type)
     elif account.service.name == 'ByBit':
         return bybit_internal_transfer(account, symbol, amount, from_account_type, to_account_type)
+
+
+def withdraw(account, symbol, amount, chain, address):
+    if account.service.name == 'Binance':
+        return binance_withdraw(account, symbol, amount, chain, address)
+    elif account.service.name == 'ByBit':
+        return bybit_withdraw(account, symbol, amount, chain, address)

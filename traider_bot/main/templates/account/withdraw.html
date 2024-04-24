@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+</style>
+
+<div class="row">
+    <div class="col-3 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Вывод средств</h3>
+                <h5 class="text-center">{{account.name}}</h5>
+            </div>
+            <div class="card-body">
+
+                <div class="row text-center">
+                    <div class="col">
+                        <h5>Финансирования</h5>
+                        <h4>{{ fund_balance }}</h4>
+                    </div>
+                    <div class="col">
+                        <h5>Деривативный</h5>
+                        <h4>{{ futures_balance }}</h4>
+                    </div>
+                </div>
+                <hr>
+
+                <form method="POST">
+                {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col">
+                            {{ form.symbol.label_tag }}
+                            {{ form.symbol }}
+                        </div>
+                        <div class="col">
+                            {{ form.qty.label_tag }}
+                            {{ form.qty }}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="">
+                        {{ form.chain.label_tag }}
+                        {{ form.chain }}
+                    </div>
+
+                    <br>
+                    <div class="address-field">
+                      <label for="address">Адрес: </label>
+                      <select class="form-select" name="address" id="address">
+                        <optgroup label="Личные аккаунты">
+                            {% for account in user_accounts %}
+                              <option value="{{account.address}}">{{account.name}}</option>
+                            {% endfor %}
+                        </optgroup>
+                        <optgroup label="Адресная книга">
+                            {% for address in whitelist %}
+                              <option value="{{address.address}}">{{address.note}}</option>
+                            {% endfor %}
+                        </optgroup>
+                      </select>
+                    </div>
+                    <div class="row text-center">
+                        <a href="{% url 'whitelist' %}">Адресная книга</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary border-0 ms-auto mt-3">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

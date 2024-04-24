@@ -50,7 +50,7 @@ def bybit_internal_transfer(account, symbol, amount, from_account_type, to_accou
     return response
 
 
-def bybit_withdraw(account, symbol, chain, force_chain, address, amount):
+def bybit_withdraw(account, symbol, chain, address, amount):
     session = get_session(account)
 
     response = session.withdraw(
@@ -58,11 +58,21 @@ def bybit_withdraw(account, symbol, chain, force_chain, address, amount):
         chain=chain,
         address=address,
         amount=amount,
-        forceChain=force_chain,
         accountType="FUND",
         timestamp=int(time.time()) * 1000,
     )
     return response
+
+
+def bybit_get_user_assets(account, symbol, acc_type="FUND"):
+    session = get_session(account)
+
+    response = session.get_coin_balance(
+        accountType=acc_type,
+        coin=symbol,
+    )
+
+    return response['result']['balance']['walletBalance']
 
 
 # def create_universal_transfer(
@@ -88,15 +98,20 @@ if __name__ == "__main__":
         api_secret="71Xj99PBSljGv8wOer2iRnBt7xF2J6UsF7Ex",
     )
 
-    print(test_session.withdraw(
+    print(test_session.get_coin_balance(
+        accountType="UNIFIED",
         coin="USDT",
-        chain="TRX",
-        address="TLjWZpgjsovzZdH55vvMuMu1gheVSj6nU3",
-        amount="5",
-        timestamp=int(time.time()) * 1000,
-        forceChain=1,
-        accountType="FUND",
     ))
+
+    # print(test_session.withdraw(
+    #     coin="USDT",
+    #     chain="TRX",
+    #     address="TLjWZpgjsovzZdH55vvMuMu1gheVSj6nU3",
+    #     amount="5",
+    #     timestamp=int(time.time()) * 1000,
+    #     forceChain=1,
+    #     accountType="FUND",
+    # ))
 
     # response = (test_session.get_open_orders(
     #     category="linear",

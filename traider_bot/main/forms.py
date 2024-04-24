@@ -2,19 +2,20 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
-from .models import Account
+from .models import Account, WhiteListAccount
 
 
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ['name', 'service', 'API_TOKEN', 'SECRET_KEY', 'is_mainnet', 'account_type', ]
+        fields = ['name', 'service', 'API_TOKEN', 'SECRET_KEY', 'is_mainnet', 'account_type', 'address', ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'service': forms.Select(attrs={'class': 'form-control'}),
             'API_TOKEN': forms.TextInput(attrs={'class': 'form-control'}),
             'SECRET_KEY': forms.TextInput(attrs={'class': 'form-control'}),
             'account_type': forms.Select(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'name': 'Название аккаунта',
@@ -23,6 +24,7 @@ class AccountForm(forms.ModelForm):
             'SECRET_KEY': 'API Secret',
             'account_type': 'Тип аккаунта (только для ByBit)',
             'is_mainnet': 'Основная сеть',
+            'address': 'Адрес USDT кошелька',
         }
 
 
@@ -79,7 +81,7 @@ class AccountSelectForm(forms.Form):
 
 class InternalTransferForm(forms.Form):
     ACCOUNT_TYPE_CHOICES = [
-        ('FUND', 'Финансовый/Спот'),
+        ('FUND', 'Финансирования/Спот'),
         ('UNIFIED', 'Универсальный/Деривативный'),
     ]
 
@@ -105,10 +107,34 @@ class InternalTransferForm(forms.Form):
 
 
 class WithdrawForm(forms.Form):
+    SYMBOL_CHOICES = [
+        ('USDT', 'USDT'),
+    ]
+
     CHAIN_TYPE_CHOICES = [
         ('TRX', 'TRC20 (Tron)'),
     ]
-    address = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}), label='Адрес')
-    chain = forms.ChoiceField(choices=CHAIN_TYPE_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}), label='Сеть')
-    symbol = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}), label='Монета')
+    chain = forms.ChoiceField(choices=CHAIN_TYPE_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}), label='Сеть')
+    symbol = forms.ChoiceField(choices=SYMBOL_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}), label='Монета')
     qty = forms.DecimalField(max_digits=15, decimal_places=5, widget=forms.NumberInput(attrs={'class': 'form-control'}), label='Количество')
+
+    # def __init__(self, user, *args, **kwargs):
+    #     super(WithdrawForm, self).__init__(*args, **kwargs)
+    #     user_accounts = Account.objects.filter(owner=user)
+    #     account_choices = [(acc.address, acc.name) for acc in user_accounts]
+    #     self.fields['address'] = forms.ChoiceField(choices=account_choices, widget=forms.Select(attrs={'class': 'form-select'}), label='Адрес')
+
+
+class WhiteListAccountForm(forms.ModelForm):
+    class Meta:
+        model = WhiteListAccount
+
+        fields = ['address', 'note', 'symbol', 'chain']
+        widgets = {
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'note': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'address': 'Адрес',
+            'note': 'Заметка',
+        }

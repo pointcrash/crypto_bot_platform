@@ -22,7 +22,7 @@ RUN pip install gunicorn
 #ENV PYTHONUNBUFFERED=1
 
 # Делаем скрипт исполняемым
-#RUN chmod +x /app/run.sh
+RUN chmod +x /app/run.sh
 
 # Устанавливаем скрипт запуска как ENTRYPOINT
 ENTRYPOINT ["/app/run.sh"]

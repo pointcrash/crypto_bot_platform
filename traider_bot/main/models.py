@@ -16,6 +16,7 @@ class Account(models.Model):
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='CONTRACT', null=True)
     is_mainnet = models.BooleanField()
     url = models.CharField(default='https://api-testnet.bybit.com')
+    address = models.CharField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if self.is_mainnet:
@@ -26,6 +27,17 @@ class Account(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class WhiteListAccount(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='whitelist')
+    address = models.CharField()
+    symbol = models.CharField(max_length=25, blank=True)
+    chain = models.CharField(max_length=25, blank=True)
+    note = models.CharField(max_length=25, blank=True)
+
+    time_create = models.DateTimeField(auto_now_add=True)
+    time_update = models.DateTimeField(auto_now=True)
 
 
 class ActiveBot(models.Model):

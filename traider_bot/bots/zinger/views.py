@@ -99,6 +99,8 @@ def zinger_bot_edit(request, bot_id):
         bot_cached_data[new_key] = cache.get(key)
 
     positions, orders = get_cur_positions_and_orders_info(bot)
+    logger.info(
+        f'{orders}')
 
     return render(request, 'bots_info_page.html', {
         'bot_settings_template': bot_settings_template,

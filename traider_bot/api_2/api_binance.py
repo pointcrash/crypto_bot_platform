@@ -212,6 +212,13 @@ def binance_account_balance(account):
     return response
 
 
+def binance_get_user_asset(account, symbol):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+    response = client.get_user_asset(asset=symbol)
+
+    return response[0]['free']
+
+
 def binance_internal_transfer(account, symbol, amount, from_account_type, to_account_type):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
     if from_account_type == 'FUND' and to_account_type == 'UNIFIED':
