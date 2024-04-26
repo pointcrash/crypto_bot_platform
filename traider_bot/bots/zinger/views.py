@@ -1,17 +1,16 @@
 import logging
 import threading
-from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.shortcuts import render, redirect
+from django.utils import timezone
 
 from bots.forms import BotModelForm, BotModelEditForm
 from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
 from bots.zinger.forms import ZingerForm
-from bots.zinger.logic.start_logic import zinger_worker
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 from orders.forms import OrderCustomForm
 
@@ -124,7 +123,7 @@ def start_zinger_bot_view(request, bot_id, event_number):
 
     bot.is_active = True
     if event_number == 2:
-        bot.time_create = datetime.now()
+        bot.time_create = timezone.now()
     bot.save()
     bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
 

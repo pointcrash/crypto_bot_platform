@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from decimal import ROUND_DOWN
 
+from django.utils import timezone
+
 from api_2.api_bybit import *
 from api_2.api_binance import *
 from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets, \
@@ -190,7 +192,7 @@ def get_pnl_by_time(bot, start_time, end_time=None):
     if get_pnl_func is not None:
         total_pnl = 0
         if end_time is None:
-            end_time = datetime.now()
+            end_time = timezone.now()
 
         custom_logging(bot, end_time)
         custom_logging(bot, start_time)
