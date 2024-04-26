@@ -52,11 +52,11 @@ a:hover {
 <!--            <a href="{% url 'telegram_list' %}" class="list-group-item p-3 text-muted{% if 'telegram_list' in request.resolver_match.url_name %} active{% endif %}"><h5>telegram-bot   <i class="fa-brands fa-telegram"></i></h5></a>-->
             {% if date_form %}
             <div class="list-group-item">
-                <h5 class="text-muted mt-2">PNL calculation</h5>
+                <h5 class="text-muted mt-2">Расчет PnL</h5>
                 <form method="post" class="m-2">
                     {% csrf_token %}
                     {{ date_form.as_p }}
-                    <button class="btn btn-sm btn-primary ms-auto" type="submit">Calculate</button>
+                    <button class="btn btn-sm btn-primary ms-auto" type="submit">Расчитать</button>
                 </form>
             </div>
             {% endif %}

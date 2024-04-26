@@ -51,9 +51,9 @@ class LoginForm(forms.Form):
 
 class DateRangeForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(
-        attrs={'type': 'date', 'class': 'form-control', 'title': 'Расчет будет произведен от 00:00 выбранной даты'}))
+        attrs={'type': 'date', 'class': 'form-control', 'title': 'Расчет будет произведен от 00:00 выбранной даты'}), label='Дата начала')
     end_date = forms.DateField(widget=forms.DateInput(
-        attrs={'type': 'date', 'class': 'form-control', 'title': 'За выбранную дату расчет произведен не будет'}))
+        attrs={'type': 'date', 'class': 'form-control', 'title': 'За выбранную дату расчет произведен не будет'}), label='Дата окончания')
 
 
 class AccountSelectForm(forms.Form):

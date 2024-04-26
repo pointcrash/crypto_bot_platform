@@ -1,3 +1,4 @@
+import datetime
 import logging
 import threading
 import time
@@ -11,7 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
 from django.utils import timezone
 
-from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets, withdraw
+from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets, withdraw, \
+    get_pnl_by_time
 from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
 from bots.bb.logic.start_logic import bb_worker
 from bots.general_functions import all_symbols_update
@@ -50,8 +52,11 @@ def logs_list(request, bot_id):
         if date_form.is_valid():
             start_date = date_form.cleaned_data['start_date']
             end_date = date_form.cleaned_data['end_date']
-            pnl_list = calculate_pnl(bot=bot, start_date=start_date, end_date=end_date)
-            pnl = pnl_list['pnl']
+
+            start_date = datetime.datetime.combine(start_date, datetime.time())
+            end_date = datetime.datetime.combine(end_date, datetime.time())
+            pnl = get_pnl_by_time(bot=bot, start_time=start_date, end_time=end_date)
+            pnl = round(float(pnl), 2)
             not_timezone = True
 
         if not not_timezone:

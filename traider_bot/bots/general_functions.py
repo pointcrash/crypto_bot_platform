@@ -17,7 +17,7 @@ django.setup()
 from timezone.models import TimeZone
 from main.models import ActiveBot, ExchangeService, Account
 from bots.models import Symbol, Log
-from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
+from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
 
@@ -491,3 +491,5 @@ def get_cur_positions_and_orders_info(bot):
     raw_orders = get_open_orders(bot)
     orders = [order_formatters(order) for order in raw_orders] if raw_orders else None
     return positions, orders
+
+

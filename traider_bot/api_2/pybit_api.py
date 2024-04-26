@@ -1,9 +1,10 @@
+import datetime
 import time
 import uuid
 
 from pybit.unified_trading import HTTP
 
-from api_2.formattres import order_formatters
+from api_2.custom_logging_api import custom_logging
 
 
 def get_session(account):
@@ -75,20 +76,25 @@ def bybit_get_user_assets(account, symbol, acc_type="FUND"):
     return response['result']['balance']['walletBalance']
 
 
-# def create_universal_transfer(
-#         account, symbol, amount, from_member_id, to_member_id, from_account_type, to_account_type):
-#     session = get_session(account)
-#
-#     response = session.create_universal_transfer(
-#         transferId=str(uuid.uuid4()),
-#         coin=symbol,
-#         amount=str(amount),
-#         fromMemberId=from_member_id,
-#         toMemberId=to_member_id,
-#         fromAccountType=from_account_type,
-#         toAccountType=to_account_type,
-#     )
-#     return response
+def bybit_get_pnl_by_time(bot, start_time, end_time):
+    session = get_session(bot.account)
+    start_time = int(start_time.timestamp() * 1000)
+    end_time = int(end_time.timestamp() * 1000)
+    total_pnl = 0
+
+    custom_logging(bot, f'bybit_get_pnl_by_time({bot.symbol.name}, {start_time}, {end_time}, )', 'REQUEST')
+    response = session.get_closed_pnl(
+        category="linear",
+        symbol=bot.symbol,
+        startTime=start_time,
+        endTime=end_time,
+    )
+
+    custom_logging(bot, response, 'RESPONSE')
+    for trade in response['result']['list']:
+        total_pnl += float(trade['closedPnl'])
+
+    return total_pnl
 
 
 if __name__ == "__main__":
@@ -97,11 +103,6 @@ if __name__ == "__main__":
         api_key="xcXVA47NndHFNDBqJ9",
         api_secret="71Xj99PBSljGv8wOer2iRnBt7xF2J6UsF7Ex",
     )
-
-    print(test_session.get_coin_balance(
-        accountType="UNIFIED",
-        coin="USDT",
-    ))
 
     # print(test_session.withdraw(
     #     coin="USDT",

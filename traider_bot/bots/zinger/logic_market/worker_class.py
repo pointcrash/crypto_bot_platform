@@ -5,7 +5,8 @@ import time
 from django.core.cache import cache
 from decimal import Decimal, ROUND_HALF_UP
 
-from api_2.api_aggregator import change_position_mode, set_leverage, place_order, get_position_inform, cancel_all_orders
+from api_2.api_aggregator import change_position_mode, set_leverage, place_order, get_position_inform, \
+    cancel_all_orders, get_pnl_by_time
 from api_2.custom_logging_api import custom_logging
 
 
@@ -22,7 +23,7 @@ class WorkZingerClassMarket:
         self.end_order_id_list = dict()
         self.position_info = dict()
         self.unrealizedPnl = dict()
-        self.realizedPnl = self.zinger.realized_pnl
+        self.realizedPnl = Decimal(get_pnl_by_time(self.bot, start_time=self.bot.time_create))
         self.required_income = self.calc_required_income()
 
         self.multiplication_factor = dict()

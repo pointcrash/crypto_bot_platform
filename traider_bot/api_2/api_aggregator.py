@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta
 from decimal import ROUND_DOWN
 
 from api_2.api_bybit import *
 from api_2.api_binance import *
-from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets
+from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets, \
+    bybit_get_pnl_by_time
 
 
 def get_quantity_from_price(bot, price, amount):
@@ -173,3 +175,32 @@ def withdraw(account, symbol, amount, chain, address):
         return binance_withdraw(account, symbol, amount, chain, address)
     elif account.service.name == 'ByBit':
         return bybit_withdraw(account, symbol, amount, chain, address)
+
+
+def get_pnl_by_time(bot, start_time, end_time=None):
+    get_pnl_func = None
+
+    #  Get 'get_pnl_func'
+    if bot.account.service.name == 'Binance':
+        get_pnl_func = binance_get_pnl_by_time
+    elif bot.account.service.name == 'ByBit':
+        get_pnl_func = bybit_get_pnl_by_time
+
+    #  Calculate sum total pnl by time
+    if get_pnl_func is not None:
+        total_pnl = 0
+        if end_time is None:
+            end_time = datetime.now()
+
+        while end_time - start_time > timedelta(days=7):
+            seven_days_later = start_time + timedelta(days=7)
+            pnl = get_pnl_func(bot, start_time, seven_days_later)
+            total_pnl += pnl
+            start_time = seven_days_later
+
+        if end_time - start_time < timedelta(days=7):
+            pnl = get_pnl_func(bot, start_time, end_time)
+            total_pnl += pnl
+
+        return str(total_pnl)
+
