@@ -34,7 +34,7 @@ class WorkZingerClassMarket:
         self.order_locker = threading.Lock()
 
     def cached_data(self, key, value):
-        cache.set(f'bot{self.bot.id}_{key}', str(value), timeout=3600)
+        cache.set(f'bot{self.bot.id}_{key}', str(value))
 
     def calc_required_income(self):
         return (self.bot.amount_long + self.bot.amount_short) * (self.zinger.income_percent / 100)

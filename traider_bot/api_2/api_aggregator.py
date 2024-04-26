@@ -192,6 +192,8 @@ def get_pnl_by_time(bot, start_time, end_time=None):
         if end_time is None:
             end_time = datetime.now()
 
+        custom_logging(bot, end_time)
+        custom_logging(bot, start_time)
         while end_time - start_time > timedelta(days=7):
             seven_days_later = start_time + timedelta(days=7)
             pnl = get_pnl_func(bot, start_time, seven_days_later)

@@ -1,5 +1,6 @@
 import logging
 import threading
+from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
@@ -114,3 +115,23 @@ def zinger_bot_edit(request, bot_id):
         'positions': positions,
         'orders': orders,
     })
+
+
+@login_required
+def start_zinger_bot_view(request, bot_id, event_number):
+    bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
+
+    bot.is_active = True
+    if event_number == 2:
+        bot.time_create = datetime.now()
+    bot.save()
+    bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
+
+    if bot_thread is not None:
+        bot_thread.start()
+
+    logger.info(
+        f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
+    return redirect(request.META.get('HTTP_REFERER'))
