@@ -226,7 +226,7 @@ def edit_account(request, acc_id):
     else:
         form = AccountForm(instance=account)
 
-    return render(request, 'account/account_edit.html', {'form': form})
+    return render(request, 'account/account_edit.html', {'form': form, 'account': account})
 
 
 @login_required
@@ -392,7 +392,8 @@ def withdraw_view(request, acc_id):
     futures_balance = get_futures_account_balance(account)['availableBalance']
     fund_balance = get_user_assets(account, symbol="USDT")
 
-    user_accounts = Account.objects.filter(owner=user)
+    user_accounts = Account.objects.filter(owner=user).exclude(id=acc_id)
+    user_accounts =user_accounts.exclude(address=None).exclude(address='')
     whitelist = WhiteListAccount.objects.filter(user=user)
 
     if request.method == 'POST':
@@ -401,7 +402,7 @@ def withdraw_view(request, acc_id):
             chain = form.cleaned_data['chain']
             symbol = form.cleaned_data['symbol']
             amount = form.cleaned_data['qty']
-            address = form.cleaned_data['address']
+            address = request.POST.get('address')
 
             response = withdraw(account=account, symbol=symbol, amount=amount, chain=chain, address=address)
 
