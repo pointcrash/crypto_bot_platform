@@ -1,3 +1,4 @@
+import time
 from decimal import Decimal
 
 from api_2.custom_logging_api import custom_logging
@@ -39,6 +40,10 @@ def handle_order_stream_message(msg, bot_class_obj):
                     bot_class_obj.calc_second_open_order_price_by_nipple(psn_side, psn_qty, psn_price)
                 else:
                     bot_class_obj.place_second_open_order_by_market(psn_side, psn_qty)
+
+            else:
+                custom_logging(bot_class_obj.bot, f'UNKNOWN ORDER {msg["orderId"]} {msg["status"]}')
+                time.sleep(1)
 
 
 def handle_position_stream_message(msg, bot_class_obj):
