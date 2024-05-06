@@ -59,6 +59,9 @@ def handle_position_stream_message(msg, bot_class_obj):
             if msg['side'] == bot_class_obj.position_info['side']:
                 bot_class_obj.position_info['qty'] = 0
                 bot_class_obj.have_psn = False
+                bot_class_obj.ml_filled = False
+                bot_class_obj.ml_qty = 0
+                bot_class_obj.ml_status_save()
         bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
 
         # bot_class_obj.replace_closing_orders()

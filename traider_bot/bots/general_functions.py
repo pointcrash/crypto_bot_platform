@@ -7,7 +7,8 @@ import os
 import django
 import pytz
 
-from api_2.api_aggregator import get_exchange_information
+from api_2.api_aggregator import get_exchange_information, get_position_inform, get_open_orders
+from api_2.formattres import order_formatters
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
@@ -16,7 +17,7 @@ django.setup()
 from timezone.models import TimeZone
 from main.models import ActiveBot, ExchangeService, Account
 from bots.models import Symbol, Log
-from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, get_current_price, \
+from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
 
@@ -478,3 +479,17 @@ def clear_cache_bot_data(bot_id):
     bot_cache_keys = [key for key in cache.keys(f'bot{bot_id}*')]
     for key in bot_cache_keys:
         cache.delete(key)
+
+
+def get_cur_positions_and_orders_info(bot):
+    positions = get_position_inform(bot)
+    for position in positions:
+        position['leverage'] = bot.leverage
+        position['cost'] = round(float(position['qty']) * float(position['markPrice']), 2)
+        position['margin'] = round(position['cost'] / position['leverage'], 2)
+
+    raw_orders = get_open_orders(bot)
+    orders = [order_formatters(order) for order in raw_orders] if raw_orders else None
+    return positions, orders
+
+

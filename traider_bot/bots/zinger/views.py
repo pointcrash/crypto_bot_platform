@@ -4,13 +4,15 @@ import threading
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.shortcuts import render, redirect
+from django.utils import timezone
 
 from bots.forms import BotModelForm, BotModelEditForm
+from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
 from bots.zinger.forms import ZingerForm
-from bots.zinger.logic.start_logic import zinger_worker
 from bots.zinger.logic_market.start_logic import zinger_worker_market
+from orders.forms import OrderCustomForm
 
 logger = logging.getLogger('django')
 
@@ -54,6 +56,7 @@ def zinger_bot_create(request):
 
 @login_required
 def zinger_bot_edit(request, bot_id):
+    bot_settings_template = 'zinger/settings.html'
     bot = BotModel.objects.get(pk=bot_id)
     user = request.user
 
@@ -62,6 +65,8 @@ def zinger_bot_edit(request, bot_id):
     if request.method == 'POST':
         bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
         zinger_form = ZingerForm(request.POST, instance=bot.zinger)
+        order_form = OrderCustomForm(request.POST)
+
         if bot_form.is_valid() and zinger_form.is_valid():
             if bot.is_active:
                 bot.account = account
@@ -85,6 +90,7 @@ def zinger_bot_edit(request, bot_id):
     else:
         bot_form = BotModelForm(request=request, instance=bot)
         zinger_form = ZingerForm(instance=bot.zinger)
+        order_form = OrderCustomForm()
 
     bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
     bot_cached_data = dict()
@@ -92,11 +98,39 @@ def zinger_bot_edit(request, bot_id):
         new_key = key.split('_')[1]
         bot_cached_data[new_key] = cache.get(key)
 
-    return render(request, 'zinger/edit.html', {
+    positions, orders = get_cur_positions_and_orders_info(bot)
+    logger.info(
+        f'{orders}')
+
+    return render(request, 'bots_info_page.html', {
+        'bot_settings_template': bot_settings_template,
         'bot_form': bot_form,
         'zinger_form': zinger_form,
+        'order_form': order_form,
         'bot': bot,
         'symbol': symbol,
         'account': account,
         'bot_cached_data': bot_cached_data,
+        'positions': positions,
+        'orders': orders,
     })
+
+
+@login_required
+def start_zinger_bot_view(request, bot_id, event_number):
+    bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
+
+    bot.is_active = True
+    if event_number == 2:
+        bot.time_create = timezone.now()
+    bot.save()
+    bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
+
+    if bot_thread is not None:
+        bot_thread.start()
+
+    logger.info(
+        f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
+    return redirect(request.META.get('HTTP_REFERER'))

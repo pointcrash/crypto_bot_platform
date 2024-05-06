@@ -1,3 +1,4 @@
+import datetime
 import logging
 import threading
 import time
@@ -11,7 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
 from django.utils import timezone
 
-from api_2.api_aggregator import account_balance
+from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets, withdraw, \
+    get_pnl_by_time
 from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
 from bots.bb.logic.start_logic import bb_worker
 from bots.general_functions import all_symbols_update
@@ -21,10 +23,10 @@ from bots.zinger.logic.start_logic import zinger_worker
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
-from .forms import RegistrationForm, LoginForm, DateRangeForm
+from .forms import RegistrationForm, LoginForm, DateRangeForm, InternalTransferForm, WithdrawForm, WhiteListAccountForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
-from main.models import Account
+from main.models import Account, WhiteListAccount
 from .logic import calculate_pnl
 import requests
 
@@ -50,8 +52,11 @@ def logs_list(request, bot_id):
         if date_form.is_valid():
             start_date = date_form.cleaned_data['start_date']
             end_date = date_form.cleaned_data['end_date']
-            pnl_list = calculate_pnl(bot=bot, start_date=start_date, end_date=end_date)
-            pnl = pnl_list['pnl']
+
+            start_date = datetime.datetime.combine(start_date, datetime.time())
+            end_date = datetime.datetime.combine(end_date, datetime.time())
+            pnl = get_pnl_by_time(bot=bot, start_time=start_date, end_time=end_date)
+            pnl = round(float(pnl), 2)
             not_timezone = True
 
         if not not_timezone:
@@ -113,7 +118,10 @@ def account_list(request):
     else:
         accounts = Account.objects.filter(owner=request.user)
     logger.info(f'{user} открыл список аккаунтов')
-    return render(request, 'account/accounts_list.html', {'accounts': accounts, })
+
+    internal_transfer_form = InternalTransferForm()
+    return render(request, 'account/accounts_list.html',
+                  {'accounts': accounts, 'internal_transfer_form': internal_transfer_form, })
 
 
 @login_required
@@ -296,7 +304,7 @@ def profile_mode_switching(request, profile_id):
 def get_balance(request, acc_id):
     account = Account.objects.get(pk=acc_id)
     try:
-        balance = account_balance(account)
+        balance = get_futures_account_balance(account)
         wb = balance['fullBalance']
         tb = balance['availableBalance']
     except Exception as e:
@@ -354,3 +362,94 @@ def restart_all_bots(request):
             bot_thread.start()
 
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def internal_transfer_view(request, acc_id):
+    account = Account.objects.get(pk=acc_id)
+
+    if request.method == 'POST':
+        form = InternalTransferForm(request.POST)
+        if form.is_valid():
+            from_account_type = form.cleaned_data['fromAccountType']
+            to_account_type = form.cleaned_data['toAccountType']
+            symbol = form.cleaned_data['symbol']
+            amount = form.cleaned_data['amount']
+            internal_transfer(account=account, symbol=symbol, amount=amount, from_account_type=from_account_type,
+                              to_account_type=to_account_type)
+
+            return redirect('account_list')
+    else:
+        form = InternalTransferForm()
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def withdraw_view(request, acc_id):
+    user = request.user
+    account = Account.objects.get(pk=acc_id)
+    futures_balance = get_futures_account_balance(account)['availableBalance']
+    fund_balance = get_user_assets(account, symbol="USDT")
+
+    user_accounts = Account.objects.filter(owner=user)
+    whitelist = WhiteListAccount.objects.filter(user=user)
+
+    if request.method == 'POST':
+        form = WithdrawForm(request.POST)
+        if form.is_valid():
+            chain = form.cleaned_data['chain']
+            symbol = form.cleaned_data['symbol']
+            amount = form.cleaned_data['qty']
+            address = form.cleaned_data['address']
+
+            response = withdraw(account=account, symbol=symbol, amount=amount, chain=chain, address=address)
+
+            return redirect('account_list')
+    else:
+        form = WithdrawForm()
+
+    return render(request, 'account/withdraw.html', context={
+        'form': form,
+        'futures_balance': futures_balance,
+        'fund_balance': fund_balance,
+        'account': account,
+        'user_accounts': user_accounts,
+        'whitelist': whitelist,
+    })
+
+
+@login_required
+def whitelist_view(request):
+    user = request.user
+    whitelist = user.whitelist.all()
+
+    if request.method == 'POST':
+        form = WhiteListAccountForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = user
+            address.symbol = 'USDT'
+            address.chain = 'TRX'
+            address.save()
+
+            return redirect(request.META.get('HTTP_REFERER'))
+    else:
+        form = WhiteListAccountForm()
+
+    return render(request, 'account/whitelist.html', context={
+        'form': form,
+        'whitelist': whitelist,
+    })
+
+
+@login_required
+def get_account_assets_view(request, acc_id):
+    account = Account.objects.get(pk=acc_id)
+
+    futures_balance = get_futures_account_balance(account)
+    futures_balance = futures_balance['availableBalance']
+
+    fund_balance = get_user_assets(account, symbol="USDT")
+
+    return JsonResponse({"futures_balance": futures_balance, "fund_balance": fund_balance})

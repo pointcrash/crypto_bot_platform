@@ -3,7 +3,7 @@ from django.urls import path, include
 from bots.SimpleHedge.views import averaging_simple_hedge_view
 from bots.StepHedge.views import on_off_move_nipple
 from bots.SetZeroPsn.views import start_set_zero_psn_bot, stop_set_zero_psn_bot
-from bots.views import views_bots_type_choice, delete_bot, stop_bot, bot_list, bot_start
+from bots.views import views_bots_type_choice, delete_bot, stop_bot, bot_list, bot_start, deactivate_all_my_bots
 
 urlpatterns = [
     path('list/', bot_list, name='bot_list'),
@@ -13,6 +13,7 @@ urlpatterns = [
     #
     path('terminate/<int:bot_id>/<int:event_number>/', stop_bot, name='terminate_bot'),
     path('delete/<int:bot_id>/<int:event_number>/', delete_bot, name='delete_bot'),
+    path('deactivate/all/my/bots/', deactivate_all_my_bots, name='deactivate_all_my_bots'),
     #
     path('bb/', include('bots.bb.urls')),
     path('zinger/', include('bots.zinger.urls')),

@@ -1,8 +1,5 @@
-{% extends 'base.html' %}
-
-{% block content %}
 <div class="row">
-    <div class="col-11 mx-auto">
+    <div class="col-12 mx-auto">
         <h2 class="text-center">Настройки Бота</h2>
         <p>{{ bot_cached_data }}</p>
         <form method="POST">
@@ -153,20 +150,15 @@
                             <a type="button"
                                href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
                                class="btn btn-warning col-12">Delete bot with cancel all orders</a>
-                            <a type="button"
-                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"
-                               class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
-                                Market
-                            </a>
+<!--                            <a type="button"-->
+<!--                               href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"-->
+<!--                               class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by-->
+<!--                                Market-->
+<!--                            </a>-->
                         </div>
                     </div>
                 </div>
             </div>
         </form>
-
-        {% include 'psn_order_table.html' %}
-
     </div>
 </div>
-{% endblock %}
-

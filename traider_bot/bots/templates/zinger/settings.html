@@ -1,11 +1,7 @@
-{% extends 'base.html' %}
-
-{% block content %}
 <div class="row">
-    <div class="col-11 mx-auto">
+    <div class="col-12 mx-auto">
         <h2 class="text-center">Настройки Бота</h2>
         <p>{{ bot_cached_data }}</p><hr>
-        <p>{{ orders }}</p>
         <form method="POST">
             {% csrf_token %}
             <div class="row justify-content-center">
@@ -34,10 +30,12 @@
 
                     <br>
                     {{ bot_form.account.label_tag }}
-                    {{ bot_form.account }}
+                    <input type="text" class="form-control" name="account" value="{{ account }}" readonly disabled>
+<!--                    {{ bot_form.account }}-->
                     <br>
                     {{ bot_form.symbol.label_tag }}
-                    {{ bot_form.symbol }}
+                    <input type="text" class="form-control" name="symbol" value="{{ symbol }}" readonly disabled>
+<!--                    {{ bot_form.symbol }}-->
                     <br>
                     {{ bot_form.leverage.label_tag }}
                     {{ bot_form.leverage }}
@@ -85,10 +83,10 @@
                             {{ zinger_form.qty_steps.label_tag }}
                             {{ zinger_form.qty_steps }}
                         </div>
-                        <div class="col-6 mt-auto">
-                            {{ zinger_form.qty_steps_diff.label_tag }}
-                            {{ zinger_form.qty_steps_diff }}
-                        </div>
+<!--                        <div class="col-6 mt-auto">-->
+<!--                            {{ zinger_form.qty_steps_diff.label_tag }}-->
+<!--                            {{ zinger_form.qty_steps_diff }}-->
+<!--                        </div>-->
                     </div>
                     <hr>
                     <!--                    <h4 class="text-center">Profit Orders</h4>-->
@@ -137,21 +135,16 @@
                                 <a type="button"
                                    href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
                                    class="btn btn-warning col-12">Delete bot with cancel all orders</a>
-                                <a type="button"
-                                   href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"
-                                   class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
-                                    Market
-                                </a>
+<!--                                <a type="button"-->
+<!--                                   href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"-->
+<!--                                   class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by-->
+<!--                                    Market-->
+<!--                                </a>-->
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </form>
-
-        {% include 'psn_order_table.html' %}
-
     </div>
 </div>
-{% endblock %}
-

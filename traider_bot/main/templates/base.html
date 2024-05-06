@@ -40,23 +40,23 @@ a:hover {
 
 {% include 'navbar.html' %}
 <div class="row">
-    <div class="col-md-2 p-0 border rounded shadow" style="background-color: white; max-height: 325px">
+    <div class="col-md-2 p-0 border rounded shadow" style="background-color: white; max-height: 100px">
         <div class="list-group p-0 text-center">
-            <a href="{% url 'profile_list' %}" class="list-group-item p-3 text-muted{% if 'profile_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Users   <i class="fa-solid fa-user ms-2"></i></h5></a>
-            <a href="{% url 'account_list' %}" class="list-group-item p-3 text-muted{% if 'account_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Accounts   <i class="fa-solid fa-wallet ms-2"></i></h5></a>
-            <a href="{% url 'account_position_list' %}" class="list-group-item p-3 text-muted{% if 'account_position_list' in request.resolver_match.url_name %} active{% endif %}"><h5>My positions   <i class="fa-sharp fa-solid fa-coins"></i></h5></a>
-            <a href="{% url 'bot_list' %}" class="list-group-item p-3 text-muted{% if 'bot_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Bots   <i class="fa-solid fa-robot ms-2"></i></h5></a>
+            <a href="{% url 'profile_list' %}" class="list-group-item p-3 text-muted{% if 'profile_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Пользователи   <i class="fa-solid fa-user ms-2"></i></h5></a>
+            <a href="{% url 'account_list' %}" class="list-group-item p-3 text-muted{% if 'account_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Аккаунты   <i class="fa-solid fa-wallet ms-2"></i></h5></a>
+<!--            <a href="{% url 'account_position_list' %}" class="list-group-item p-3 text-muted{% if 'account_position_list' in request.resolver_match.url_name %} active{% endif %}"><h5>My positions   <i class="fa-sharp fa-solid fa-coins"></i></h5></a>-->
+            <a href="{% url 'bot_list' %}" class="list-group-item p-3 text-muted{% if 'bot_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Боты   <i class="fa-solid fa-robot ms-2"></i></h5></a>
 <!--            <a href="{% url 'bots_groups_list' %}" class="list-group-item p-3 text-muted{% if 'bots_groups_list' in request.resolver_match.url_name %} active{% endif %}"><h5>Bots Group   <i class="fa-solid fa-layer-group"></i></h5></a>-->
 <!--            <a href="{% url 'logs' %}" class="list-group-item p-3 text-muted"><h5>Logs   <i class="fa-solid fa-file-lines ms-2"></i></h5></a>-->
 <!--            <a href="{% url 'strategies' %}" class="list-group-item p-3 text-muted{% if 'strategies' in request.resolver_match.url_name %} active{% endif %}"><h5>Strategies   <i class="fa-sharp fa-solid fa-chess-knight"></i></h5></a>-->
 <!--            <a href="{% url 'telegram_list' %}" class="list-group-item p-3 text-muted{% if 'telegram_list' in request.resolver_match.url_name %} active{% endif %}"><h5>telegram-bot   <i class="fa-brands fa-telegram"></i></h5></a>-->
             {% if date_form %}
             <div class="list-group-item">
-                <h5 class="text-muted mt-2">PNL calculation</h5>
+                <h5 class="text-muted mt-2">Расчет PnL</h5>
                 <form method="post" class="m-2">
                     {% csrf_token %}
                     {{ date_form.as_p }}
-                    <button class="btn btn-sm btn-primary ms-auto" type="submit">Calculate</button>
+                    <button class="btn btn-sm btn-primary ms-auto" type="submit">Расчитать</button>
                 </form>
             </div>
             {% endif %}

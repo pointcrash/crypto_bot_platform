@@ -6,11 +6,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.shortcuts import render, redirect
 
+from api_2.api_aggregator import get_open_orders, get_position_inform
+from api_2.formattres import order_formatters
 from bots.bb.forms import BBForm
 from bots.bb.logic.start_logic import bb_worker
 from bots.forms import BotModelForm, BotModelEditForm
+from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
+from orders.forms import OrderCustomForm
 
 logger = logging.getLogger('django')
 
@@ -56,6 +60,7 @@ def bb_bot_create(request):
 
 @login_required
 def bb_bot_edit(request, bot_id):
+    bot_settings_template = 'bb/settings.html'
     bot = BotModel.objects.get(pk=bot_id)
     user = request.user
 
@@ -64,6 +69,8 @@ def bb_bot_edit(request, bot_id):
     if request.method == 'POST':
         bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
         bb_form = BBForm(request.POST, instance=bot.bb)
+        order_form = OrderCustomForm(request.POST)
+
         if bot_form.is_valid() and bb_form.is_valid():
             if bot.is_active:
                 bot.account = account
@@ -87,6 +94,7 @@ def bb_bot_edit(request, bot_id):
     else:
         bot_form = BotModelForm(request=request, instance=bot)
         bb_form = BBForm(instance=bot.bb)
+        order_form = OrderCustomForm()
 
     bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
     bot_cached_data = dict()
@@ -94,11 +102,17 @@ def bb_bot_edit(request, bot_id):
         new_key = key.split('_')[1]
         bot_cached_data[new_key] = cache.get(key)
 
-    return render(request, 'bb/edit.html', {
+    positions, orders = get_cur_positions_and_orders_info(bot)
+
+    return render(request, 'bots_info_page.html', {
+        'bot_settings_template': bot_settings_template,
         'bot_form': bot_form,
         'bb_form': bb_form,
+        'order_form': order_form,
         'bot': bot,
         'symbol': symbol,
         'account': account,
         'bot_cached_data': bot_cached_data,
+        'orders': orders,
+        'positions': positions,
     })

@@ -32,7 +32,7 @@ class WorkBollingerBandsClass:
         self.logger = self.get_logger_for_bot_ws_msg(bot.id)
 
     def cached_data(self, key, value):
-        cache.set(f'bot{self.bot.id}_{key}', str(value), timeout=3600)
+        cache.set(f'bot{self.bot.id}_{key}', str(value))
 
     def get_logger_for_bot_ws_msg(self, bot_id):
         formatter = logging.Formatter('%(message)s')
