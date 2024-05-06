@@ -2,6 +2,14 @@ name: Bybit bot CI/CD
 
 on:
   workflow_dispatch:
+    inputs:
+      component:
+        type: choice
+        description: What application component to update
+        options:
+          - main
+          - wsmanager
+
 
   # Remove on-push after the pipeline is developed
   push:
@@ -35,6 +43,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      # The same host for dev and master branches
     - name: Setting up SSH key
       run: |
         set -e
@@ -42,8 +51,8 @@ jobs:
         if [[ $branch == "pipeline" ]]; then
           echo "${{ secrets.TEST_SERVER_SSH_KEY }}" > private_key
         elif [[ $branch == "dev" ]]; then
-          echo "${{ secrets.DEV_SSH_KEY }}" > private_key
-        elif [[ $branch == "main" ]]; then
+          echo "${{ secrets.PROD_SSH_KEY }}" > private_key
+        elif [[ $branch == "master" ]]; then
           echo "${{ secrets.PROD_SSH_KEY }}" > private_key
         else
           echo "No key for branch $branch, exit"
@@ -57,6 +66,7 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('ansible/pip-dependencies.txt') }}
     - name: Install Ansible 9.1.0
       run: pip3 install -r ansible/pip-dependencies.txt
+      # When the work is finished, remove the second $component initialization
     - name: Run Ansible playbook
       run: |
         set -e
@@ -67,17 +77,28 @@ jobs:
         if [[ $branch == "pipeline" ]]; then
           host="test"
         elif [[ $branch == "dev" ]]; then
-          host="dev"
-        elif [[ $branch == "main" ]]; then
+          host="prod"
+        elif [[ $branch == "master" ]]; then
           host="prod"
         else
           echo "No host for branch $branch, exit"
           exit 1
         fi
+        component="${{ github.event.inputs.component }}"
+        component="main"
+        repo_url=""
+        if [[ $component == "main"]]; then
+          repo_url="git@github.com:almazor/bot-python.git"
+        elif [[ $component == "wsmanager" ]]; then
+          repo_url="git@github.com:almazor/WSManager.git"
+        else
+          echo "No component ${{ github.event.inputs.component }}, exit"
+          exit 1
+        fi
         cd ./ansible
         ansible-playbook -i inventory.ini --limit "$host" playbook.yml --private-key=../private_key \
-          --extra-vars "repo_url=git@github.com:almazor/bot-bb-uriy.git repo_branch=$branch"
-    - name: Pass Binance bot hosts to outputs
+          --extra-vars "repo_url=git@github.com:almazor/bot-bb-uriy.git repo_branch=$branch component=$component"
+    - name: Pass Bybit bot hosts to outputs
       id: get_bb_bot_hosts
       run: echo "bb_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | yq '.test.hosts[]')" >> $GITHUB_OUTPUT
   check-connectivity:
