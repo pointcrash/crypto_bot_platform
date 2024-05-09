@@ -17,6 +17,30 @@ def get_session(account):
     return session
 
 
+def bybit_set_trading_stop(bot, psn_side, tp_limit_price=None, sl_limit_price=None,
+                           tp_size=None, sl_size=None, take_profit_qty=None, stop_loss_qty=None):
+
+    session = get_session(bot.account)
+    tpsl_mode = "Full" if not take_profit_qty and not stop_loss_qty else 'Partial'
+    position_idx = 1 if psn_side == 'LONG' else 2
+
+    response = session.set_trading_stop(
+        category="linear",
+        symbol=bot.symbol,
+        takeProfit=take_profit_qty,
+        stopLoss=stop_loss_qty,
+        tpTriggerBy="MarkPrice",
+        slTriggerB="MarkPrice",
+        tpslMode=tpsl_mode,
+        tpSize=tp_size,
+        slSize=sl_size,
+        tpLimitPrice=tp_limit_price,
+        slLimitPrice=sl_limit_price,
+        positionIdx=position_idx,
+    )
+    return response
+
+
 def bybit_place_batch_order(bot, order_list):
     category = bot.category
     formatted_order_list = []
@@ -99,10 +123,18 @@ def bybit_get_pnl_by_time(bot, start_time, end_time):
 
 if __name__ == "__main__":
     test_session = HTTP(
-        testnet=False,
-        api_key="xcXVA47NndHFNDBqJ9",
-        api_secret="71Xj99PBSljGv8wOer2iRnBt7xF2J6UsF7Ex",
+        testnet=True,
+        api_key="dMwQJxAlfO7Qvl848e",
+        api_secret="QrN3JS2VCXwVjV76sHAMwUJFa81KrPMSA0yl",
     )
+
+    # print(test_session.set_trading_stop(
+    #     category="linear",
+    #     symbol="BTCUSDT",
+    #     trailingStop="1200",
+    #     activePrice="63761",
+    #     positionIdx=1,
+    # ))
 
     # print(test_session.withdraw(
     #     coin="USDT",

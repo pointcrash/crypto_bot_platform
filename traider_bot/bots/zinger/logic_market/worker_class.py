@@ -6,7 +6,7 @@ from django.core.cache import cache
 from decimal import Decimal, ROUND_HALF_UP
 
 from api_2.api_aggregator import change_position_mode, set_leverage, place_order, get_position_inform, \
-    cancel_all_orders, get_pnl_by_time
+    cancel_all_orders, get_pnl_by_time, cancel_order
 from api_2.custom_logging_api import custom_logging
 
 
@@ -23,6 +23,7 @@ class WorkZingerClassMarket:
         self.end_order_id_list = dict()
         self.position_info = dict()
         self.unrealizedPnl = dict()
+        self.tp_trailing_data = dict()
         self.realizedPnl = Decimal(get_pnl_by_time(self.bot, start_time=self.bot.time_create))
         self.required_income = self.calc_required_income()
 
@@ -87,7 +88,6 @@ class WorkZingerClassMarket:
     def place_tp_orders(self, psn_side, psn_price, psn_qty):
         amount_usdt = self.bot.amount_long if psn_side == 'LONG' else self.bot.amount_short
         if amount_usdt != 0:
-
             psn_cost = psn_qty * psn_price
             if psn_side == 'LONG':
                 side = 'SELL'
@@ -98,18 +98,27 @@ class WorkZingerClassMarket:
             else:
                 raise Exception(f'Not correct side position_info: {psn_side}')
 
-            # order_price = order_price.quantize(Decimal(self.bot.symbol.tickSize), rounding=ROUND_HALF_UP)
             order_price = round(order_price, int(self.bot.symbol.priceScale))
 
-            prices = [psn_price, order_price]
-            self.multiplication_factor[psn_side] = max(prices) / min(prices)
-            response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price,
-                                   qty=psn_qty)
-            self.tp_order_id_list[psn_side] = response['orderId']
-            self.unrealizedPnl[psn_side] = abs(psn_price - order_price) * psn_qty
+            if self.zinger.tp_trailing:
+                self.tp_trailing_data[psn_side] = dict()
+                self.tp_trailing_data[psn_side]['activate_price'] = order_price
+                self.tp_trailing_data[psn_side]['callback_rate'] = psn_price * Decimal(self.zinger.tp_trailing_percent) / 100
+                if psn_side == 'LONG':
+                    self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] - self.tp_trailing_data[psn_side]['callback_rate']
+                elif psn_side == 'SHORT':
+                    self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] + self.tp_trailing_data[psn_side]['callback_rate']
+                self.tp_trailing_data[psn_side]['status'] = False
 
-            self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
-            self.cached_data(key='multFactor', value=self.multiplication_factor)
+            else:
+                response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price, qty=psn_qty)
+                self.tp_order_id_list[psn_side] = response['orderId']
+
+                prices = [psn_price, order_price]
+                self.multiplication_factor[psn_side] = max(prices) / min(prices)
+                self.unrealizedPnl[psn_side] = abs(psn_price - order_price) * psn_qty
+                self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
+                self.cached_data(key='multFactor', value=self.multiplication_factor)
 
     def get_side_and_qty_for_second_orders(self, psn_side, psn_qty):
         if psn_side == 'LONG':
@@ -169,6 +178,48 @@ class WorkZingerClassMarket:
                 self.place_second_open_order(order_data['psn_side'], order_data['psn_qty'])
                 self.nipple_data_list.pop('SHORT')
 
+    def trailing_order(self, psn_side):
+        exec_price = self.tp_trailing_data[psn_side]['execution_price']
+        callback_rate = self.tp_trailing_data[psn_side]['callback_rate']
+
+        if psn_side == 'LONG':
+            if self.current_price - exec_price > callback_rate:
+                self.tp_trailing_data[psn_side]['execution_price'] = self.current_price - callback_rate
+            elif self.current_price <= exec_price:
+                self.place_trailing_tp_order(psn_side)
+        elif psn_side == 'SHORT':
+            if exec_price - self.current_price > callback_rate:
+                self.tp_trailing_data[psn_side]['execution_price'] = self.current_price + callback_rate
+            elif self.current_price >= exec_price:
+                self.place_trailing_tp_order(psn_side)
+
+    def activate_trailing_check(self, psn_side):
+        if self.tp_trailing_data.get(psn_side, {}).get('status') is True:
+            return True
+        # elif self.tp_trailing_data.get(psn_side, {}).get('activate_price') is None:
+        #     return None
+        else:
+            activate_price = self.tp_trailing_data[psn_side]['activate_price']
+            if psn_side == 'LONG' and self.current_price >= activate_price or psn_side == 'SHORT' and self.current_price <= activate_price:
+                self.tp_trailing_data[psn_side]['status'] = True
+                return True
+            else:
+                return False
+
+    def place_trailing_tp_order(self, psn_side):
+        self.unrealizedPnl[psn_side] = abs(self.position_info[psn_side]['price'] - self.current_price) * self.position_info[psn_side]['qty']
+        prices = [self.position_info[psn_side]['price'], self.current_price]
+        self.multiplication_factor[psn_side] = max(prices) / min(prices)
+
+        self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
+        self.cached_data(key='multFactor', value=self.multiplication_factor)
+
+        self.tp_trailing_data.pop(psn_side)
+
+        side = 'SELL' if psn_side == 'LONG' else 'BUY'
+        response = place_order(self.bot, side=side, position_side=psn_side, order_type='MARKET', price=self.current_price, qty=self.position_info[psn_side]['qty'])
+        self.tp_order_id_list[psn_side] = response['orderId']
+
     def calc_pnl(self):
         current_pnl = copy.copy(self.realizedPnl)
         for psn_side, psn in self.position_info.items():
@@ -204,3 +255,8 @@ class WorkZingerClassMarket:
         self.cached_data(key=f'realizedPnl', value=self.realizedPnl)
         self.zinger.realized_pnl = self.realizedPnl
         self.zinger.save()
+
+    def replace_tp_order(self, psn_side, psn_price, psn_qty):
+        order_id = self.tp_order_id_list.pop(psn_side)
+        cancel_order(self.bot, order_id)
+        self.place_tp_orders(psn_side, psn_price, psn_qty)

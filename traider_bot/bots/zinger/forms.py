@@ -7,7 +7,7 @@ class ZingerForm(forms.ModelForm):
         model = StepHedge
         fields = ['short1invest', 'long1invest', 'tp_pnl_percent_short', 'tp_pnl_percent_long', 'pnl_short_avg',
                   'pnl_long_avg', 'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff',
-                  'is_nipple_active', 'income_percent', ]
+                  'is_nipple_active', 'income_percent', 'tp_trailing', 'tp_trailing_percent', ]
 
         widgets = {
             'short1invest': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -23,6 +23,8 @@ class ZingerForm(forms.ModelForm):
             'qty_steps_diff': forms.NumberInput(attrs={'class': 'form-control', 'id': 'qty_steps_diff'}),
             'add_tp': forms.RadioSelect(choices=[(True, 'Add take profit'), (False, 'Replace take profit')]),
             'is_nipple_active': forms.CheckboxInput(attrs={'id': 'is_nipple_active'}),
+            'tp_trailing': forms.CheckboxInput(attrs={'id': 'tp_trailing'}),
+            'tp_trailing_percent': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'short1invest': 'SHORT - 1ST ORDER INVESTMENTS',
@@ -34,8 +36,10 @@ class ZingerForm(forms.ModelForm):
             'pnl_long_avg': '% PnL Long average',
             'margin_short_avg': '% Margin Short average',
             'margin_long_avg': '% Margin Long average',
-            'qty_steps': 'COUNT TICKS',
+            'qty_steps': 'Кол-во тиков',
             'qty_steps_diff': 'TICKS DIFF',
             'add_tp': 'Many TP',
-            'is_nipple_active': 'Nipple',
+            'is_nipple_active': 'Ниппель',
+            'tp_trailing': 'Трейлинг закрытия',
+            'tp_trailing_percent': '% отката цены',
         }

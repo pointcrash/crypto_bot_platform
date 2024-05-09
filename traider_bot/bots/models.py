@@ -150,6 +150,18 @@ class SimpleHedge(models.Model):
 
 
 class StepHedge(models.Model):
+    TP_TRAILING_PERCENT_CHOICES = (
+        ('0.1', '0.1'),
+        ('0.2', '0.2'),
+        ('0.3', '0.3'),
+        ('0.5', '0.5'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('5', '5'),
+        ('10', '10'),
+    )
+
     bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True, related_name='zinger')
     short1invest = models.IntegerField(blank=True, null=True)
     long1invest = models.IntegerField(blank=True, null=True)
@@ -165,6 +177,8 @@ class StepHedge(models.Model):
     qty_steps_diff = models.IntegerField(default=10, blank=True)
     add_tp = models.BooleanField(default=False, blank=True)
     is_nipple_active = models.BooleanField(default=False, blank=True, null=True)
+    tp_trailing = models.BooleanField(default=False, blank=True, null=True)
+    tp_trailing_percent = models.CharField(max_length=5, choices=TP_TRAILING_PERCENT_CHOICES, default='1')
     move_nipple = models.BooleanField(blank=True, null=True)
 
     def set_move_nipple_value(self):
