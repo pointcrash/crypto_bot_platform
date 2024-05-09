@@ -1,11 +1,10 @@
-import datetime
-
-a = 1714089600000 / 1000
-b = 1714176000000 / 1000
-
-print(datetime.datetime.fromtimestamp(a))
-print(datetime.datetime.fromtimestamp(b))
-print()
-
-print(datetime.datetime.fromtimestamp(int(1713744000000 / 1000)))
-print(datetime.datetime.fromtimestamp(int(1714176000000 / 1000)))
+a = dict()
+a['psn'] = dict()
+a['psna'] = dict()
+a['psn']['1'] = 45
+a['psn']['2'] = 45
+a['psn']['3'] = 45
+a['psna']['3'] = 45
+a.pop('psn')
+for i in a:
+    print(i)

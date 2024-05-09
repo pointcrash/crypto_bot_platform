@@ -50,7 +50,10 @@ def get_position_inform(bot):
 def place_order(bot, side, order_type, price, amount_usdt=None, qty=None, position_side=None, timeInForce=None):
     if order_type.upper() == 'LIMIT' and not timeInForce:
         timeInForce = 'GTC'
+
     if not qty:
+        if not amount_usdt:
+            raise ValueError('qty or amount must be specified')
         qty = get_quantity_from_price(bot, price, amount_usdt)
 
     if bot.account.service.name == 'Binance':

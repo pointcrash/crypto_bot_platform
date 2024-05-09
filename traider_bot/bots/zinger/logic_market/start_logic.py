@@ -3,6 +3,7 @@ import traceback
 
 from django.core.cache import cache
 
+from api_2.api_aggregator import cancel_all_orders
 from api_2.custom_ws_class import CustomWSClient
 from .handlers_messages import zinger_handler_wrapper_market
 from .worker_class import WorkZingerClassMarket
@@ -40,6 +41,7 @@ def zinger_worker_market(bot):
         custom_logging(bot, f"**Traceback:** {traceback.format_exc()}")
 
     finally:
+        cancel_all_orders(bot)
         try:
             if ws_client is not None:
                 ws_client.exit()
