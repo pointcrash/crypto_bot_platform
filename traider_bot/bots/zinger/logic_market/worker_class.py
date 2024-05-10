@@ -260,3 +260,26 @@ class WorkZingerClassMarket:
         order_id = self.tp_order_id_list.pop(psn_side)
         cancel_order(self.bot, order_id)
         self.place_tp_orders(psn_side, psn_price, psn_qty)
+
+    def reinvest(self, psn_side):
+        if psn_side == 'LONG':
+            if not self.zinger.reinvest_long:
+                return
+            reinvest_psn_side = 'SHORT'
+            side = 'SELL'
+        elif psn_side == 'SHORT':
+            if not self.zinger.reinvest_short:
+                return
+            reinvest_psn_side = 'LONG'
+            side = 'BUY'
+        else:
+            raise ValueError(f'Unknown psn_side value "{psn_side}"')
+
+        #  Get amount USDT for reinvest
+        if self.zinger.reinvest_with_leverage:
+            amount_usdt = self.unrealizedPnl[psn_side]
+        else:
+            amount_usdt = self.unrealizedPnl[psn_side] / self.bot.leverage
+
+        response = place_order(self.bot, side=side, position_side=reinvest_psn_side, order_type='MARKET', price=self.current_price, amount_usdt=amount_usdt)
+        self.tp_order_id_list[psn_side] = response['orderId']
