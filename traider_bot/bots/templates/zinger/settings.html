@@ -106,6 +106,25 @@
                     <!--                    {{ form.d.label_tag }}-->
                     <!--                    {{ form.d }}-->
                 </div>
+
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h5 class="text-center">Реинвест</h5>
+                    <br>
+                    <div class="d-inline">
+                        {{ zinger_form.reinvest_long }}
+                        <p class="d-inline">{{ zinger_form.reinvest_long.label_tag }}</p>
+                    </div>
+                    <div class="d-inline">
+                        {{ zinger_form.reinvest_short }}
+                        <p class="d-inline">{{ zinger_form.reinvest_short.label_tag }}</p>
+                    </div>
+                    <div class="d-inline">
+                        {{ zinger_form.reinvest_with_leverage }}
+                        <p class="d-inline">{{ zinger_form.reinvest_with_leverage.label_tag }}</p>
+                    </div>
+                    <hr>
+                </div>
+
                 <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
                     <div class="row justify-content-center">
                         <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>

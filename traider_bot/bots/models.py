@@ -181,6 +181,10 @@ class StepHedge(models.Model):
     tp_trailing_percent = models.CharField(max_length=5, choices=TP_TRAILING_PERCENT_CHOICES, default='1')
     move_nipple = models.BooleanField(blank=True, null=True)
 
+    reinvest_with_leverage = models.BooleanField(default=False, blank=True, null=True)
+    reinvest_long = models.BooleanField(default=False, blank=True, null=True)
+    reinvest_short = models.BooleanField(default=False, blank=True, null=True)
+
     def set_move_nipple_value(self):
         if self.move_nipple is None:
             self.move_nipple = True if self.is_nipple_active is True else False
