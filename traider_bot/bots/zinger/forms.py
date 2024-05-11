@@ -8,7 +8,7 @@ class ZingerForm(forms.ModelForm):
         fields = ['short1invest', 'long1invest', 'tp_pnl_percent_short', 'tp_pnl_percent_long', 'pnl_short_avg',
                   'pnl_long_avg', 'margin_short_avg', 'margin_long_avg', 'qty_steps', 'qty_steps_diff',
                   'is_nipple_active', 'income_percent', 'tp_trailing', 'tp_trailing_percent',
-                  'reinvest_long', 'reinvest_short', 'reinvest_with_leverage', ]
+                  'reinvest_long', 'reinvest_short', 'reinvest_with_leverage', 'reinvest_count_ticks', ]
 
         widgets = {
             'short1invest': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -29,6 +29,7 @@ class ZingerForm(forms.ModelForm):
             'reinvest_long': forms.CheckboxInput(attrs={'id': 'reinvest_long'}),
             'reinvest_short': forms.CheckboxInput(attrs={'id': 'reinvest_short'}),
             'reinvest_with_leverage': forms.CheckboxInput(attrs={'id': 'reinvest_with_leverage'}),
+            'reinvest_count_ticks': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'short1invest': 'SHORT - 1ST ORDER INVESTMENTS',
@@ -49,4 +50,5 @@ class ZingerForm(forms.ModelForm):
             'reinvest_long': 'Лонг',
             'reinvest_short': 'Шорт',
             'reinvest_with_leverage': 'Реинвест с учетом плеча',
+            'reinvest_count_ticks': 'С какого выхода начать',
         }

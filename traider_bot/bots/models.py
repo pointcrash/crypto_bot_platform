@@ -175,6 +175,8 @@ class StepHedge(models.Model):
     margin_long_avg = models.IntegerField(blank=True, null=True)
     qty_steps = models.IntegerField(default=30, blank=True)
     qty_steps_diff = models.IntegerField(default=10, blank=True)
+    count_ticks_long = models.IntegerField(default=0, blank=True, null=True)
+    count_ticks_short = models.IntegerField(default=0, blank=True, null=True)
     add_tp = models.BooleanField(default=False, blank=True)
     is_nipple_active = models.BooleanField(default=False, blank=True, null=True)
     tp_trailing = models.BooleanField(default=False, blank=True, null=True)
@@ -184,6 +186,7 @@ class StepHedge(models.Model):
     reinvest_with_leverage = models.BooleanField(default=False, blank=True, null=True)
     reinvest_long = models.BooleanField(default=False, blank=True, null=True)
     reinvest_short = models.BooleanField(default=False, blank=True, null=True)
+    reinvest_count_ticks = models.IntegerField(default=0, blank=True, null=True)
 
     def set_move_nipple_value(self):
         if self.move_nipple is None:
