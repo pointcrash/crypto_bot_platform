@@ -254,6 +254,10 @@ class WorkZingerClassMarket:
         self.realizedPnl += self.unrealizedPnl[psn_side]
         self.cached_data(key=f'realizedPnl', value=self.realizedPnl)
         self.zinger.realized_pnl = self.realizedPnl
+        if psn_side == 'LONG':
+            self.zinger.count_ticks_long += 1
+        elif psn_side == 'SHORT':
+            self.zinger.count_ticks_short += 1
         self.zinger.save()
 
     def replace_tp_order(self, psn_side, psn_price, psn_qty):
@@ -265,10 +269,14 @@ class WorkZingerClassMarket:
         if psn_side == 'LONG':
             if not self.zinger.reinvest_long:
                 return
+            if self.zinger.count_ticks_long < self.zinger.reinvest_count_ticks:
+                return
             reinvest_psn_side = 'SHORT'
             side = 'SELL'
         elif psn_side == 'SHORT':
             if not self.zinger.reinvest_short:
+                return
+            if self.zinger.count_ticks_short < self.zinger.reinvest_count_ticks:
                 return
             reinvest_psn_side = 'LONG'
             side = 'BUY'
