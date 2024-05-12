@@ -6,6 +6,7 @@
     single_branch: yes
     version: "{{ repo_branch }}"
     key_file: /root/.ssh/deploy_key
+    force: true
   when: component == "main"
 - name: Cloning the repo's branch to a host - WSManager module
   ansible.builtin.git:
@@ -14,4 +15,5 @@
     single_branch: yes
     version: "{{ repo_branch }}"
     key_file: /root/.ssh/deploy_key_ws
+    force: true
   when: component == "wsmanager"

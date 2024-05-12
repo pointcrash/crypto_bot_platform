@@ -5,4 +5,5 @@
 
   roles:
     - pull_repo
-    - restart_docker
+    - restart_main
+    - restart_wsmanager
