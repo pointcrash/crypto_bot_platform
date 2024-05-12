@@ -1,0 +1,8 @@
+---
+- name: Restart WSManager container
+  community.docker.docker_compose_v2:
+    project_src: {{ repo_dest }}
+    state: restarted
+    services:
+      - ws-manager
+  when: component == "wsmanager"

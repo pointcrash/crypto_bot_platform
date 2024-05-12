@@ -1,0 +1,10 @@
+---
+- name: Transfer the script
+  copy:
+    src: files/restart-python.sh
+    dest: /root/restart-python.sh
+    mode: 0700
+  when: component == "main"
+- name: Execute the script to kill the main Python process
+  script: /root/restart-python.sh "{{ repo_dest }}"
+  when: component == "main"
