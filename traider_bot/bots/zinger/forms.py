@@ -52,3 +52,42 @@ class ZingerForm(forms.ModelForm):
             'reinvest_with_leverage': 'Реинвест с учетом плеча',
             'reinvest_count_ticks': 'С какого выхода начать',
         }
+
+
+class AverageZingerForm(forms.Form):
+    qty = forms.DecimalField(max_digits=11, decimal_places=1, widget=forms.NumberInput(attrs={'class': 'form-control'}),
+                             label='Кол-во')
+
+    NOMINAL_CHOICES = [
+        ('%', '%'),
+        ('$', '$'),
+    ]
+    nominal = forms.ChoiceField(choices=NOMINAL_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}),
+                                label='% / $')
+
+    price = forms.DecimalField(max_digits=20, decimal_places=10, required=False,
+                               widget=forms.NumberInput(attrs={'class': 'form-control'}), label='Цена')
+
+    ORDER_CHOICES = [
+        ('MARKET', 'Market'),
+        ('LIMIT', 'Limit'),
+    ]
+    type = forms.ChoiceField(choices=ORDER_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}),
+                             label='Тип ордера')
+    PSN_CHOICES = [
+        ('BOTH', 'Both'),
+        ('LONG', 'Long'),
+        ('SHORT', 'Short'),
+    ]
+    psnSide = forms.ChoiceField(choices=PSN_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}),
+                                label='Позиция')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        order_type = cleaned_data.get("type")
+        price = cleaned_data.get("price")
+
+        if order_type == 'LIMIT' and not price:
+            raise forms.ValidationError("Укажите цену для лимитного ордера")
+
+        return cleaned_data

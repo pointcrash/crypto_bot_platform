@@ -1,16 +1,19 @@
 import logging
 import threading
+from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
+from api_2.api_aggregator import get_current_price, place_conditional_order, place_order, get_position_inform, \
+    get_quantity_from_price
 from bots.forms import BotModelForm, BotModelEditForm
 from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
-from bots.zinger.forms import ZingerForm
+from bots.zinger.forms import ZingerForm, AverageZingerForm
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 from orders.forms import OrderCustomForm
 
@@ -66,6 +69,7 @@ def zinger_bot_edit(request, bot_id):
         bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
         zinger_form = ZingerForm(request.POST, instance=bot.zinger)
         order_form = OrderCustomForm(request.POST)
+        average_form = AverageZingerForm(request.POST)
 
         if bot_form.is_valid() and zinger_form.is_valid():
             if bot.is_active:
@@ -91,6 +95,7 @@ def zinger_bot_edit(request, bot_id):
         bot_form = BotModelForm(request=request, instance=bot)
         zinger_form = ZingerForm(instance=bot.zinger)
         order_form = OrderCustomForm()
+        average_form = AverageZingerForm()
 
     bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
     bot_cached_data = dict()
@@ -107,6 +112,7 @@ def zinger_bot_edit(request, bot_id):
         'bot_form': bot_form,
         'zinger_form': zinger_form,
         'order_form': order_form,
+        'average_form': average_form,
         'bot': bot,
         'symbol': symbol,
         'account': account,
@@ -134,3 +140,49 @@ def start_zinger_bot_view(request, bot_id, event_number):
         f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
 
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def zinger_manual_average_view(request, bot_id):
+    bot = BotModel.objects.get(pk=bot_id)
+
+    if request.method == 'POST':
+        form = AverageZingerForm(request.POST)
+        if form.is_valid():
+            qty = Decimal(form.cleaned_data['qty'])
+            nominal = form.cleaned_data['price']
+            price = Decimal(form.cleaned_data['price'])
+            order_type = form.cleaned_data['type']
+            form_psn_side = form.cleaned_data['psnSide']
+
+            qty_list = dict()
+            side_list = ['LONG', 'SHORT'] if form_psn_side == 'BOTH' else [form_psn_side]
+            if nominal == '%':
+                psn_data = get_position_inform(bot)
+                for psn in psn_data:
+                    qty_list[psn['side']] = abs(Decimal(psn['qty'])) * qty / 100
+
+            elif nominal == '$':
+                for side in ['LONG', 'SHORT']:
+                    buy_qty = get_quantity_from_price(bot=bot, price=price, amount=qty)
+                    qty_list[side] = buy_qty
+
+            for psn_side in side_list:
+                if order_type == 'MARKET':
+                    side = 'BUY' if psn_side == 'LONG' else 'SHORT'
+                    response = place_order(bot=bot, side=side, position_side=psn_side, qty=qty_list[psn_side],
+                                           price=price, order_type=order_type)
+
+                elif order_type == 'LIMIT':
+                    cur_price = get_current_price(bot)
+                    side = 'BUY' if psn_side == 'LONG' else 'SHORT'
+                    trigger_direction = 1 if cur_price < price else 2
+                    response = place_conditional_order(bot=bot, side=side, position_side=psn_side,
+                                                       qty=qty_list[psn_side], trigger_price=price,
+                                                       trigger_direction=trigger_direction)
+
+            return redirect('zinger_bot_edit', bot_id=bot.id)
+    else:
+        form = AverageZingerForm()
+
+    return render(request, 'create_order.html', {'form': form})
