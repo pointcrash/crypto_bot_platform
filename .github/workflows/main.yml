@@ -102,16 +102,15 @@ jobs:
         set -e
         branch=$(git rev-parse --abbrev-ref HEAD)
         if [[ $branch == "pipeline" ]]; then
-          host="test"
+          ansible-inventory --list -i ansible/inventory.ini | jq -r '.test.hosts[]' >> $GITHUB_OUTPUT
         elif [[ $branch == "dev" ]]; then
-          host="prod"
+          ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]' >> $GITHUB_OUTPUT
         elif [[ $branch == "master" ]]; then
-          host="prod"
+          ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]' >> $GITHUB_OUTPUT
         else
           echo "No host for branch $branch, exit"
           exit 1
         fi
-        echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r ".$host.hosts[]")" >> $GITHUB_OUTPUT
   check-connectivity:
     runs-on: ubuntu-latest
     needs: deploy
