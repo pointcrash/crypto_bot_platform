@@ -111,7 +111,7 @@ jobs:
           echo "No host for branch $branch, exit"
           exit 1
         fi
-        echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | yq '.$host.hosts[]')" >> $GITHUB_OUTPUT
+        echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r ".$host.hosts[]")" >> $GITHUB_OUTPUT
   check-connectivity:
     runs-on: ubuntu-latest
     needs: deploy
@@ -121,10 +121,9 @@ jobs:
         BP_BOT_HOSTS: ${{ needs.deploy.outputs.bp_bot_hosts }}
       run: |
         set -e
-        echo "Enter script"
+        echo "${BP_BOT_HOSTS}"
         for host in "${BP_BOT_HOSTS[@]}"
         do
-          echo "Checking host $host"
           response_code=$(curl --write-out '%{http_code}' --silent --output /dev/null -k https://$host/login)
           if [ "$response_code" -ne 200 ]; then
             echo "Error: https://$host/login page response code is $response_code"
