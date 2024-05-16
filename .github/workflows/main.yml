@@ -36,7 +36,7 @@ jobs:
       # Turn on host key checking in case of self-hosted runner (and add its IP to known_hosts)
       ANSIBLE_HOST_KEY_CHECKING: False
     outputs:
-      bb_bot_hosts: ${{ steps.get_bb_bot_hosts.outputs.bb_bot_hosts}}
+      bp_bot_hosts: ${{ steps.get_bp_bot_hosts.outputs.bp_bot_hosts}}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -97,16 +97,16 @@ jobs:
         ansible-playbook -i inventory.ini --limit "$host" playbook.yml --private-key=../private_key \
           --extra-vars "repo_url=$repo_url repo_branch=$branch component=$component"
     - name: Pass the bot hosts to outputs
-      id: get_bb_bot_hosts
+      id: get_bp_bot_hosts
       run: |
         set -e
         branch=$(git rev-parse --abbrev-ref HEAD)
         if [[ $branch == "pipeline" ]]; then
-          ansible-inventory --list -i ansible/inventory.ini | jq -r '.test.hosts[]' >> $GITHUB_OUTPUT
+          echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.test.hosts[]')" >> $GITHUB_OUTPUT
         elif [[ $branch == "dev" ]]; then
-          ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]' >> $GITHUB_OUTPUT
+          echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]')" >> $GITHUB_OUTPUT
         elif [[ $branch == "master" ]]; then
-          ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]' >> $GITHUB_OUTPUT
+          echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]')" >> $GITHUB_OUTPUT
         else
           echo "No host for branch $branch, exit"
           exit 1
