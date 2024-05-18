@@ -109,6 +109,7 @@ class WorkZingerClassMarket:
                 elif psn_side == 'SHORT':
                     self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] + self.tp_trailing_data[psn_side]['callback_rate']
                 self.tp_trailing_data[psn_side]['status'] = False
+                self.cached_data(key='tp_trailing_data', value=self.tp_trailing_data)
 
             else:
                 response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price, qty=psn_qty)
