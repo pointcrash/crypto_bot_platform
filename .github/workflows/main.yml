@@ -120,10 +120,9 @@ jobs:
         BP_BOT_HOSTS: ${{ needs.deploy.outputs.bp_bot_hosts }}
       run: |
         set -e
-        echo "${BP_BOT_HOSTS}"
         for host in "${BP_BOT_HOSTS[@]}"
         do
-          response_code=$(curl --write-out '%{http_code}' --silent --output /dev/null -k https://$host/login)
+          response_code=$(curl --write-out '%{http_code}' --silent --output /dev/null -k https://$host/login/)
           if [ "$response_code" -ne 200 ]; then
             echo "Error: https://$host/login page response code is $response_code"
             exit 1
