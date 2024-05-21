@@ -10,7 +10,6 @@ on:
           - main
           - wsmanager
 
-
   # Remove on-push after the pipeline is developed
   push:
     branches:
@@ -40,7 +39,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      # The same host for dev and master branches
+      # The same host for dev and main branches
     - name: Setting up SSH key
       run: |
         set -e
@@ -49,7 +48,7 @@ jobs:
           echo "${{ secrets.TEST_SERVER_SSH_KEY }}" > private_key
         elif [[ $branch == "dev" ]]; then
           echo "${{ secrets.PROD_SSH_KEY }}" > private_key
-        elif [[ $branch == "master" ]]; then
+        elif [[ $branch == "main" ]]; then
           echo "${{ secrets.PROD_SSH_KEY }}" > private_key
         else
           echo "No key for branch $branch, exit"
@@ -65,7 +64,6 @@ jobs:
       run: pip3 install -r ansible/pip-dependencies.txt
     - name: Install Ansible dependencies
       run: ansible-galaxy collection install community.docker --force
-      # When the work is finished, remove the second $component initialization
     - name: Run Ansible playbook
       run: |
         set -e
@@ -76,14 +74,18 @@ jobs:
           host="test"
         elif [[ $branch == "dev" ]]; then
           host="prod"
-        elif [[ $branch == "master" ]]; then
+        elif [[ $branch == "main" ]]; then
           host="prod"
         else
           echo "No host for branch $branch, exit"
           exit 1
         fi
-        component="${{ github.event.inputs.component }}"
-        component="main"
+        component=""
+        if [[ ${{ github.event.inputs.component }} == "" ]]; then
+          component="main"
+        else
+          component=${{ github.event.inputs.component }}
+        fi
         repo_url=""
         if [[ $component == "main" ]]; then
           repo_url="git@github.com:almazor/bot-python.git"
@@ -105,7 +107,7 @@ jobs:
           echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.test.hosts[]')" >> $GITHUB_OUTPUT
         elif [[ $branch == "dev" ]]; then
           echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]')" >> $GITHUB_OUTPUT
-        elif [[ $branch == "master" ]]; then
+        elif [[ $branch == "main" ]]; then
           echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]')" >> $GITHUB_OUTPUT
         else
           echo "No host for branch $branch, exit"
