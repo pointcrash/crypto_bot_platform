@@ -4,7 +4,8 @@
 <div class="row">
     <div class="col-11 mx-auto">
         <h2 class="text-center">Настройки Бота</h2>
-        <p>{{ bot_cached_data }}</p>
+        <p>{{ bot_cached_data }}</p><hr>
+        <p>{{ orders }}</p>
         <form method="POST">
             {% csrf_token %}
             <div class="row justify-content-center">
@@ -74,22 +75,27 @@
                     {{ zinger_form.income_percent.label_tag }}
                     {{ zinger_form.income_percent }}
                     <br>
-                    <br>
                     <div class="d-inline">
                         <p class="d-inline">{{ zinger_form.is_nipple_active.label_tag }}</p>
                         {{ zinger_form.is_nipple_active }}
                     </div>
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-12">
                             {{ zinger_form.qty_steps.label_tag }}
                             {{ zinger_form.qty_steps }}
                         </div>
-                        <div class="col-6 mt-auto">
-                            {{ zinger_form.qty_steps_diff.label_tag }}
-                            {{ zinger_form.qty_steps_diff }}
-                        </div>
+<!--                        <div class="col-6 mt-auto">-->
+<!--                            {{ zinger_form.qty_steps_diff.label_tag }}-->
+<!--                            {{ zinger_form.qty_steps_diff }}-->
+<!--                        </div>-->
                     </div>
-                    <hr>
+                    <br>
+                    <div class="d-inline">
+                        <p class="d-inline">{{ zinger_form.tp_trailing.label_tag }}</p>
+                        {{ zinger_form.tp_trailing }}
+                    </div>
+                    {{ zinger_form.tp_trailing_percent.label_tag }}
+                    {{ zinger_form.tp_trailing_percent }}
                     <!--                    <h4 class="text-center">Profit Orders</h4>-->
                     <!--                    <div class="d-inline">-->
                     <!--                        {{ zinger_form.take_on_ml.label_tag }}-->
@@ -147,6 +153,9 @@
                 </div>
             </div>
         </form>
+
+        {% include 'psn_order_table.html' %}
+
     </div>
 </div>
 {% endblock %}

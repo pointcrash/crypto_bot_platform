@@ -46,6 +46,7 @@ class CustomWSClient:
         except Exception as e:
             custom_logging(self.bot, f'GET ERROR IN "_on_message" func: {e}')
             custom_logging(self.bot, f"**Traceback:** {traceback.format_exc()}")
+            custom_logging(self.bot, f"**СООБЩЕНИЕ ВЫЗВАШЕЕ ОШИБКУ:** {message}")
 
     def _on_close(self, ws, close_code, reason):
         pass

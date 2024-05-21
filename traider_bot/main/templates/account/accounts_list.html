@@ -10,19 +10,22 @@
 
 <div class="container">
     <div class="row text-end">
-        <div class="col-12 col-lg-10">
-            <h1 class="text-center">Accounts</h1>
-            <a href="{% url 'create_account' %}" class="btn btn-primary btn-shadow">Add new account</a>
+        <div class="col-11">
+            <h1 class="text-center">Аккаунты</h1>
+            <a href="{% url 'whitelist' %}" class="btn btn-outline-primary btn-shadow border-0">Адресная книга</a>
+            <a href="{% url 'create_account' %}" class="btn btn-primary btn-shadow border-0">Добавить аккаунт</a>
             <div class="card mt-2 border-0 shadow p-3">
                 <table class="table" style="vertical-align: middle">
                     <thead>
                     <tr class=" text-center">
-                        <th>Name</th>
+                        <th>Имя аккаунта</th>
                         <th class="d-none d-sm-table-cell">Биржа</th>
-                        <th class="d-none d-sm-table-cell">Is mainnet</th>
-                        <th>Balance</th>
-                        <th style="color: orange">Edit</th>
-                        <th style="color: red">Delete</th>
+                        <th class="d-none d-sm-table-cell">Сеть</th>
+                        <th>Баланс</th>
+                        <th>Перевод</th>
+                        <th>Вывод</th>
+                        <th style="color: orange">Редактировать</th>
+                        <th style="color: red">Удалить</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -30,27 +33,39 @@
                     <tr class=" text-center">
                         <td>{{ account.name }}</td>
                         <td>{{ account.service }}</td>
-                        <td class="d-none d-sm-table-cell">{% if account.is_mainnet %}<i class="fa-solid fa-check"></i>{% else %}<i
-                                class="fa-solid fa-xmark"></i>{% endif %}
+                        <td class="d-none d-sm-table-cell">
+                            {% if account.is_mainnet %}Основная{% else %}Тестовая{% endif %}
                         </td>
-                        <td><button id="{{ account.pk }}" class="get-balance-button btn btn-sm btn-secondary px-3 btn-shadow">Balance</button></td>
-
-                        <!-- Модальное окно для отображения баланса аккаунта -->
-                        <div class="modal" id="balanceModal" tabindex="-1" role="dialog">
-                          <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h5 class="modal-title mx-auto">Баланс аккаунта "<span id="accountPkPlaceholder"></span>"</h5>
-                              </div>
-                              <div class="modal-body text-center">
-                                <p id="balanceInfo">Загрузка...</p>
-                              </div>
+                        <td>
+                            <button id="{{ account.pk }}"
+                                    class="get-balance-button btn btn-sm btn-light px-3 btn-shadow"><i class="fa-solid fa-wallet" style="color: #74C0FC;"></i>
+                            </button>
+                            <!-- Модальное окно для отображения баланса аккаунта -->
+                            <div class="modal" id="balanceModal" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title mx-auto">Баланс аккаунта "<span
+                                                    id="accountPkPlaceholder"></span>"</h5>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <p id="balanceInfo">Загрузка...</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                          </div>
-                        </div>
+                        </td>
 
-<!--                        <td class="border">{{ tb }}</td>-->
-                        <td><a class="btn btn-sm btn-warning px-3 btn-shadow" href="{% url 'edit_account' acc_id=account.pk %}">Edit</a>
+                        <td>
+                            {% include 'account/modal_internal_transfer.html' %}
+                        </td>
+                        <td>
+                            <a href="{% url 'withdraw' acc_id=account.pk %}" class="btn btn-sm btn-outline-success btn-shadow border-0"><i class="fa-solid fa-reply-all mx-2"></i></a>
+                        </td>
+
+                        <!--                        <td class="border">{{ tb }}</td>-->
+                        <td><a class="btn btn-sm btn-warning px-3 btn-shadow"
+                               href="{% url 'edit_account' acc_id=account.pk %}">Редактировать</a>
                         </td>
                         <td>{% include 'account/delete_account_modal.html' %}</td>
                     </tr>
@@ -64,25 +79,49 @@
 
 
 <script>
-  const buttons = document.querySelectorAll('.get-balance-button');
-  buttons.forEach(button => {
-    button.addEventListener('click', () => {
-      const accountId = button.id;
-      fetch(`/accounts/get_balance/${accountId}/`)
-        .then(response => response.json())
-        .then(data => {
-          const modalTitle = document.getElementById('accountPkPlaceholder');
-          const balanceInfo = document.getElementById('balanceInfo');
-          const accountName = data.name;
-          modalTitle.textContent = accountName;
-          balanceInfo.innerHTML = `Баланс кошелька: <strong>${data.wb}</strong> USDT<br>Доступный баланс: <strong>${data.tb}</strong> USDT`;
-          const balanceModal = new bootstrap.Modal(document.getElementById('balanceModal'));
-          balanceModal.show();
-        })
-        .catch(error => {
-          console.error("Ошибка при получении баланса:", error);
+    const buttons = document.querySelectorAll('.get-balance-button');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const accountId = button.id;
+        fetch(`/accounts/get_balance/${accountId}/`)
+          .then(response => response.json())
+          .then(data => {
+            const modalTitle = document.getElementById('accountPkPlaceholder');
+            const balanceInfo = document.getElementById('balanceInfo');
+            const accountName = data.name;
+            modalTitle.textContent = accountName;
+            balanceInfo.innerHTML = `Баланс кошелька: <strong>${data.wb}</strong> USDT<br>Доступный баланс: <strong>${data.tb}</strong> USDT`;
+            const balanceModal = new bootstrap.Modal(document.getElementById('balanceModal'));
+            balanceModal.show();
+          })
+          .catch(error => {
+            console.error("Ошибка при получении баланса:", error);
+          });
+      });
+    });
+</script>
+
+<script>
+    const transferButtons = document.querySelectorAll('.internal-transfer-btn');
+    transferButtons.forEach(transferButton => {
+      transferButton.addEventListener('click', () => {
+        const transferAccountId = transferButton.id.replace(/\D/g, '');
+        fetch(`/accounts/get_account_assets/${transferAccountId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const fundBalance = data.fund_balance;
+                const futuresBalance = data.futures_balance;
+                const fundBalanceElement = document.querySelector(`#fundBalance${transferAccountId}`);
+                const futuresBalanceElement = document.querySelector(`#futuresBalance${transferAccountId}`);
+                if (fundBalanceElement && futuresBalanceElement) {
+                    fundBalanceElement.textContent = fundBalance;
+                    futuresBalanceElement.textContent = futuresBalance;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching balance:', error);
+            });
         });
     });
-  });
 </script>
 {% endblock %}

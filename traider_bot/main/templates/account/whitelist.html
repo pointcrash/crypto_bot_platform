@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+<div class="container">
+    <div class="row text-end">
+        <div class="col-11">
+            <h1 class="text-center">Адресная книга</h1>
+            {% include 'account/modal_whitelist_add.html' %}
+            <div class="card mt-2 border-0 shadow p-3">
+                <table class="table" style="vertical-align: middle">
+                    <thead>
+                    <tr class=" text-center">
+                        <th>Заметка</th>
+                        <th class="d-none d-sm-table-cell">Адрес</th>
+                        <th class="d-none d-sm-table-cell">Монета</th>
+                        <th>Сеть</th>
+                        <th style="color: orange">Редактировать</th>
+                        <th style="color: red">Удалить</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for account in whitelist %}
+                    <tr class=" text-center">
+                        <td>{{ account.note }}</td>
+                        <td>{{ account.address }}</td>
+                        <td class="d-none d-sm-table-cell">{{ account.symbol }}</td>
+                        <td>{{ account.chain }}</td>
+                        <td><button class="btn btn-sm btn-warning px-3 btn-shadow">Редактировать</button></td>
+                        <td><button class="btn btn-danger btn-sm btn-shadow">Удалить</button></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

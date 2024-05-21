@@ -100,7 +100,7 @@ def delete_bot(request, bot_id, event_number):
 
     bot.delete()
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect('bot_list')
 
 
 @login_required
@@ -134,8 +134,9 @@ def deactivate_all_my_bots(request):
     bots = BotModel.objects.filter(owner=user)
 
     for bot in bots:
-        bot.is_active = False
-        bot.save()
-        time.sleep(7)
+        if bot.is_active is True:
+            bot.is_active = False
+            bot.save()
+    time.sleep(7)
 
     return redirect(request.META.get('HTTP_REFERER'))

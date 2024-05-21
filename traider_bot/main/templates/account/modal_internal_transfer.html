@@ -1,0 +1,65 @@
+<!-- Button trigger modal -->
+<button id="internalTransfer{{ account.pk }}" type="button" class="btn btn-success btn-sm btn-shadow internal-transfer-btn" data-bs-toggle="modal" data-bs-target="#internalTransferModal{{ account.pk }}">
+    <i class="fa-solid fa-right-left mx-2"></i>
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="internalTransferModal{{ account.pk }}" tabindex="-1" aria-labelledby="internalTransferModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="internalTransferModalLabel">{{ account.name }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form method="POST" action="{% url 'internal_transfer' acc_id=account.pk %}">
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col">
+                            <h5>Финансирования</h5>
+                            <h4 id="fundBalance{{account.pk}}"><i class="fa-solid fa-spinner fa-spin"></i></h4>
+                        </div>
+                        <div class="col">
+                            <h5>Деривативный</h5>
+                            <h4 id="futuresBalance{{account.pk}}"><i class="fa-solid fa-spinner fa-spin"></i></h4>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-6">
+                            {{ internal_transfer_form.fromAccountType.label_tag }}
+                            {{ internal_transfer_form.fromAccountType }}
+                        </div>
+                        <div class="col-6">
+                            {{ internal_transfer_form.toAccountType.label_tag }}
+                            {{ internal_transfer_form.toAccountType }}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ internal_transfer_form.symbol.label_tag }}
+                            {{ internal_transfer_form.symbol }}
+                        </div>
+                        <div class="col-6">
+                            {{ internal_transfer_form.amount.label_tag }}
+                            {{ internal_transfer_form.amount }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-secondary">Перевести</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

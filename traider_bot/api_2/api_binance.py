@@ -1,4 +1,5 @@
 import traceback
+from datetime import datetime
 from decimal import Decimal
 from functools import wraps
 from binance.client import Client
@@ -212,6 +213,34 @@ def binance_account_balance(account):
     return response
 
 
+def binance_get_user_asset(account, symbol):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+    response = client.get_user_asset(asset=symbol)
+
+    return response[0]['free']
+
+
+def binance_internal_transfer(account, symbol, amount, from_account_type, to_account_type):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+    if from_account_type == 'FUND' and to_account_type == 'UNIFIED':
+        transfer_type = 1
+    elif from_account_type == 'UNIFIED' and to_account_type == 'FUND':
+        transfer_type = 2
+    else:
+        transfer_type = None
+
+    response = client.futures_account_transfer(asset=symbol, amount=amount, type=transfer_type)
+
+    return response
+
+
+def binance_withdraw(account, symbol, amount, chain, address):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+    response = client.withdraw(coin=symbol, network=chain, address=address, amount=amount)
+
+    return response
+
+
 def get_binance_exchange_information(account):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
 
@@ -242,3 +271,39 @@ def get_binance_exchange_information(account):
             symbol_set[obj['symbol']]['maxLeverage'] = obj['brackets'][0]['initialLeverage']
 
     return symbol_set
+
+
+@with_binance_client
+def binance_get_pnl_by_time(bot, client, start_time, end_time):
+    start_time = int(start_time.timestamp() * 1000)
+    end_time = int(end_time.timestamp() * 1000)
+    total_pnl = 0
+
+    custom_logging(bot, f'binance_get_pnl_by_time({bot.symbol.name}, {start_time}, {end_time}, )', 'REQUEST')
+    response = client.futures_account_trades(symbol=bot.symbol, startTime=start_time, endTime=end_time)
+    custom_logging(bot, response, 'RESPONSE')
+    for trade in response:
+        total_pnl += float(trade['realizedPnl'])
+        total_pnl -= float(trade['commission'])
+
+    return total_pnl
+
+
+if __name__ == "__main__":
+    pass
+    # client = Client(
+    #     'DtQ4NHexgkjnoNLKFeEiPjeFsN5vJr8UsUBigfelxO4DAyykSBZAyLRteiktUjJj',
+    #     '6G3BhdLPDywx5y7QsxrYOFj3glD4bMglpifUOfjwo1gfE7KMfoadVkJCyXwac3b2',
+    #     testnet=False,
+    # )
+    #
+    # response = client.futures_account_trades(symbol='1000BONKUSDT')
+    # pnl = 0
+    # commission = 0
+    # for i in response:
+    #     pnl += float(i['realizedPnl'])
+    #     commission += float(i['commission'])
+    #
+    # print(commission)
+    # print(pnl)
+    #
