@@ -1,9 +1,8 @@
-
 FROM python:3.11
 
 #COPY /bot-python/traider_bot/requirements.txt /app/requirements.txt
 WORKDIR /app
-
+COPY bot-python/traider_bot .
 # Создаем и активируем виртуальное окружение
 RUN pip install virtualenv
 RUN virtualenv venv
@@ -12,7 +11,7 @@ RUN source venv/bin/activate
 
 
 RUN pip install --upgrade pip
-#RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt
 RUN pip install gunicorn
 
 #COPY /bot-python/traider_bot /app
@@ -22,12 +21,7 @@ RUN pip install gunicorn
 #ENV PYTHONUNBUFFERED=1
 
 # Делаем скрипт исполняемым
-#RUN chmod +x /app/run.sh
+RUN chmod +x /app/run.sh
 
 # Устанавливаем скрипт запуска как ENTRYPOINT
 ENTRYPOINT ["/app/run.sh"]
-
-
-
-
-

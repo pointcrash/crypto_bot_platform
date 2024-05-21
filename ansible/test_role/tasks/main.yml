@@ -1,0 +1,8 @@
+---
+- name: Show Uptime
+  command: uptime
+  register: uptime_output
+
+- name: Display Uptime
+  debug:
+    var: uptime_output.stdout_lines

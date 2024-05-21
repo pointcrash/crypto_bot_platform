@@ -1,0 +1,19 @@
+---
+- name: Cloning the repo's branch to a host - main module
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"
+    dest: "{{ repo_dest }}/bot-python"
+    single_branch: yes
+    version: "{{ repo_branch }}"
+    key_file: /root/.ssh/deploy_key
+    force: true
+  when: component == "main"
+- name: Cloning the repo's branch to a host - WSManager module
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"
+    dest: "{{ repo_dest }}/WSManager"
+    single_branch: yes
+    version: "{{ repo_branch }}"
+    key_file: /root/.ssh/deploy_key_ws
+    force: true
+  when: component == "wsmanager"

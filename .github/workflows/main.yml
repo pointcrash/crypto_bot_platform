@@ -1,0 +1,132 @@
+name: Bybit bot CI/CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        type: choice
+        description: What application component to update
+        options:
+          - main
+          - wsmanager
+
+
+  # Remove on-push after the pipeline is developed
+  push:
+    branches:
+      - pipeline
+      - dev
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Install Ruff
+      run: pip3 install ruff==0.2.0
+    - name: Check code
+      run: cd traider_bot && ruff check .
+      continue-on-error: true
+  deploy:
+    runs-on: ubuntu-latest
+    needs: lint
+    env:
+      PIP_CACHE_DIR: /tmp/pipcache
+      # Turn on host key checking in case of self-hosted runner (and add its IP to known_hosts)
+      ANSIBLE_HOST_KEY_CHECKING: False
+    outputs:
+      bp_bot_hosts: ${{ steps.get_bp_bot_hosts.outputs.bp_bot_hosts}}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      # The same host for dev and master branches
+    - name: Setting up SSH key
+      run: |
+        set -e
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [[ $branch == "pipeline" ]]; then
+          echo "${{ secrets.TEST_SERVER_SSH_KEY }}" > private_key
+        elif [[ $branch == "dev" ]]; then
+          echo "${{ secrets.PROD_SSH_KEY }}" > private_key
+        elif [[ $branch == "master" ]]; then
+          echo "${{ secrets.PROD_SSH_KEY }}" > private_key
+        else
+          echo "No key for branch $branch, exit"
+          exit 1
+        fi
+        chmod 600 private_key
+    - name: Cache Pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: /tmp/pipcache
+        key: ${{ runner.os }}-${{ hashFiles('ansible/pip-dependencies.txt') }}
+    - name: Install Ansible 9.1.0
+      run: pip3 install -r ansible/pip-dependencies.txt
+    - name: Install Ansible dependencies
+      run: ansible-galaxy collection install community.docker --force
+      # When the work is finished, remove the second $component initialization
+    - name: Run Ansible playbook
+      run: |
+        set -e
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        echo "Deploying from branch $branch"
+        host=""
+        if [[ $branch == "pipeline" ]]; then
+          host="test"
+        elif [[ $branch == "dev" ]]; then
+          host="prod"
+        elif [[ $branch == "master" ]]; then
+          host="prod"
+        else
+          echo "No host for branch $branch, exit"
+          exit 1
+        fi
+        component="${{ github.event.inputs.component }}"
+        component="main"
+        repo_url=""
+        if [[ $component == "main" ]]; then
+          repo_url="git@github.com:almazor/bot-python.git"
+        elif [[ $component == "wsmanager" ]]; then
+          repo_url="git@github.com:almazor/WSManager.git"
+        else
+          echo "No component ${{ github.event.inputs.component }} specified, exit"
+          exit 1
+        fi
+        cd ./ansible
+        ansible-playbook -i inventory.ini --limit "$host" playbook.yml --private-key=../private_key \
+          --extra-vars "repo_url=$repo_url repo_branch=$branch component=$component"
+    - name: Pass the bot hosts to outputs
+      id: get_bp_bot_hosts
+      run: |
+        set -e
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [[ $branch == "pipeline" ]]; then
+          echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.test.hosts[]')" >> $GITHUB_OUTPUT
+        elif [[ $branch == "dev" ]]; then
+          echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]')" >> $GITHUB_OUTPUT
+        elif [[ $branch == "master" ]]; then
+          echo "bp_bot_hosts=$(ansible-inventory --list -i ansible/inventory.ini | jq -r '.prod.hosts[]')" >> $GITHUB_OUTPUT
+        else
+          echo "No host for branch $branch, exit"
+          exit 1
+        fi
+  check-connectivity:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+    - name: Check connectivity for hosts
+      env:
+        BP_BOT_HOSTS: ${{ needs.deploy.outputs.bp_bot_hosts }}
+      run: |
+        set -e
+        for host in "${BP_BOT_HOSTS[@]}"
+        do
+          response_code=$(curl --write-out '%{http_code}' --silent --output /dev/null -k https://$host/login/)
+          if [ "$response_code" -ne 200 ]; then
+            echo "Error: https://$host/login page response code is $response_code"
+            exit 1
+          else
+            echo "$host returns 200 OK"
+          fi
+        done
