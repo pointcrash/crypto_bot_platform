@@ -35,7 +35,7 @@ def handle_order_stream_message(msg, bot_class_obj):
 
             elif msg['orderId'] == bot_class_obj.tp_order_id_list[psn_side]:
                 custom_logging(bot_class_obj.bot, f'TP ORDER {msg["orderId"]} {msg["status"]}')
-                bot_class_obj.update_realized_pnl(psn_side=psn_side, psn_price=psn_price, psn_qty=psn_qty)
+                bot_class_obj.update_realized_pnl(psn_side=psn_side)
                 bot_class_obj.reinvest(psn_side=psn_side)
                 if bot_class_obj.zinger.is_nipple_active:
                     bot_class_obj.nipple_side = psn_side
