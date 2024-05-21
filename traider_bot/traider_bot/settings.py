@@ -9,7 +9,7 @@ SECRET_KEY = django_app_key
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '164.92.182.43', '127.0.0.1']
+ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '164.92.182.43', '127.0.0.1', '165.227.142.240']
 
 CORS_ALLOWED_ORIGINS = [
     "https://bravo.almazor.co",

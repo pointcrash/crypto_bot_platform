@@ -1,0 +1,4 @@
+---
+- name: Execute the script to kill the main Python process
+  script: files/restart-python.sh "{{ repo_dest }}"
+  when: component == "main"
