@@ -81,10 +81,10 @@ jobs:
           exit 1
         fi
         component=""
-        if [[ ${{ github.event.inputs.component }} == "" ]]; then
+        if [[ "${{ github.event.inputs.component }}" == "" ]]; then
           component="main"
         else
-          component=${{ github.event.inputs.component }}
+          component="${{ github.event.inputs.component }}"
         fi
         repo_url=""
         if [[ $component == "main" ]]; then
