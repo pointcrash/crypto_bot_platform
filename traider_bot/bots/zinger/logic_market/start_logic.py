@@ -46,7 +46,7 @@ def zinger_worker_market(bot):
             if ws_client is not None:
                 ws_client.exit()
 
-            clear_cache_bot_data(bot.id)
+            # clear_cache_bot_data(bot.id)
             print('End working ZINGER bot')
         except Exception as e:
             print('ERROR:', e)

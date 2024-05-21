@@ -81,6 +81,8 @@ class WorkZingerClassMarket:
 
         amount_usdt = self.bot.amount_long if side == 'BUY' else self.bot.amount_short
         if amount_usdt != 0:
+            self.cached_data('cur_price', self.current_price)
+            self.cached_data('amount_usdt', amount_usdt)
             response = place_order(self.bot, side=side, order_type='MARKET', price=self.current_price,
                                    amount_usdt=amount_usdt)
             return response['orderId']
