@@ -29,8 +29,8 @@ def get_position_inform(bot):
         psn_list = bybit_get_position_inform(bot)
 
     for psn in psn_list:
-        psn['markPrice'] = str(float(psn['markPrice']))
-        psn['entryPrice'] = str(float(psn['entryPrice']))
+        psn['markPrice'] = str(float(psn['markPrice'])) if psn['markPrice'] else 0
+        psn['entryPrice'] = str(float(psn['entryPrice'])) if psn['entryPrice'] else 0
         if psn.get('unrealisedPnl'):
             psn['unrealisedPnl'] = str(round(float(psn['unrealisedPnl']), 2))
         else:
