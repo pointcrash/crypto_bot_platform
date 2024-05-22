@@ -45,9 +45,9 @@
                     <td>{{ position.margin }}</td>
 
                     {% if "-" in position.unrealisedPnl %}
-                    <td style="color:red">{{ position.unrealisedPnl }}</td>
+                    <td style="color:red">{{ position.unrealisedPnl }} ({{ position.roi }}%)</td>
                     {% else %}
-                    <td style="color:green">{{ position.unrealisedPnl }}</td>
+                    <td style="color:green">{{ position.unrealisedPnl }} ({{ position.roi }}%)</td>
                     {% endif %}
 
                     <td>

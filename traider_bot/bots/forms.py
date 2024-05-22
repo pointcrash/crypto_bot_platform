@@ -1,7 +1,8 @@
 from decimal import Decimal
 from django import forms
 
-from api_test.api_v5_bybit import get_query_account_coins_balance, get_current_price
+from api_2.api_aggregator import min_qty_check, get_current_price
+from api_test.api_v5_bybit import get_query_account_coins_balance
 from main.models import Account
 from .general_functions import get_quantity_from_price
 from .models import Set0Psn, SimpleHedge, OppositePosition, StepHedge, BotModel
@@ -41,6 +42,21 @@ class BotModelForm(forms.ModelForm):
             'amount_short': 'Шорт USDT',
             'margin_type': 'Тип маржи',
         }
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     amount_long = cleaned_data.get('amount_long')
+    #     amount_short = cleaned_data.get('amount_short')
+    #     leverage = Decimal(cleaned_data.get('leverage'))
+    #     symbol = cleaned_data.get('symbol')
+    #     cur_price = Decimal(get_current_price(bot))
+    #
+    #     long_qty_status = min_qty_check(symbol, leverage, cur_price, amount_long)
+    #     short_qty_status = min_qty_check(symbol, leverage, cur_price, amount_short)
+    #
+    #     if float(tpap) * tp_count > 100:
+    #         raise forms.ValidationError(f"Произведение значений TP Amount = {tpap} и TP Count = {tp_count} не может превышать 100%."
+    #                                     f" Текущий результат = {float(tpap) * tp_count}")
 
 
 class BotModelEditForm(forms.ModelForm):

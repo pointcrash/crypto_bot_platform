@@ -115,10 +115,10 @@
                 </div>
                 <div class="col-8 col-sm-5 col-mb-3 col-xl-3 mx-auto mb-5">
                     <div class="row justify-content-center">
-                        <button type="submit" class="btn btn-success mt-3">Save and Start Bot</button>
+                        <button type="submit" class="btn btn-success mt-3">Сохранить</button>
                         <!-- Button trigger modal -->
                         <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
-                                data-bs-target="#deleteBotModal">Delete Bot
+                                data-bs-target="#deleteBotModal">Удалить бота
                         </button>
                     </div>
                 </div>
@@ -133,19 +133,18 @@
                                         aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <h6>Choose way to delete:</h6>
+                                <h6>Выберите вариант удаления:</h6>
                             </div>
                             <div class="modal-footer">
                                 <a type="button"
                                    href="{% url 'delete_bot' bot_id=bot.pk event_number=1 %}"
-                                   class="btn btn-warning col-12">Delete and stop bot only</a>
+                                   class="btn btn-warning col-12">Удалить бота</a>
                                 <a type="button"
                                    href="{% url 'delete_bot' bot_id=bot.pk event_number=2 %}"
-                                   class="btn btn-warning col-12">Delete bot with cancel all orders</a>
+                                   class="btn btn-warning col-12">Удалить бота и отменить ордера</a>
                                 <a type="button"
                                    href="{% url 'delete_bot' bot_id=bot.pk event_number=3 %}"
-                                   class="btn btn-danger col-12">Delete bot with cancel all orders and drop position by
-                                    Market
+                                   class="btn btn-danger col-12">Удалить бота, отменить ордера и закрыть позиции по маркету
                                 </a>
                             </div>
                         </div>

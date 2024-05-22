@@ -16,20 +16,30 @@
             <div class="row justify-content-center">
                 {% if bot_form.errors %}
                 <div class="col-10 mx-auto alert alert-danger mt-2">
-                    {% for field_errors in bot_form.errors.values %}
-                    {% for error in field_errors %}
-                    {{ error }}
-                    {% endfor %}
+                    {% for field_name, field_errors in bot_form.errors.items %}
+                        <div class="error">
+                            <strong>{{ field_name }}:</strong>
+                            <ul>
+                                {% for error in field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% endfor %}
                 </div>
                 {% endif %}
 
                 {% if bb_form.errors %}
                 <div class="col-10 mx-auto alert alert-danger mt-2">
-                    {% for field_errors in bb_form.errors.values %}
-                    {% for error in field_errors %}
-                    {{ error }}
-                    {% endfor %}
+                    {% for field_name, field_errors in bb_form.errors.items %}
+                        <div class="error">
+                            <strong>{{ field_name }}:</strong>
+                            <ul>
+                                {% for error in field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% endfor %}
                 </div>
                 {% endif %}

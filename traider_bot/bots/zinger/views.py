@@ -1,6 +1,6 @@
 import logging
 import threading
-from decimal import Decimal
+from decimal import Decimal, ROUND_UP
 
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from api_2.api_aggregator import get_current_price, place_conditional_order, place_order, get_position_inform, \
-    get_quantity_from_price
+    get_quantity_from_price, min_qty_check
 from bots.forms import BotModelForm, BotModelEditForm
 from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
@@ -38,14 +38,28 @@ def zinger_bot_create(request):
             bot.is_active = False
             bot.save()
 
-            zinger_model = zinger_form.save(commit=False)
-            zinger_model.bot = bot
-            zinger_model.save()
+            cur_price = Decimal(get_current_price(bot))
+            long_qty_status = min_qty_check(bot.symbol, bot.leverage, cur_price, bot.amount_long)
+            short_qty_status = min_qty_check(bot.symbol, bot.leverage, cur_price, bot.amount_short)
 
-            logger.info(
-                f'{user} создал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+            if long_qty_status and short_qty_status:
+                zinger_model = zinger_form.save(commit=False)
+                zinger_model.bot = bot
+                zinger_model.save()
 
-            return redirect('bot_list')
+                logger.info(
+                    f'{user} создал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
+                return redirect('bot_list')
+
+            else:
+                min_amount = (Decimal(bot.symbol.minOrderQty) * cur_price / bot.leverage).quantize(Decimal(1), rounding=ROUND_UP)
+                if not long_qty_status:
+                    bot_form.add_error('amount_short', f'Инвестиция не может быть меньше {min_amount}$')
+                if not short_qty_status:
+                    bot_form.add_error('amount_long', f'Инвестиция не может быть меньше {min_amount}$')
+                bot.delete()
+
     else:
         bot_form = BotModelForm(request=request)
         zinger_form = ZingerForm()
@@ -72,25 +86,45 @@ def zinger_bot_edit(request, bot_id):
         average_form = AverageZingerForm(request.POST)
 
         if bot_form.is_valid() and zinger_form.is_valid():
-            if bot.is_active:
-                bot.account = account
-                bot.symbol = symbol
-                terminate_bot(bot)
-
-            zinger_model = zinger_form.save(commit=False)
-            bot = bot_form.save(commit=False)
-            bot.is_active = True
             bot.account = account
             bot.symbol = symbol
-            zinger_model.save()
-            bot.save()
 
-            bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
-            bot_thread.start()
-            logger.info(
-                f'{user} отредактировал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+            amount_long = Decimal(bot_form.cleaned_data.get('amount_long'))
+            amount_short = Decimal(bot_form.cleaned_data.get('amount_short'))
+            leverage = Decimal(bot_form.cleaned_data.get('leverage'))
+            cur_price = Decimal(get_current_price(bot))
+            long_qty_status = min_qty_check(bot.symbol, leverage, cur_price, amount_long)
+            short_qty_status = min_qty_check(bot.symbol, leverage, cur_price, amount_short)
 
-            return redirect('bot_list')
+            if long_qty_status and short_qty_status:
+                if bot.is_active:
+                    restart_value = True
+                    terminate_bot(bot)
+                else:
+                    restart_value = False
+
+                zinger_model = zinger_form.save(commit=False)
+                bot = bot_form.save(commit=False)
+                bot.is_active = True if restart_value is True else False
+                bot.account = account
+                bot.symbol = symbol
+                zinger_model.save()
+                bot.save()
+
+                if restart_value is True:
+                    bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
+                    bot_thread.start()
+                logger.info(
+                    f'{user} отредактировал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
+                return redirect('bot_list')
+            else:
+                min_amount = (Decimal(bot.symbol.minOrderQty) * cur_price / leverage).quantize(Decimal(1), rounding=ROUND_UP)
+                if not long_qty_status:
+                    bot_form.add_error('amount_short', f'Инвестиция не может быть меньше {min_amount}$')
+                if not short_qty_status:
+                    bot_form.add_error('amount_long', f'Инвестиция не может быть меньше {min_amount}$')
+
     else:
         bot_form = BotModelForm(request=request, instance=bot)
         zinger_form = ZingerForm(instance=bot.zinger)

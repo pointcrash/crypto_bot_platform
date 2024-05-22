@@ -13,6 +13,14 @@ def get_quantity_from_price(bot, price, amount):
     return (Decimal(str(amount * bot.leverage)) / price).quantize(Decimal(bot.symbol.minOrderQty), rounding=ROUND_DOWN)
 
 
+def min_qty_check(symbol, leverage, price, amount):
+    qty = (Decimal(str(amount * leverage)) / price).quantize(Decimal(symbol.minOrderQty), rounding=ROUND_DOWN)
+    if qty < Decimal(symbol.minOrderQty):
+        return False
+    else:
+        return True
+
+
 def get_position_inform(bot):
     if bot.account.service.name == 'Binance':
         psn_list = binance_get_position_inform(bot)
