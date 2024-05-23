@@ -22,7 +22,6 @@ def zinger_handler_wrapper_market(bb_worker_class_obj):
 
 
 def handle_order_stream_message(msg, bot_class_obj):
-    custom_logging(bot_class_obj.bot, f'ORDER {msg["orderId"]} {msg["status"]}')
     with bot_class_obj.order_locker:
         if msg['status'] == 'FILLED':
             psn_side = msg['psnSide']
@@ -49,6 +48,8 @@ def handle_order_stream_message(msg, bot_class_obj):
             else:
                 custom_logging(bot_class_obj.bot, f'UNKNOWN ORDER {msg["orderId"]} {msg["status"]}')
                 bot_class_obj.replace_tp_order(psn_side, psn_price, psn_qty)
+        else:
+            custom_logging(bot_class_obj.bot, f'UNKNOWN ORDER {msg["orderId"]} {msg["status"]}')
 
 
 def handle_position_stream_message(msg, bot_class_obj):
