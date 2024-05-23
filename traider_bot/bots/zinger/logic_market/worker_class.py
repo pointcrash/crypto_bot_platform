@@ -211,7 +211,7 @@ class WorkZingerClassMarket:
 
     def place_trailing_tp_order(self, psn_side):
         self.unrealizedPnl[psn_side] = abs(self.position_info[psn_side]['entryPrice'] - self.current_price) * self.position_info[psn_side]['qty']
-        prices = [self.position_info[psn_side]['price'], self.current_price]
+        prices = [self.position_info[psn_side]['entryPrice'], self.current_price]
         self.multiplication_factor[psn_side] = max(prices) / min(prices)
 
         self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
