@@ -82,8 +82,8 @@ class WorkZingerClassMarket:
 
         amount_usdt = self.bot.amount_long if side == 'BUY' else self.bot.amount_short
         if amount_usdt != 0:
-            self.cached_data('cur_price', self.current_price)
-            self.cached_data('amount_usdt', amount_usdt)
+            self.cached_data('curPrice', self.current_price)
+            self.cached_data('amountUSDT', amount_usdt)
             response = place_order(self.bot, side=side, order_type='MARKET', price=self.current_price,
                                    amount_usdt=amount_usdt)
             return response['orderId']
@@ -113,7 +113,7 @@ class WorkZingerClassMarket:
                     elif psn_side == 'SHORT':
                         self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] + self.tp_trailing_data[psn_side]['callback_rate']
                     self.tp_trailing_data[psn_side]['status'] = False
-                    self.cached_data(key='tp_trailing_data', value=self.tp_trailing_data)
+                    self.cached_data(key='tpTrailingData', value=self.tp_trailing_data)
 
             else:
                 response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price, qty=psn_qty)
