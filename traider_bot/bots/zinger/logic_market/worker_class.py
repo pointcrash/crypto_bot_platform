@@ -33,6 +33,7 @@ class WorkZingerClassMarket:
 
         self.psn_locker = threading.Lock()
         self.order_locker = threading.Lock()
+        self.tp_trailing_data_locker = threading.Lock()
 
     def cached_data(self, key, value):
         cache.set(f'bot{self.bot.id}_{key}', str(value))
@@ -103,15 +104,16 @@ class WorkZingerClassMarket:
             order_price = round(order_price, int(self.bot.symbol.priceScale))
 
             if self.zinger.tp_trailing:
-                self.tp_trailing_data[psn_side] = dict()
-                self.tp_trailing_data[psn_side]['activate_price'] = order_price
-                self.tp_trailing_data[psn_side]['callback_rate'] = psn_price * Decimal(self.zinger.tp_trailing_percent) / 100
-                if psn_side == 'LONG':
-                    self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] - self.tp_trailing_data[psn_side]['callback_rate']
-                elif psn_side == 'SHORT':
-                    self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] + self.tp_trailing_data[psn_side]['callback_rate']
-                self.tp_trailing_data[psn_side]['status'] = False
-                self.cached_data(key='tp_trailing_data', value=self.tp_trailing_data)
+                with self.tp_trailing_data_locker:
+                    self.tp_trailing_data[psn_side] = dict()
+                    self.tp_trailing_data[psn_side]['activate_price'] = order_price
+                    self.tp_trailing_data[psn_side]['callback_rate'] = psn_price * Decimal(self.zinger.tp_trailing_percent) / 100
+                    if psn_side == 'LONG':
+                        self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] - self.tp_trailing_data[psn_side]['callback_rate']
+                    elif psn_side == 'SHORT':
+                        self.tp_trailing_data[psn_side]['execution_price'] = self.tp_trailing_data[psn_side]['activate_price'] + self.tp_trailing_data[psn_side]['callback_rate']
+                    self.tp_trailing_data[psn_side]['status'] = False
+                    self.cached_data(key='tp_trailing_data', value=self.tp_trailing_data)
 
             else:
                 response = place_order(self.bot, side=side, position_side=psn_side, order_type='LIMIT', price=order_price, qty=psn_qty)
@@ -217,7 +219,8 @@ class WorkZingerClassMarket:
         self.cached_data(key='unrealizedPnl', value=self.unrealizedPnl)
         self.cached_data(key='multFactor', value=self.multiplication_factor)
 
-        self.tp_trailing_data.pop(psn_side)
+        with self.tp_trailing_data_locker:
+            self.tp_trailing_data.pop(psn_side)
 
         side = 'SELL' if psn_side == 'LONG' else 'BUY'
         response = place_order(self.bot, side=side, position_side=psn_side, order_type='MARKET', price=self.current_price, qty=self.position_info[psn_side]['qty'])

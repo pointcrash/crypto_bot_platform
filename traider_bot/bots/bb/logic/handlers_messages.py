@@ -56,7 +56,7 @@ def handle_position_stream_message(msg, bot_class_obj):
                 bot_class_obj.avg_obj.update_psn_info(bot_class_obj.position_info)
             bot_class_obj.have_psn = True
         else:
-            if msg['side'] == bot_class_obj.position_info['side']:
+            if msg['side'] == bot_class_obj.position_info.get('side'):
                 bot_class_obj.position_info['qty'] = 0
                 bot_class_obj.have_psn = False
                 bot_class_obj.ml_filled = False
