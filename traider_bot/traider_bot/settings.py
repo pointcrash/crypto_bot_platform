@@ -9,15 +9,32 @@ SECRET_KEY = django_app_key
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['bravo.almazor.co', 'localhost', '209.38.180.77', '164.92.182.43', '127.0.0.1', '165.227.142.240']
+ALLOWED_HOSTS = [
+    'bravo.almazor.co',
+    'delta.almazor.co',
+    'localhost',
+    '209.38.180.77',
+    '164.92.182.43',
+    '127.0.0.1',
+    '165.227.142.240',
+    '139.59.206.100',
+]
 
 CORS_ALLOWED_ORIGINS = [
     "https://bravo.almazor.co",
     "https://209.38.180.77",
+    "https://delta.almazor.co",
+    "https://139.59.206.100",
     # Другие доверенные источники здесь
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://*.bravo.almazor.co', 'https://*.209.38.180.77', 'https://*.127.0.0.1']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.bravo.almazor.co',
+    'https://*.209.38.180.77',
+    'https://*.127.0.0.1',
+    'https://*.139.59.206.100',
+    'https://*.delta.almazor.co',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
