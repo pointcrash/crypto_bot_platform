@@ -1,0 +1,26 @@
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#startZingerBotModal{{ bot.pk }}">
+    <i class="fa-solid fa-play"></i>
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="startZingerBotModal{{ bot.pk }}" tabindex="-1" aria-labelledby="startZingerBotModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="startZingerBotModalLabel">{{ bot.symbol }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Выберите вариант запуска:</h6>
+            </div>
+            <div class="modal-footer">
+                <a type="button" href="{% url 'start_zinger_bot' bot_id=bot.pk event_number=1 %}"
+                   class="btn btn-success col-8 mx-auto">Запустить</a>
+                <a type="button" href="{% url 'start_zinger_bot' bot_id=bot.pk event_number=2 %}"
+                   class="btn btn-outline-success col-8 mx-auto">Обновить дату и запустить</a>
+            </div>
+        </div>
+    </div>
+</div>

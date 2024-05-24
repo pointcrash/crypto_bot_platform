@@ -1,3 +1,5 @@
-l = {'s': 1}
-a = l.pop('s')
-print(l)
+l = []
+if not l:
+    print(True)
+else:
+    print(False)

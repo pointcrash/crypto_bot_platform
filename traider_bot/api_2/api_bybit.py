@@ -185,6 +185,7 @@ def bybit_get_open_orders(bot):
 
     try:
         response = response['result']['list']
+        return response
     except Exception as e:
         print(e)
         print(response)
@@ -238,7 +239,7 @@ def bybit_change_position_mode_on_hedge(bot, category='linear'):
     return response
 
 
-def bybit_account_balance(account):
+def bybit_get_unified_account_balance(account):
     endpoint = "/v5/asset/transfer/query-account-coins-balance"
     method = "GET"
     params = f"accountType={account.account_type}&coin=USDT"

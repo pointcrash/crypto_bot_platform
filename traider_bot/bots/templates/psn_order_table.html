@@ -1,0 +1,181 @@
+<div class="container m-0 p-0" style="background-color:#131722">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold text-light" style="background-color:#131722" id="table1-tab" data-bs-toggle="tab" data-bs-target="#table1"
+                    type="button" role="tab" aria-controls="table1" aria-selected="true">Позиции
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-light" id="table2-tab" style="background-color:#131722" data-bs-toggle="tab" data-bs-target="#table2" type="button"
+                    role="tab" aria-controls="table2" aria-selected="false">Ордера
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="table1" role="tabpanel" aria-labelledby="table1-tab">
+            <table class="table text-light" style="background-color:#131722">
+                <thead>
+                <tr>
+                    <th scope="col">Side</th>
+                    <th scope="col">Leverage</th>
+                    <th scope="col">qty</th>
+                    <th scope="col">entryPrice</th>
+                    <th scope="col">markPrice</th>
+                    <th scope="col">Cost</th>
+                    <th scope="col">Margin</th>
+                    <th scope="col">unrealizedPnl</th>
+                    <th scope="col">closePosition</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if positions %}
+                {% for position in positions %}
+                <tr>
+                    {% if position.side == 'LONG' %}
+                    <td style="color:green">{{ position.side }}</td>
+                    {% elif position.side == 'SHORT' %}
+                    <td style="color:red">{{ position.side }}</td>
+                    {% endif %}
+
+                    <td>{{ position.leverage }}</td>
+                    <td>{{ position.qty }}</td>
+                    <td>{{ position.entryPrice }}</td>
+                    <td>{{ position.markPrice }}</td>
+                    <td>{{ position.cost }}</td>
+                    <td>{{ position.margin }}</td>
+
+                    {% if "-" in position.unrealisedPnl %}
+                    <td style="color:red">{{ position.unrealisedPnl }} ({{ position.roi }}%)</td>
+                    {% else %}
+                    <td style="color:green">{{ position.unrealisedPnl }} ({{ position.roi }}%)</td>
+                    {% endif %}
+
+                    <td>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#closePsnModal{{ position.side }}">Закрыть
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" style="color:black" id="closePsnModal{{ position.side }}" tabindex="-1"
+                             aria-labelledby="closePsnModalLabel{{ position.side }}"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="closePsnModalLabel{{ position.side }}">{{
+                                            bot.symbol }}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h6>Выбранная позиция будет закрыта по маркету</h6>
+                                        <hr>
+                                        <p>Позиция - {{position.side}}</p>
+                                        <p>Количество - {{position.qty}}</p>
+                                        <p>Цена входа - {{position.entryPrice}}</p>
+                                        <p>Текущая цена - {{position.markPrice}}</p>
+                                        <p>PNL - {{position.unrealisedPnl}}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a class="btn btn-danger"
+                                           href="{% url 'close_selected_position' bot_id=bot.id psn_side=position.side qty=position.qty %}">Подтвердить</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="table2" role="tabpanel" aria-labelledby="table2-tab">
+<!--            <a class="ms-auto" href="{% url 'create_order_url' bot_id=bot.id %}">Новый ордер</a>-->
+            <table class="table text-light" style="background-color:#131722">
+                <thead>
+                <tr>
+                    <th scope="col">Status</th>
+                    <th scope="col">Position</th>
+                    <th scope="col">Side</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">triggerPrice</th>
+                    <th scope="col">qty</th>
+                    <th scope="col">reduceOnly</th>
+                    <th scope="col">cancel</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if orders %}
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.status }}</td>
+
+                    {% if order.psnSide == 'LONG' %}
+                    <td style="color:green">{{ order.psnSide }}</td>
+                    {% elif order.psnSide == 'SHORT' %}
+                    <td style="color:red">{{ order.psnSide }}</td>
+                    {% endif %}
+
+                    {% if order.side == 'OPEN' %}
+                    <td style="color:green">{{ order.side }}</td>
+                    {% elif order.side == 'CLOSE' %}
+                    <td style="color:red">{{ order.side }}</td>
+                    {% endif %}
+
+                    <td>{{ order.price }}</td>
+                    <td>{{ order.triggerPrice }}</td>
+                    <td>{{ order.qty }}</td>
+                    <td>{{ order.reduceOnly }}</td>
+                    <td><a href="{% url 'cancel_selected_order' bot_id=bot.id order_id=order.orderId %}"><i
+                            class="fas fa-trash"></i></a></td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+
+            <form method="POST" action="{% url 'create_order_url' bot_id=bot.id %}" class="text-light">
+                    {% csrf_token %}
+
+                <div class="row p-1">
+                    <div class="col mt-auto">
+                        {{ order_form.psnSide.label_tag }}
+                        {{ order_form.psnSide }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        {{ order_form.side.label_tag }}
+                        {{ order_form.side }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        {{ order_form.qty.label_tag }}
+                        {{ order_form.qty }}
+                    </div>
+
+<!--                    <div class="col mt-auto">-->
+<!--                        {{ order_form.price.label_tag }}-->
+<!--                        {{ order_form.price }}-->
+<!--                    </div>-->
+
+                    <div class="col mt-auto">
+                        {{ order_form.triggerPrice.label_tag }}
+                        {{ order_form.triggerPrice }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        {{ order_form.type.label_tag }}
+                        {{ order_form.type }}
+                    </div>
+
+                    <div class="col mt-auto">
+                        <button type="submit" class="btn btn-secondary">Разместить</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

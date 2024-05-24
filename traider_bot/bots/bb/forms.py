@@ -39,7 +39,7 @@ class BBForm(forms.ModelForm):
             'bb_avg_percent': '% усреднения',
             'is_deviation_from_lines': 'Отклонение от линий',
             'percent_deviation_from_lines': '% отклонения',
-            'dfm': '% отклонения цены',
+            'dfm': '% отклонения',
             'chw': 'Ширина канала',
             'dfep': 'DFEP',
             'max_margin': 'Макс. маржа',

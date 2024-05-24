@@ -49,8 +49,8 @@ class OrderCustomForm(forms.Form):
     type = forms.ChoiceField(choices=ORDER_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}),
                              label='Тип ордера')
     SIDE_CHOICES = [
-        ('BUY', 'Buy'),
-        ('SELL', 'Sell'),
+        ('OPEN', 'Open'),
+        ('CLOSE', 'Close'),
     ]
     side = forms.ChoiceField(choices=SIDE_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}),
                              label='Купить/Продать')
@@ -60,6 +60,16 @@ class OrderCustomForm(forms.Form):
     ]
     psnSide = forms.ChoiceField(choices=PSN_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}),
                                 label='Позиция')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        order_type = cleaned_data.get("type")
+        trigger_price = cleaned_data.get("triggerPrice")
+
+        if order_type == 'LIMIT' and not trigger_price:
+            raise forms.ValidationError("Укажите цену для лимитного ордера")
+
+        return cleaned_data
 
     # class Meta:
     #     fields = ['qty', 'price', 'triggerPrice', 'type', 'side', 'psnSide']
