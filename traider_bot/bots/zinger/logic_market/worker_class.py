@@ -229,16 +229,14 @@ class WorkZingerClassMarket:
     def calc_pnl(self):
         current_pnl = copy.copy(self.realizedPnl)
         for psn_side in ['LONG', 'SHORT']:
-            psn = self.position_info[psn_side]
+            psn = self.position_info.get(psn_side)
             if psn_side == 'LONG':
                 pnl_long = (self.current_price - psn['entryPrice']) * psn['qty']
-                # current_pnl += (self.current_price - psn['entryPrice']) * psn['qty']
                 current_pnl += pnl_long
                 self.cached_data(key=f'pnlLong', value=pnl_long)
 
             elif psn_side == 'SHORT':
                 pnl_short = (psn['entryPrice'] - self.current_price) * psn['qty']
-                # current_pnl += (psn['entryPrice'] - self.current_price) * psn['qty']
                 current_pnl += pnl_short
                 self.cached_data(key=f'pnlShort', value=pnl_short)
         self.cached_data(key=f'currentPnl', value=current_pnl)

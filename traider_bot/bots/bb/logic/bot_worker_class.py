@@ -21,7 +21,7 @@ class WorkBollingerBandsClass:
         self.ml_filled = bot.bb.take_on_ml_status
         self.ml_qty = bot.bb.take_on_ml_qty
         self.current_price = None
-        self.current_order_id = ''
+        self.current_order_id = []
         self.have_psn = False
         self.ml_order_id = None
         self.main_order_id = None
@@ -140,7 +140,7 @@ class WorkBollingerBandsClass:
                 response = place_order(self.bot, side='BUY', order_type='MARKET', price=current_price,
                                        amount_usdt=amount_usdt)
                 if response.get('orderId'):
-                    self.current_order_id = response.get('orderId')
+                    self.current_order_id.append(response['orderId'])
                     self.have_psn = True
                 else:
                     custom_logging(self.bot, response, named='response')
@@ -150,7 +150,7 @@ class WorkBollingerBandsClass:
                 response = place_order(self.bot, side='SELL', order_type='MARKET', price=current_price,
                                        amount_usdt=amount_usdt)
                 if response.get('orderId'):
-                    self.current_order_id = response.get('orderId')
+                    self.current_order_id.append(response['orderId'])
                     self.have_psn = True
                 else:
                     custom_logging(self.bot, response, named='response')
@@ -174,7 +174,7 @@ class WorkBollingerBandsClass:
                 response = place_order(self.bot, side=side, position_side=position_side, order_type='MARKET',
                                        price=ml_take_price, qty=ml_take_qty)
                 self.ml_order_id = response['orderId']
-                self.current_order_id = response.get('orderId')
+                self.current_order_id.append(response['orderId'])
                 self.ml_qty = ml_take_qty
                 self.ml_filled = True
                 self.ml_status_save()
@@ -185,7 +185,7 @@ class WorkBollingerBandsClass:
             response = place_order(self.bot, side=side, position_side=position_side,
                                    price=price, order_type='MARKET', qty=main_take_qty)
             self.main_order_id = response['orderId']
-            self.current_order_id = response.get('orderId')
+            self.current_order_id.append(response['orderId'])
             self.have_psn = False
             self.ml_qty = 0
             self.ml_filled = False
@@ -205,7 +205,7 @@ class WorkBollingerBandsClass:
                 response = place_order(self.bot, side=order_side, price=self.current_price, order_type='MARKET',
                                        qty=self.ml_qty)
                 order_id = response['orderId']
-                self.current_order_id = response.get('orderId')
+                self.current_order_id.append(response['orderId'])
                 self.ml_qty = 0
                 self.ml_filled = False
                 self.ml_status_save()

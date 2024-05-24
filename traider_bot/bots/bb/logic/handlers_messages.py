@@ -28,11 +28,11 @@ def bb_handler_wrapper(bb_worker_class_obj):
 def handle_order_stream_message(msg, bot_class_obj):
     if msg['status'].upper() == 'FILLED':
         order_id = msg['orderId']
-        if order_id == bot_class_obj.current_order_id:
-            bot_class_obj.current_order_id = ''
+        if order_id in bot_class_obj.current_order_id:
+            bot_class_obj.current_order_id.remove(order_id)
             custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
         else:
-            custom_logging(bot_class_obj.bot, f' CUSTOM ORDER FILLED ID {order_id}')
+            custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
     #     if msg['orderId'] == bot_class_obj.ml_order_id:
     #         bot_class_obj.ml_filled = True
     #     elif msg['orderId'] == bot_class_obj.main_order_id:
@@ -83,7 +83,7 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
-    start_time = time.time()
+    # start_time = time.time()
 
     bot_class_obj.current_price = Decimal(msg['markPrice'])
     bot_class_obj.cached_data(key='currentPrice', value=bot_class_obj.current_price)
@@ -100,9 +100,9 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
             with bot_class_obj.psn_locker:
                 bot_class_obj.place_open_psn_order(bot_class_obj.current_price)
 
-    end_time = time.time()
-    execution_time = end_time - start_time
-    bot_class_obj.logger.debug(execution_time)
+    # end_time = time.time()
+    # execution_time = end_time - start_time
+    # bot_class_obj.logger.debug(execution_time)
 
 # def handle_mark_price_stream_message(msg, bot_class_obj):
 #     bot_class_obj.current_price = Decimal(msg['markPrice'])
