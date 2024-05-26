@@ -29,6 +29,7 @@ class WorkBollingerBandsClass:
 
         self.psn_locker = threading.Lock()
         self.avg_locker = threading.Lock()
+        self.order_locker = threading.Lock()
         self.logger = self.get_logger_for_bot_ws_msg(bot.id)
 
     def cached_data(self, key, value):
@@ -204,11 +205,15 @@ class WorkBollingerBandsClass:
             if order_side:
                 response = place_order(self.bot, side=order_side, price=self.current_price, order_type='MARKET',
                                        qty=self.ml_qty)
-                order_id = response['orderId']
                 self.current_order_id.append(response['orderId'])
                 self.ml_qty = 0
                 self.ml_filled = False
                 self.ml_status_save()
+
+    def average(self):
+        self.ml_filled = False
+        self.ml_qty = 0
+        self.ml_status_save()
 
     def ml_status_save(self):
         bot_bb = self.bot.bb

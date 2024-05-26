@@ -28,18 +28,12 @@ def bb_handler_wrapper(bb_worker_class_obj):
 def handle_order_stream_message(msg, bot_class_obj):
     if msg['status'].upper() == 'FILLED':
         order_id = msg['orderId']
-        if order_id in bot_class_obj.current_order_id:
-            bot_class_obj.current_order_id.remove(order_id)
-            custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
-        else:
-            custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
-    #     if msg['orderId'] == bot_class_obj.ml_order_id:
-    #         bot_class_obj.ml_filled = True
-    #     elif msg['orderId'] == bot_class_obj.main_order_id:
-    #         bot_class_obj.have_psn = False
-    #         bot_class_obj.position_info = None
-    #         bot_class_obj.ml_filled = False
-    #         bot_class_obj.replace_opening_orders()
+        with bot_class_obj.order_locker:
+            if order_id in bot_class_obj.current_order_id:
+                bot_class_obj.current_order_id.remove(order_id)
+                custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
+            else:
+                custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
 
 
 def handle_position_stream_message(msg, bot_class_obj):
@@ -55,6 +49,7 @@ def handle_position_stream_message(msg, bot_class_obj):
             with bot_class_obj.avg_locker:
                 bot_class_obj.avg_obj.update_psn_info(bot_class_obj.position_info)
             bot_class_obj.have_psn = True
+            bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
         else:
             if msg['side'] == bot_class_obj.position_info.get('side'):
                 bot_class_obj.position_info['qty'] = 0
@@ -62,7 +57,7 @@ def handle_position_stream_message(msg, bot_class_obj):
                 bot_class_obj.ml_filled = False
                 bot_class_obj.ml_qty = 0
                 bot_class_obj.ml_status_save()
-        bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
+                bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
 
         # bot_class_obj.replace_closing_orders()
 
@@ -84,21 +79,19 @@ def handle_message_kline_info(msg, bot_class_obj):
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
     # start_time = time.time()
-
-    bot_class_obj.current_price = Decimal(msg['markPrice'])
-    bot_class_obj.cached_data(key='currentPrice', value=bot_class_obj.current_price)
-    if not bot_class_obj.current_order_id:
-        if bot_class_obj.have_psn is True:
-            with bot_class_obj.avg_locker:
-                if bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price):
-                    bot_class_obj.ml_filled = False
-                    bot_class_obj.ml_qty = 0
-                    bot_class_obj.ml_status_save()
-            bot_class_obj.place_closing_orders()
-            bot_class_obj.turn_after_ml()
-        else:
-            with bot_class_obj.psn_locker:
-                bot_class_obj.place_open_psn_order(bot_class_obj.current_price)
+    with bot_class_obj.order_locker:
+        bot_class_obj.current_price = Decimal(msg['markPrice'])
+        bot_class_obj.cached_data(key='currentPrice', value=bot_class_obj.current_price)
+        if not bot_class_obj.current_order_id:
+            if bot_class_obj.have_psn is True:
+                with bot_class_obj.avg_locker:
+                    if bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price):
+                        bot_class_obj.average()
+                bot_class_obj.place_closing_orders()
+                bot_class_obj.turn_after_ml()
+            else:
+                with bot_class_obj.psn_locker:
+                    bot_class_obj.place_open_psn_order(bot_class_obj.current_price)
 
     # end_time = time.time()
     # execution_time = end_time - start_time
