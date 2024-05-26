@@ -49,6 +49,7 @@ def handle_position_stream_message(msg, bot_class_obj):
             with bot_class_obj.avg_locker:
                 bot_class_obj.avg_obj.update_psn_info(bot_class_obj.position_info)
             bot_class_obj.have_psn = True
+            bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
         else:
             if msg['side'] == bot_class_obj.position_info.get('side'):
                 bot_class_obj.position_info['qty'] = 0
@@ -56,7 +57,7 @@ def handle_position_stream_message(msg, bot_class_obj):
                 bot_class_obj.ml_filled = False
                 bot_class_obj.ml_qty = 0
                 bot_class_obj.ml_status_save()
-        bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
+                bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
 
         # bot_class_obj.replace_closing_orders()
 
@@ -85,9 +86,7 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
             if bot_class_obj.have_psn is True:
                 with bot_class_obj.avg_locker:
                     if bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price):
-                        bot_class_obj.ml_filled = False
-                        bot_class_obj.ml_qty = 0
-                        bot_class_obj.ml_status_save()
+                        bot_class_obj.average()
                 bot_class_obj.place_closing_orders()
                 bot_class_obj.turn_after_ml()
             else:

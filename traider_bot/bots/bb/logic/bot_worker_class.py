@@ -210,6 +210,11 @@ class WorkBollingerBandsClass:
                 self.ml_filled = False
                 self.ml_status_save()
 
+    def average(self):
+        self.ml_filled = False
+        self.ml_qty = 0
+        self.ml_status_save()
+
     def ml_status_save(self):
         bot_bb = self.bot.bb
         bot_bb.take_on_ml_status = self.ml_filled
