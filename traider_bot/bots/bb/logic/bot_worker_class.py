@@ -25,6 +25,7 @@ class WorkBollingerBandsClass:
         self.have_psn = False
         self.ml_order_id = None
         self.main_order_id = None
+        self.sl_order = None
         self.position_info = dict()
 
         self.psn_locker = threading.Lock()
@@ -209,6 +210,13 @@ class WorkBollingerBandsClass:
                 self.ml_qty = 0
                 self.ml_filled = False
                 self.ml_status_save()
+
+    def place_stop_loss(self):
+        if self.bot.bb.sl_order:
+            if not self.sl_order:
+                pass
+
+
 
     def average(self):
         self.ml_filled = False
