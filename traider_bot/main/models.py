@@ -49,3 +49,14 @@ class ExchangeService(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class WSManager(models.Model):
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True)
+    status = models.BooleanField()
+
+    time_create = models.DateTimeField(auto_now_add=True)
+    time_update = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.account

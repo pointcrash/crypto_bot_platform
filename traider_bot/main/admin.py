@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from bots.models import Log
-from main.models import Account, ActiveBot, ExchangeService
+from main.models import Account, ActiveBot, ExchangeService, WSManager
 
 
 # Register your models here.
@@ -26,3 +26,10 @@ class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'name',)
     list_display_links = ('id', 'name',)
     search_fields = ('id', 'name',)
+
+
+@admin.register(WSManager)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'account', 'status', )
+    list_display_links = ('id', 'account', )
+    search_fields = ('id', 'account', 'status', )
