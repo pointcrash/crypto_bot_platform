@@ -18,6 +18,7 @@
                 <table class="table" style="vertical-align: middle">
                     <thead>
                     <tr class=" text-center">
+                        <th></th>
                         <th>Имя аккаунта</th>
                         <th class="d-none d-sm-table-cell">Биржа</th>
                         <th class="d-none d-sm-table-cell">Сеть</th>
@@ -29,8 +30,15 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for account in accounts %}
+                    {% for account, status_ws_conn in accounts %}
                     <tr class=" text-center">
+                        <td>
+                            {% if status_ws_conn %}
+                                <i class="fa-solid fa-circle" style="color: #00c227;"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle" style="color: #c20000;"></i>
+                            {% endif %}
+                        </td>
                         <td>{{ account.name }}</td>
                         <td>{{ account.service }}</td>
                         <td class="d-none d-sm-table-cell">

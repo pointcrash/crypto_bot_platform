@@ -125,6 +125,8 @@ class BBBotModel(models.Model):
     chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
     dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     max_margin = models.IntegerField(null=True, blank=True)
+    count_cycles = models.IntegerField(default=0)
+    endless_cycle = models.BooleanField(default=False)
 
     hard_avg = models.BooleanField(default=False)
     hard_avg_type = models.CharField(choices=HARD_AVG_TYPE_CHOICES, null=True, blank=True)

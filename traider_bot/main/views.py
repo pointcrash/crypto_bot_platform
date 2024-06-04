@@ -26,7 +26,7 @@ from timezone.models import TimeZone
 from .forms import RegistrationForm, LoginForm, DateRangeForm, InternalTransferForm, WithdrawForm, WhiteListAccountForm
 from django.contrib.auth import authenticate, login, logout
 from main.forms import AccountForm
-from main.models import Account, WhiteListAccount
+from main.models import Account, WhiteListAccount, WSManager
 from .logic import calculate_pnl
 import requests
 
@@ -113,11 +113,18 @@ def logs_view(request):
 @login_required
 def account_list(request):
     user = request.user
+    acc_status_list = []
     if user.is_superuser:
         accounts = Account.objects.all()
     else:
         accounts = Account.objects.filter(owner=request.user)
     logger.info(f'{user} открыл список аккаунтов')
+
+    for account in accounts:
+        conn_status = WSManager.objects.get(account=account).status
+        acc_status_list.append(conn_status)
+
+    accounts = zip(accounts, acc_status_list)
 
     internal_transfer_form = InternalTransferForm()
     return render(request, 'account/accounts_list.html',

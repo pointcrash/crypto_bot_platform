@@ -9,7 +9,7 @@ class BBForm(forms.ModelForm):
 
         fields = ['side', 'qty_kline', 'interval', 'd', 'take_on_ml', 'take_on_ml_percent', 'auto_avg',
                   'avg_percent', 'is_deviation_from_lines', 'percent_deviation_from_lines', 'dfm', 'chw', 'dfep',
-                  'max_margin', 'hard_avg', 'hard_avg_type', 'hard_avg_percent', ]
+                  'max_margin', 'hard_avg', 'hard_avg_type', 'hard_avg_percent', 'endless_cycle', ]
 
         widgets = {
             'side': forms.Select(attrs={'class': 'form-control'}),
@@ -47,6 +47,7 @@ class BBForm(forms.ModelForm):
             'hard_avg': 'Простое усреднение',
             'hard_avg_type': 'Условие',
             'hard_avg_percent': 'Процент',
+            'endless_cycle': 'Кол-во циклов: 1/∞',
         }
 
     def clean(self):

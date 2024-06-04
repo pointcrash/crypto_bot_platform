@@ -11,6 +11,7 @@ from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_or
     terminate_bot_with_cancel_orders_and_drop_positions
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 from main.forms import AccountSelectForm
+from orders.models import Position
 
 logger = logging.getLogger('django')
 
@@ -18,6 +19,8 @@ logger = logging.getLogger('django')
 @login_required
 def bot_list(request):
     user = request.user
+    position_qty_list = list()
+    position_pnl_list = list()
 
     if user.is_superuser:
         bots = BotModel.objects.all().order_by('pk')
@@ -34,6 +37,24 @@ def bot_list(request):
     else:
         logger.info(f'{user} открыл список ботов')
         account_select_form = AccountSelectForm(user=request.user)
+
+    for bot in bots:
+        long_position = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='LONG').last()
+        short_position = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='SHORT').last()
+        if long_position and short_position:
+            position_qty_list.append((long_position.qty, short_position.qty))
+            position_pnl_list.append((long_position.unrealised_pnl, short_position.unrealised_pnl))
+        elif not long_position and not short_position:
+            position_qty_list.append(('0', '0'))
+            position_pnl_list.append(('0', '0'))
+        elif not long_position:
+            position_qty_list.append(('0', short_position.qty))
+            position_pnl_list.append(('0', short_position.unrealised_pnl))
+        elif not short_position:
+            position_qty_list.append((long_position.qty, '0'))
+            position_pnl_list.append((long_position.unrealised_pnl, '0'))
+
+    bots = zip(bots, position_qty_list, position_pnl_list)
 
     return render(request, 'bot_list.html', {
         'bots': bots,

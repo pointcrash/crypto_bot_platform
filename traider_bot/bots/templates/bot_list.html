@@ -39,6 +39,9 @@
                     <th>Бот ID</th>
                     <th>Аккаунт</th>
                     <th>Пара</th>
+                    <th>Плечо</th>
+                    <th>Позиции</th>
+<!--                    <th>ПНЛ</th>-->
                     <th class="d-none d-sm-table-cell">Стратегия</th>
                     <th class="d-none d-sm-table-cell">Сторона</th>
                     <th class="d-none d-md-table-cell">USDT$</th>
@@ -48,11 +51,30 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for bot in bots %}
+                {% for bot, positions_qty, positions_pnl  in bots %}
                 <tr class="">
                     <td>{{ bot.pk }}</td>
                     <td>{{ bot.account }}</td>
                     <td>{{ bot.symbol }}</td>
+                    <td>{{ bot.leverage }}</td>
+                    <td>
+                        {% for qty in positions_qty %}
+                            {% if forloop.first %}
+                                <h6 style="color:green">LONG: {{qty}}</h6>
+                            {% else %}
+                                <h6 style="color:red">SHORT: {{qty}}</h6>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+<!--                    <td>-->
+<!--                        {% for pnl in positions_pnl %}-->
+<!--                            {% if '-' in pnl %}-->
+<!--                                <h6 style="color:red">{{pnl}}</h6>-->
+<!--                            {% else %}-->
+<!--                                <h6 style="color:green">{{pnl}}</h6>-->
+<!--                            {% endif %}-->
+<!--                        {% endfor %}-->
+<!--                    </td>-->
                     <td class="d-none d-sm-table-cell">{{ bot.work_model }}</td>
                     <td class="d-none d-sm-table-cell">
                         {% if bot.work_model == 'bb' %}{{ bot.bb.side }}{% endif %}</td>
