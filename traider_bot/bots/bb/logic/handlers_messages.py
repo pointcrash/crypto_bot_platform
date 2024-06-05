@@ -96,8 +96,3 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
     # execution_time = end_time - start_time
     # bot_class_obj.logger.debug(execution_time)
 
-# def handle_mark_price_stream_message(msg, bot_class_obj):
-#     bot_class_obj.current_price = Decimal(msg['markPrice'])
-#     if bot_class_obj.have_psn is True:
-#         with bot_class_obj.avg_locker:
-#             bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price)

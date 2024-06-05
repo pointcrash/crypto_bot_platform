@@ -91,7 +91,6 @@ class WorkBollingerBandsClass:
 
     def place_open_psn_order(self, current_price):
         if self.bot.bb.endless_cycle or not self.bot.bb.endless_cycle and self.count_cycles == 0:
-            self.count_cycles += 1
             side = self.bot.bb.side
             amount_usdt = self.bot.amount_long
 
@@ -102,6 +101,7 @@ class WorkBollingerBandsClass:
                     if response.get('orderId'):
                         self.current_order_id.append(response['orderId'])
                         self.have_psn = True
+                        self.count_cycles += 1
                     else:
                         custom_logging(self.bot, response, named='response')
                         raise Exception('Open order is failed')
@@ -112,6 +112,7 @@ class WorkBollingerBandsClass:
                     if response.get('orderId'):
                         self.current_order_id.append(response['orderId'])
                         self.have_psn = True
+                        self.count_cycles += 1
                     else:
                         custom_logging(self.bot, response, named='response')
                         raise Exception('Open order is failed')
