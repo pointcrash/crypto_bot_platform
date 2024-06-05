@@ -54,6 +54,7 @@ class ExchangeService(models.Model):
 class WSManager(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True)
     status = models.BooleanField()
+    error_text = models.CharField(null=True)
 
     time_create = models.DateTimeField(auto_now_add=True)
     time_update = models.DateTimeField(auto_now=True)

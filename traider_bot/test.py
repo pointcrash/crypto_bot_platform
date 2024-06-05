@@ -1,6 +1,7 @@
 a = [1,2,3]
-b = [1,2,3]
+q = {'s': 23, 3: 123}
+b = list(q.values())
 c = [1,2,3]
-print(zip(a,b,c))
-for i in zip(a,b,c):
-    print(i)
+
+print(q)
+print(b)

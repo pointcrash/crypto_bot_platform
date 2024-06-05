@@ -9,8 +9,7 @@ from api_2.formattres import order_formatters
 api_key = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
 api_secret = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
 
-client = Client(api_key, api_secret, testnet=True)
-
+# client = Client(api_key, api_secret, testnet=True)
 
 def get_data_ago_to_ms(days):
     current_date = datetime.now()

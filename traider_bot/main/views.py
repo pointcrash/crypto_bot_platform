@@ -225,6 +225,7 @@ def edit_account(request, acc_id):
             acc = form.save(commit=False)
             form.save()
 
+            # logger.info(f'ssssssssssssssssssssssssssssssssss')
             url = f"http://ws-manager:8008/ws/conn/update_account/{acc.pk}"
             requests.get(url)
 
@@ -233,7 +234,13 @@ def edit_account(request, acc_id):
     else:
         form = AccountForm(instance=account)
 
-    return render(request, 'account/account_edit.html', {'form': form, 'account': account})
+    ws_error = WSManager.objects.get(account=account).error_text
+
+    return render(request, 'account/account_edit.html', {
+        'form': form,
+        'account': account,
+        'ws_error': ws_error
+    })
 
 
 @login_required
@@ -400,7 +407,7 @@ def withdraw_view(request, acc_id):
     fund_balance = get_user_assets(account, symbol="USDT")
 
     user_accounts = Account.objects.filter(owner=user).exclude(id=acc_id)
-    user_accounts =user_accounts.exclude(address=None).exclude(address='')
+    user_accounts = user_accounts.exclude(address=None).exclude(address='')
     whitelist = WhiteListAccount.objects.filter(user=user)
 
     if request.method == 'POST':
