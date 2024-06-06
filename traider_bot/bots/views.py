@@ -23,9 +23,9 @@ def bot_list(request):
     position_pnl_list = list()
 
     if user.is_superuser:
-        bots = BotModel.objects.all().order_by('pk')
+        bots = BotModel.objects.all().select_related('bb').order_by('pk')
     else:
-        bots = BotModel.objects.filter(owner=user).order_by('pk')
+        bots = BotModel.objects.filter(owner=user).select_related('bb').order_by('pk')
 
     if request.method == 'POST':
         account_select_form = AccountSelectForm(request.POST, user=request.user)

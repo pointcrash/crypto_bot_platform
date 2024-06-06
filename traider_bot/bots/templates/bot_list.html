@@ -40,6 +40,7 @@
                     <th>Аккаунт</th>
                     <th>Пара</th>
                     <th>Плечо</th>
+                    <th>ТФ</th>
                     <th>Позиции</th>
 <!--                    <th>ПНЛ</th>-->
                     <th class="d-none d-sm-table-cell">Стратегия</th>
@@ -57,6 +58,7 @@
                     <td>{{ bot.account }}</td>
                     <td>{{ bot.symbol }}</td>
                     <td>{{ bot.leverage }}</td>
+                    <td>{% if bot.bb.interval %}{{ bot.bb.interval }}м{% endif %}</td>
                     <td>
                         {% for qty in positions_qty %}
                             {% if forloop.first %}
