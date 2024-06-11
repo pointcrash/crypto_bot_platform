@@ -7,9 +7,11 @@ class BBForm(forms.ModelForm):
     class Meta:
         model = BBBotModel
 
-        fields = ['side', 'qty_kline', 'interval', 'd', 'take_on_ml', 'take_on_ml_percent', 'auto_avg',
+        fields = ['side', 'qty_kline', 'interval', 'd', 'take_on_ml', 'take_after_ml', 'take_on_ml_percent', 'auto_avg',
                   'avg_percent', 'is_deviation_from_lines', 'percent_deviation_from_lines', 'dfm', 'chw', 'dfep',
-                  'max_margin', 'hard_avg', 'hard_avg_type', 'hard_avg_percent', 'endless_cycle', ]
+                  'max_margin', 'hard_avg', 'hard_avg_type', 'hard_avg_percent', 'endless_cycle',
+                  'stop_loss', 'stop_bot_after_loss', 'stop_loss_value', 'stop_loss_value_choice',
+                  'trailing_in', 'trailing_in_percent', 'trailing_out', 'trailing_out_percent', ]
 
         widgets = {
             'side': forms.Select(attrs={'class': 'form-control'}),
@@ -26,6 +28,12 @@ class BBForm(forms.ModelForm):
 
             'hard_avg_type': forms.Select(attrs={'class': 'form-control'}),
             'hard_avg_percent': forms.NumberInput(attrs={'class': 'form-control'}),
+
+            'stop_loss_value_choice': forms.Select(attrs={'class': 'form-control'}),
+            'stop_loss_value': forms.NumberInput(attrs={'class': 'form-control'}),
+
+            'trailing_in_percent': forms.Select(attrs={'class': 'form-control'}),
+            'trailing_out_percent': forms.Select(attrs={'class': 'form-control'}),
         }
 
         labels = {
@@ -33,11 +41,12 @@ class BBForm(forms.ModelForm):
             'qty_kline': 'Количество свечей',
             'interval': 'Интервал свечи',
             'd': 'Отклонение',
-            'auto_avg': 'Авто-усреднение',
+            'auto_avg': 'Усреднение по Боллинджеру',
             'take_on_ml': 'Выход на середине',
+            'take_after_ml': 'Докуп после ML',
             'take_on_ml_percent': '% выхода',
             'bb_avg_percent': '% усреднения',
-            'is_deviation_from_lines': 'Отклонение от линий',
+            'is_deviation_from_lines': 'Вход за линией',
             'percent_deviation_from_lines': '% отклонения',
             'dfm': '% отклонения',
             'chw': 'Ширина канала',
@@ -48,6 +57,17 @@ class BBForm(forms.ModelForm):
             'hard_avg_type': 'Условие',
             'hard_avg_percent': 'Процент',
             'endless_cycle': 'Кол-во циклов: 1/∞',
+
+            'stop_loss': 'StopLoss',
+            'stop_bot_after_loss': 'Остановка бота',
+            'stop_loss_value': 'Значение',
+            'stop_loss_value_choice': 'Условие',
+
+            'trailing_in': 'Трейлинг входа',
+            'trailing_in_percent': 'Трейлинг процент',
+            'trailing_out': 'Трейлинг выхода',
+            'trailing_out_percent': 'Трейлинг процент',
+
         }
 
     def clean(self):

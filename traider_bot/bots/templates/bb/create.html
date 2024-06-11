@@ -99,6 +99,8 @@
                     <div class="d-inline">
                         {{ bb_form.take_on_ml.label_tag }}
                         <div class="d-inline mx-1">{{ bb_form.take_on_ml }}</div>
+                        {{ bb_form.take_after_ml.label_tag }}
+                        <div class="d-inline mx-1">{{ bb_form.take_after_ml }}</div>
                         {{ bb_form.take_on_ml_percent.label_tag }}
                         {{ bb_form.take_on_ml_percent }}
                     </div>
@@ -132,7 +134,7 @@
                     {{ bb_form.chw }}
                         </div>
                     </div>
-                    <br>
+                    <hr>
 
                     <div class="d-inline">
                         <p class="d-inline">{{ bb_form.hard_avg.label_tag }}</p>
@@ -140,17 +142,83 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                    {{ bb_form.hard_avg_type.label_tag }}
-                    {{ bb_form.hard_avg_type }}
+                            {{ bb_form.hard_avg_type.label_tag }}
+                            {{ bb_form.hard_avg_type }}
                         </div>
                         <div class="col-6">
-                    {{ bb_form.hard_avg_percent.label_tag }}
-                    {{ bb_form.hard_avg_percent }}
+                            {{ bb_form.hard_avg_percent.label_tag }}
+                            {{ bb_form.hard_avg_percent }}
                         </div>
                     </div>
+                    <hr>
 
                     {{ bb_form.max_margin.label_tag }}
                     {{ bb_form.max_margin }}
+                    <br>
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <h6 class="text-center">Stop loss</h6>
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="d-inline">{{ bb_form.stop_loss.label_tag }}</p>
+                            {{ bb_form.stop_loss }}
+                        </div>
+                        <div class="col-6">
+                            <p class="d-inline">{{ bb_form.stop_bot_after_loss.label_tag }}</p>
+                            {{ bb_form.stop_bot_after_loss }}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ bb_form.stop_loss_value.label_tag }}
+                            {{ bb_form.stop_loss_value }}
+                        </div>
+                        <div class="col-6">
+                            {{ bb_form.stop_loss_value_choice.label_tag }}
+                            {{ bb_form.stop_loss_value_choice }}
+                        </div>
+                    </div>
+<!--                    {{ bb_form.stop_loss_value }}-->
+<!--                    {{ bb_form.stop_loss_value_choice }}-->
+                    <hr>
+                    <h6 class="text-center">Вход за линией</h6>
+
+                    <div class="d-inline">
+                        <p class="d-inline">{{ bb_form.is_deviation_from_lines.label_tag }}</p>
+                        {{ bb_form.is_deviation_from_lines }}
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ bb_form.percent_deviation_from_lines }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ bb_form.percent_deviation_from_lines.label_tag }}
+                        </div>
+                    </div>
+                    <hr>
+
+                    <h6 class="text-center">Трейлинги</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ bb_form.trailing_in.label_tag }}
+                            {{ bb_form.trailing_in }}
+                        </div>
+                        <div class="col-6">
+                            {{ bb_form.trailing_out.label_tag }}
+                            {{ bb_form.trailing_out }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ bb_form.trailing_in_percent }}
+                        </div>
+                        <div class="col-6">
+                            {{ bb_form.trailing_out_percent }}
+                        </div>
+                    </div>
+
                     <br>
                 </div>
             </div>

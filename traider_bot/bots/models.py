@@ -92,6 +92,18 @@ class BBBotModel(models.Model):
         ('percent', 'Изменение цены'),
     )
 
+    TRAILING_PERCENT_CHOICES = (
+        ('0.1', '0.1'),
+        ('0.2', '0.2'),
+        ('0.3', '0.3'),
+        ('0.5', '0.5'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('5', '5'),
+        ('10', '10'),
+    )
+
     KLINE_INTERVAL_CHOICES = (
         ('1', '1'),
         ('3', '3'),
@@ -113,14 +125,29 @@ class BBBotModel(models.Model):
     qty_kline = models.IntegerField(default=20)
     interval = models.CharField(max_length=3, choices=KLINE_INTERVAL_CHOICES, default='15')
     d = models.IntegerField(default=2)
+
     take_on_ml = models.BooleanField(default=True)
+    take_after_ml = models.BooleanField(default=False)
     take_on_ml_percent = models.DecimalField(max_digits=5, decimal_places=2, default=50)
     take_on_ml_status = models.BooleanField(default=False, blank=True, null=True)
     take_on_ml_qty = models.DecimalField(max_digits=10, decimal_places=5, default=0, blank=True, null=True)
+
     auto_avg = models.BooleanField(default=False)
     avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
+
+    stop_loss = models.BooleanField(default=False)
+    stop_bot_after_loss = models.BooleanField(default=False)
+    stop_loss_value = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    stop_loss_value_choice = models.CharField(max_length=10, choices=HARD_AVG_TYPE_CHOICES, default='pnl')
+
+    trailing_in = models.BooleanField(default=False)
+    trailing_in_percent = models.CharField(max_length=5, choices=TRAILING_PERCENT_CHOICES, default='0.5')
+    trailing_out = models.BooleanField(default=False)
+    trailing_out_percent = models.CharField(max_length=5, choices=TRAILING_PERCENT_CHOICES, default='0.5')
+
     is_deviation_from_lines = models.BooleanField(default=False, blank=True)
-    percent_deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0, blank=True)
+    percent_deviation_from_lines = models.DecimalField(max_digits=5, decimal_places=2, default=0, blank=True)
+
     dfm = models.DecimalField(max_digits=5, decimal_places=3, default=70)
     chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
     dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)

@@ -2,6 +2,7 @@ import logging
 import time
 from decimal import Decimal
 
+from api_2.api_aggregator import cancel_order
 from api_2.custom_logging_api import custom_logging
 
 
@@ -32,6 +33,17 @@ def handle_order_stream_message(msg, bot_class_obj):
             if order_id in bot_class_obj.current_order_id:
                 bot_class_obj.current_order_id.remove(order_id)
                 custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
+
+                if order_id == bot_class_obj.open_order_id:
+                    bot_class_obj.place_stop_loss()
+
+                if order_id == bot_class_obj.main_order_id:
+                    cancel_order(bot_class_obj.bot, bot_class_obj.sl_order)
+                    bot_class_obj.sl_order = None
+
+                elif order_id == bot_class_obj.sl_order:
+                    bot_class_obj.deactivate_bot()
+                    custom_logging(bot_class_obj.bot, f' EXIT WITH STOP LOSS {order_id}')
             else:
                 custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
 

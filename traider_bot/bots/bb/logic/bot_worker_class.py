@@ -25,6 +25,7 @@ class WorkBollingerBandsClass:
         self.have_psn = False
         self.ml_order_id = None
         self.main_order_id = None
+        self.open_order_id = None
         self.sl_order = None
         self.position_info = dict()
         self.count_cycles = 0
@@ -78,7 +79,7 @@ class WorkBollingerBandsClass:
         psn_side = self.position_info['side']
         psn_price = Decimal(self.position_info['entryPrice'])
         tick_size = Decimal(self.bot.symbol.tickSize)
-        take_distance = tick_size * 6 if take_number == 1 else tick_size * 12
+        take_distance = tick_size * 10 if take_number == 1 else tick_size * 20
 
         if psn_side == 'LONG':
             if price < psn_price:
@@ -93,12 +94,14 @@ class WorkBollingerBandsClass:
         if self.bot.bb.endless_cycle or not self.bot.bb.endless_cycle and self.count_cycles == 0:
             side = self.bot.bb.side
             amount_usdt = self.bot.amount_long
+            deviation = (current_price * self.bot.bb.percent_deviation_from_lines / 100) if self.bot.bb.is_deviation_from_lines else 0
 
             if side == 'FB' or side == 'Buy':
-                if current_price <= self.bb.bl:
+                if current_price <= self.bb.bl - deviation:
                     response = place_order(self.bot, side='BUY', order_type='MARKET', price=current_price,
                                            amount_usdt=amount_usdt)
                     if response.get('orderId'):
+                        self.open_order_id = response['orderId']
                         self.current_order_id.append(response['orderId'])
                         self.have_psn = True
                         self.count_cycles += 1
@@ -106,10 +109,11 @@ class WorkBollingerBandsClass:
                         custom_logging(self.bot, response, named='response')
                         raise Exception('Open order is failed')
             if side == 'FB' or side == 'Sell':
-                if current_price >= self.bb.tl:
+                if current_price >= self.bb.tl + deviation:
                     response = place_order(self.bot, side='SELL', order_type='MARKET', price=current_price,
                                            amount_usdt=amount_usdt)
                     if response.get('orderId'):
+                        self.open_order_id = response['orderId']
                         self.current_order_id.append(response['orderId'])
                         self.have_psn = True
                         self.count_cycles += 1
@@ -158,7 +162,7 @@ class WorkBollingerBandsClass:
                 self.bot.save()
 
     def turn_after_ml(self):
-        if self.bot.bb.take_on_ml and self.ml_filled:
+        if self.bot.bb.take_after_ml and self.bot.bb.take_on_ml and self.ml_filled:
             position_side = self.position_info['side']
             order_side = None
 
@@ -176,9 +180,36 @@ class WorkBollingerBandsClass:
                 self.ml_status_save()
 
     def place_stop_loss(self):
-        if self.bot.bb.sl_order:
+        if self.bot.bb.stop_loss:
             if not self.sl_order:
-                pass
+                psn_side = self.position_info['side']
+                psn_price = self.position_info['entryPrice']
+                psn_qty = self.position_info['qty']
+                psn_cost = psn_price * psn_qty
+                losses = psn_cost / self.bot.leverage * self.bot.bb.stop_loss_value / 100
+
+                if psn_side == 'LONG':
+                    side = 'SELL'
+                    if self.bot.bb.stop_loss_value_choice == 'percent':
+                        trigger_price = psn_price - (psn_price * self.bot.bb.stop_loss_value / 100)
+                    elif self.bot.bb.stop_loss_value_choice == 'pnl':
+                        psn_cost_after_loss = psn_cost - losses
+                        trigger_price = psn_cost_after_loss / psn_qty
+
+                elif psn_side == 'SHORT':
+                    side = 'BUY'
+                    if self.bot.bb.stop_loss_value_choice == 'percent':
+                        trigger_price = psn_price + (psn_price * self.bot.bb.stop_loss_value / 100)
+                    elif self.bot.bb.stop_loss_value_choice == 'pnl':
+                        psn_cost_after_loss = psn_cost + losses
+                        trigger_price = psn_cost_after_loss / psn_qty
+
+                td = 1 if self.current_price < trigger_price else 2
+
+                response = place_conditional_order(self.bot, side=side, position_side=psn_side,
+                                                   trigger_price=trigger_price, trigger_direction=td, qty=psn_qty)
+                self.current_order_id.append(response['orderId'])
+                self.sl_order = response['orderId']
 
     def average(self):
         self.ml_filled = False
@@ -190,3 +221,9 @@ class WorkBollingerBandsClass:
         bot_bb.take_on_ml_status = self.ml_filled
         bot_bb.take_on_ml_qty = self.ml_qty
         bot_bb.save()
+
+    def deactivate_bot(self):
+        self.bot.bb.endless_cycle = False
+        self.bot.is_active = False
+        self.bot.bb.save()
+        self.bot.save()
