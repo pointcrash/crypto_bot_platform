@@ -29,6 +29,7 @@ class WorkBollingerBandsClass:
         self.sl_order = None
         self.position_info = dict()
         self.count_cycles = 0
+        self.trailing_price = 0
 
         self.psn_locker = threading.Lock()
         self.avg_locker = threading.Lock()
@@ -94,13 +95,21 @@ class WorkBollingerBandsClass:
         if self.bot.bb.endless_cycle or not self.bot.bb.endless_cycle and self.count_cycles == 0:
             side = self.bot.bb.side
             amount_usdt = self.bot.amount_long
-            deviation = (current_price * self.bot.bb.percent_deviation_from_lines / 100) if self.bot.bb.is_deviation_from_lines else 0
+            deviation = (
+                        current_price * self.bot.bb.percent_deviation_from_lines / 100) if self.bot.bb.is_deviation_from_lines else 0
 
             if side == 'FB' or side == 'Buy':
                 if current_price <= self.bb.bl - deviation:
+
+                    self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
+                    if self.bot.bb.trailing_in and not self.bl_trailing(self.bot.bb.trailing_in_percent):
+                        self.cached_data('trailingPrice', self.trailing_price)
+                        return
+
                     response = place_order(self.bot, side='BUY', order_type='MARKET', price=current_price,
                                            amount_usdt=amount_usdt)
                     if response.get('orderId'):
+                        self.trailing_price = 0
                         self.open_order_id = response['orderId']
                         self.current_order_id.append(response['orderId'])
                         self.have_psn = True
@@ -110,9 +119,16 @@ class WorkBollingerBandsClass:
                         raise Exception('Open order is failed')
             if side == 'FB' or side == 'Sell':
                 if current_price >= self.bb.tl + deviation:
+
+                    self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
+                    if self.bot.bb.trailing_in and not self.tl_trailing(self.bot.bb.trailing_in_percent):
+                        self.cached_data('trailingPrice', self.trailing_price)
+                        return
+
                     response = place_order(self.bot, side='SELL', order_type='MARKET', price=current_price,
                                            amount_usdt=amount_usdt)
                     if response.get('orderId'):
+                        self.trailing_price = 0
                         self.open_order_id = response['orderId']
                         self.current_order_id.append(response['orderId'])
                         self.have_psn = True
@@ -147,10 +163,21 @@ class WorkBollingerBandsClass:
 
         if (position_side == 'LONG' and self.current_price > price) or (
                 position_side == 'SHORT' and self.current_price < price):
+
+            # Trailing price
+            self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
+            if self.bot.bb.trailing_out:
+                if position_side == 'LONG' and not self.tl_trailing(
+                        self.bot.bb.trailing_out_percent) or position_side == 'SHORT' and not self.bl_trailing(
+                        self.bot.bb.trailing_out_percent):
+                    self.cached_data('trailingPrice', self.trailing_price)
+                    return
+
             response = place_order(self.bot, side=side, position_side=position_side,
                                    price=price, order_type='MARKET', qty=main_take_qty)
             self.main_order_id = response['orderId']
             self.current_order_id.append(response['orderId'])
+            self.trailing_price = 0
             self.have_psn = False
             self.ml_qty = 0
             self.ml_filled = False
@@ -210,6 +237,18 @@ class WorkBollingerBandsClass:
                                                    trigger_price=trigger_price, trigger_direction=td, qty=psn_qty)
                 self.current_order_id.append(response['orderId'])
                 self.sl_order = response['orderId']
+
+    def bl_trailing(self, trailing_percent):
+        if self.current_price < self.trailing_price:
+            self.trailing_price = self.current_price
+        elif self.current_price >= self.trailing_price * (1 + (trailing_percent / 100)):
+            return True
+
+    def tl_trailing(self, trailing_percent):
+        if self.current_price > self.trailing_price:
+            self.trailing_price = self.current_price
+        elif self.current_price <= self.trailing_price * (1 - (trailing_percent / 100)):
+            return True
 
     def average(self):
         self.ml_filled = False
