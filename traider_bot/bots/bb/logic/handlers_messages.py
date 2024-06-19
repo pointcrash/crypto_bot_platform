@@ -34,18 +34,16 @@ def handle_order_stream_message(msg, bot_class_obj):
                 bot_class_obj.current_order_id.remove(order_id)
                 custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
 
-                if order_id == bot_class_obj.open_order_id:
-                    bot_class_obj.place_stop_loss()
-
                 if order_id == bot_class_obj.main_order_id:
                     cancel_order(bot_class_obj.bot, bot_class_obj.sl_order)
                     bot_class_obj.sl_order = None
 
-                elif order_id == bot_class_obj.sl_order:
+            else:
+                if order_id == bot_class_obj.sl_order:
                     bot_class_obj.deactivate_bot()
                     custom_logging(bot_class_obj.bot, f' EXIT WITH STOP LOSS {order_id}')
-            else:
-                custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
+                else:
+                    custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
 
 
 def handle_position_stream_message(msg, bot_class_obj):
@@ -98,6 +96,7 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
                 with bot_class_obj.avg_locker:
                     if bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price):
                         bot_class_obj.average()
+                bot_class_obj.place_stop_loss()
                 bot_class_obj.place_closing_orders()
                 bot_class_obj.turn_after_ml()
             else:

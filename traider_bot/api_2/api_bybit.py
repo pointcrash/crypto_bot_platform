@@ -84,7 +84,10 @@ def bybit_get_position_inform(bot):
     except Exception as e:
         print(e)
         print(response)
-        raise Exception(traceback.print_exc())
+        try:
+            raise Exception(traceback.print_exc())
+        except:
+            raise Exception(traceback.format_exc())
 
 
 def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side=None):

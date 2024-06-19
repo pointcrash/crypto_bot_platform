@@ -8,8 +8,12 @@ from api_2.formattres import order_formatters
 
 api_key = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
 api_secret = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
+main_api_key = 'DtQ4NHexgkjnoNLKFeEiPjeFsN5vJr8UsUBigfelxO4DAyykSBZAyLRteiktUjJj'
+main_api_secret = '6G3BhdLPDywx5y7QsxrYOFj3glD4bMglpifUOfjwo1gfE7KMfoadVkJCyXwac3b2'
 
 # client = Client(api_key, api_secret, testnet=True)
+# main_client = Client(main_api_key, main_api_secret, testnet=False)
+
 
 def get_data_ago_to_ms(days):
     current_date = datetime.now()
@@ -37,8 +41,8 @@ def get_data_ago_to_ms(days):
 # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
 # print(client.futures_position_information(symbol='BTCUSDT'))  # Инфо по позиции
 # print(client.futures_klines(symbol='BTCUSDT', interval='5m', limit=20)[::-1])
-# print(client.futures_income_history(symbol='BTCUSDT', incomeType='REALIZED_PNL', startTime=get_data_ago_to_ms(30)))
-# x = client.futures_account_trades(symbol='BTCUSDT')
+# print(main_client.futures_income_history(symbol='NOTUSDT', incomeType='REALIZED_PNL', startTime=get_data_ago_to_ms(30)))
+# x = main_client.futures_account_trades(symbol='NOTUSDT', startTime=get_data_ago_to_ms(23), endTime=get_data_ago_to_ms(16))
 # for y in x:
 #     print(y)
 

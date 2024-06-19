@@ -102,7 +102,7 @@ class WorkBollingerBandsClass:
                 if current_price <= self.bb.bl - deviation:
 
                     self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
-                    if self.bot.bb.trailing_in and not self.bl_trailing(self.bot.bb.trailing_in_percent):
+                    if self.bot.bb.trailing_in and not self.bl_trailing(Decimal(self.bot.bb.trailing_in_percent)):
                         self.cached_data('trailingPrice', self.trailing_price)
                         return
 
@@ -121,7 +121,7 @@ class WorkBollingerBandsClass:
                 if current_price >= self.bb.tl + deviation:
 
                     self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
-                    if self.bot.bb.trailing_in and not self.tl_trailing(self.bot.bb.trailing_in_percent):
+                    if self.bot.bb.trailing_in and not self.tl_trailing(Decimal(self.bot.bb.trailing_in_percent)):
                         self.cached_data('trailingPrice', self.trailing_price)
                         return
 
@@ -167,9 +167,9 @@ class WorkBollingerBandsClass:
             # Trailing price
             self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
             if self.bot.bb.trailing_out:
-                if position_side == 'LONG' and not self.tl_trailing(
-                        self.bot.bb.trailing_out_percent) or position_side == 'SHORT' and not self.bl_trailing(
-                        self.bot.bb.trailing_out_percent):
+                if position_side == 'LONG' and not self.tl_trailing(Decimal(
+                        self.bot.bb.trailing_out_percent)) or position_side == 'SHORT' and not self.bl_trailing(
+                        Decimal(self.bot.bb.trailing_out_percent)):
                     self.cached_data('trailingPrice', self.trailing_price)
                     return
 
@@ -207,8 +207,8 @@ class WorkBollingerBandsClass:
                 self.ml_status_save()
 
     def place_stop_loss(self):
-        if self.bot.bb.stop_loss:
-            if not self.sl_order:
+        if not self.sl_order:
+            if self.bot.bb.stop_loss:
                 psn_side = self.position_info['side']
                 psn_price = self.position_info['entryPrice']
                 psn_qty = self.position_info['qty']
@@ -235,7 +235,7 @@ class WorkBollingerBandsClass:
 
                 response = place_conditional_order(self.bot, side=side, position_side=psn_side,
                                                    trigger_price=trigger_price, trigger_direction=td, qty=psn_qty)
-                self.current_order_id.append(response['orderId'])
+                # self.current_order_id.append(response['orderId'])
                 self.sl_order = response['orderId']
 
     def bl_trailing(self, trailing_percent):
