@@ -23,8 +23,9 @@ from bots.zinger.logic.start_logic import zinger_worker
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
-from .forms import RegistrationForm, LoginForm, DateRangeForm, InternalTransferForm, WithdrawForm, WhiteListAccountForm
-from django.contrib.auth import authenticate, login, logout
+from .forms import RegistrationForm, LoginForm, DateRangeForm, InternalTransferForm, WithdrawForm, WhiteListAccountForm, \
+    CustomUserChangeForm
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from main.forms import AccountForm
 from main.models import Account, WhiteListAccount, WSManager
 from .logic import calculate_pnl
@@ -285,6 +286,19 @@ def login_view(request):
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
+
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = CustomUserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, request.user)  # Обновляем сессию пользователя
+            return redirect('account_list')  # Перенаправляем на страницу профиля после сохранения
+    else:
+        form = CustomUserChangeForm(instance=request.user)
+    return render(request, 'profile/edit_profile.html', {'form': form})
 
 
 @login_required

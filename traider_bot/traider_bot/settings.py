@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from config import django_app_key
+from config import django_app_key, SMTP_PASS
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -162,6 +162,16 @@ LOGGING = {
 }
 
 LOGIN_URL = "/login/"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'support@almazor.co'
+EMAIL_HOST_PASSWORD = SMTP_PASS
+DEFAULT_FROM_EMAIL = 'support@almazor.co'
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

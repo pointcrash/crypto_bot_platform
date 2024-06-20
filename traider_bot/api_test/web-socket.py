@@ -14,8 +14,8 @@ def main():
     symbol = 'BTCUSDT'
     symbo1 = 'ETHUSDT'
 
-    twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret, testnet=True)
-    # twm = ThreadedWebsocketManager(api_key=main_api_key, api_secret=main_api_secret, testnet=False)
+    # twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret, testnet=True)
+    twm = ThreadedWebsocketManager(api_key=main_api_key, api_secret=main_api_secret, testnet=False)
     # global_list_twm_for_binance['my_account'] = twm
 
     # start is required to initialise its internal loop
@@ -36,7 +36,7 @@ def main():
 
     # twm.start_kline_socket(callback=handle_socket_message, symbol=symbol)
     # twm.start_futures_user_socket(callback=handle_socket_message)
-    twm.start_margin_socket(callback=handle_socket_message)
+    twm.start_futures_user_socket(callback=handle_socket_message)
     # twm.start_coin_futures_socket(callback=handle_socket_message)
     # twm.start_futures_user_socket(callback=handle_socket_messag1e)
     # print('ok')
@@ -55,9 +55,11 @@ def main():
     # twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret, testnet=True)
     # twm.start()
     # twm.start_symbol_mark_price_socket(callback=handle_socket_message, symbol=symbol, fast=True)
-    time.sleep(1000)
-    twm.stop()
-    twm.join()
+    try:
+        time.sleep(1000)
+    finally:
+        twm.stop()
+        twm.join()
 
 #
 # def subscribe_f():

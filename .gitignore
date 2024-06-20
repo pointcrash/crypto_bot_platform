@@ -1,2 +1,3 @@
 .idea
 .ruff_cache
+traider_bot/config.py
