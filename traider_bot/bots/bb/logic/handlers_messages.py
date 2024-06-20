@@ -79,7 +79,7 @@ def handle_message_kline_info(msg, bot_class_obj):
         bot_class_obj.cached_data(key='tl', value=bot_class_obj.bb.tl)
         bot_class_obj.cached_data(key='ml', value=bot_class_obj.bb.ml)
         bot_class_obj.cached_data(key='bl', value=bot_class_obj.bb.bl)
-        bot_class_obj.cached_data(key='closePriceList', value=bot_class_obj.bb.close_price_list)
+        # bot_class_obj.cached_data(key='closePriceList', value=bot_class_obj.bb.close_price_list)
         # if not bot_class_obj.have_psn:
         #     bot_class_obj.replace_opening_orders()
         # else:

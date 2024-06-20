@@ -99,7 +99,7 @@ def bb_bot_edit(request, bot_id):
 
                 bb_model = bb_form.save(commit=False)
                 bot = bot_form.save(commit=False)
-                bot.is_active = True
+                bot.is_active = True if restart_value else False
                 bot.account = account
                 bot.symbol = symbol
                 bb_model.save()
