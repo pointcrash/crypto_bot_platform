@@ -14,6 +14,8 @@ from single_bot.logic.global_variables import lock, global_list_bot_id, global_l
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
 django.setup()
 
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 from timezone.models import TimeZone
 from main.models import ActiveBot, ExchangeService, Account
 from bots.models import Symbol, Log
@@ -496,3 +498,8 @@ def get_cur_positions_and_orders_info(bot):
     orders = [order_formatters(order) for order in raw_orders] if raw_orders else None
     return positions, orders
 
+
+def send_telegram_notice(account, message):
+    telegram_account = TelegramAccount.objects.filter(owner=account.owner).first()
+    if telegram_account:
+        send_telegram_message(telegram_account.chat_id, message=message)

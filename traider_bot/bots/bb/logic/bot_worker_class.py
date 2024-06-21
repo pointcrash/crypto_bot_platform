@@ -209,8 +209,8 @@ class WorkBollingerBandsClass:
         if not self.sl_order:
             if self.bot.bb.stop_loss:
                 psn_side = self.position_info['side']
-                psn_price = self.position_info['entryPrice']
-                psn_qty = self.position_info['qty']
+                psn_price = Decimal(self.position_info['entryPrice'])
+                psn_qty = Decimal(self.position_info['qty'])
                 psn_cost = psn_price * psn_qty
                 losses = psn_cost / self.bot.leverage * self.bot.bb.stop_loss_value / 100
 

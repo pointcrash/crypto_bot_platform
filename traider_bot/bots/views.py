@@ -153,12 +153,7 @@ def bot_start(request, bot_id):
 @login_required
 def deactivate_all_my_bots(request):
     user = request.user
-    bots = BotModel.objects.filter(owner=user)
-
-    for bot in bots:
-        if bot.is_active is True:
-            bot.is_active = False
-            bot.save()
-    time.sleep(7)
+    BotModel.objects.filter(owner=user, is_active=True).update(is_active=False)
+    time.sleep(3)
 
     return redirect(request.META.get('HTTP_REFERER'))

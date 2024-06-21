@@ -16,6 +16,20 @@
         <form method="POST">
             {% csrf_token %}
 
+            <div class="row text-start">
+                <div class="col-3">
+                    {{ form.low_margin_value.label_tag }}
+                    {{ form.low_margin_value }}
+                </div>
+                <div class="col-1">
+                    {{ form.low_margin_value_type.label_tag }}
+                    {{ form.low_margin_value_type }}
+                </div>
+                <div class="col-3">
+                    {{ form.low_margin_actions.label_tag }}
+                    {{ form.low_margin_actions }}
+                </div>
+            </div>
             <div class="row">
                 <div class="col-6">
                     {{ form.name.label_tag }}

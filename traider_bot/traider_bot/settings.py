@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_q',
 
     'orders',
     'main',
@@ -187,6 +188,26 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+Q_CLUSTER = {
+    'name': 'DjangoQ',
+    'workers': 1,
+    'recycle': 500,
+    'timeout': 60,
+    'ack_failures': True,
+    'max_attempts': 3,
+    'retry': 60,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default',  # Use Django ORM
+    'sync': False,
+    'save_limit': 250,
+    'poll': 1,
+    'log_level': 'DEBUG',  # Set to DEBUG for more detailed logs
+    'log_file': 'django_q.log',  # Log file path
+}
+
 
 LANGUAGE_CODE = 'ru-RU'
 

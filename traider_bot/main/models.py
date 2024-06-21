@@ -8,6 +8,16 @@ class Account(models.Model):
         ('UNIFIED', 'UNIFIED'),
     )
 
+    LOW_MARGIN_ACTIONS_CHOICES = (
+        ('alert', 'Только уведомление'),
+        ('off_bots', 'Выключить ботов'),
+    )
+
+    LOW_MARGIN_VALUE_CHOICES = (
+        ('$', '$'),
+        ('%', '%'),
+    )
+
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     name = models.CharField(unique=True)
     service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
@@ -17,6 +27,10 @@ class Account(models.Model):
     is_mainnet = models.BooleanField()
     url = models.CharField(default='https://api-testnet.bybit.com')
     address = models.CharField(blank=True, null=True)
+
+    low_margin_value = models.IntegerField(blank=True, null=True)
+    low_margin_value_type = models.CharField(choices=LOW_MARGIN_VALUE_CHOICES, default='$', null=True, blank=True)
+    low_margin_actions = models.CharField(choices=LOW_MARGIN_ACTIONS_CHOICES, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.is_mainnet:
