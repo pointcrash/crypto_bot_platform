@@ -1,4 +1,4 @@
-from api_2.api_aggregator import get_futures_account_balance
+from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders
 from bots.general_functions import send_telegram_notice
 from bots.models import BotModel
 from main.models import Account
@@ -29,5 +29,9 @@ def account_margin_check():
 
                 elif account.low_margin_actions == 'off_bots':
                     send_telegram_notice(account, message)
-                    BotModel.objects.filter(account=account, is_active=True).update(is_active=False)
 
+                    bots = BotModel.objects.filter(account=account, is_active=True)
+                    bots.update(is_active=False)
+
+                    for bot in bots:
+                        cancel_all_orders(bot)

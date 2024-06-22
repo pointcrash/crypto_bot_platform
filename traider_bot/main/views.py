@@ -331,17 +331,19 @@ def profile_mode_switching(request, profile_id):
 
 def get_balance(request, acc_id):
     account = Account.objects.get(pk=acc_id)
-    try:
-        balance = get_futures_account_balance(account)
-        wb = balance['fullBalance']
-        tb = balance['availableBalance']
-    except Exception as e:
-        wb = f'Ошибка получения баланса: {e}'
-        tb = f'Ошибка получения баланса'
-        print(e)
-        print(f'Апи ключи аккаунта {account.name} устарели, замените')
+    # try:
+    balance = get_futures_account_balance(account)
+    wb = balance['fullBalance']
+    tb = balance['availableBalance']
+    unrealizedPnl = balance['unrealizedPnl']
+    # except Exception as e:
+    #     wb = f'Ошибка получения баланса: {e}'
+    #     tb = f'Ошибка получения баланса'
+    #     unrealizedPnl = 'Unknown'
+    #     print(e)
+    #     print(f'Апи ключи аккаунта {account.name} устарели, замените')
 
-    return JsonResponse({"wb": wb, "tb": tb, "name": account.name})
+    return JsonResponse({"wb": wb, "tb": tb, "unrealizedPnl": unrealizedPnl, "name": account.name})
 
 
 @login_required

@@ -209,6 +209,7 @@ def binance_account_balance(account):
     response = {
         'fullBalance': round(float(response['balance']), 2),
         'availableBalance': round(float(response['availableBalance']), 2),
+        'unrealizedPnl': round(float(response['crossUnPnl']), 2),
     }
     return response
 

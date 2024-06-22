@@ -1,4 +1,5 @@
 import datetime
+import json
 import time
 import uuid
 
@@ -98,6 +99,24 @@ def bybit_get_user_assets(account, symbol, acc_type="FUND"):
     )
 
     return response['result']['balance']['walletBalance']
+
+
+def bybit_get_wallet_balance(account, symbol='USDT', acc_type="UNIFIED"):
+    session = get_session(account)
+
+    response = session.get_wallet_balance(
+        accountType=acc_type,
+        coin=symbol,
+    )
+
+    response = response['result']['list'][0]
+    response = {
+        'fullBalance': round(float(response['totalMarginBalance']), 2),
+        'availableBalance': round(float(response['totalAvailableBalance']), 2),
+        'unrealizedPnl': round(float(response['totalPerpUPL']), 2),
+    }
+
+    return response
 
 
 def bybit_get_pnl_by_time(bot, start_time, end_time):

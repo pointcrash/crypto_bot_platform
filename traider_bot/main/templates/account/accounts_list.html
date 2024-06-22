@@ -98,7 +98,7 @@
             const balanceInfo = document.getElementById('balanceInfo');
             const accountName = data.name;
             modalTitle.textContent = accountName;
-            balanceInfo.innerHTML = `Баланс кошелька: <strong>${data.wb}</strong> USDT<br>Доступный баланс: <strong>${data.tb}</strong> USDT`;
+            balanceInfo.innerHTML = `Баланс кошелька: <strong>${data.wb}</strong> USDT<br>Доступный баланс: <strong>${data.tb}</strong> USDT<br>Нереализованный PnL: <strong>${data.unrealizedPnl}</strong> USDT`;
             const balanceModal = new bootstrap.Modal(document.getElementById('balanceModal'));
             balanceModal.show();
           })

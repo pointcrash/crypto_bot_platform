@@ -6,7 +6,7 @@ from django.utils import timezone
 from api_2.api_bybit import *
 from api_2.api_binance import *
 from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets, \
-    bybit_get_pnl_by_time
+    bybit_get_pnl_by_time, bybit_get_wallet_balance
 
 
 def get_quantity_from_price(bot, price, amount):
@@ -138,12 +138,13 @@ def get_futures_account_balance(account):
     if account.service.name == 'Binance':
         return binance_account_balance(account)
     elif account.service.name == 'ByBit':
-        return bybit_get_unified_account_balance(account)
+        return bybit_get_wallet_balance(account)
 
     ''' Returned data:
     {   
         'fullBalance': 1454.82,
         'availableBalance': 707.96,
+        'unrealizedPnl': -7.96,
     }
     '''
 
