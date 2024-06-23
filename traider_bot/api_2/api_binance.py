@@ -192,14 +192,14 @@ def binance_set_leverage(bot, client):
 
 
 @with_binance_client
-def binance_change_position_mode_on_hedge(bot, client):
+def binance_change_position_mode_on_hedge(bot, client, hedge_mode):
     custom_logging(bot, f'binance_change_position_mode_on_hedge({bot.symbol.name})', 'REQUEST')
     try:
-        response = client.futures_change_position_mode(symbol=bot.symbol.name, dualsideposition=True)
+        response = client.futures_change_position_mode(symbol=bot.symbol.name, dualsideposition=hedge_mode)
         custom_logging(bot, response, 'RESPONSE')
         return response
-    except:
-        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
+    except Exception as e:
+        custom_logging(bot, f"{e}")
 
 
 def binance_account_balance(account):

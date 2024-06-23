@@ -1,15 +1,18 @@
 import logging
 import threading
 import time
+from datetime import datetime
 from decimal import Decimal
 
 from django.core.cache import cache
+from django.utils.timezone import make_naive
 
 from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, \
-    get_position_inform, place_conditional_order
+    get_position_inform, place_conditional_order, get_pnl_by_time
 from api_2.custom_logging_api import custom_logging
 from bots.bb.logic.avg_logic import BBAutoAverage
 from bots.bb.logic.bb_class import BollingerBands
+from bots.models import BotsData
 
 
 class WorkBollingerBandsClass:
@@ -24,7 +27,7 @@ class WorkBollingerBandsClass:
         self.current_order_id = []
         self.have_psn = False
         self.ml_order_id = None
-        self.main_order_id = None
+        self.close_psn_main_order_id = None
         self.open_order_id = None
         self.sl_order = None
         self.position_info = dict()
@@ -132,6 +135,7 @@ class WorkBollingerBandsClass:
                         self.current_order_id.append(response['orderId'])
                         self.have_psn = True
                         self.count_cycles += 1
+
                     else:
                         custom_logging(self.bot, response, named='response')
                         raise Exception('Open order is failed')
@@ -174,14 +178,14 @@ class WorkBollingerBandsClass:
 
             response = place_order(self.bot, side=side, position_side=position_side,
                                    price=price, order_type='MARKET', qty=main_take_qty)
-            self.main_order_id = response['orderId']
+            self.close_psn_main_order_id = response['orderId']
             self.current_order_id.append(response['orderId'])
             self.trailing_price = 0
             self.have_psn = False
             self.ml_qty = 0
             self.ml_filled = False
             self.ml_status_save()
-            self.count_cycles += 1
+            # self.count_cycles += 1
 
             if self.bot.bb.endless_cycle is False:
                 self.bot.is_active = False
@@ -251,6 +255,17 @@ class WorkBollingerBandsClass:
         elif self.current_price <= self.trailing_price * (1 - (trailing_percent / 100)):
             return True
 
+    def calc_and_save_pnl_per_cycle(self):
+        pnl = get_pnl_by_time(bot=self.bot, start_time=make_naive(self.bot.cycle_time_start), end_time=datetime.now())
+        pnl = round(Decimal(pnl), 5)
+
+        botsdata, created = BotsData.objects.get_or_create(bot=self.bot)
+
+        botsdata.total_pnl = botsdata.total_pnl + pnl
+        botsdata.count_cycles = botsdata.count_cycles + 1
+        botsdata.cycle_pnl_dict[botsdata.count_cycles] = str(pnl)
+        botsdata.save()
+
     def average(self):
         self.ml_filled = False
         self.ml_qty = 0
@@ -266,4 +281,8 @@ class WorkBollingerBandsClass:
         self.bot.bb.endless_cycle = False
         self.bot.is_active = False
         self.bot.bb.save()
+        self.bot.save()
+
+    def bot_cycle_time_start_update(self):
+        self.bot.cycle_time_start = datetime.now()
         self.bot.save()

@@ -34,40 +34,64 @@ def handle_order_stream_message(msg, bot_class_obj):
                 bot_class_obj.current_order_id.remove(order_id)
                 custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
 
-                if order_id == bot_class_obj.main_order_id:
+                if order_id == bot_class_obj.open_order_id:
+                    pass
+                    # bot_class_obj.bot_cycle_time_start_update()
+
+                elif order_id == bot_class_obj.close_psn_main_order_id:
                     cancel_order(bot_class_obj.bot, bot_class_obj.sl_order)
                     bot_class_obj.sl_order = None
+
+                    # time.sleep(1)
+                    # bot_class_obj.calc_and_save_pnl_per_cycle()
 
             else:
                 if order_id == bot_class_obj.sl_order:
                     bot_class_obj.deactivate_bot()
                     custom_logging(bot_class_obj.bot, f' EXIT WITH STOP LOSS {order_id}')
+
+                    # time.sleep(1)
+                    # bot_class_obj.calc_and_save_pnl_per_cycle()
                 else:
+                    # if msg['reduceOnly'] is True and Decimal(msg['qty']) >= bot_class_obj.position_info['qty']:
+                    #     pass
+
                     custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
 
 
 def handle_position_stream_message(msg, bot_class_obj):
     with bot_class_obj.psn_locker:
-        if Decimal(msg['qty']) != 0:
-            if bot_class_obj.position_info.get('qty') == Decimal(msg['qty']):
-                return
+        msg_qty = Decimal(msg['qty'])
+
+        if bot_class_obj.position_info.get('qty') == msg_qty:
+            return
+
+        if msg_qty != 0:
+            if not bot_class_obj.position_info.get('qty'):
+                bot_class_obj.bot_cycle_time_start_update()
+
             bot_class_obj.position_info = {
                 'side': msg['side'],
-                'qty': abs(Decimal(msg['qty'])),
+                'qty': abs(msg_qty),
                 'entryPrice': Decimal(msg['entryPrice']),
             }
             with bot_class_obj.avg_locker:
                 bot_class_obj.avg_obj.update_psn_info(bot_class_obj.position_info)
             bot_class_obj.have_psn = True
             bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
+
         else:
             if msg['side'] == bot_class_obj.position_info.get('side'):
+                custom_logging(bot_class_obj.bot, f'{msg}')
                 bot_class_obj.position_info['qty'] = 0
                 bot_class_obj.have_psn = False
                 bot_class_obj.ml_filled = False
                 bot_class_obj.ml_qty = 0
                 bot_class_obj.ml_status_save()
                 bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
+
+                time.sleep(1)
+                bot_class_obj.calc_and_save_pnl_per_cycle()
         # bot_class_obj.replace_closing_orders()
 
 

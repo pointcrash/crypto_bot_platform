@@ -2,6 +2,11 @@
     <div class="col-12 mx-auto">
         <h2 class="text-center">Настройки Бота</h2>
         <p>{{ bot_cached_data }}</p>
+        {% if bot.botsdata %}
+        <p>Кол-во циклов: {{ bot.botsdata.count_cycles }}</p>
+        <p>Тотал Pnl: {{ bot.botsdata.total_pnl }}</p>
+        <p>Pnl за каждый цикл: {{ bot.botsdata.cycle_pnl_dict }}</p>
+        {% endif %}
         <form method="POST">
             {% csrf_token %}
             <div class="row justify-content-center">

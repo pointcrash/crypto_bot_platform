@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
-
+from django.contrib.postgres.fields import ArrayField
 from main.models import Account, ExchangeService
 
 
@@ -43,6 +43,7 @@ class BotModel(models.Model):
     is_active = models.BooleanField(default=False)
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
+    cycle_time_start = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ['account', 'symbol']
@@ -238,3 +239,10 @@ class JsonObjectClass(models.Model):
     bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
     bot_mode = models.CharField(blank=True, null=True)
     data = models.JSONField(blank=True, null=True)
+
+
+class BotsData(models.Model):
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
+    total_pnl = models.DecimalField(max_digits=20, decimal_places=5, default=0, blank=True)
+    count_cycles = models.IntegerField(default=0, blank=True)
+    cycle_pnl_dict = models.JSONField(default=dict, blank=True)

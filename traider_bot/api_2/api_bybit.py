@@ -224,10 +224,10 @@ def bybit_set_leverage(bot, category='linear'):
     return response
 
 
-def bybit_change_position_mode_on_hedge(bot, category='linear'):
+def bybit_change_position_mode_on_hedge(bot, category='linear', hedge_mode=True):
     endpoint = "/v5/position/switch-mode"
     method = "POST"
-    mode = 3  # Hedge
+    mode = 3 if hedge_mode else 0
     params = {
         'category': category,
         'symbol': bot.symbol.name,

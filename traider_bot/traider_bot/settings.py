@@ -1,13 +1,16 @@
 import os
 from pathlib import Path
 
-from config import django_app_key, SMTP_PASS
+from dotenv import load_dotenv
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = django_app_key
+load_dotenv()
 
-DEBUG = True
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'bravo.almazor.co',
@@ -98,18 +101,18 @@ WSGI_APPLICATION = 'traider_bot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'MyDB',
-        'USER': 'admin',
-        'PASSWORD': 'lksd23GBKwed.',
-        'HOST': 'db',
-        'PORT': '5432',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT'),
     }
 }
 
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/0',
+        'LOCATION': os.getenv('REDIS_URL'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -164,14 +167,14 @@ LOGGING = {
 
 LOGIN_URL = "/login/"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mail.ru'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'support@almazor.co'
-EMAIL_HOST_PASSWORD = SMTP_PASS
-DEFAULT_FROM_EMAIL = 'support@almazor.co'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -198,14 +201,7 @@ Q_CLUSTER = {
     'ack_failures': True,
     'max_attempts': 3,
     'retry': 60,
-    'queue_limit': 50,
-    'bulk': 10,
-    'orm': 'default',  # Use Django ORM
-    'sync': False,
-    'save_limit': 250,
-    'poll': 1,
-    'log_level': 'DEBUG',  # Set to DEBUG for more detailed logs
-    'log_file': 'django_q.log',  # Log file path
+    'orm': 'default',
 }
 
 

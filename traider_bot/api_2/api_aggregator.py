@@ -127,11 +127,11 @@ def set_leverage(bot):
         return bybit_set_leverage(bot)
 
 
-def change_position_mode(bot):
+def change_position_mode(bot, hedge_mode=True):
     if bot.account.service.name == 'Binance':
-        return binance_change_position_mode_on_hedge(bot)
+        return binance_change_position_mode_on_hedge(bot, hedge_mode=hedge_mode)
     elif bot.account.service.name == 'ByBit':
-        return bybit_change_position_mode_on_hedge(bot)
+        return bybit_change_position_mode_on_hedge(bot, hedge_mode=hedge_mode)
 
 
 def get_futures_account_balance(account):
