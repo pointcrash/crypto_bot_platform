@@ -17,7 +17,7 @@ from api_2.api_aggregator import get_futures_account_balance, internal_transfer,
 from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
 from bots.bb.logic.start_logic import bb_worker
 from bots.general_functions import all_symbols_update
-from bots.models import Log, Symbol, BotModel
+from bots.models import Log, Symbol, BotModel, UserBotLog
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from bots.zinger.logic.start_logic import zinger_worker
 from single_bot.logic.global_variables import global_list_bot_id
@@ -36,6 +36,28 @@ logger = logging.getLogger('django')
 
 def view_home(request):
     return render(request, 'home.html')
+
+
+@login_required
+def user_bot_logs_view(request, bot_id):
+    log_list = []
+    bot = BotModel.objects.get(id=bot_id)
+    logs = UserBotLog.objects.filter(bot=bot_id).order_by('pk')
+    user = request.user
+
+    for i in range(1, len(logs) + 1):
+        log_list.append([i, logs[i - 1]])
+
+    log_list.sort(key=lambda x: x[0], reverse=True)
+    logs_per_page = 50  # Количество логов на странице
+    paginator = Paginator(log_list, logs_per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    logger.info(f'{user} открыл логи бота ID: {bot_id}')
+    return render(request, 'logs/user_bot_logs.html', {
+        'log_list': page_obj,
+        'bot': bot,
+    })
 
 
 @login_required

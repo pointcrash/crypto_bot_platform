@@ -6,7 +6,7 @@ from django.utils import timezone
 from api_2.api_bybit import *
 from api_2.api_binance import *
 from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets, \
-    bybit_get_pnl_by_time, bybit_get_wallet_balance
+    bybit_get_pnl_by_time, bybit_get_wallet_balance, bybit_get_all_position_info
 
 
 def get_quantity_from_price(bot, price, amount):
@@ -19,6 +19,25 @@ def min_qty_check(symbol, leverage, price, amount):
         return False
     else:
         return True
+
+
+def get_all_position_inform(account):
+    psn_list = []
+    if account.service.name == 'Binance':
+        psn_list = binance_get_all_position_inform(account)
+
+    elif account.service.name == 'ByBit':
+        psn_list = bybit_get_all_position_info(account)
+
+    for psn in psn_list:
+        psn['markPrice'] = str(float(psn['markPrice'])) if psn['markPrice'] else 0
+        psn['entryPrice'] = str(float(psn['entryPrice'])) if psn['entryPrice'] else 0
+        if psn.get('unrealisedPnl'):
+            psn['unrealisedPnl'] = str(round(float(psn['unrealisedPnl']), 2))
+        else:
+            psn['unrealisedPnl'] = '0'
+
+    return psn_list
 
 
 def get_position_inform(bot):

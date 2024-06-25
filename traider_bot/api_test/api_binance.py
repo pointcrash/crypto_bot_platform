@@ -39,7 +39,11 @@ def get_data_ago_to_ms(days):
 # print(client.futures_change_leverage(symbol='BTCUSDT', leverage=9))  # Изменить плечо
 # print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму
 # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
-# print(client.futures_position_information(symbol='BTCUSDT'))  # Инфо по позиции
+# print(main_client.futures_position_information(symbol='BTCUSDT'))  # Инфо по позиции
+# response = (main_client.futures_position_information())  # Инфо по позиции
+# for i in response:
+#     if float(i['positionAmt']) != 0:
+#         print(i)
 # print(client.futures_klines(symbol='BTCUSDT', interval='5m', limit=20)[::-1])
 # print(main_client.futures_income_history(symbol='NOTUSDT', incomeType='REALIZED_PNL', startTime=get_data_ago_to_ms(30)))
 # x = main_client.futures_account_trades(symbol='NOTUSDT', startTime=get_data_ago_to_ms(23), endTime=get_data_ago_to_ms(16))

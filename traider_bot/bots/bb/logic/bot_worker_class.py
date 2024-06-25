@@ -12,6 +12,7 @@ from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_
 from api_2.custom_logging_api import custom_logging
 from bots.bb.logic.avg_logic import BBAutoAverage
 from bots.bb.logic.bb_class import BollingerBands
+from bots.general_functions import custom_user_bot_logging
 from bots.models import BotsData
 
 
@@ -56,6 +57,8 @@ class WorkBollingerBandsClass:
         return logger
 
     def preparatory_actions(self):
+        custom_user_bot_logging(self.bot, f' Бот запущен')
+
         try:
             change_position_mode(self.bot)
         except:
@@ -265,6 +268,9 @@ class WorkBollingerBandsClass:
         botsdata.count_cycles = botsdata.count_cycles + 1
         botsdata.cycle_pnl_dict[botsdata.count_cycles] = str(pnl)
         botsdata.save()
+
+        custom_user_bot_logging(self.bot, f' Конец {botsdata.count_cycles} цикла: {datetime.now()}.'
+                                          f' PnL за цикл: {pnl}. Итоговый PnL: {botsdata.total_pnl}')
 
     def average(self):
         self.ml_filled = False

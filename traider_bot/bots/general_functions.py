@@ -18,7 +18,7 @@ from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 from timezone.models import TimeZone
 from main.models import ActiveBot, ExchangeService, Account
-from bots.models import Symbol, Log
+from bots.models import Symbol, Log, UserBotLog
 from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
@@ -503,3 +503,29 @@ def send_telegram_notice(account, message):
     telegram_account = TelegramAccount.objects.filter(owner=account.owner).first()
     if telegram_account:
         send_telegram_message(telegram_account.chat_id, message=message)
+
+
+def custom_user_bot_logging(bot, content):
+    user = bot.owner
+    timezone = TimeZone.objects.filter(users=user).first()
+    gmt0 = pytz.timezone('GMT')
+    date = datetime.now(gmt0).replace(microsecond=0)
+    bot_info = f'Bot {bot.pk} {bot.symbol.name}'
+    gmt = 0
+
+    if timezone:
+        gmt = int(timezone.gmtOffset)
+        if gmt > 0:
+            date = date + timedelta(seconds=gmt)
+        else:
+            date = date - timedelta(seconds=gmt)
+
+    if gmt > 0:
+        str_gmt = '+' + str(gmt / 3600)
+    elif gmt < 0:
+        str_gmt = str(gmt / 3600)
+    else:
+        str_gmt = str(gmt)
+
+    in_time = f'{date.time()} | {date.date()}'
+    UserBotLog.objects.create(bot=bot, content=f'{bot_info} {content}', time=f'{in_time} (GMT {str_gmt})')

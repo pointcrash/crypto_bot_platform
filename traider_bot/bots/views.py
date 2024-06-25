@@ -22,6 +22,7 @@ def bot_list(request):
     user = request.user
     position_qty_list = list()
     position_pnl_list = list()
+    position_amount_list = list()
 
     if user.is_superuser:
         bots = BotModel.objects.all().select_related('bb').order_by('pk')
@@ -40,22 +41,35 @@ def bot_list(request):
         account_select_form = AccountSelectForm(user=request.user)
 
     for bot in bots:
-        long_position = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='LONG').last()
-        short_position = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='SHORT').last()
-        if long_position and short_position:
-            position_qty_list.append((long_position.qty, short_position.qty))
-            position_pnl_list.append((long_position.unrealised_pnl, short_position.unrealised_pnl))
-        elif not long_position and not short_position:
+        lp = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='LONG').last()
+        sp = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='SHORT').last()
+
+        if lp:
+            lp.unrealised_pnl = round(float(lp.unrealised_pnl), 2)
+        if sp:
+            sp.unrealised_pnl = round(float(sp.unrealised_pnl), 2)
+
+        if lp and sp:
+            position_qty_list.append((lp.qty, sp.qty))
+            position_pnl_list.append((lp.unrealised_pnl, sp.unrealised_pnl))
+            position_amount_list.append((round(float(lp.qty)*float(lp.entry_price), 2), round(float(sp.qty)*float(sp.entry_price), 2)))
+
+        elif not lp and not sp:
             position_qty_list.append(('0', '0'))
             position_pnl_list.append(('0', '0'))
-        elif not long_position:
-            position_qty_list.append(('0', short_position.qty))
-            position_pnl_list.append(('0', short_position.unrealised_pnl))
-        elif not short_position:
-            position_qty_list.append((long_position.qty, '0'))
-            position_pnl_list.append((long_position.unrealised_pnl, '0'))
+            position_amount_list.append(('0', '0'))
 
-    bots = zip(bots, position_qty_list, position_pnl_list)
+        elif not lp:
+            position_qty_list.append(('0', sp.qty))
+            position_pnl_list.append(('0', sp.unrealised_pnl))
+            position_amount_list.append(('0', round(float(sp.qty)*float(sp.entry_price), 2)))
+
+        elif not sp:
+            position_qty_list.append((lp.qty, '0'))
+            position_pnl_list.append((lp.unrealised_pnl, '0'))
+            position_amount_list.append((round(float(lp.qty)*float(lp.entry_price), 2), '0'))
+
+    bots = zip(bots, position_amount_list, position_pnl_list)
 
     return render(request, 'bot_list.html', {
         'bots': bots,

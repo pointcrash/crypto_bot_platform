@@ -246,3 +246,10 @@ class BotsData(models.Model):
     total_pnl = models.DecimalField(max_digits=20, decimal_places=5, default=0, blank=True)
     count_cycles = models.IntegerField(default=0, blank=True)
     cycle_pnl_dict = models.JSONField(default=dict, blank=True)
+
+
+class UserBotLog(models.Model):
+    bot = models.ForeignKey(BotModel, on_delete=models.CASCADE)
+    content = models.CharField()
+    time = models.CharField(null=True)
+    time_create = models.DateTimeField(auto_now_add=True)

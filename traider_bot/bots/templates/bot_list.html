@@ -42,7 +42,7 @@
                     <th>Плечо</th>
                     <th>ТФ</th>
                     <th>Позиции</th>
-<!--                    <th>ПНЛ</th>-->
+                    <th>ПНЛ</th>
                     <th class="d-none d-sm-table-cell">Стратегия</th>
                     <th class="d-none d-sm-table-cell">Сторона</th>
                     <th class="d-none d-md-table-cell">USDT$</th>
@@ -52,7 +52,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for bot, positions_qty, positions_pnl  in bots %}
+                {% for bot, position_amount, positions_pnl  in bots %}
                 <tr class="">
                     <td>{{ bot.pk }}</td>
                     <td>{{ bot.account }}</td>
@@ -60,11 +60,20 @@
                     <td>{{ bot.leverage }}</td>
                     <td>{% if bot.bb.interval %}{{ bot.bb.interval }}м{% endif %}</td>
                     <td>
-                        {% for qty in positions_qty %}
+                        {% for cost in position_amount %}
                             {% if forloop.first %}
-                                <h6 style="color:green">LONG: {{qty}}</h6>
+                                <h6 style="color:green">LONG: {{ cost }}</h6>
                             {% else %}
-                                <h6 style="color:red">SHORT: {{qty}}</h6>
+                                <h6 style="color:red">SHORT: {{ cost }}</h6>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for pnl in positions_pnl %}
+                            {% if forloop.first %}
+                                <h6 style="color:gray">{{ pnl }}</h6>
+                            {% else %}
+                                <h6 style="color:gray">{{ pnl }}</h6>
                             {% endif %}
                         {% endfor %}
                     </td>
@@ -106,7 +115,11 @@
                     <a class="btn btn-primary btn-shadow" href="{% url 'zinger_bot_edit' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                     {% endif %}
 
-                    <a class="btn  btn-secondary btn-shadow" href="{% url 'logs_detail' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>
+                    {% if request.user.is_superuser %}
+                        <a class="btn  btn-secondary btn-shadow" href="{% url 'logs_detail' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>
+                    {% endif %}
+                    <a class="btn  btn-light btn-shadow" href="{% url 'user_bot_logs' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>
+
                     <button type="button" class="btn btn-danger btn-shadow" data-bs-toggle="modal"
                     data-bs-target="#deleteBotModal{{bot.pk}}"><i class="fa-solid fa-trash"></i>
                     </button>

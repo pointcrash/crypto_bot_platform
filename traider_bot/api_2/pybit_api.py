@@ -20,7 +20,6 @@ def get_session(account):
 
 def bybit_set_trading_stop(bot, psn_side, tp_limit_price=None, sl_limit_price=None,
                            tp_size=None, sl_size=None, take_profit_qty=None, stop_loss_qty=None):
-
     session = get_session(bot.account)
     tpsl_mode = "Full" if not take_profit_qty and not stop_loss_qty else 'Partial'
     position_idx = 1 if psn_side == 'LONG' else 2
@@ -74,6 +73,25 @@ def bybit_internal_transfer(account, symbol, amount, from_account_type, to_accou
         toAccountType=to_account_type,
     )
     return response
+
+
+def bybit_get_all_position_info(account):
+    session = get_session(account)
+
+    def format_data(position_list):
+        position_inform_list = [{
+            'symbol': position['symbol'],
+            'qty': position['size'],
+            'entryPrice': position['avgPrice'],
+            'markPrice': position['markPrice'],
+            'unrealisedPnl': position['unrealisedPnl'],
+            'side': 'LONG' if int(position['positionIdx']) == 1 else 'SHORT',
+        } for position in position_list]
+        return position_inform_list
+
+    response = session.get_positions(category='linear', settleCoin='USDT')
+    position_inform_list = format_data(response['result']['list'])
+    return position_inform_list
 
 
 def bybit_withdraw(account, symbol, chain, address, amount):

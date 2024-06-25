@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
-    profile_list, profile_mode_switching, cleaning_logs_view
+    profile_list, profile_mode_switching, cleaning_logs_view, user_bot_logs_view
 from single_bot.views import say_hello
 
 # from timezone.views import create_timezone
@@ -13,6 +13,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('logs/', logs_view, name='logs'),
     path('logs/<int:bot_id>/', logs_list, name='logs_detail'),
+    path('user_bot_logs/<int:bot_id>/', user_bot_logs_view, name='user_bot_logs'),
     path('cleaning_logs/', cleaning_logs_view, name='cleaning_logs'),
     path('logs/delete/<int:bot_id>/', view_logs_delete, name='logs_delete'),
     path('bots/', include('bots.urls')),
