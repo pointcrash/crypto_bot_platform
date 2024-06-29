@@ -1,3 +1,4 @@
 scrypt_statistic.py
 gunicorn.pid
 logs/django.log
+.env

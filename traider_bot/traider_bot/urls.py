@@ -28,4 +28,7 @@ urlpatterns = [
     path('profile/', profile_list, name='profile_list'),
     path('profile/profile_mode_switching/<int:profile_id>/', profile_mode_switching, name='profile_mode_switching'),
 
+    path('api/v1/', include('bots.urls_api')),
+    path('api/v1/main/', include('main.urls_api')),
+
 ]

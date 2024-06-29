@@ -42,7 +42,7 @@ def account_margin_check():
                         for bot in bots:
                             cancel_all_orders(bot)
         except Exception as e:
-            logger.info(f'{e}')
+            # logger.info(f'{e}')
             continue
 
 
@@ -52,7 +52,7 @@ def account_positions_check():
         try:
             positions = get_all_position_inform(account)
         except Exception as e:
-            logger.info(f'{e}')
+            # logger.info(f'{e}')
             continue
 
         for psn in positions:
