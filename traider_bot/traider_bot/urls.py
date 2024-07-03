@@ -4,12 +4,6 @@ from django.urls import path, include
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
     profile_list, profile_mode_switching, cleaning_logs_view, user_bot_logs_view
 from single_bot.views import say_hello
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
-# from timezone.views import create_timezone
 
 urlpatterns = [
     path('', view_home, name='home'),
@@ -35,9 +29,7 @@ urlpatterns = [
     path('api/v1/', include('bots.urls_api')),
     path('api/v1/main/', include('main.urls_api')),
 
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('api/auth/', include('authentication.urls')),
 
 ]
 
