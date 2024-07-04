@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     'django_q',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_simplejwt.token_blacklist',
+    # 'rest_framework_simplejwt.token_blacklist',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -228,8 +228,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
     ],
@@ -251,8 +251,8 @@ CSRF_COOKIE_SAMESITE = 'None'
 
 REST_AUTH = {
     'USE_JWT': True,
-    'JWT_AUTH_COOKIE': 'jwtAuthToken',
-    'JWT_AUTH_REFRESH_COOKIE': 'jwtRefreshToken',
+    'JWT_AUTH_COOKIE': 'jwt-auth-token',
+    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
     'JWT_AUTH_HTTPONLY': True,
     'JWT_AUTH_SECURE': True,
     'JWT_AUTH_SAMESITE': 'None',
