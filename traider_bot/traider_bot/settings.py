@@ -48,8 +48,8 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'https://*.bravo.almazor.co',
     'https://*.209.38.180.77',
-    'https://*.127.0.0.1',
-    'http://*.127.0.0.1',
+    'https://127.0.0.1',
+    'http://127.0.0.1',
     'http://*.localhost',
     'https://*.localhost',
     'https://*.139.59.206.100',
