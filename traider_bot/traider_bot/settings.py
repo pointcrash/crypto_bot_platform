@@ -56,6 +56,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.delta.almazor.co',
     'http://*.localhost:3000',
     'http://*.127.0.0.1:3000',
+    'http://127.0.0.1:3000',
 ]
 
 INSTALLED_APPS = [
