@@ -29,22 +29,32 @@ ALLOWED_HOSTS = [
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
+# CORS_ALLOW_HEADERS = [
+#     'Accept',
+#     'Accept-Encoding',
+#     'Authorization',
+#     'Content-Type',
+#     'Set-Cookie',
+# ]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://bravo.almazor.co",
-    "https://209.38.180.77",
-    "https://delta.almazor.co",
-    "https://139.59.206.100",
-    # Другие доверенные источники здесь
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://bravo.almazor.co",
+#     "https://209.38.180.77",
+#     "https://delta.almazor.co",
+#     "https://139.59.206.100",
+#     # Другие доверенные источники здесь
+# ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.bravo.almazor.co',
     'https://*.209.38.180.77',
     'https://*.127.0.0.1',
     'http://*.127.0.0.1',
+    'http://*.localhost',
+    'https://*.localhost',
     'https://*.139.59.206.100',
     'https://*.delta.almazor.co',
+    'http://*.localhost:3000',
 ]
 
 INSTALLED_APPS = [
@@ -78,6 +88,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -86,7 +97,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'traider_bot.urls'
@@ -216,13 +226,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny',
     ],
 }
 
@@ -231,11 +242,21 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 REST_AUTH = {
     'USE_JWT': True,
-    'JWT_AUTH_COOKIE': 'jwt-auth-token',
-    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
+    'JWT_AUTH_COOKIE': 'jwtAuthToken',
+    'JWT_AUTH_REFRESH_COOKIE': 'jwtRefreshToken',
+    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_SECURE': True,
+    'JWT_AUTH_SAMESITE': 'None',
+
+    # 'TOKEN_MODEL': 'None',
+    # 'SESSION_LOGIN': False,
 }
 
 Q_CLUSTER = {
