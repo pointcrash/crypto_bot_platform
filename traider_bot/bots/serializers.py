@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from bots.models import BotModel, BBBotModel, Log, UserBotLog, StepHedge
+from bots.models import BotModel, BBBotModel, Log, UserBotLog, StepHedge, Symbol
 from main.serializers import AccountNameOnlySerializer
 
 
@@ -16,8 +16,15 @@ class BBBotModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SymbolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Symbol
+        fields = '__all__'
+
+
 class BotModelSerializer(serializers.ModelSerializer):
     account = AccountNameOnlySerializer()
+    symbol = SymbolSerializer()
     bb = BBBotModelSerializer()
     zinger = StepHedgeSerializer()
 

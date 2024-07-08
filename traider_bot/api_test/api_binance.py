@@ -40,6 +40,9 @@ def get_data_ago_to_ms(days):
 # print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму
 # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
 # print(main_client.futures_position_information(symbol='BTCUSDT'))  # Инфо по позиции
+
+# print(main_client.futures_change_margin_type(symbol='BTCUSDT', marginType='ISOLATED'))  # Инфо по позиции
+
 # response = (main_client.futures_position_information())  # Инфо по позиции
 # for i in response:
 #     if float(i['positionAmt']) != 0:

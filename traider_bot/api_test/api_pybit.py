@@ -1,6 +1,5 @@
 from pybit.unified_trading import HTTP
 
-from api_2.api_aggregator import get_all_position_inform
 
 main_api_key = 'xcXVA47NndHFNDBqJ9'
 main_api_secret = '71Xj99PBSljGv8wOer2iRnBt7xF2J6UsF7Ex'
@@ -25,6 +24,14 @@ def bybit_set_trading_stop():
     return response
 
 
+def bybit_set_margin_mode():
+    session = get_session()
+    response = session.set_margin_mode(
+        setMarginMode='REGULAR_MARGIN',
+    )
+    return response
+
+
 def bybit_get_position_info():
     session = get_session()
     response = session.get_positions(category='linear', settleCoin='USDT')
@@ -33,3 +40,4 @@ def bybit_get_position_info():
 
 if __name__ == '__main__':
     pass
+    # print(bybit_set_margin_mode())
