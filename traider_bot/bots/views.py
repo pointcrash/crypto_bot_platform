@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb.logic.start_logic import bb_worker
+from bots.grid.logic.start_logic import grid_worker
 from bots.models import BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
@@ -150,6 +151,11 @@ def bot_start(request, bot_id):
         bot.is_active = True
         bot.save()
         bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+
+    if bot.work_model == 'grid':
+        bot.is_active = True
+        bot.save()
+        bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
     elif bot.work_model == 'zinger':
         bot.is_active = True

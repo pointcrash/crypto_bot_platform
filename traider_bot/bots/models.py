@@ -164,6 +164,13 @@ class BBBotModel(models.Model):
     time_update = models.DateTimeField(auto_now=True, null=True)
 
 
+class Grid(models.Model):
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE)
+    low_price = models.DecimalField(max_digits=20, decimal_places=7)
+    high_price = models.DecimalField(max_digits=20, decimal_places=7)
+    grid_count = models.IntegerField()
+
+
 class Set0Psn(models.Model):
     bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
     set0psn = models.BooleanField(default=False)
