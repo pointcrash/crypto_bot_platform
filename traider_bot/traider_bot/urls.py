@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from rest_framework_nested.routers import NestedDefaultRouter
 
 from bots.views_api import BotModelViewSet, BotReadOnlyViewSet, GridViewSet, BBViewSet
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
@@ -10,6 +11,11 @@ from single_bot.views import say_hello
 router = DefaultRouter()
 router.register(r'bots', BotModelViewSet, basename='bot')
 router.register(r'bots-detail', BotReadOnlyViewSet, basename='bot-detail')
+
+# Вложенный маршрутизатор для bb и grid
+bots_router = NestedDefaultRouter(router, r'bots', lookup='bot')
+bots_router.register(r'bb', BBViewSet, basename='bot-bb')
+bots_router.register(r'grid', GridViewSet, basename='bot-grid')
 
 urlpatterns = [
     path('', view_home, name='home'),
