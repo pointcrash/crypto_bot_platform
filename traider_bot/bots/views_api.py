@@ -41,7 +41,7 @@ class GridViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         bot_id = self.kwargs['bot_pk']
-        return BBBotModel.objects.filter(bot_id=bot_id)
+        return Grid.objects.filter(bot_id=bot_id)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
