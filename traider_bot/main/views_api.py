@@ -8,6 +8,14 @@ from main.serializers import UserSerializer, AccountSerializer
 from traider_bot.permissions import IsOwnerOrAdmin
 
 
+class CurrentUserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, ]
+
+    def get_queryset(self):
+        return User.object.filter(username=self.request.user.username)
+
+
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer

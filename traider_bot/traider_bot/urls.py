@@ -10,8 +10,6 @@ from single_bot.views import say_hello
 router = DefaultRouter()
 router.register(r'bots', BotModelViewSet, basename='bot')
 router.register(r'bots-detail', BotReadOnlyViewSet, basename='bot-detail')
-# router.register(r'bots/bb', BBViewSet, basename='bb')
-# router.register(r'bots/grid', GridViewSet, basename='grid')
 
 urlpatterns = [
     path('', view_home, name='home'),

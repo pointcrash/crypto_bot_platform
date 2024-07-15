@@ -13,4 +13,4 @@ class IsOwnerOrAdmin(permissions.BasePermission):
             return True
 
         # Instance must have an attribute named `owner`.
-        return obj.owner == request.user or request.user.is_superuser
+        return obj.owner == request.user or request.user.is_staff
