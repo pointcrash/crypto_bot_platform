@@ -42,9 +42,10 @@ urlpatterns = [
     path('api/v1/', include('orders.urls_api')),
     path('api/v1/main/', include('main.urls_api')),
 
-    path('api/v1/', include(router.urls)),
-
     path('api/auth/', include('authentication.urls')),
+
+    path('api/v1/', include(router.urls)),
+    path('api/v1/', include(bots_router.urls)),
 
 ]
 

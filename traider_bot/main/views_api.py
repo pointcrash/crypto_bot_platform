@@ -12,8 +12,8 @@ class CurrentUserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, ]
 
-    def get_queryset(self):
-        return User.objects.filter(username=self.request.user.username)
+    def get_object(self):
+        return self.request.user
 
 
 class UsersViewSet(viewsets.ModelViewSet):
