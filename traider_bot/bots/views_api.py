@@ -21,8 +21,36 @@ from traider_bot.permissions import IsOwnerOrAdmin
 logger = logging.getLogger('django')
 
 
+class BBViewSet(viewsets.ModelViewSet):
+    serializer_class = BBBotModelSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+
+
+class GridViewSet(viewsets.ModelViewSet):
+    serializer_class = GridSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+
+
+class ZingerViewSet(viewsets.ModelViewSet):
+    serializer_class = StepHedgeSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+
+
 class BotModelViewSet(viewsets.ModelViewSet):
     serializer_class = BotModelSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            queryset = BotModel.objects.all()
+        else:
+            queryset = BotModel.objects.filter(owner=user)
+        return queryset
+
+
+class BotReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = BotModelReadOnlySerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
     def get_queryset(self):

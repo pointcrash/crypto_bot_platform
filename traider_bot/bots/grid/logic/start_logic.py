@@ -5,7 +5,7 @@ from datetime import datetime
 from api_2.custom_ws_class import CustomWSClient
 from .bot_worker_class import WorkGridClass
 
-from .handlers_messages import bb_handler_wrapper
+from .handlers_messages import grid_handler_wrapper
 from ...general_functions import custom_logging, clear_cache_bot_data
 
 
@@ -15,10 +15,10 @@ def grid_worker(bot):
 
     ws_client = None
     try:
-        bb_worker_class = WorkGridClass(bot)
+        worker_class = WorkGridClass(bot)
 
         ''' Connection WS '''
-        ws_client = CustomWSClient(callback=bb_handler_wrapper(bb_worker_class), bot=bot)
+        ws_client = CustomWSClient(callback=grid_handler_wrapper(worker_class), bot=bot)
         ws_client.start()
 
         time.sleep(5)
@@ -27,11 +27,13 @@ def grid_worker(bot):
         ws_client.sub_to_user_info()
         # ws_client.sub_to_kline(interval=bot.bb.interval)
 
-        ''' Change leverage and position mode '''
-        bb_worker_class.preparatory_actions()
-
         ''' Subscribe to mark price topic '''
         ws_client.sub_to_mark_price()
+
+        ''' Change leverage and position mode '''
+        worker_class.preparatory_actions()
+
+        worker_class.initial_placing_orders()
 
         while bot.is_active and ws_client.is_connected():
             time.sleep(5)

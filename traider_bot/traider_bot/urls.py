@@ -2,13 +2,16 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from bots.views_api import BotModelViewSet
+from bots.views_api import BotModelViewSet, BotReadOnlyViewSet, GridViewSet, BBViewSet
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
     profile_list, profile_mode_switching, cleaning_logs_view, user_bot_logs_view
 from single_bot.views import say_hello
 
 router = DefaultRouter()
 router.register(r'bots', BotModelViewSet, basename='bot')
+router.register(r'bots-detail', BotReadOnlyViewSet, basename='bot-detail')
+# router.register(r'bots/bb', BBViewSet, basename='bb')
+# router.register(r'bots/grid', GridViewSet, basename='grid')
 
 urlpatterns = [
     path('', view_home, name='home'),

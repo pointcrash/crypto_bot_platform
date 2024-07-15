@@ -61,89 +61,89 @@ def grid_bot_create(request):
         bot_form = BotModelForm(request=request)
         grid_form = GridForm()
 
-    return render(request, 'bb/create.html', {
+    return render(request, 'grid/create.html', {
         'bot_form': bot_form,
         'grid_form': grid_form,
         'title': title,
     })
 
-#
-# @login_required
-# def bb_bot_edit(request, bot_id):
-#     bot_settings_template = 'bb/settings.html'
-#     bot = BotModel.objects.get(pk=bot_id)
-#     user = request.user
-#
-#     symbol = bot.symbol
-#     account = bot.account
-#     if request.method == 'POST':
-#         bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
-#         bb_form = BBForm(request.POST, instance=bot.bb)
-#         order_form = OrderCustomForm(request.POST)
-#
-#         if bot_form.is_valid() and bb_form.is_valid():
-#             bot.account = account
-#             bot.symbol = symbol
-#
-#             amount_long = Decimal(bot_form.cleaned_data.get('amount_long'))
-#             leverage = Decimal(bot_form.cleaned_data.get('leverage'))
-#             cur_price = Decimal(get_current_price(bot))
-#             qty_status = min_qty_check(bot.symbol, leverage, cur_price, amount_long)
-#
-#             if qty_status:
-#                 if bot.is_active:
-#                     restart_value = True
-#                     terminate_bot(bot)
-#                 else:
-#                     restart_value = False
-#
-#                 bb_model = bb_form.save(commit=False)
-#                 bot = bot_form.save(commit=False)
-#                 bot.is_active = True if restart_value else False
-#                 bot.account = account
-#                 bot.symbol = symbol
-#                 bb_model.save()
-#                 bot.save()
-#
-#                 if restart_value is True:
-#                     bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
-#                     bot_thread.start()
-#                 logger.info(
-#                     f'{user} отредактировал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
-#
-#                 return redirect('bot_list')
-#
-#             else:
-#                 min_amount = (Decimal(bot.symbol.minOrderQty) * cur_price / leverage).quantize(Decimal(1), rounding=ROUND_UP)
-#                 if not qty_status:
-#                     bot_form.add_error('amount_long', f'Инвестиция не может быть меньше {min_amount}$')
-#     else:
-#         bot_form = BotModelForm(request=request, instance=bot)
-#         bb_form = BBForm(instance=bot.bb)
-#         order_form = OrderCustomForm()
-#
-#     bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
-#     bot_cached_data = dict()
-#     for key in bot_cache_keys:
-#         new_key = key.split('_')[1]
-#         bot_cached_data[new_key] = cache.get(key)
-#
-#     position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
-#     order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
-#
-#     positions, orders = get_cur_positions_and_orders_info(bot)
-#
-#     return render(request, 'bots_info_page.html', {
-#         'bot_settings_template': bot_settings_template,
-#         'bot_form': bot_form,
-#         'bb_form': bb_form,
-#         'order_form': order_form,
-#         'bot': bot,
-#         'symbol': symbol,
-#         'account': account,
-#         'bot_cached_data': bot_cached_data,
-#         'orders': orders,
-#         'positions': positions,
-#         'order_history': order_history,
-#         'position_history': position_history,
-#     })
+
+@login_required
+def grid_bot_edit(request, bot_id):
+    bot_settings_template = 'bb/settings.html'
+    bot = BotModel.objects.get(pk=bot_id)
+    user = request.user
+
+    symbol = bot.symbol
+    account = bot.account
+    if request.method == 'POST':
+        bot_form = BotModelEditForm(request.POST, request=request, instance=bot)
+        bb_form = BBForm(request.POST, instance=bot.bb)
+        order_form = OrderCustomForm(request.POST)
+
+        if bot_form.is_valid() and bb_form.is_valid():
+            bot.account = account
+            bot.symbol = symbol
+
+            amount_long = Decimal(bot_form.cleaned_data.get('amount_long'))
+            leverage = Decimal(bot_form.cleaned_data.get('leverage'))
+            cur_price = Decimal(get_current_price(bot))
+            qty_status = min_qty_check(bot.symbol, leverage, cur_price, amount_long)
+
+            if qty_status:
+                if bot.is_active:
+                    restart_value = True
+                    terminate_bot(bot)
+                else:
+                    restart_value = False
+
+                bb_model = bb_form.save(commit=False)
+                bot = bot_form.save(commit=False)
+                bot.is_active = True if restart_value else False
+                bot.account = account
+                bot.symbol = symbol
+                bb_model.save()
+                bot.save()
+
+                if restart_value is True:
+                    bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+                    bot_thread.start()
+                logger.info(
+                    f'{user} отредактировал бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
+
+                return redirect('bot_list')
+
+            else:
+                min_amount = (Decimal(bot.symbol.minOrderQty) * cur_price / leverage).quantize(Decimal(1), rounding=ROUND_UP)
+                if not qty_status:
+                    bot_form.add_error('amount_long', f'Инвестиция не может быть меньше {min_amount}$')
+    else:
+        bot_form = BotModelForm(request=request, instance=bot)
+        bb_form = BBForm(instance=bot.bb)
+        order_form = OrderCustomForm()
+
+    bot_cache_keys = [key for key in cache.keys(f'bot{bot.id}*')]
+    bot_cached_data = dict()
+    for key in bot_cache_keys:
+        new_key = key.split('_')[1]
+        bot_cached_data[new_key] = cache.get(key)
+
+    position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
+    order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
+
+    positions, orders = get_cur_positions_and_orders_info(bot)
+
+    return render(request, 'bots_info_page.html', {
+        'bot_settings_template': bot_settings_template,
+        'bot_form': bot_form,
+        'bb_form': bb_form,
+        'order_form': order_form,
+        'bot': bot,
+        'symbol': symbol,
+        'account': account,
+        'bot_cached_data': bot_cached_data,
+        'orders': orders,
+        'positions': positions,
+        'order_history': order_history,
+        'position_history': position_history,
+    })
