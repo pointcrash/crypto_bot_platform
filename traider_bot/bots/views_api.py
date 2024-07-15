@@ -16,24 +16,42 @@ from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_or
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 
 from bots.serializers import *
-from traider_bot.permissions import IsOwnerOrAdmin
+from traider_bot.permissions import IsOwnerOrAdmin, IsBotOwnerOrAdmin
 
 logger = logging.getLogger('django')
 
 
 class BBViewSet(viewsets.ModelViewSet):
     serializer_class = BBBotModelSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
+
+    def get_queryset(self):
+        bot_id = self.kwargs['bot_pk']
+        return BBBotModel.objects.filter(bot_id=bot_id)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class GridViewSet(viewsets.ModelViewSet):
     serializer_class = GridSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
+
+    def get_queryset(self):
+        bot_id = self.kwargs['bot_pk']
+        return BBBotModel.objects.filter(bot_id=bot_id)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class ZingerViewSet(viewsets.ModelViewSet):
     serializer_class = StepHedgeSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
 
 class BotModelViewSet(viewsets.ModelViewSet):
