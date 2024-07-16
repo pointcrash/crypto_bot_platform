@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested.routers import NestedDefaultRouter
 
-from bots.views_api import BotModelViewSet, BotReadOnlyViewSet, GridViewSet, BBViewSet
+from bots.views_api import BotModelViewSet, BotReadOnlyViewSet, GridViewSet, BBViewSet, SymbolViewSet
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
     profile_list, profile_mode_switching, cleaning_logs_view, user_bot_logs_view
 from single_bot.views import say_hello
@@ -11,6 +11,7 @@ from single_bot.views import say_hello
 router = DefaultRouter()
 router.register(r'bots', BotModelViewSet, basename='bot')
 router.register(r'bots-detail', BotReadOnlyViewSet, basename='bot-detail')
+router.register(r'symbols', SymbolViewSet, basename='symbol')
 
 # Вложенный маршрутизатор для bb и grid
 bots_router = NestedDefaultRouter(router, r'bots', lookup='bot')
@@ -38,7 +39,7 @@ urlpatterns = [
     path('profile/', profile_list, name='profile_list'),
     path('profile/profile_mode_switching/<int:profile_id>/', profile_mode_switching, name='profile_mode_switching'),
 
-    # path('api/v1/bots/', include('bots.urls_api')),
+    path('api/v1/bots/', include('bots.urls_api')),
     path('api/v1/', include('orders.urls_api')),
     path('api/v1/main/', include('main.urls_api')),
 

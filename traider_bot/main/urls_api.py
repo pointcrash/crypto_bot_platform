@@ -9,6 +9,6 @@ urlpatterns = [
 
     path('accounts/', AccountsViewSet.as_view({'get': 'list'})),
     path('accounts/<int:pk>/', AccountsViewSet.as_view({'put': 'update', 'get': 'retrieve', 'delete': 'destroy'})),
-    # path('accounts/owner/<int:owner_id>/', AccountsViewSet.as_view({'get': 'list_by_owner'})),
+    path('accounts/by-owner/<int:owner_id>/', AccountsViewSet.as_view({'get': 'list_by_owner'})),
 
 ]

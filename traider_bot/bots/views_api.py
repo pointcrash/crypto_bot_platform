@@ -16,7 +16,7 @@ from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_or
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 
 from bots.serializers import *
-from traider_bot.permissions import IsOwnerOrAdmin, IsBotOwnerOrAdmin
+from traider_bot.permissions import IsOwnerOrAdmin, IsBotOwnerOrAdmin, IsAdminOrReadOnly
 
 logger = logging.getLogger('django')
 
@@ -79,6 +79,11 @@ class BotReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = BotModel.objects.filter(owner=user)
         return queryset
 
+    def list_by_account(self, request, account_id):
+        queryset = BotModel.objects.filter(account=account_id)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class BotLogsViewSet(viewsets.ModelViewSet):
     serializer_class = BotLogsSerializer
@@ -97,6 +102,12 @@ class UserBotLogViewSet(viewsets.ModelViewSet):
         bot_id = self.kwargs.get('bot_id')
         queryset = UserBotLog.objects.filter(bot=bot_id)
         return queryset
+
+
+class SymbolViewSet(viewsets.ModelViewSet):
+    queryset = Symbol.objects.all()
+    serializer_class = SymbolSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class StopBotView(APIView):
