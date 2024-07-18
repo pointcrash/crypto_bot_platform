@@ -30,7 +30,13 @@ def grid_handler_wrapper(bb_worker_class_obj):
 
 def handle_order_stream_message(msg, bot_class_obj):
     custom_logging(bot_class_obj.bot, f'ORDER {msg}')
-    # if msg['status'].upper() == 'FILLED':
+
+    if msg['status'].upper() == 'FILLED':
+        if not msg['reduceOnly']:
+            bot_class_obj.place_close_order(psn_side=msg['psnSide'], price=msg['price'], qty=msg['qty'])
+        else:
+            bot_class_obj.place_new_open_order(psn_side=msg['psnSide'], price=msg['price'], qty=msg['qty'])
+
     #     order_id = msg['orderId']
     #     with bot_class_obj.order_locker:
     #         if order_id in bot_class_obj.current_order_id:
@@ -104,7 +110,7 @@ def handle_position_stream_message(msg, bot_class_obj):
     #
     #             time.sleep(1)
     #             bot_class_obj.calc_and_save_pnl_per_cycle()
-        # bot_class_obj.replace_closing_orders()
+    # bot_class_obj.replace_closing_orders()
 
 
 def handle_message_kline_info(msg, bot_class_obj):
@@ -117,14 +123,12 @@ def handle_message_kline_info(msg, bot_class_obj):
     #     bot_class_obj.cached_data(key='tl', value=bot_class_obj.bb.tl)
     #     bot_class_obj.cached_data(key='ml', value=bot_class_obj.bb.ml)
     #     bot_class_obj.cached_data(key='bl', value=bot_class_obj.bb.bl)
-        # bot_class_obj.cached_data(key='closePriceList', value=bot_class_obj.bb.close_price_list)
-        # if not bot_class_obj.have_psn:
-        #     bot_class_obj.replace_opening_orders()
-        # else:
-        #     bot_class_obj.replace_closing_orders()
+    # bot_class_obj.cached_data(key='closePriceList', value=bot_class_obj.bb.close_price_list)
+    # if not bot_class_obj.have_psn:
+    #     bot_class_obj.replace_opening_orders()
+    # else:
+    #     bot_class_obj.replace_closing_orders()
 
 
 def handle_mark_price_stream_message(msg, bot_class_obj):
     bot_class_obj.current_price = Decimal(msg['markPrice'])
-
-
