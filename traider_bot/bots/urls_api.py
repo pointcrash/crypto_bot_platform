@@ -8,4 +8,9 @@ urlpatterns = [
 
     path('by-account/<int:account_id>/', BotReadOnlyViewSet.as_view({'get': 'list_by_account'})),
 
+    path('start/<int:bot_id>/', BotStartView.as_view(), name='start_bot'),
+    path('terminate/<int:bot_id>/<int:event_number>/', StopBotView.as_view(), name='stop_bot'),
+    path('delete/<int:bot_id>/<int:event_number>/', DeleteBotView.as_view(), name='delete_bot'),
+    path('deactivate/all/my/bots/', DeactivateAllMyBotsView.as_view(), name='deactivate_all_bots'),
+
 ]

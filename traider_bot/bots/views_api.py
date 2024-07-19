@@ -111,7 +111,7 @@ class SymbolViewSet(viewsets.ModelViewSet):
 
 
 class StopBotView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
     def post(self, request, bot_id, event_number):
         try:
@@ -135,7 +135,7 @@ class StopBotView(APIView):
 
 
 class DeleteBotView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
     def post(self, request, bot_id, event_number):
         try:
@@ -162,7 +162,7 @@ class DeleteBotView(APIView):
 
 
 class BotStartView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
     def post(self, request, bot_id):
         try:
@@ -199,7 +199,7 @@ class BotStartView(APIView):
 
 
 class DeactivateAllMyBotsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
     def post(self, request):
         try:
