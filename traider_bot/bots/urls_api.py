@@ -7,6 +7,7 @@ urlpatterns = [
     path('user_logs/<int:bot_id>', UserBotLogViewSet.as_view({'get': 'list'})),
 
     path('by-account/<int:account_id>/', BotReadOnlyViewSet.as_view({'get': 'list_by_account'})),
+    path('by-user/<int:user_id>/', BotReadOnlyViewSet.as_view({'get': 'list_by_user_id'})),
 
     path('start/<int:bot_id>/', BotStartView.as_view(), name='start_bot'),
     path('terminate/<int:bot_id>/<int:event_number>/', StopBotView.as_view(), name='stop_bot'),

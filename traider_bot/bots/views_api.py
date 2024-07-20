@@ -84,6 +84,11 @@ class BotReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    def list_by_user_id(self, request, user_id):
+        queryset = BotModel.objects.filter(owner=user_id)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class BotLogsViewSet(viewsets.ModelViewSet):
     serializer_class = BotLogsSerializer
