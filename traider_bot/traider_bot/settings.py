@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'tg_bot',
     'timezone',
     'authentication',
+    'support',
 ]
 
 MIDDLEWARE = [
