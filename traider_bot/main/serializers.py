@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from bots.models import BotModel
-from main.models import Account
+from main.models import Account, ExchangeService
 
 
 def masking_data_string(string):
@@ -42,6 +42,12 @@ class AccountNameOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ['id', 'name']
+
+
+class ExchangeServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExchangeService
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):

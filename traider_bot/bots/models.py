@@ -29,8 +29,8 @@ class BotModel(models.Model):
         ('ISOLATED', 'ISOLATED'),
     )
 
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     category = models.CharField(max_length=10, default='linear', blank=True)
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
     leverage = models.IntegerField(default=10)

@@ -18,7 +18,7 @@ class Account(models.Model):
         ('%', '%'),
     )
 
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(unique=True)
     service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
     API_TOKEN = models.CharField()
