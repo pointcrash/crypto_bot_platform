@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api_2.api_aggregator import get_futures_account_balance, internal_transfer
+from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets
 from main.forms import InternalTransferForm
 from main.models import Account, ExchangeService
 from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer
@@ -65,13 +65,26 @@ class ExchangeServiceReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
-class GetAccountBalanceView(APIView):
+class GetFuturesBalanceView(APIView):
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
     def get(self, request, acc_id):
         try:
             account = Account.objects.get(pk=acc_id)
             balance = get_futures_account_balance(account)
+            return JsonResponse({'success': True, 'message': 'Balance was successfully received', 'body': balance})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+class GetFundBalanceView(APIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+
+    def get(self, request, acc_id):
+        try:
+            account = Account.objects.get(pk=acc_id)
+            balance = get_user_assets(account, symbol="USDT")
             return JsonResponse({'success': True, 'message': 'Balance was successfully received', 'body': balance})
 
         except Exception as e:
