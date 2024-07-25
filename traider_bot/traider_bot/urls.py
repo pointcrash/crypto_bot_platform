@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/v1/', include('orders.urls_api')),
     path('api/v1/main/', include('main.urls_api')),
     path('api/v1/support/', include('support.urls_api')),
+    path('api/v1/documentation/', include('documentation.urls_api')),
 
     path('api/auth/', include('authentication.urls')),
 

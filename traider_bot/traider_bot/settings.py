@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     'timezone',
     'authentication',
     'support',
+    'documentation',
 ]
 
 MIDDLEWARE = [
