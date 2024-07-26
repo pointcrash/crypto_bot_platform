@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class SupportTask(models.Model):
-    TASK_STATUS_CHOICES = (
+class SupportTicket(models.Model):
+    TICKET_STATUS_CHOICES = (
         ('NEW', 'NEW'),
         ('TAKEN', 'TAKEN'),
         ('RESOLVED', 'RESOLVED'),
@@ -15,7 +15,7 @@ class SupportTask(models.Model):
     stuff = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='assigned_support_tasks')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    status = models.CharField(max_length=10, choices=TASK_STATUS_CHOICES, default='NEW')
+    status = models.CharField(max_length=10, choices=TICKET_STATUS_CHOICES, default='NEW')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -26,8 +26,8 @@ class SupportTask(models.Model):
         return self.title
 
 
-class TaskMessage(models.Model):
-    task = models.ForeignKey(SupportTask, related_name='messages', on_delete=models.CASCADE)
+class TicketMessage(models.Model):
+    ticket = models.ForeignKey(SupportTicket, related_name='messages', on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     is_read = models.BooleanField(default=False)

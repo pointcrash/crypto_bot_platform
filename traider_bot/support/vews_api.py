@@ -3,12 +3,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import *
-from .serializers import TaskSerializer, MessageSerializer
+from .serializers import MessageSerializer, TicketSerializer
 
 
-class TaskViewSet(viewsets.ModelViewSet):
-    queryset = SupportTask.objects.all()
-    serializer_class = TaskSerializer
+class TicketViewSet(viewsets.ModelViewSet):
+    queryset = SupportTicket.objects.all()
+    serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -16,7 +16,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = TaskMessage.objects.all()
+    queryset = TicketMessage.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
 
@@ -29,5 +29,5 @@ class MessageViewSet(viewsets.ModelViewSet):
             message.is_read = request.data.get('is_read', True)
             message.save()
             return Response({'status': 'read status updated'})
-        except TaskMessage.DoesNotExist:
+        except TicketMessage.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)

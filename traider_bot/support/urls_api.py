@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from support.vews_api import TaskViewSet, MessageViewSet
+from support.vews_api import TicketViewSet, MessageViewSet
 
 router = DefaultRouter()
-router.register(r'tasks', TaskViewSet)
+router.register(r'tickets', TicketViewSet)
 router.register(r'messages', MessageViewSet)
 
 urlpatterns = [
