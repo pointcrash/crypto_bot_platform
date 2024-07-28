@@ -10,4 +10,6 @@ router.register(r'messages', MessageViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('messages/<int:pk>/read/', MessageViewSet.as_view({'post': 'update_read_status'}), name='message-read-status'),
+    path('ticket/<int:ticket_id>/messages/', MessageViewSet.as_view({'get': 'list_by_ticket'})),
+    path('user-tickets/', TicketViewSet.as_view({'get': 'list_by_user'})),
 ]

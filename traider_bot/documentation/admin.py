@@ -12,6 +12,10 @@ class OrdersAdmin(admin.ModelAdmin):
 
 @admin.register(DocTag)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'doc_page', 'created_at')
+    list_display = ('id', 'title', 'get_doc_pages', 'created_at')
     list_display_links = ('id', 'title')
-    search_fields = ('id', 'title', 'doc_page', 'created_at')
+    search_fields = ('id', 'title', 'get_doc_pages', 'created_at')
+
+    def get_doc_pages(self, obj):
+        return ", ".join([d.id for d in obj.doc_page.all()])
+    get_doc_pages.short_description = 'doc_pages'
