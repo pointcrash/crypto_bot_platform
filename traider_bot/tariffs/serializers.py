@@ -16,5 +16,5 @@ class TariffSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tariff
-        fields = ['__all__']
+        fields = '__all__'
 
