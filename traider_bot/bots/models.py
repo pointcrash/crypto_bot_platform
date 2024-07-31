@@ -34,10 +34,10 @@ class BotModel(models.Model):
     category = models.CharField(max_length=10, default='linear', blank=True)
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
     leverage = models.IntegerField(default=10)
-    amount_long = models.IntegerField(validators=[MinValueValidator(0)])
-    amount_short = models.IntegerField(validators=[MinValueValidator(0)], null=True, blank=True)
+    amount_long = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+    amount_short = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS', blank=True)
-    work_model = models.CharField(max_length=10)
+    work_model = models.CharField(max_length=10, null=True, blank=True)
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
 
     is_active = models.BooleanField(default=False)
