@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'authentication',
     'support',
     'documentation',
+    'tariffs',
 ]
 
 MIDDLEWARE = [
