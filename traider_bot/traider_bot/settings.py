@@ -16,6 +16,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     'bravo.almazor.co',
     'delta.almazor.co',
+    'adm.almazor.co',
     'localhost',
     '209.38.180.77',
     '164.92.182.43',
