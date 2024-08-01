@@ -58,32 +58,6 @@ class BotModelSerializer(serializers.ModelSerializer):
         model = BotModel
         fields = '__all__'
 
-    # def update(self, instance, validated_data):
-    #     bb_data = validated_data.pop('bb', None)
-    #     zinger_data = validated_data.pop('zinger', None)
-    #     grid_data = validated_data.pop('grid', None)
-    #
-    #     if bb_data and instance.bb:
-    #         for attr, value in bb_data.items():
-    #             setattr(instance.bb, attr, value)
-    #         instance.bb.save()
-    #
-    #     if zinger_data and instance.zinger:
-    #         for attr, value in zinger_data.items():
-    #             setattr(instance.zinger, attr, value)
-    #         instance.zinger.save()
-    #
-    #     if grid_data and instance.grid:
-    #         for attr, value in grid_data.items():
-    #             setattr(instance.grid, attr, value)
-    #         instance.grid.save()
-    #
-    #     for attr, value in validated_data.items():
-    #         setattr(instance, attr, value)
-    #
-    #     instance.save()
-    #     return instance
-
 
 class BotLogsSerializer(serializers.ModelSerializer):
     class Meta:
