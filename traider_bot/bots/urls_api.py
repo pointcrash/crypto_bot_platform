@@ -14,4 +14,5 @@ urlpatterns = [
     path('delete/<int:bot_id>/<int:event_number>/', DeleteBotView.as_view(), name='delete_bot'),
     path('deactivate/all/my/bots/', DeactivateAllMyBotsView.as_view(), name='deactivate_all_bots'),
 
+    path('<int:bot_id>/get-positions-orders/', GetOrdersAndPositionsHistoryBotsView.as_view(), name='get_positions_orders'),
 ]

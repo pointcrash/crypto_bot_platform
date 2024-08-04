@@ -10,12 +10,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from bots.bb.logic.start_logic import bb_worker
+from bots.general_functions import get_cur_positions_and_orders_info
 from bots.grid.logic.start_logic import grid_worker
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 
 from bots.serializers import *
+from orders.models import Position, Order
+from orders.serializers import PositionSerializer, OrderSerializer
 from traider_bot.permissions import IsOwnerOrAdmin, IsBotOwnerOrAdmin, IsAdminOrReadOnly
 
 logger = logging.getLogger('django')
@@ -218,3 +221,36 @@ class DeactivateAllMyBotsView(APIView):
             logger.error(f'Error stopping all bots: {e}')
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
+
+class GetOrdersAndPositionsHistoryBotsView(APIView):
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
+
+    def get(self, request, bot_id):
+        try:
+            bot = get_object_or_404(BotModel, pk=bot_id)
+
+            position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by(
+                '-time_update')
+            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by(
+                '-time_update')
+
+            position_history_serialized = PositionSerializer(position_history, many=True).data
+            order_history_serialized = OrderSerializer(order_history, many=True).data
+
+            positions, orders = get_cur_positions_and_orders_info(bot)
+
+            return JsonResponse(
+                {
+                    'success': True,
+                    'data': {
+                        'position_history': position_history_serialized,
+                        'order_history': order_history_serialized,
+                        'positions': positions,
+                        'orders': orders
+                    }
+                }
+            )
+
+        except Exception as e:
+            logger.error(f'Error stopping all bots: {e}')
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
