@@ -16,5 +16,6 @@ urlpatterns = [
 
     path('exchange-services/', ExchangeServiceReadOnlyViewSet.as_view({'get': 'list'})),
 
+    path('get-trusted-ip/', GetTrustedIPView.as_view(), name='get_trusted_ip'),
 
 ]

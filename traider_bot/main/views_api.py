@@ -116,3 +116,18 @@ class InternalTransferView(APIView):
             return Response({'success': True, 'message': 'Transfer completed successfully'})
         else:
             return Response({'success': False, 'message': 'Invalid data', 'errors': form.errors}, status=400)
+
+
+class GetTrustedIPView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            trusted_ip = [
+             '164.90.181.246',
+            ]
+
+            return JsonResponse({'trusted_ip': trusted_ip})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
