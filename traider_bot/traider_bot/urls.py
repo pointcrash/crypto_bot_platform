@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/v1/support/', include('support.urls_api')),
     path('api/v1/documentation/', include('documentation.urls_api')),
     path('api/v1/tariffs/', include('tariffs.urls_api')),
+    path('api/v1/', include('purchases.urls_api')),
 
     path('api/auth/', include('authentication.urls')),
 

@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     'support',
     'documentation',
     'tariffs',
+    'purchases',
 ]
 
 MIDDLEWARE = [
