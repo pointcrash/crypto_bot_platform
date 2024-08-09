@@ -12,15 +12,17 @@ class DocTagSerializer(serializers.ModelSerializer):
 
 
 class SimpleDocTagSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = DocTag
-        fields = ['id', 'title']
+        fields = ['title']
 
 
 class DocPageSerializer(serializers.ModelSerializer):
     tags = SimpleDocTagSerializer(many=True, read_only=True)
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=DocTag.objects.all(), write_only=True, source='tags'
+    )
 
     class Meta:
         model = DocPage
-        fields = ['id', 'title', 'body', 'created_at', 'updated_at', 'tags']
+        fields = ['id', 'title', 'body', 'created_at', 'updated_at', 'tags', 'tag_ids']
