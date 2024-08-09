@@ -166,9 +166,9 @@ class BBBotModel(models.Model):
 
 class Grid(models.Model):
     bot = models.OneToOneField(BotModel, on_delete=models.CASCADE)
-    low_price = models.DecimalField(max_digits=20, decimal_places=7)
-    high_price = models.DecimalField(max_digits=20, decimal_places=7)
-    grid_count = models.IntegerField()
+    low_price = models.DecimalField(max_digits=20, decimal_places=7, blank=True, null=True)
+    high_price = models.DecimalField(max_digits=20, decimal_places=7, blank=True, null=True)
+    grid_count = models.IntegerField(default=10)
 
 
 class Set0Psn(models.Model):
