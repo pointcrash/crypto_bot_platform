@@ -14,7 +14,7 @@ class DocPage(models.Model):
 
 class DocTag(models.Model):
     title = models.CharField(max_length=50)
-    doc_page = models.ManyToManyField(DocPage, related_name='tags')
+    doc_page = models.ManyToManyField(DocPage, related_name='tags', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
