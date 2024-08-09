@@ -20,7 +20,7 @@ class SimpleDocTagSerializer(serializers.ModelSerializer):
 class DocPageSerializer(serializers.ModelSerializer):
     tags = SimpleDocTagSerializer(many=True, read_only=True)
     tag_ids = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=DocTag.objects.all(), write_only=True, source='tags'
+        many=True, queryset=DocTag.objects.all(), source='tags'
     )
 
     class Meta:
