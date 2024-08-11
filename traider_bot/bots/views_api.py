@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+from decimal import Decimal
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -9,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api_2.api_aggregator import place_order
 from bots.bb.logic.start_logic import bb_worker
 from bots.general_functions import get_cur_positions_and_orders_info
 from bots.grid.logic.start_logic import grid_worker
@@ -20,6 +22,7 @@ from bots.serializers import *
 from orders.models import Position, Order
 from orders.serializers import PositionSerializer, OrderSerializer
 from traider_bot.permissions import IsOwnerOrAdmin, IsBotOwnerOrAdmin, IsAdminOrReadOnly
+import traceback
 
 logger = logging.getLogger('django')
 
@@ -222,6 +225,25 @@ class DeactivateAllMyBotsView(APIView):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
+class CloseSelectedPositionView(APIView):
+    permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
+
+    def post(self, request, bot_id):
+        try:
+            qty = request.query_params.get('qty')
+            psn_side = request.query_params.get('side')
+
+            bot = BotModel.objects.get(pk=bot_id)
+            side = 'SELL' if psn_side == 'LONG' else 'BUY'
+            qty = abs(Decimal(qty))
+            response = place_order(bot=bot, side=side, position_side=psn_side, qty=qty, price=None, order_type='MARKET')
+
+            return JsonResponse({'success': True, 'message': 'Position closed', 'response': response}, status=200)
+        except Exception as e:
+            logger.error(f'Error stopping all bots: {e}')
+            return JsonResponse({'success': False, 'message': str(e), '**traceback**': str(traceback.format_exc())}, status=500)
+
+
 class GetOrdersAndPositionsHistoryBotsView(APIView):
     permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
@@ -253,4 +275,4 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
 
         except Exception as e:
             logger.error(f'Error stopping all bots: {e}')
-            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+            return JsonResponse({'success': False, 'message': str(e), '**traceback**': str(traceback.format_exc())}, status=500)

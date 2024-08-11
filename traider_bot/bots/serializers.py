@@ -37,7 +37,9 @@ class SymbolSerializer(serializers.ModelSerializer):
 
 class BotModelReadOnlySerializer(serializers.ModelSerializer):
     account = AccountNameOnlySerializer(read_only=True)
+    account_name = serializers.ReadOnlyField(source='account.name')
     symbol = SymbolSerializer(read_only=True)
+    symbol_name = serializers.ReadOnlyField(source='symbol.name')
     bb = BBBotModelSerializer(read_only=True)
     zinger = StepHedgeSerializer(read_only=True)
     grid = GridSerializer(read_only=True)
@@ -49,7 +51,9 @@ class BotModelReadOnlySerializer(serializers.ModelSerializer):
 
 class BotModelSerializer(serializers.ModelSerializer):
     account = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())
+    account_name = serializers.ReadOnlyField(source='account.name')
     symbol = serializers.PrimaryKeyRelatedField(queryset=Symbol.objects.all())
+    symbol_name = serializers.ReadOnlyField(source='symbol.name')
     bb = serializers.PrimaryKeyRelatedField(queryset=BBBotModel.objects.all(), required=False, allow_null=True)
     zinger = serializers.PrimaryKeyRelatedField(queryset=StepHedge.objects.all(), required=False, allow_null=True)
     grid = serializers.PrimaryKeyRelatedField(queryset=Grid.objects.all(), required=False, allow_null=True)
