@@ -3,8 +3,8 @@ from django.urls import path
 from bots.views_api import *
 
 urlpatterns = [
-    path('<int:bot_id>/logs', BotLogsViewSet.as_view({'get': 'list'})),
-    path('<int:bot_id>/user_logs', UserBotLogViewSet.as_view({'get': 'list'})),
+    path('<int:bot_id>/logs/', BotLogsViewSet.as_view({'get': 'list'})),
+    path('<int:bot_id>/user_logs/', UserBotLogViewSet.as_view({'get': 'list'})),
 
     path('by-account/<int:account_id>/', BotReadOnlyViewSet.as_view({'get': 'list_by_account'})),
     path('by-user/<int:user_id>/', BotReadOnlyViewSet.as_view({'get': 'list_by_user_id'})),
