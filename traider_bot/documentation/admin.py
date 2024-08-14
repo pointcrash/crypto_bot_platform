@@ -17,13 +17,16 @@ class OrdersAdmin(admin.ModelAdmin):
     search_fields = ('id', 'title', 'get_doc_pages', 'created_at')
 
     def get_doc_pages(self, obj):
-        return ", ".join([d.id for d in obj.doc_page.all()])
+        return ", ".join([str(d.id) for d in obj.doc_page.all()])
     get_doc_pages.short_description = 'doc_pages'
 
 
 @admin.register(DocCategory)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title')
+    list_display = ('id', 'title', 'get_doc_pages')
     list_display_links = ('id', 'title',)
-    search_fields = ('id', 'title')
+    search_fields = ('id', 'title', 'get_doc_pages')
 
+    def get_doc_pages(self, obj):
+        return ", ".join([str(d.id) for d in obj.doc_page.all()])
+    get_doc_pages.short_description = 'doc_pages'
