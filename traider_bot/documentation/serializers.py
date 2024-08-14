@@ -14,7 +14,7 @@ class DocTagSerializer(serializers.ModelSerializer):
 class SimpleDocTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocTag
-        fields = ['title']
+        fields = ['id', 'title']
 
 
 class DocPageSerializer(serializers.ModelSerializer):
