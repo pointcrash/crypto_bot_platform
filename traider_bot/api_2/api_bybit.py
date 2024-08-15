@@ -78,9 +78,12 @@ def bybit_get_position_inform(bot):
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     custom_logging(bot, response, 'RESPONSE')
     try:
-        response = response['result']['list']
-        position_inform_list = format_data(response)
-        return position_inform_list
+        if response['result'].get('list', None):
+            response = response['result']['list']
+            position_inform_list = format_data(response)
+            return position_inform_list
+        else:
+            return response
     except Exception as e:
         print(e)
         print(response)
