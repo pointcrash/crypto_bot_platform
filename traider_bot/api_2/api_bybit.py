@@ -78,19 +78,16 @@ def bybit_get_position_inform(bot):
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     custom_logging(bot, response, 'RESPONSE')
     try:
-        if response['result'].get('list', None):
-            response = response['result']['list']
-            position_inform_list = format_data(response)
-            return position_inform_list
-        else:
-            return response
+        response = response['result']['list']
+        position_inform_list = format_data(response)
+        return position_inform_list
     except Exception as e:
         print(e)
         print(response)
         try:
-            raise Exception(traceback.print_exc())
+            raise f'response - {response}, Exception - {Exception(traceback.print_exc())}'
         except:
-            raise Exception(traceback.format_exc())
+            raise f'response - {response}, Exception - {Exception(traceback.format_exc())}'
 
 
 def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side=None):
