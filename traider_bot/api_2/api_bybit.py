@@ -60,6 +60,7 @@ def sort_position_inform(unsorted_list):
 
 
 def bybit_get_position_inform(bot):
+
     def format_data(position_list):
         position_inform_list = [{
             'symbol': position['symbol'],
@@ -85,9 +86,9 @@ def bybit_get_position_inform(bot):
         print(e)
         print(response)
         try:
-            raise Exception(f'response - {response}, Exception - {traceback.print_exc()}')
+            raise Exception(f'Response: "{response['retMsg']}",\n Traceback: "{traceback.print_exc()}"')
         except:
-            raise Exception(f'response - {response}, Exception - {traceback.format_exc()}')
+            raise Exception(f'Response: "{response['retMsg']}",\n Traceback: "{traceback.format_exc()}"')
 
 
 def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side=None):
