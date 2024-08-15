@@ -86,9 +86,9 @@ def bybit_get_position_inform(bot):
         print(e)
         print(response)
         try:
-            raise Exception(f'Response: "{response['retMsg']}",\n Traceback: "{traceback.print_exc()}"')
+            raise Exception(f"Response: {response['retMsg']},\n Traceback: {traceback.print_exc()}")
         except:
-            raise Exception(f'Response: "{response['retMsg']}",\n Traceback: "{traceback.format_exc()}"')
+            raise Exception(f"Response: {response['retMsg']},\n Traceback: {traceback.format_exc()}")
 
 
 def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side=None):
