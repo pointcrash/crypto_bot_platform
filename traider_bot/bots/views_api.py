@@ -275,4 +275,4 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
 
         except Exception as e:
             logger.error(f'Error stopping all bots: {e}')
-            return JsonResponse({'success': False, 'message': str(e), '**traceback**': str(traceback.format_exc())}, status=500)
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
