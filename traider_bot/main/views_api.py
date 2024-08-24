@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 
 from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets
 from main.forms import InternalTransferForm
-from main.models import Account, ExchangeService
-from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer
+from main.models import Account, ExchangeService, Referral
+from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer
 from traider_bot.permissions import IsOwnerOrAdmin
 
 
@@ -131,3 +131,20 @@ class GetTrustedIPView(APIView):
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+class AddReferredUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        referral_code = kwargs.get('referral_code')
+        try:
+            referral = Referral.objects.get(code=referral_code)
+        except Referral.DoesNotExist:
+            return Response({"detail": "Referral code does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ReferralSerializer(instance=referral, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"detail": "User added to referral list."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

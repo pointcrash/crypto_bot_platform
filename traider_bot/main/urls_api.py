@@ -18,4 +18,6 @@ urlpatterns = [
 
     path('get-trusted-ip/', GetTrustedIPView.as_view(), name='get_trusted_ip'),
 
+    path('referrals/<str:referral_code>/add/', AddReferredUserView.as_view(), name='add-referred-user'),
+
 ]

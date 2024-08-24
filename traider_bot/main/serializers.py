@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from bots.models import BotModel
-from main.models import Account, ExchangeService
+from main.models import Account, ExchangeService, Referral
 
 
 def masking_data_string(string):
@@ -53,6 +53,7 @@ class ExchangeServiceSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     account_count = serializers.SerializerMethodField()
     bots_count = serializers.SerializerMethodField()
+    referral_code = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -63,3 +64,25 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_bots_count(self, obj):
         return BotModel.objects.filter(owner=obj).count()
+
+    def get_referral_code(self, obj):
+        return Referral.objects.get(user=obj).code
+
+
+class ReferralSerializer(serializers.ModelSerializer):
+    referred_user_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Referral
+        fields = ['user', 'code', 'referred_user_id']
+
+    def update(self, instance, validated_data):
+        referred_user_id = validated_data.pop('referred_user_id')
+        try:
+            referred_user = User.objects.get(id=referred_user_id)
+            instance.referred_users.add(referred_user)
+            instance.save()
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this ID does not exist.")
+
+        return instance
