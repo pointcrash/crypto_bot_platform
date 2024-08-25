@@ -124,7 +124,7 @@ class GetTrustedIPView(APIView):
     def get(self, request):
         try:
             trusted_ip = [
-             '164.90.181.246',
+             '164.92.182.43',
             ]
 
             return JsonResponse({'trusted_ip': trusted_ip})
@@ -134,7 +134,7 @@ class GetTrustedIPView(APIView):
 
 
 class AddReferredUserView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
 
     def post(self, request, *args, **kwargs):
         referral_code = kwargs.get('referral_code')
