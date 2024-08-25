@@ -69,7 +69,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_referral_code(self, obj):
         return Referral.objects.get(user=obj).code
 
-    def get_referral_ccount(self, obj):
+    def get_referral_account(self, obj):
         return Referral.objects.filter(user=obj).count()
 
 
