@@ -54,6 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
     account_count = serializers.SerializerMethodField()
     bots_count = serializers.SerializerMethodField()
     referral_code = serializers.SerializerMethodField()
+    referral_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -67,6 +68,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_referral_code(self, obj):
         return Referral.objects.get(user=obj).code
+
+    def get_referral_ccount(self, obj):
+        return Referral.objects.filter(user=obj).count()
 
 
 class ReferralSerializer(serializers.ModelSerializer):
