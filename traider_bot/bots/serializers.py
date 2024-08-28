@@ -38,7 +38,7 @@ class SymbolSerializer(serializers.ModelSerializer):
 class BotModelReadOnlySerializer(serializers.ModelSerializer):
     account = AccountNameOnlySerializer(read_only=True)
     account_name = serializers.ReadOnlyField(source='account.name')
-    account_service = serializers.ReadOnlyField(source='account.service')
+    account_service = serializers.ReadOnlyField(source='account.service.name')
     symbol = SymbolSerializer(read_only=True)
     symbol_name = serializers.ReadOnlyField(source='symbol.name')
     bb = BBBotModelSerializer(read_only=True)
@@ -53,7 +53,7 @@ class BotModelReadOnlySerializer(serializers.ModelSerializer):
 class BotModelSerializer(serializers.ModelSerializer):
     account = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())
     account_name = serializers.ReadOnlyField(source='account.name')
-    account_service = serializers.ReadOnlyField(source='account.service')
+    account_service = serializers.ReadOnlyField(source='account.service.name')
     symbol = serializers.PrimaryKeyRelatedField(queryset=Symbol.objects.all())
     symbol_name = serializers.ReadOnlyField(source='symbol.name')
     bb = serializers.PrimaryKeyRelatedField(queryset=BBBotModel.objects.all(), required=False, allow_null=True)
