@@ -187,20 +187,16 @@ class BotStartView(APIView):
             bot.save()
 
             if bot.work_model == 'bb':
-                pass
-                # bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+                bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
             if bot.work_model == 'grid':
-                pass
-                # bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
+                bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
             elif bot.work_model == 'zinger':
-                pass
-                # bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
+                bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
 
             if bot_thread is not None:
-                pass
-                # bot_thread.start()
+                bot_thread.start()
 
             return JsonResponse({'success': True, 'message': 'Bot started successfully'})
 
