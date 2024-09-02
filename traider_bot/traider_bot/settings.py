@@ -17,6 +17,7 @@ ALLOWED_HOSTS = [
     'bravo.almazor.co',
     'delta.almazor.co',
     'adm.almazor.co',
+    'trade.cryptonna.com',
     'localhost',
     '209.38.180.77',
     '164.92.182.43',
@@ -48,6 +49,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.bravo.almazor.co',
+    'https://*.trade.cryptonna.com',
     'https://*.209.38.180.77',
     'https://127.0.0.1',
     'http://127.0.0.1',
