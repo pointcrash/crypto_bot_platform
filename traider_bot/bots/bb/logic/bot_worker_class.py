@@ -1,15 +1,19 @@
 import logging
 import threading
 import time
+from datetime import datetime
 from decimal import Decimal
 
 from django.core.cache import cache
+from django.utils.timezone import make_naive
 
 from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, \
-    get_position_inform, place_conditional_order
+    get_position_inform, place_conditional_order, get_pnl_by_time
 from api_2.custom_logging_api import custom_logging
 from bots.bb.logic.avg_logic import BBAutoAverage
 from bots.bb.logic.bb_class import BollingerBands
+from bots.general_functions import custom_user_bot_logging
+from bots.models import BotsData
 
 
 class WorkBollingerBandsClass:
@@ -24,9 +28,12 @@ class WorkBollingerBandsClass:
         self.current_order_id = []
         self.have_psn = False
         self.ml_order_id = None
-        self.main_order_id = None
+        self.close_psn_main_order_id = None
+        self.open_order_id = None
         self.sl_order = None
         self.position_info = dict()
+        self.count_cycles = 0
+        self.trailing_price = 0
 
         self.psn_locker = threading.Lock()
         self.avg_locker = threading.Lock()
@@ -50,6 +57,8 @@ class WorkBollingerBandsClass:
         return logger
 
     def preparatory_actions(self):
+        custom_user_bot_logging(self.bot, f' Бот запущен')
+
         try:
             change_position_mode(self.bot)
         except:
@@ -64,6 +73,7 @@ class WorkBollingerBandsClass:
         if len(not_null_psn_list) > 1:
             raise Exception('More than one position')
         elif len(not_null_psn_list) == 1:
+            self.count_cycles += 1
             self.have_psn = True
             self.position_info = not_null_psn_list[0]
             self.position_info['qty'] = abs(Decimal(self.position_info['qty']))
@@ -72,57 +82,11 @@ class WorkBollingerBandsClass:
         # else:
         #     self.replace_opening_orders()
 
-    # def replace_opening_orders(self):
-    #     cancel_all_orders(self.bot)
-    #     side = self.bot.bb.side
-    #     amount_usdt = self.bot.amount_long
-    #
-    #     while not self.current_price:
-    #         time.sleep(0.5)
-    #
-    #     if side == 'FB' or side == 'LONG':
-    #         if self.current_price <= self.bb.bl:
-    #             return place_order(self.bot, side='BUY', order_type='MARKET', price=self.current_price,
-    #                                amount_usdt=amount_usdt)
-    #         place_conditional_order(self.bot, side='BUY', position_side='LONG', trigger_price=self.bb.bl,
-    #                                 trigger_direction=2, amount_usdt=amount_usdt)
-    #     if side == 'FB' or side == 'SHORT':
-    #         if self.current_price >= self.bb.tl:
-    #             return place_order(self.bot, side='SELL', order_type='MARKET', price=self.current_price,
-    #                                amount_usdt=amount_usdt)
-    #         place_conditional_order(self.bot, side='SELL', position_side='SHORT', trigger_price=self.bb.tl,
-    #                                 trigger_direction=1, amount_usdt=amount_usdt)
-    #
-    # def replace_closing_orders(self):
-    #     cancel_all_orders(self.bot)
-    #     position_side = self.position_info['side']
-    #     psn_qty = self.position_info['qty']
-    #
-    #     side, price, td = ('SELL', self.bb.tl, 1) if position_side == 'LONG' else ('BUY', self.bb.bl, 2)
-    #     price = self.price_check(price, 2)
-    #
-    #     if self.bot.bb.take_on_ml and not self.ml_filled and psn_qty > Decimal(self.bot.symbol.minOrderQty):
-    #         ml_take_price = self.price_check(self.bb.ml, 1)
-    #         ml_take_qty = Decimal(str(psn_qty * self.bot.bb.take_on_ml_percent / 100)).quantize(
-    #             Decimal(self.bot.symbol.minOrderQty))
-    #
-    #         response = place_conditional_order(self.bot, side=side, position_side=position_side,
-    #                                            trigger_price=ml_take_price, trigger_direction=td, qty=ml_take_qty)
-    #         self.ml_order_id = response['orderId']
-    #
-    #         main_take_qty = psn_qty - ml_take_qty
-    #     else:
-    #         main_take_qty = Decimal(self.position_info['qty'])
-    #
-    #     response = place_conditional_order(self.bot, side=side, position_side=position_side,
-    #                                        trigger_price=price, trigger_direction=td, qty=main_take_qty)
-    #     self.main_order_id = response['orderId']
-
     def price_check(self, price, take_number):
         psn_side = self.position_info['side']
         psn_price = Decimal(self.position_info['entryPrice'])
         tick_size = Decimal(self.bot.symbol.tickSize)
-        take_distance = tick_size * 6 if take_number == 1 else tick_size * 12
+        take_distance = tick_size * 10 if take_number == 1 else tick_size * 20
 
         if psn_side == 'LONG':
             if price < psn_price:
@@ -134,29 +98,50 @@ class WorkBollingerBandsClass:
             return price
 
     def place_open_psn_order(self, current_price):
-        side = self.bot.bb.side
-        amount_usdt = self.bot.amount_long
+        if self.bot.bb.endless_cycle or not self.bot.bb.endless_cycle and self.count_cycles == 0:
+            side = self.bot.bb.side
+            amount_usdt = self.bot.amount_long
+            deviation = (current_price * self.bot.bb.percent_deviation_from_lines / 100) if self.bot.bb.is_deviation_from_lines else 0
 
-        if side == 'FB' or side == 'LONG':
-            if current_price <= self.bb.bl:
-                response = place_order(self.bot, side='BUY', order_type='MARKET', price=current_price,
-                                       amount_usdt=amount_usdt)
-                if response.get('orderId'):
-                    self.current_order_id.append(response['orderId'])
-                    self.have_psn = True
-                else:
-                    custom_logging(self.bot, response, named='response')
-                    raise Exception('Open order is failed')
-        if side == 'FB' or side == 'SHORT':
-            if current_price >= self.bb.tl:
-                response = place_order(self.bot, side='SELL', order_type='MARKET', price=current_price,
-                                       amount_usdt=amount_usdt)
-                if response.get('orderId'):
-                    self.current_order_id.append(response['orderId'])
-                    self.have_psn = True
-                else:
-                    custom_logging(self.bot, response, named='response')
-                    raise Exception('Open order is failed')
+            if side == 'FB' or side == 'Buy':
+                if current_price <= self.bb.bl - deviation:
+
+                    self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
+                    self.cached_data(key='BuyTrailingPrice', value=self.trailing_price)
+                    if self.bot.bb.trailing_in and not self.bl_trailing(Decimal(self.bot.bb.trailing_in_percent)):
+                        return
+
+                    response = place_order(self.bot, side='BUY', order_type='MARKET', price=current_price,
+                                           amount_usdt=amount_usdt)
+                    if response.get('orderId'):
+                        self.trailing_price = 0
+                        self.open_order_id = response['orderId']
+                        self.current_order_id.append(response['orderId'])
+                        self.have_psn = True
+                        self.count_cycles += 1
+                    else:
+                        custom_logging(self.bot, response, named='response')
+                        raise Exception('Open order is failed')
+            if side == 'FB' or side == 'Sell':
+                if current_price >= self.bb.tl + deviation:
+
+                    self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
+                    self.cached_data(key='SellTrailingPrice', value=self.trailing_price)
+                    if self.bot.bb.trailing_in and not self.tl_trailing(Decimal(self.bot.bb.trailing_in_percent)):
+                        return
+
+                    response = place_order(self.bot, side='SELL', order_type='MARKET', price=current_price,
+                                           amount_usdt=amount_usdt)
+                    if response.get('orderId'):
+                        self.trailing_price = 0
+                        self.open_order_id = response['orderId']
+                        self.current_order_id.append(response['orderId'])
+                        self.have_psn = True
+                        self.count_cycles += 1
+
+                    else:
+                        custom_logging(self.bot, response, named='response')
+                        raise Exception('Open order is failed')
 
     def place_closing_orders(self):
         position_side = self.position_info['side']
@@ -184,17 +169,33 @@ class WorkBollingerBandsClass:
 
         if (position_side == 'LONG' and self.current_price > price) or (
                 position_side == 'SHORT' and self.current_price < price):
+
+            # Trailing price
+            self.trailing_price = self.current_price if not self.trailing_price else self.trailing_price
+            if self.bot.bb.trailing_out:
+                if position_side == 'LONG' and not self.tl_trailing(Decimal(
+                        self.bot.bb.trailing_out_percent)) or position_side == 'SHORT' and not self.bl_trailing(
+                        Decimal(self.bot.bb.trailing_out_percent)):
+                    self.cached_data('CloseTrailingPrice', self.trailing_price)
+                    return
+
             response = place_order(self.bot, side=side, position_side=position_side,
                                    price=price, order_type='MARKET', qty=main_take_qty)
-            self.main_order_id = response['orderId']
+            self.close_psn_main_order_id = response['orderId']
             self.current_order_id.append(response['orderId'])
+            self.trailing_price = 0
             self.have_psn = False
             self.ml_qty = 0
             self.ml_filled = False
             self.ml_status_save()
+            # self.count_cycles += 1
+
+            if self.bot.bb.endless_cycle is False:
+                self.bot.is_active = False
+                self.bot.save()
 
     def turn_after_ml(self):
-        if self.bot.bb.take_on_ml and self.ml_filled:
+        if self.bot.bb.take_after_ml and self.bot.bb.take_on_ml and self.ml_filled:
             position_side = self.position_info['side']
             order_side = None
 
@@ -212,11 +213,64 @@ class WorkBollingerBandsClass:
                 self.ml_status_save()
 
     def place_stop_loss(self):
-        if self.bot.bb.sl_order:
-            if not self.sl_order:
-                pass
+        if not self.sl_order:
+            if self.bot.bb.stop_loss:
+                psn_side = self.position_info['side']
+                psn_price = Decimal(self.position_info['entryPrice'])
+                psn_qty = Decimal(self.position_info['qty'])
+                psn_cost = psn_price * psn_qty
+                losses = psn_cost / self.bot.leverage * self.bot.bb.stop_loss_value / 100
 
+                if psn_side == 'LONG':
+                    side = 'SELL'
+                    if self.bot.bb.stop_loss_value_choice == 'percent':
+                        trigger_price = psn_price - (psn_price * self.bot.bb.stop_loss_value / 100)
+                    elif self.bot.bb.stop_loss_value_choice == 'pnl':
+                        psn_cost_after_loss = psn_cost - losses
+                        trigger_price = psn_cost_after_loss / psn_qty
 
+                elif psn_side == 'SHORT':
+                    side = 'BUY'
+                    if self.bot.bb.stop_loss_value_choice == 'percent':
+                        trigger_price = psn_price + (psn_price * self.bot.bb.stop_loss_value / 100)
+                    elif self.bot.bb.stop_loss_value_choice == 'pnl':
+                        psn_cost_after_loss = psn_cost + losses
+                        trigger_price = psn_cost_after_loss / psn_qty
+
+                td = 1 if self.current_price < trigger_price else 2
+
+                response = place_conditional_order(self.bot, side=side, position_side=psn_side,
+                                                   trigger_price=trigger_price, trigger_direction=td, qty=psn_qty)
+                # self.current_order_id.append(response['orderId'])
+                self.sl_order = response['orderId']
+
+    def bl_trailing(self, trailing_percent):
+        if self.current_price < self.trailing_price:
+            self.trailing_price = self.current_price
+            self.cached_data('ClosedTrPrice', self.trailing_price * (1 + (trailing_percent / 100)))
+        elif self.current_price >= self.trailing_price * (1 + (trailing_percent / 100)):
+            return True
+
+    def tl_trailing(self, trailing_percent):
+        if self.current_price > self.trailing_price:
+            self.trailing_price = self.current_price
+            self.cached_data('ClosedTrPrice', self.trailing_price * (1 - (trailing_percent / 100)))
+        elif self.current_price <= self.trailing_price * (1 - (trailing_percent / 100)):
+            return True
+
+    def calc_and_save_pnl_per_cycle(self):
+        pnl = get_pnl_by_time(bot=self.bot, start_time=make_naive(self.bot.cycle_time_start), end_time=datetime.now())
+        pnl = round(Decimal(pnl), 5)
+
+        botsdata, created = BotsData.objects.get_or_create(bot=self.bot)
+
+        botsdata.total_pnl = botsdata.total_pnl + pnl
+        botsdata.count_cycles = botsdata.count_cycles + 1
+        botsdata.cycle_pnl_dict[botsdata.count_cycles] = str(pnl)
+        botsdata.save()
+
+        custom_user_bot_logging(self.bot, f' Конец {botsdata.count_cycles} цикла: {datetime.now()}.'
+                                          f' PnL за цикл: {pnl}. Итоговый PnL: {botsdata.total_pnl}')
 
     def average(self):
         self.ml_filled = False
@@ -228,3 +282,13 @@ class WorkBollingerBandsClass:
         bot_bb.take_on_ml_status = self.ml_filled
         bot_bb.take_on_ml_qty = self.ml_qty
         bot_bb.save()
+
+    def deactivate_bot(self):
+        self.bot.bb.endless_cycle = False
+        self.bot.is_active = False
+        self.bot.bb.save()
+        self.bot.save()
+
+    def bot_cycle_time_start_update(self):
+        self.bot.cycle_time_start = datetime.now()
+        self.bot.save()

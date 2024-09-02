@@ -2,6 +2,7 @@ from pybit.unified_trading import WebSocket
 from time import sleep
 
 ws = WebSocket(
+    trace_logging=True,
     testnet=False,
     channel_type="private",
     api_key="xcXVA47NndHFNDBqJ9",
@@ -13,6 +14,7 @@ def handle_message(message):
     print(message)
 
 
-ws.wallet_stream(callback=handle_message)
-while True:
-    sleep(1)
+if __name__ == "__main__":
+    ws.position_stream(callback=handle_message)
+    while True:
+        sleep(1)

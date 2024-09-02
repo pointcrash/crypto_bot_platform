@@ -17,6 +17,7 @@ urlpatterns = [
     #
     path('bb/', include('bots.bb.urls')),
     path('zinger/', include('bots.zinger.urls')),
+    path('grid/', include('bots.grid.urls')),
     path('start_set_zero_psn_bot/<int:acc_id>/<str:symbol_name>/<int:trend>', start_set_zero_psn_bot, name='start_set_zero_psn_bot'),
     path('stop_set_zero_psn_bot/<int:acc_id>/<str:symbol_name>/', stop_set_zero_psn_bot, name='stop_set_zero_psn_bot'),
     #

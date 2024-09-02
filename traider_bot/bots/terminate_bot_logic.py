@@ -28,7 +28,7 @@ def terminate_bot(bot, user=None):
     if bot.is_active:
         bot.is_active = False
         bot.save()
-        time.sleep(7)
+        time.sleep(3)
 
     if user:
         custom_logging(bot, f'Бот был деактивирован вручную пользователем "{user.username}"')

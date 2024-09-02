@@ -16,6 +16,7 @@ from bots.general_functions import get_cur_positions_and_orders_info
 from bots.models import Symbol, BotModel
 from bots.terminate_bot_logic import terminate_bot
 from orders.forms import OrderCustomForm
+from orders.models import Position, Order
 
 logger = logging.getLogger('django')
 
@@ -98,7 +99,7 @@ def bb_bot_edit(request, bot_id):
 
                 bb_model = bb_form.save(commit=False)
                 bot = bot_form.save(commit=False)
-                bot.is_active = True
+                bot.is_active = True if restart_value else False
                 bot.account = account
                 bot.symbol = symbol
                 bb_model.save()
@@ -127,6 +128,9 @@ def bb_bot_edit(request, bot_id):
         new_key = key.split('_')[1]
         bot_cached_data[new_key] = cache.get(key)
 
+    position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
+    order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
+
     positions, orders = get_cur_positions_and_orders_info(bot)
 
     return render(request, 'bots_info_page.html', {
@@ -140,4 +144,6 @@ def bb_bot_edit(request, bot_id):
         'bot_cached_data': bot_cached_data,
         'orders': orders,
         'positions': positions,
+        'order_history': order_history,
+        'position_history': position_history,
     })

@@ -97,7 +97,7 @@ jobs:
         fi
         cd ./ansible
         ansible-playbook -i inventory.ini --limit "$host" playbook.yml --private-key=../private_key \
-          --extra-vars "repo_url=$repo_url repo_branch=$branch component=$component"
+          --extra-vars "repo_url=$repo_url repo_branch=$branch component=$component" -vvvv
     - name: Pass the bot hosts to outputs
       id: get_bp_bot_hosts
       run: |

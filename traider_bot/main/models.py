@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Account(models.Model):
@@ -8,7 +10,17 @@ class Account(models.Model):
         ('UNIFIED', 'UNIFIED'),
     )
 
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    LOW_MARGIN_ACTIONS_CHOICES = (
+        ('alert', 'Только уведомление'),
+        ('off_bots', 'Выключить ботов'),
+    )
+
+    LOW_MARGIN_VALUE_CHOICES = (
+        ('$', '$'),
+        ('%', '%'),
+    )
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(unique=True)
     service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
     API_TOKEN = models.CharField()
@@ -17,6 +29,10 @@ class Account(models.Model):
     is_mainnet = models.BooleanField()
     url = models.CharField(default='https://api-testnet.bybit.com')
     address = models.CharField(blank=True, null=True)
+
+    low_margin_value = models.IntegerField(blank=True, null=True)
+    low_margin_value_type = models.CharField(choices=LOW_MARGIN_VALUE_CHOICES, default='$', null=True, blank=True)
+    low_margin_actions = models.CharField(choices=LOW_MARGIN_ACTIONS_CHOICES, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.is_mainnet:
@@ -49,3 +65,41 @@ class ExchangeService(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class WSManager(models.Model):
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True)
+    status = models.BooleanField()
+    error_text = models.CharField(null=True)
+
+    time_create = models.DateTimeField(auto_now_add=True)
+    time_update = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.account
+
+
+class Referral(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='referral')
+    code = models.CharField(max_length=20, unique=True)
+    referred_users = models.ManyToManyField(User, related_name='referred_by', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} - {self.code}'
+
+    def generate_code(self):
+        import string, random
+        characters = string.ascii_letters + string.digits
+        self.code = ''.join(random.choice(characters) for _ in range(10))
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.generate_code()
+        super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender=User)
+def create_referral(sender, instance, created, **kwargs):
+    if created:
+        Referral.objects.create(user=instance)

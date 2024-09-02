@@ -1,4 +1,5 @@
 import datetime
+import json
 import time
 import uuid
 
@@ -19,7 +20,6 @@ def get_session(account):
 
 def bybit_set_trading_stop(bot, psn_side, tp_limit_price=None, sl_limit_price=None,
                            tp_size=None, sl_size=None, take_profit_qty=None, stop_loss_qty=None):
-
     session = get_session(bot.account)
     tpsl_mode = "Full" if not take_profit_qty and not stop_loss_qty else 'Partial'
     position_idx = 1 if psn_side == 'LONG' else 2
@@ -75,6 +75,25 @@ def bybit_internal_transfer(account, symbol, amount, from_account_type, to_accou
     return response
 
 
+def bybit_get_all_position_info(account):
+    session = get_session(account)
+
+    def format_data(position_list):
+        position_inform_list = [{
+            'symbol': position['symbol'],
+            'qty': position['size'],
+            'entryPrice': position['avgPrice'],
+            'markPrice': position['markPrice'],
+            'unrealisedPnl': position['unrealisedPnl'],
+            'side': 'LONG' if int(position['positionIdx']) == 1 else 'SHORT',
+        } for position in position_list]
+        return position_inform_list
+
+    response = session.get_positions(category='linear', settleCoin='USDT')
+    position_inform_list = format_data(response['result']['list'])
+    return position_inform_list
+
+
 def bybit_withdraw(account, symbol, chain, address, amount):
     session = get_session(account)
 
@@ -98,6 +117,24 @@ def bybit_get_user_assets(account, symbol, acc_type="FUND"):
     )
 
     return response['result']['balance']['walletBalance']
+
+
+def bybit_get_wallet_balance(account, symbol='USDT', acc_type="UNIFIED"):
+    session = get_session(account)
+
+    response = session.get_wallet_balance(
+        accountType=acc_type,
+        coin=symbol,
+    )
+
+    response = response['result']['list'][0]
+    response = {
+        'fullBalance': round(float(response['totalMarginBalance']), 2),
+        'availableBalance': round(float(response['totalAvailableBalance']), 2),
+        'unrealizedPnl': round(float(response['totalPerpUPL']), 2),
+    }
+
+    return response
 
 
 def bybit_get_pnl_by_time(bot, start_time, end_time):

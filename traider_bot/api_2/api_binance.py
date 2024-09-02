@@ -46,6 +46,29 @@ def binance_get_position_inform(bot, client):
 
 
 @with_binance_client
+def binance_get_all_position_inform(account):
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+
+    def format_data(position_list):
+        position_inform_list = [{
+            'symbol': position['symbol'],
+            'qty': position['positionAmt'],
+            'entryPrice': position['entryPrice'],
+            'markPrice': position['markPrice'],
+            'unrealisedPnl': position['unRealizedProfit'],
+            'side': position['positionSide'],
+        } for position in position_list]
+
+        return position_inform_list
+
+    response = client.futures_position_information()
+    filtered_response = [position for position in response if float(position['positionAmt']) != 0]
+    position_inform_list = format_data(filtered_response)
+
+    return position_inform_list
+
+
+@with_binance_client
 def binance_place_order(bot, client, side, order_type, price, qty, position_side, timeInForce='GTC'):
     if order_type.capitalize() == 'Market':
         price = None
@@ -192,14 +215,14 @@ def binance_set_leverage(bot, client):
 
 
 @with_binance_client
-def binance_change_position_mode_on_hedge(bot, client):
+def binance_change_position_mode_on_hedge(bot, client, hedge_mode):
     custom_logging(bot, f'binance_change_position_mode_on_hedge({bot.symbol.name})', 'REQUEST')
     try:
-        response = client.futures_change_position_mode(symbol=bot.symbol.name, dualsideposition=True)
+        response = client.futures_change_position_mode(symbol=bot.symbol.name, dualsideposition=hedge_mode)
         custom_logging(bot, response, 'RESPONSE')
         return response
-    except:
-        custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
+    except Exception as e:
+        custom_logging(bot, f"{e}")
 
 
 def binance_account_balance(account):
@@ -209,6 +232,7 @@ def binance_account_balance(account):
     response = {
         'fullBalance': round(float(response['balance']), 2),
         'availableBalance': round(float(response['availableBalance']), 2),
+        'unrealizedPnl': round(float(response['crossUnPnl']), 2),
     }
     return response
 
@@ -217,6 +241,7 @@ def binance_get_user_asset(account, symbol):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
     response = client.get_user_asset(asset=symbol)
 
+    # return response
     return response[0]['free']
 
 

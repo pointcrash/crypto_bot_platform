@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .btn-shadow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+
+<div class="row">
+    <div class="col-11 mx-auto">
+        <h2 class="text-center">{{ title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                {% if bot_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_name, field_errors in bot_form.errors.items %}
+                        <div class="error">
+                            <strong>{{ field_name }}:</strong>
+                            <ul>
+                                {% for error in field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if bb_form.errors %}
+                <div class="col-10 mx-auto alert alert-danger mt-2">
+                    {% for field_name, field_errors in grid_form.errors.items %}
+                        <div class="error">
+                            <strong>{{ field_name }}:</strong>
+                            <ul>
+                                {% for error in field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="card shadow col-12 col-xl-2 col-lg-5 p-3 m-2">
+                    <h4 class="text-center">Настройки бота</h4>
+
+                    <br>
+                    {{ bot_form.account.label_tag }}
+                    {{ bot_form.account }}
+                    <br>
+                    {{ bot_form.symbol.label_tag }}
+                    {{ bot_form.symbol }}
+                    <br>
+                    {{ bot_form.leverage.label_tag }}
+                    {{ bot_form.leverage }}
+                    <br>
+                    <p>USDT:</p>
+                    {{ bot_form.amount_long }}
+                    <br>
+                </div>
+                <div class="card shadow col-12 col-xl-3 col-lg-5 p-3 m-2">
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ grid_form.low_price.label_tag }}
+                            {{ grid_form.low_price }}
+                        </div>
+                        <div class="col-6 mt-auto">
+                            {{ grid_form.high_price.label_tag }}
+                            {{ grid_form.high_price }}
+                        </div>
+                    </div>
+                    
+                    {{ grid_form.grid_count.label_tag }}
+                    {{ grid_form.grid_count }}
+
+                    <br>
+                </div>
+            </div>
+            <div class="col-5 col-sm-3 mx-auto mb-5">
+            <button type="submit" class="col-12 btn-shadow btn btn-success mt-3">Сохранить Бота</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

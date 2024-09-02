@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
-
+from django.contrib.postgres.fields import ArrayField
 from main.models import Account, ExchangeService
 
 
@@ -29,20 +29,21 @@ class BotModel(models.Model):
         ('ISOLATED', 'ISOLATED'),
     )
 
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    account = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     category = models.CharField(max_length=10, default='linear', blank=True)
     symbol = models.ForeignKey(Symbol, on_delete=models.DO_NOTHING)
     leverage = models.IntegerField(default=10)
-    amount_long = models.IntegerField(validators=[MinValueValidator(0)])
-    amount_short = models.IntegerField(validators=[MinValueValidator(0)], null=True, blank=True)
+    amount_long = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+    amount_short = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     margin_type = models.CharField(max_length=10, choices=MARGIN_TYPE_CHOICES, default='CROSS', blank=True)
-    work_model = models.CharField(max_length=10)
+    work_model = models.CharField(max_length=10, null=True, blank=True)
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
 
     is_active = models.BooleanField(default=False)
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
+    cycle_time_start = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ['account', 'symbol']
@@ -92,6 +93,18 @@ class BBBotModel(models.Model):
         ('percent', 'Изменение цены'),
     )
 
+    TRAILING_PERCENT_CHOICES = (
+        ('0.1', '0.1'),
+        ('0.2', '0.2'),
+        ('0.3', '0.3'),
+        ('0.5', '0.5'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('5', '5'),
+        ('10', '10'),
+    )
+
     KLINE_INTERVAL_CHOICES = (
         ('1', '1'),
         ('3', '3'),
@@ -113,18 +126,35 @@ class BBBotModel(models.Model):
     qty_kline = models.IntegerField(default=20)
     interval = models.CharField(max_length=3, choices=KLINE_INTERVAL_CHOICES, default='15')
     d = models.IntegerField(default=2)
+
     take_on_ml = models.BooleanField(default=True)
+    take_after_ml = models.BooleanField(default=False)
     take_on_ml_percent = models.DecimalField(max_digits=5, decimal_places=2, default=50)
     take_on_ml_status = models.BooleanField(default=False, blank=True, null=True)
     take_on_ml_qty = models.DecimalField(max_digits=10, decimal_places=5, default=0, blank=True, null=True)
+
     auto_avg = models.BooleanField(default=False)
     avg_percent = models.DecimalField(max_digits=5, decimal_places=2, default=100)
+
+    stop_loss = models.BooleanField(default=False)
+    stop_bot_after_loss = models.BooleanField(default=False)
+    stop_loss_value = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    stop_loss_value_choice = models.CharField(max_length=10, choices=HARD_AVG_TYPE_CHOICES, default='pnl')
+
+    trailing_in = models.BooleanField(default=False)
+    trailing_in_percent = models.CharField(max_length=5, choices=TRAILING_PERCENT_CHOICES, default='0.5')
+    trailing_out = models.BooleanField(default=False)
+    trailing_out_percent = models.CharField(max_length=5, choices=TRAILING_PERCENT_CHOICES, default='0.5')
+
     is_deviation_from_lines = models.BooleanField(default=False, blank=True)
-    percent_deviation_from_lines = models.DecimalField(max_digits=10, decimal_places=5, default=0, blank=True)
+    percent_deviation_from_lines = models.DecimalField(max_digits=5, decimal_places=2, default=0, blank=True)
+
     dfm = models.DecimalField(max_digits=5, decimal_places=3, default=70)
     chw = models.DecimalField(max_digits=5, decimal_places=3, default=2)
     dfep = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     max_margin = models.IntegerField(null=True, blank=True)
+    count_cycles = models.IntegerField(default=0)
+    endless_cycle = models.BooleanField(default=False)
 
     hard_avg = models.BooleanField(default=False)
     hard_avg_type = models.CharField(choices=HARD_AVG_TYPE_CHOICES, null=True, blank=True)
@@ -132,6 +162,13 @@ class BBBotModel(models.Model):
 
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
+
+
+class Grid(models.Model):
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE)
+    low_price = models.DecimalField(max_digits=20, decimal_places=7, blank=True, null=True)
+    high_price = models.DecimalField(max_digits=20, decimal_places=7, blank=True, null=True)
+    grid_count = models.IntegerField(default=10)
 
 
 class Set0Psn(models.Model):
@@ -209,3 +246,17 @@ class JsonObjectClass(models.Model):
     bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
     bot_mode = models.CharField(blank=True, null=True)
     data = models.JSONField(blank=True, null=True)
+
+
+class BotsData(models.Model):
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
+    total_pnl = models.DecimalField(max_digits=20, decimal_places=5, default=0, blank=True)
+    count_cycles = models.IntegerField(default=0, blank=True)
+    cycle_pnl_dict = models.JSONField(default=dict, blank=True)
+
+
+class UserBotLog(models.Model):
+    bot = models.ForeignKey(BotModel, on_delete=models.CASCADE)
+    content = models.CharField()
+    time = models.CharField(null=True)
+    time_create = models.DateTimeField(auto_now_add=True)

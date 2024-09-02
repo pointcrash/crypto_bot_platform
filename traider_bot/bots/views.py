@@ -6,11 +6,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from bots.bb.logic.start_logic import bb_worker
+from bots.grid.logic.start_logic import grid_worker
 from bots.models import BotModel
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 from main.forms import AccountSelectForm
+from orders.models import Position
 
 logger = logging.getLogger('django')
 
@@ -18,11 +20,14 @@ logger = logging.getLogger('django')
 @login_required
 def bot_list(request):
     user = request.user
+    position_qty_list = list()
+    position_pnl_list = list()
+    position_amount_list = list()
 
     if user.is_superuser:
-        bots = BotModel.objects.all().order_by('pk')
+        bots = BotModel.objects.all().select_related('bb').order_by('pk')
     else:
-        bots = BotModel.objects.filter(owner=user).order_by('pk')
+        bots = BotModel.objects.filter(owner=user).select_related('bb').order_by('pk')
 
     if request.method == 'POST':
         account_select_form = AccountSelectForm(request.POST, user=request.user)
@@ -34,6 +39,37 @@ def bot_list(request):
     else:
         logger.info(f'{user} открыл список ботов')
         account_select_form = AccountSelectForm(user=request.user)
+
+    for bot in bots:
+        lp = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='LONG').last()
+        sp = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name, side='SHORT').last()
+
+        if lp:
+            lp.unrealised_pnl = round(float(lp.unrealised_pnl), 2)
+        if sp:
+            sp.unrealised_pnl = round(float(sp.unrealised_pnl), 2)
+
+        if lp and sp:
+            position_qty_list.append((lp.qty, sp.qty))
+            position_pnl_list.append((lp.unrealised_pnl, sp.unrealised_pnl))
+            position_amount_list.append((round(float(lp.qty)*float(lp.entry_price), 2), round(float(sp.qty)*float(sp.entry_price), 2)))
+
+        elif not lp and not sp:
+            position_qty_list.append(('0', '0'))
+            position_pnl_list.append(('0', '0'))
+            position_amount_list.append(('0', '0'))
+
+        elif not lp:
+            position_qty_list.append(('0', sp.qty))
+            position_pnl_list.append(('0', sp.unrealised_pnl))
+            position_amount_list.append(('0', round(float(sp.qty)*float(sp.entry_price), 2)))
+
+        elif not sp:
+            position_qty_list.append((lp.qty, '0'))
+            position_pnl_list.append((lp.unrealised_pnl, '0'))
+            position_amount_list.append((round(float(lp.qty)*float(lp.entry_price), 2), '0'))
+
+    bots = zip(bots, position_amount_list, position_pnl_list)
 
     return render(request, 'bot_list.html', {
         'bots': bots,
@@ -116,6 +152,11 @@ def bot_start(request, bot_id):
         bot.save()
         bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
+    if bot.work_model == 'grid':
+        bot.is_active = True
+        bot.save()
+        bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
+
     elif bot.work_model == 'zinger':
         bot.is_active = True
         bot.save()
@@ -131,12 +172,7 @@ def bot_start(request, bot_id):
 @login_required
 def deactivate_all_my_bots(request):
     user = request.user
-    bots = BotModel.objects.filter(owner=user)
-
-    for bot in bots:
-        if bot.is_active is True:
-            bot.is_active = False
-            bot.save()
-    time.sleep(7)
+    BotModel.objects.filter(owner=user, is_active=True).update(is_active=False)
+    time.sleep(3)
 
     return redirect(request.META.get('HTTP_REFERER'))

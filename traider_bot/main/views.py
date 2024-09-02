@@ -17,16 +17,17 @@ from api_2.api_aggregator import get_futures_account_balance, internal_transfer,
 from api_test.api_v5_bybit import get_query_account_coins_balance, get_list
 from bots.bb.logic.start_logic import bb_worker
 from bots.general_functions import all_symbols_update
-from bots.models import Log, Symbol, BotModel
+from bots.models import Log, Symbol, BotModel, UserBotLog
 from bots.SetZeroPsn.logic.psn_count import psn_count
 from bots.zinger.logic.start_logic import zinger_worker
 from single_bot.logic.global_variables import global_list_bot_id
 from timezone.forms import TimeZoneForm
 from timezone.models import TimeZone
-from .forms import RegistrationForm, LoginForm, DateRangeForm, InternalTransferForm, WithdrawForm, WhiteListAccountForm
-from django.contrib.auth import authenticate, login, logout
+from .forms import RegistrationForm, LoginForm, DateRangeForm, InternalTransferForm, WithdrawForm, WhiteListAccountForm, \
+    CustomUserChangeForm
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from main.forms import AccountForm
-from main.models import Account, WhiteListAccount
+from main.models import Account, WhiteListAccount, WSManager
 from .logic import calculate_pnl
 import requests
 
@@ -35,6 +36,28 @@ logger = logging.getLogger('django')
 
 def view_home(request):
     return render(request, 'home.html')
+
+
+@login_required
+def user_bot_logs_view(request, bot_id):
+    log_list = []
+    bot = BotModel.objects.get(id=bot_id)
+    logs = UserBotLog.objects.filter(bot=bot_id).order_by('pk')
+    user = request.user
+
+    for i in range(1, len(logs) + 1):
+        log_list.append([i, logs[i - 1]])
+
+    log_list.sort(key=lambda x: x[0], reverse=True)
+    logs_per_page = 50  # Количество логов на странице
+    paginator = Paginator(log_list, logs_per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    logger.info(f'{user} открыл логи бота ID: {bot_id}')
+    return render(request, 'logs/user_bot_logs.html', {
+        'log_list': page_obj,
+        'bot': bot,
+    })
 
 
 @login_required
@@ -113,11 +136,18 @@ def logs_view(request):
 @login_required
 def account_list(request):
     user = request.user
+    acc_status_list = []
     if user.is_superuser:
         accounts = Account.objects.all()
     else:
         accounts = Account.objects.filter(owner=request.user)
     logger.info(f'{user} открыл список аккаунтов')
+
+    for account in accounts:
+        conn_status = WSManager.objects.get(account=account).status
+        acc_status_list.append(conn_status)
+
+    accounts = zip(accounts, acc_status_list)
 
     internal_transfer_form = InternalTransferForm()
     return render(request, 'account/accounts_list.html',
@@ -218,6 +248,7 @@ def edit_account(request, acc_id):
             acc = form.save(commit=False)
             form.save()
 
+            # logger.info(f'ssssssssssssssssssssssssssssssssss')
             url = f"http://ws-manager:8008/ws/conn/update_account/{acc.pk}"
             requests.get(url)
 
@@ -226,7 +257,13 @@ def edit_account(request, acc_id):
     else:
         form = AccountForm(instance=account)
 
-    return render(request, 'account/account_edit.html', {'form': form, 'account': account})
+    ws_error = WSManager.objects.get(account=account).error_text
+
+    return render(request, 'account/account_edit.html', {
+        'form': form,
+        'account': account,
+        'ws_error': ws_error
+    })
 
 
 @login_required
@@ -274,6 +311,19 @@ def login_view(request):
 
 
 @login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = CustomUserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, request.user)  # Обновляем сессию пользователя
+            return redirect('account_list')  # Перенаправляем на страницу профиля после сохранения
+    else:
+        form = CustomUserChangeForm(instance=request.user)
+    return render(request, 'profile/edit_profile.html', {'form': form})
+
+
+@login_required
 def profile_list(request):
     user = request.user
     if user.is_superuser:
@@ -303,17 +353,19 @@ def profile_mode_switching(request, profile_id):
 
 def get_balance(request, acc_id):
     account = Account.objects.get(pk=acc_id)
-    try:
-        balance = get_futures_account_balance(account)
-        wb = balance['fullBalance']
-        tb = balance['availableBalance']
-    except Exception as e:
-        wb = f'Ошибка получения баланса: {e}'
-        tb = f'Ошибка получения баланса'
-        print(e)
-        print(f'Апи ключи аккаунта {account.name} устарели, замените')
+    # try:
+    balance = get_futures_account_balance(account)
+    wb = balance['fullBalance']
+    tb = balance['availableBalance']
+    unrealizedPnl = balance['unrealizedPnl']
+    # except Exception as e:
+    #     wb = f'Ошибка получения баланса: {e}'
+    #     tb = f'Ошибка получения баланса'
+    #     unrealizedPnl = 'Unknown'
+    #     print(e)
+    #     print(f'Апи ключи аккаунта {account.name} устарели, замените')
 
-    return JsonResponse({"wb": wb, "tb": tb, "name": account.name})
+    return JsonResponse({"wb": wb, "tb": tb, "unrealizedPnl": unrealizedPnl, "name": account.name})
 
 
 @login_required
@@ -393,7 +445,7 @@ def withdraw_view(request, acc_id):
     fund_balance = get_user_assets(account, symbol="USDT")
 
     user_accounts = Account.objects.filter(owner=user).exclude(id=acc_id)
-    user_accounts =user_accounts.exclude(address=None).exclude(address='')
+    user_accounts = user_accounts.exclude(address=None).exclude(address='')
     whitelist = WhiteListAccount.objects.filter(user=user)
 
     if request.method == 'POST':

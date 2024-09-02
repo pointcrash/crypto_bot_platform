@@ -1,8 +1,11 @@
 import logging
 import time
+from datetime import datetime
 from decimal import Decimal
 
+from api_2.api_aggregator import cancel_order
 from api_2.custom_logging_api import custom_logging
+from bots.general_functions import custom_user_bot_logging
 
 
 def bb_handler_wrapper(bb_worker_class_obj):
@@ -32,32 +35,73 @@ def handle_order_stream_message(msg, bot_class_obj):
             if order_id in bot_class_obj.current_order_id:
                 bot_class_obj.current_order_id.remove(order_id)
                 custom_logging(bot_class_obj.bot, f' ORDER FILLED ID {order_id}')
+
+                if order_id == bot_class_obj.open_order_id:
+                    custom_user_bot_logging(bot_class_obj.bot, f' Открывающий ордер исполнен. ID: {order_id}')
+                    pass
+                    # bot_class_obj.bot_cycle_time_start_update()
+
+                elif order_id == bot_class_obj.ml_order_id:
+                    custom_user_bot_logging(bot_class_obj.bot, f' Выход на центральной линии. Ордер исполнен. ID: {order_id}')
+
+                elif order_id == bot_class_obj.close_psn_main_order_id:
+                    custom_user_bot_logging(bot_class_obj.bot, f' Закрывающий ордер исполнен. ID: {order_id}')
+                    cancel_order(bot_class_obj.bot, bot_class_obj.sl_order)
+                    bot_class_obj.sl_order = None
+
+                    # time.sleep(1)
+                    # bot_class_obj.calc_and_save_pnl_per_cycle()
+
             else:
-                custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
+                if order_id == bot_class_obj.sl_order:
+                    bot_class_obj.deactivate_bot()
+                    custom_logging(bot_class_obj.bot, f' EXIT WITH STOP LOSS {order_id}')
+                    custom_user_bot_logging(bot_class_obj.bot, f' Стоп лосс ордер исполнен. ID: {order_id}')
+
+                    # time.sleep(1)
+                    # bot_class_obj.calc_and_save_pnl_per_cycle()
+                else:
+                    # if msg['reduceOnly'] is True and Decimal(msg['qty']) >= bot_class_obj.position_info['qty']:
+                    #     pass
+
+                    custom_logging(bot_class_obj.bot, f' UNKNOWN ORDER FILLED ID {order_id}, params: {msg}')
+                    custom_user_bot_logging(bot_class_obj.bot, f' Неизвестный ордер исполнен. ID: {order_id}')
 
 
 def handle_position_stream_message(msg, bot_class_obj):
     with bot_class_obj.psn_locker:
-        if Decimal(msg['qty']) != 0:
-            if bot_class_obj.position_info.get('qty') == Decimal(msg['qty']):
-                return
+        msg_qty = Decimal(msg['qty'])
+
+        if bot_class_obj.position_info.get('qty') == msg_qty:
+            return
+
+        if msg_qty != 0:
+            if not bot_class_obj.position_info.get('qty'):
+                custom_user_bot_logging(bot_class_obj.bot, f' Начало цикла: {datetime.now()}')
+                bot_class_obj.bot_cycle_time_start_update()
+
             bot_class_obj.position_info = {
                 'side': msg['side'],
-                'qty': abs(Decimal(msg['qty'])),
+                'qty': abs(msg_qty),
                 'entryPrice': Decimal(msg['entryPrice']),
             }
             with bot_class_obj.avg_locker:
                 bot_class_obj.avg_obj.update_psn_info(bot_class_obj.position_info)
             bot_class_obj.have_psn = True
             bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
+
         else:
             if msg['side'] == bot_class_obj.position_info.get('side'):
+                custom_logging(bot_class_obj.bot, f'{msg}')
                 bot_class_obj.position_info['qty'] = 0
                 bot_class_obj.have_psn = False
                 bot_class_obj.ml_filled = False
                 bot_class_obj.ml_qty = 0
                 bot_class_obj.ml_status_save()
                 bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
+
+                time.sleep(1)
+                bot_class_obj.calc_and_save_pnl_per_cycle()
         # bot_class_obj.replace_closing_orders()
 
 
@@ -69,7 +113,7 @@ def handle_message_kline_info(msg, bot_class_obj):
         bot_class_obj.cached_data(key='tl', value=bot_class_obj.bb.tl)
         bot_class_obj.cached_data(key='ml', value=bot_class_obj.bb.ml)
         bot_class_obj.cached_data(key='bl', value=bot_class_obj.bb.bl)
-        bot_class_obj.cached_data(key='closePriceList', value=bot_class_obj.bb.close_price_list)
+        # bot_class_obj.cached_data(key='closePriceList', value=bot_class_obj.bb.close_price_list)
         # if not bot_class_obj.have_psn:
         #     bot_class_obj.replace_opening_orders()
         # else:
@@ -86,6 +130,7 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
                 with bot_class_obj.avg_locker:
                     if bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price):
                         bot_class_obj.average()
+                bot_class_obj.place_stop_loss()
                 bot_class_obj.place_closing_orders()
                 bot_class_obj.turn_after_ml()
             else:
@@ -96,8 +141,3 @@ def handle_mark_price_stream_message(msg, bot_class_obj):
     # execution_time = end_time - start_time
     # bot_class_obj.logger.debug(execution_time)
 
-# def handle_mark_price_stream_message(msg, bot_class_obj):
-#     bot_class_obj.current_price = Decimal(msg['markPrice'])
-#     if bot_class_obj.have_psn is True:
-#         with bot_class_obj.avg_locker:
-#             bot_class_obj.avg_obj.auto_avg(bot_class_obj.current_price)

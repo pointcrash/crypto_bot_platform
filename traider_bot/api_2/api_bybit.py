@@ -60,6 +60,7 @@ def sort_position_inform(unsorted_list):
 
 
 def bybit_get_position_inform(bot):
+
     def format_data(position_list):
         position_inform_list = [{
             'symbol': position['symbol'],
@@ -84,7 +85,12 @@ def bybit_get_position_inform(bot):
     except Exception as e:
         print(e)
         print(response)
-        raise Exception(traceback.print_exc())
+        raise Exception(f"Response: {response['retMsg']}")
+
+        # try:
+        #     raise Exception(f"Response: {response['retMsg']}; Traceback: {traceback.print_exc()}")
+        # except:
+        #     raise Exception(f"Response: {response['retMsg']}; Traceback: {traceback.format_exc()}")
 
 
 def bybit_place_order(bot, side, order_type, price=None, qty=None, position_side=None):
@@ -221,10 +227,10 @@ def bybit_set_leverage(bot, category='linear'):
     return response
 
 
-def bybit_change_position_mode_on_hedge(bot, category='linear'):
+def bybit_change_position_mode_on_hedge(bot, category='linear', hedge_mode=True):
     endpoint = "/v5/position/switch-mode"
     method = "POST"
-    mode = 3  # Hedge
+    mode = 3 if hedge_mode else 0
     params = {
         'category': category,
         'symbol': bot.symbol.name,

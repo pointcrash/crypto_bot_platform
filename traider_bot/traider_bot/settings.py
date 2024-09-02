@@ -1,17 +1,23 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
-from config import django_app_key
+from dotenv import load_dotenv
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = django_app_key
+load_dotenv()
 
-DEBUG = True
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'bravo.almazor.co',
     'delta.almazor.co',
+    'adm.almazor.co',
+    'trade.cryptonna.com',
     'localhost',
     '209.38.180.77',
     '164.92.182.43',
@@ -20,20 +26,40 @@ ALLOWED_HOSTS = [
     '139.59.206.100',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://bravo.almazor.co",
-    "https://209.38.180.77",
-    "https://delta.almazor.co",
-    "https://139.59.206.100",
-    # Другие доверенные источники здесь
-]
+# CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS') == 'True'
+# CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS') == 'True'
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# CORS_ALLOW_HEADERS = [
+#     'Accept',
+#     'Accept-Encoding',
+#     'Authorization',
+#     'Content-Type',
+#     'Set-Cookie',
+# ]
+
+# CORS_ALLOWED_ORIGINS = [
+#     "https://bravo.almazor.co",
+#     "https://209.38.180.77",
+#     "https://delta.almazor.co",
+#     "https://139.59.206.100",
+#     # Другие доверенные источники здесь
+# ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.bravo.almazor.co',
+    'https://*.trade.cryptonna.com',
     'https://*.209.38.180.77',
-    'https://*.127.0.0.1',
+    'https://127.0.0.1',
+    'http://127.0.0.1',
+    'http://*.localhost',
+    'https://*.localhost',
     'https://*.139.59.206.100',
     'https://*.delta.almazor.co',
+    'http://*.localhost:3000',
+    'http://*.127.0.0.1:3000',
+    'http://127.0.0.1:3000',
 ]
 
 INSTALLED_APPS = [
@@ -43,6 +69,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
+    'django_q',
+    'rest_framework',
+    'rest_framework.authtoken',
+    # 'rest_framework_simplejwt.token_blacklist',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'corsheaders',
 
     'orders',
     'main',
@@ -51,9 +89,15 @@ INSTALLED_APPS = [
     'single_bot',
     'tg_bot',
     'timezone',
+    'authentication',
+    'support',
+    'documentation',
+    'tariffs',
+    'purchases',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -61,6 +105,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'traider_bot.urls'
@@ -97,18 +142,18 @@ WSGI_APPLICATION = 'traider_bot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'MyDB',
-        'USER': 'admin',
-        'PASSWORD': 'lksd23GBKwed.',
-        'HOST': 'db',
-        'PORT': '5432',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT'),
     }
 }
 
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/0',
+        'LOCATION': os.getenv('REDIS_URL'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -163,6 +208,23 @@ LOGGING = {
 
 LOGIN_URL = "/login/"
 
+SITE_ID = 1
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -178,6 +240,52 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
+}
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None'
+
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'jwt-auth-token',
+    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
+    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_SECURE': True,
+    'JWT_AUTH_SAMESITE': 'None',
+
+    # 'TOKEN_MODEL': 'None',
+    # 'SESSION_LOGIN': False,
+}
+
+Q_CLUSTER = {
+    'name': 'DjangoQ',
+    'workers': 1,
+    'recycle': 500,
+    'timeout': 60,
+    'ack_failures': True,
+    'max_attempts': 3,
+    'retry': 60,
+    'orm': 'default',
+}
+
+
 LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
@@ -191,3 +299,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+

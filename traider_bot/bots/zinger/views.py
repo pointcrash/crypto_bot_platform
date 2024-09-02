@@ -16,6 +16,7 @@ from bots.terminate_bot_logic import terminate_bot
 from bots.zinger.forms import ZingerForm, AverageZingerForm
 from bots.zinger.logic_market.start_logic import zinger_worker_market
 from orders.forms import OrderCustomForm
+from orders.models import Position, Order
 
 logger = logging.getLogger('django')
 
@@ -137,6 +138,9 @@ def zinger_bot_edit(request, bot_id):
         new_key = key.split('_')[1]
         bot_cached_data[new_key] = cache.get(key)
 
+    position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
+    order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by('-time_update')
+
     positions, orders = get_cur_positions_and_orders_info(bot)
     logger.info(
         f'{orders}')
@@ -153,6 +157,8 @@ def zinger_bot_edit(request, bot_id):
         'bot_cached_data': bot_cached_data,
         'positions': positions,
         'orders': orders,
+        'order_history': order_history,
+        'position_history': position_history,
     })
 
 

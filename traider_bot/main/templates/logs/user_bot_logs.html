@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            {% if bot.work_model == 'bb' %}
+            <a href="{% url 'bb_bot_edit' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% elif bot.work_model == 'grid' %}
+            <a href="{% url 'single_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% elif bot.work_model == 'SmpHg' %}
+            <a href="{% url 'simple_hedge_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% elif bot.work_model == 'StpHg' %}
+            <a href="{% url 'step_hedge_bot_detail' bot_id=bot.pk %}" class="btn btn-warning">Edit Bot</a>
+            {% endif %}
+
+            <!-- Кнопка для открытия модального окна -->
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#warningModal">
+              Clear history
+            </button>
+
+            <!-- Модальное окно с предупреждением -->
+            <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Вся история будет безвозвратно удалена...</p>
+                      <br>
+                    <p>Вы уверены, что хотите продолжить?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+<!--                    <a href="{% url 'logs_delete' bot_id=bot.pk %}" class="btn btn-danger">Clear history</a>-->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-1">
+                <table class="table" style="vertical-align: middle">
+                    <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Content</th>
+                        <th>Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for log_id, log in log_list %}
+                    <tr>
+                        <td>{{ log_id }}</td>
+                        <td>{{ log.content }}</td>
+                        <td>{{ log.time }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Добавление ссылок на предыдущую и следующую страницы -->
+            <div class="pagination justify-content-center mt-1">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if log_list.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">
+                                &laquo; First
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ log_list.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">{{ log_list.number }}</span>
+                        </li>
+
+                        {% if log_list.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ log_list.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ log_list.paginator.num_pages }}" aria-label="Last">
+                                Last &raquo;
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+                <p class="page-info m-1">
+                    Страница {{log_list.number}} из {{log_list.paginator.num_pages}} ({{log_list.paginator.count}}
+                    логов)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

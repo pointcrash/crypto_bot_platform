@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from .models import Account, WhiteListAccount
 
@@ -8,7 +8,8 @@ from .models import Account, WhiteListAccount
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ['name', 'service', 'API_TOKEN', 'SECRET_KEY', 'is_mainnet', 'account_type', 'address', ]
+        fields = ['name', 'service', 'API_TOKEN', 'SECRET_KEY', 'is_mainnet', 'account_type', 'address',
+                  'low_margin_value', 'low_margin_value_type', 'low_margin_actions', ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'service': forms.Select(attrs={'class': 'form-control'}),
@@ -16,6 +17,10 @@ class AccountForm(forms.ModelForm):
             'SECRET_KEY': forms.TextInput(attrs={'class': 'form-control'}),
             'account_type': forms.Select(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
+
+            'low_margin_value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'low_margin_value_type': forms.Select(attrs={'class': 'form-control'}),
+            'low_margin_actions': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'name': 'Название аккаунта',
@@ -25,6 +30,10 @@ class AccountForm(forms.ModelForm):
             'account_type': 'Тип аккаунта (только для ByBit)',
             'is_mainnet': 'Основная сеть',
             'address': 'Адрес USDT кошелька',
+
+            'low_margin_value': 'Значение',
+            'low_margin_value_type': 'Тип',
+            'low_margin_actions': 'Действие',
         }
 
 
@@ -42,6 +51,18 @@ class RegistrationForm(UserCreationForm):
             raise forms.ValidationError('Неверный ключ')
 
         return secret_key
+
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name')
+        exclude = ('password',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'password' in self.fields:
+            del self.fields['password']
 
 
 class LoginForm(forms.Form):

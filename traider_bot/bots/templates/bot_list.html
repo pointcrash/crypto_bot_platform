@@ -21,7 +21,8 @@
                     <button type="submit" class="ms-1 btn btn-outline-secondary">Select</button>
                 </form>
             </div>
-            <a class="btn btn-primary ms-auto m-1 btn-shadow" href="{% url 'zinger_bot_create' %}">Зингер</a>
+            <a class="btn btn-primary ms-auto m-1 btn-shadow" href="{% url 'grid_bot_create' %}">Грид</a>
+            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'zinger_bot_create' %}">Зингер</a>
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'simple_hedge_bot_create' %}">Simple Hedge</a>-->
 <!--            <a class="btn btn-primary m-1 btn-shadow" href="{% url 'single_bot_create' %}">Grid Create</a>-->
             <a class="btn btn-primary m-1 btn-shadow" href="{% url 'bb_bot_create' %}">Боллинджер</a>
@@ -39,6 +40,10 @@
                     <th>Бот ID</th>
                     <th>Аккаунт</th>
                     <th>Пара</th>
+                    <th>Плечо</th>
+                    <th>ТФ</th>
+                    <th>Позиции</th>
+                    <th>ПНЛ</th>
                     <th class="d-none d-sm-table-cell">Стратегия</th>
                     <th class="d-none d-sm-table-cell">Сторона</th>
                     <th class="d-none d-md-table-cell">USDT$</th>
@@ -48,11 +53,40 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for bot in bots %}
+                {% for bot, position_amount, positions_pnl  in bots %}
                 <tr class="">
                     <td>{{ bot.pk }}</td>
                     <td>{{ bot.account }}</td>
                     <td>{{ bot.symbol }}</td>
+                    <td>{{ bot.leverage }}</td>
+                    <td>{% if bot.bb.interval %}{{ bot.bb.interval }}м{% endif %}</td>
+                    <td>
+                        {% for cost in position_amount %}
+                            {% if forloop.first %}
+                                <h6 style="color:green">LONG: {{ cost }}</h6>
+                            {% else %}
+                                <h6 style="color:red">SHORT: {{ cost }}</h6>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for pnl in positions_pnl %}
+                            {% if forloop.first %}
+                                <h6 style="color:gray">{{ pnl }}</h6>
+                            {% else %}
+                                <h6 style="color:gray">{{ pnl }}</h6>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+<!--                    <td>-->
+<!--                        {% for pnl in positions_pnl %}-->
+<!--                            {% if '-' in pnl %}-->
+<!--                                <h6 style="color:red">{{pnl}}</h6>-->
+<!--                            {% else %}-->
+<!--                                <h6 style="color:green">{{pnl}}</h6>-->
+<!--                            {% endif %}-->
+<!--                        {% endfor %}-->
+<!--                    </td>-->
                     <td class="d-none d-sm-table-cell">{{ bot.work_model }}</td>
                     <td class="d-none d-sm-table-cell">
                         {% if bot.work_model == 'bb' %}{{ bot.bb.side }}{% endif %}</td>
@@ -82,7 +116,11 @@
                     <a class="btn btn-primary btn-shadow" href="{% url 'zinger_bot_edit' bot_id=bot.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
                     {% endif %}
 
-                    <a class="btn  btn-secondary btn-shadow" href="{% url 'logs_detail' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>
+                    {% if request.user.is_superuser %}
+                        <a class="btn  btn-secondary btn-shadow" href="{% url 'logs_detail' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>
+                    {% endif %}
+                    <a class="btn  btn-light btn-shadow" href="{% url 'user_bot_logs' bot_id=bot.id %}"><i class="fa-regular fa-clock"></i></a>
+
                     <button type="button" class="btn btn-danger btn-shadow" data-bs-toggle="modal"
                     data-bs-target="#deleteBotModal{{bot.pk}}"><i class="fa-solid fa-trash"></i>
                     </button>

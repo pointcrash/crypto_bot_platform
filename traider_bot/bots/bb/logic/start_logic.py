@@ -1,5 +1,6 @@
 import time
 import traceback
+from datetime import datetime
 
 from api_2.custom_ws_class import CustomWSClient
 from .bot_worker_class import WorkBollingerBandsClass
@@ -9,6 +10,9 @@ from ...general_functions import custom_logging, clear_cache_bot_data
 
 
 def bb_worker(bot):
+    bot.cycle_time_start = datetime.now()
+    bot.save()
+
     ws_client = None
     try:
         bb_worker_class = WorkBollingerBandsClass(bot)
