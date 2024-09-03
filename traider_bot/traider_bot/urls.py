@@ -52,8 +52,8 @@ urlpatterns = [
     path('api/v1/', include(router.urls)),
     path('api/v1/', include(bots_router.urls)),
 
-    path('allauth/', include('allauth.urls')),
-    path('dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+    # path('allauth/', include('allauth.urls')),
+    # path('dj-rest-auth/', include('dj_rest_auth.urls')),
+    # path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 ]
 
