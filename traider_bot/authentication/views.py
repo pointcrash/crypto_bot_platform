@@ -1,5 +1,6 @@
 from dj_rest_auth.views import LoginView
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 from django.shortcuts import get_object_or_404
@@ -30,6 +31,8 @@ class CustomLoginView(LoginView):
 
 
 class ConfirmEmailView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request, key, *args, **kwargs):
         confirmation = None
         try:
