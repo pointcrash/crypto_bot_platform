@@ -305,6 +305,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ACCOUNT_ADAPTER = 'traider_bot.adapters.MyAccountAdapter'
 
-FRONTEND_URL = os.getenv('EMAIL_BACKEND')
+FRONTEND_URL = os.getenv('FRONTEND_URL')
 
 
