@@ -303,5 +303,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+ACCOUNT_ADAPTER = 'traider_bot.adapters.MyAccountAdapter'
+
+FRONTEND_URL = os.getenv('EMAIL_BACKEND')
 
 
