@@ -14,7 +14,6 @@ from authentication.views import password_reset_confirm_redirect, CustomLoginVie
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="rest_register"),
-    path('account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='custom_confirm_email'),
 
     path("login/", CustomLoginView.as_view(), name="rest_login"),
     path("logout/", LogoutView.as_view(), name="rest_logout"),
