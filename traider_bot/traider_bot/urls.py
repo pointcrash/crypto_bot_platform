@@ -50,7 +50,7 @@ urlpatterns = [
 
     path('api/auth/', include('authentication.urls')),
     path('auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='front_custom_confirm_email'),
-    path('api/v1auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='custom_confirm_email'),
+    path('api/v1/auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='custom_confirm_email'),
 
     path('api/v1/', include(router.urls)),
     path('api/v1/', include(bots_router.urls)),
