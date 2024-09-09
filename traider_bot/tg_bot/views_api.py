@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from tg_bot.models import TelegramAccount
@@ -12,6 +13,12 @@ class TelegramAccountViewSet(viewsets.ModelViewSet):
     queryset = TelegramAccount.objects.all()
     serializer_class = TelegramAccountSerializer
     permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TelegramSayHelloView(APIView):
