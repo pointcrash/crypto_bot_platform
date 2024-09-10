@@ -51,11 +51,11 @@ class ConfirmEmailView(APIView):
 
 class CustomRegisterView(RegisterView):
     def perform_create(self, serializer):
-        user = serializer.save(self.request)
+        user = super().perform_create(serializer)
         response = self.add_to_referrals(user)
         if response:
             return response
-        return super().perform_create(serializer)
+        return user
 
     def add_to_referrals(self, user):
         ref_code = self.request.data.get('ref_code')
