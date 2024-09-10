@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 from django.shortcuts import get_object_or_404
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from rest_framework.views import APIView
 
 from main.models import Referral
@@ -50,11 +50,32 @@ class ConfirmEmailView(APIView):
 
 
 class CustomRegisterView(RegisterView):
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            user = self.perform_create(serializer)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+        headers = self.get_success_headers(serializer.data)
+        data = self.get_response_data(user)
+
+        if data:
+            response = Response(
+                data,
+                status=status.HTTP_201_CREATED,
+                headers=headers,
+            )
+        else:
+            response = Response(status=status.HTTP_204_NO_CONTENT, headers=headers)
+
+        return response
+
     def perform_create(self, serializer):
         user = super().perform_create(serializer)
-        response = self.add_to_referrals(user)
-        if response:
-            return response
+        self.add_to_referrals(user)
         return user
 
     def add_to_referrals(self, user):
@@ -66,7 +87,7 @@ class CustomRegisterView(RegisterView):
             referral = Referral.objects.get(code=ref_code)
         except Referral.DoesNotExist:
             user.delete()
-            return Response({"detail": "Referral code does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            raise Exception('Referral code does not exist')
 
         referral.referred_users.add(user)
         referral.save()
