@@ -10,9 +10,12 @@ from tg_bot.serializers import TelegramAccountSerializer
 
 
 class TelegramAccountViewSet(viewsets.ModelViewSet):
-    queryset = TelegramAccount.objects.all()
     serializer_class = TelegramAccountSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return TelegramAccount.objects.filter(owner=user)
 
     def create(self, request, *args, **kwargs):
         try:
@@ -36,6 +39,25 @@ class TelegramSayHelloView(APIView):
                     message='Привет. Я бот-ассистент. Буду информировать тебя о работе твоих торговых ботов на сайте.'
                 )
                 return JsonResponse({'success': True, 'message': 'Message was sent'}, status=200)
+            else:
+                return JsonResponse({'success': False, 'message': 'Telegram account not found for this user'},
+                                    status=404)
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+class TelegramAccountDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        try:
+            tg = TelegramAccount.objects.filter(owner=user).first()
+
+            if tg:
+                tg.delete()
+                return JsonResponse({'success': True, 'message': 'Telegram account was deleted successfully'}, status=200)
             else:
                 return JsonResponse({'success': False, 'message': 'Telegram account not found for this user'},
                                     status=404)
