@@ -1,5 +1,4 @@
-from dj_rest_auth.registration.views import RegisterView
-from dj_rest_auth.views import LoginView, LogoutView, UserDetailsView
+from dj_rest_auth.views import LogoutView, UserDetailsView
 from django.urls import path
 
 from rest_framework_simplejwt.views import TokenVerifyView
@@ -10,10 +9,10 @@ from dj_rest_auth.views import (
     PasswordResetView,
 )
 
-from authentication.views import password_reset_confirm_redirect, CustomLoginView, ConfirmEmailView
+from authentication.views import password_reset_confirm_redirect, CustomLoginView, CustomRegisterView
 
 urlpatterns = [
-    path("register/", RegisterView.as_view(), name="rest_register"),
+    path("register/", CustomRegisterView.as_view(), name="rest_register"),
 
     path("login/", CustomLoginView.as_view(), name="rest_login"),
     path("logout/", LogoutView.as_view(), name="rest_logout"),

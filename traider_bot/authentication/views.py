@@ -1,3 +1,4 @@
+from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -8,7 +9,8 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 
-from main.serializers import UserSerializer
+from main.models import Referral
+from main.serializers import UserSerializer, ReferralSerializer
 
 
 # Create your views here.
@@ -45,3 +47,27 @@ class ConfirmEmailView(APIView):
             return Response({'detail': 'Email confirmed successfully'}, status=status.HTTP_200_OK)
 
         return Response({'detail': 'Invalid or expired key'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CustomRegisterView(RegisterView):
+    def perform_create(self, serializer):
+        user = serializer.save(self.request)
+        response = self.add_to_referrals(user)
+        if response:
+            return response
+        return super().perform_create(serializer)
+
+    def add_to_referrals(self, user):
+        ref_code = self.request.data.get('ref_code')
+        if not ref_code:
+            return
+
+        try:
+            referral = Referral.objects.get(code=ref_code)
+        except Referral.DoesNotExist:
+            user.delete()
+            return Response({"detail": "Referral code does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        referral.referred_users.add(user)
+        referral.save()
+        return
