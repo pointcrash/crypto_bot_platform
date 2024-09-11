@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Count
 from rest_framework import serializers
 
 from bots.models import BotModel
@@ -70,7 +71,10 @@ class UserSerializer(serializers.ModelSerializer):
         return Referral.objects.get(user=obj).code
 
     def get_referral_count(self, obj):
-        return Referral.objects.filter(user=obj).count()
+        referral = Referral.objects.filter(user=obj).annotate(referred_count=Count('referred_users')).first()
+        if referral:
+            return referral.referred_count
+        return 0
 
 
 class ReferralSerializer(serializers.ModelSerializer):

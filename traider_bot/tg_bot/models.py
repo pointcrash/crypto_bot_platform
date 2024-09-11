@@ -4,7 +4,7 @@ from django.db import models
 
 # Create your models here.
 class TelegramAccount(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, blank=True)
+    owner = models.OneToOneField(User, on_delete=models.DO_NOTHING, null=True, blank=True)
     chat_id = models.CharField(null=True, blank=True)
     telegram_username = models.CharField()
 

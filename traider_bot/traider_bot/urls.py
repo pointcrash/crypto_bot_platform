@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested.routers import NestedDefaultRouter
 
+from authentication.views import ConfirmEmailView
 from bots.views_api import BotModelViewSet, BotReadOnlyViewSet, GridViewSet, BBViewSet, SymbolViewSet
 from main.views import logs_list, registration_view, login_view, logout_view, logs_view, view_home, view_logs_delete, \
     profile_list, profile_mode_switching, cleaning_logs_view, user_bot_logs_view
@@ -46,14 +47,17 @@ urlpatterns = [
     path('api/v1/documentation/', include('documentation.urls_api')),
     path('api/v1/tariffs/', include('tariffs.urls_api')),
     path('api/v1/', include('purchases.urls_api')),
+    path('api/v1/', include('tg_bot.urls_api')),
 
     path('api/auth/', include('authentication.urls')),
+    path('auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='front_custom_confirm_email'),
+    path('api/v1/auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='custom_confirm_email'),
 
     path('api/v1/', include(router.urls)),
     path('api/v1/', include(bots_router.urls)),
 
-    path('accounts/', include('allauth.urls')),
-    path('dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('allauth/', include('allauth.urls')),
+    # path('dj-rest-auth/', include('dj_rest_auth.urls')),
+    # path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 ]
 
