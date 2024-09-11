@@ -76,7 +76,7 @@ class BotConnectView(APIView):
             user_id = request.data['user_id']
             chat_id = request.data['chat_id']
             tg_username = request.data['username']
-            user = User.objects.get_or_404(id=user_id)
+            user = User.objects.get_object_or_404(id=user_id)
 
             TelegramAccount.objects.create(owner=user, chat_id=chat_id, telegram_username=tg_username)
 
