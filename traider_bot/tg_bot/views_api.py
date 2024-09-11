@@ -69,6 +69,8 @@ class TelegramAccountDeleteView(APIView):
 
 
 class BotConnectView(APIView):
+    permission_classes = []
+
     def post(self, request):
         try:
             user_id = request.data['user_id']
