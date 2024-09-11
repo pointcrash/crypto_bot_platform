@@ -83,3 +83,18 @@ class BotConnectView(APIView):
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+class BotDisconnectView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        try:
+            user_id = request.data['user_id']
+            user = get_object_or_404(User, id=user_id)
+
+            tg = TelegramAccount.objects.get(owner=user)
+            tg.delete()
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
