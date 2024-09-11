@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
@@ -57,10 +58,25 @@ class TelegramAccountDeleteView(APIView):
 
             if tg:
                 tg.delete()
-                return JsonResponse({'success': True, 'message': 'Telegram account was deleted successfully'}, status=200)
+                return JsonResponse({'success': True, 'message': 'Telegram account was deleted successfully'},
+                                    status=200)
             else:
                 return JsonResponse({'success': False, 'message': 'Telegram account not found for this user'},
                                     status=404)
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+class BotConnectView(APIView):
+    def post(self, request):
+        try:
+            user_id = request.data['user_id']
+            chat_id = request.data['chat_id']
+            tg_username = request.data['username']
+            user = User.objects.get_or_404(id=user_id)
+
+            TelegramAccount.objects.create(owner=user, chat_id=chat_id, telegram_username=tg_username)
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
