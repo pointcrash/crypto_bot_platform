@@ -49,24 +49,24 @@ class TelegramSayHelloView(APIView):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
-class TelegramAccountDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request):
-        user = request.user
-        try:
-            tg = TelegramAccount.objects.filter(owner=user).first()
-
-            if tg:
-                tg.delete()
-                return JsonResponse({'success': True, 'message': 'Telegram account was deleted successfully'},
-                                    status=200)
-            else:
-                return JsonResponse({'success': False, 'message': 'Telegram account not found for this user'},
-                                    status=404)
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+# class TelegramAccountDeleteView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def delete(self, request):
+#         user = request.user
+#         try:
+#             tg = TelegramAccount.objects.filter(owner=user).first()
+#
+#             if tg:
+#                 tg.delete()
+#                 return JsonResponse({'success': True, 'message': 'Telegram account was deleted successfully'},
+#                                     status=200)
+#             else:
+#                 return JsonResponse({'success': False, 'message': 'Telegram account not found for this user'},
+#                                     status=404)
+#
+#         except Exception as e:
+#             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
 class BotConnectView(APIView):
