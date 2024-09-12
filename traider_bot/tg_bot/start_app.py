@@ -23,9 +23,9 @@ def handle_start(message):
         }
         response = requests.post(url, data=data)
         if response.status_code == 200:
-            bot.send_message(message.chat.id, "Подключение прошло успешно!")
+            bot.send_message(chat_id, "Подключение прошло успешно! Пожалуйста, обновите страницу.")
         else:
-            bot.send_message(message.chat.id, f"Ошибка отправки данных: {response.status_code}, {response.text}")
+            bot.send_message(chat_id, f"Ошибка отправки данных: {response.status_code}, {response.text}")
     else:
         bot.send_message(chat_id, "Привет! Вы не отправили параметров.")
 
