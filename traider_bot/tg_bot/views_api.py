@@ -86,12 +86,10 @@ class BotConnectView(APIView):
 
 
 class BotDisconnectView(APIView):
-    permission_classes = []
 
     def post(self, request):
         try:
-            user_id = request.data['user_id']
-            user = get_object_or_404(User, id=user_id)
+            user = request.user
 
             tg = TelegramAccount.objects.get(owner=user)
             tg.delete()
