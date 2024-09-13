@@ -80,6 +80,7 @@ class BotConnectView(APIView):
             user = get_object_or_404(User, id=user_id)
 
             TelegramAccount.objects.create(owner=user, chat_id=chat_id, telegram_username=tg_username)
+            return JsonResponse({'success': True, 'message': 'Bot connected successfully'}, status=200)
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
