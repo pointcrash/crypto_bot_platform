@@ -87,7 +87,7 @@ class BotConnectView(APIView):
 
 class BotDisconnectView(APIView):
 
-    def post(self, request):
+    def get(self, request):
         try:
             user = request.user
 
