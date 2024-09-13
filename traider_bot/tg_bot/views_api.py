@@ -90,9 +90,9 @@ class BotDisconnectView(APIView):
     def get(self, request):
         try:
             user = request.user
-
             tg = TelegramAccount.objects.get(owner=user)
             tg.delete()
+            return JsonResponse({'success': True, 'message': 'Bot has been disconnected'}, status=200)
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
