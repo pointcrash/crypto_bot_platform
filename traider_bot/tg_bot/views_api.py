@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -47,20 +49,51 @@ class TelegramSayHelloView(APIView):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
-class TelegramAccountDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
+# class TelegramAccountDeleteView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def delete(self, request):
+#         user = request.user
+#         try:
+#             tg = TelegramAccount.objects.filter(owner=user).first()
+#
+#             if tg:
+#                 tg.delete()
+#                 return JsonResponse({'success': True, 'message': 'Telegram account was deleted successfully'},
+#                                     status=200)
+#             else:
+#                 return JsonResponse({'success': False, 'message': 'Telegram account not found for this user'},
+#                                     status=404)
+#
+#         except Exception as e:
+#             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
-    def delete(self, request):
-        user = request.user
+
+class BotConnectView(APIView):
+    permission_classes = []
+
+    def post(self, request):
         try:
-            tg = TelegramAccount.objects.filter(owner=user).first()
+            user_id = request.data['user_id']
+            chat_id = request.data['chat_id']
+            tg_username = request.data['username']
+            user = get_object_or_404(User, id=user_id)
 
-            if tg:
-                tg.delete()
-                return JsonResponse({'success': True, 'message': 'Telegram account was deleted successfully'}, status=200)
-            else:
-                return JsonResponse({'success': False, 'message': 'Telegram account not found for this user'},
-                                    status=404)
+            TelegramAccount.objects.create(owner=user, chat_id=chat_id, telegram_username=tg_username)
+            return JsonResponse({'success': True, 'message': 'Bot connected successfully'}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+class BotDisconnectView(APIView):
+
+    def get(self, request):
+        try:
+            user = request.user
+            tg = TelegramAccount.objects.get(owner=user)
+            tg.delete()
+            return JsonResponse({'success': True, 'message': 'Bot has been disconnected'}, status=200)
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)

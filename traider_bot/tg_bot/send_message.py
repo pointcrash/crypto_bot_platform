@@ -16,9 +16,7 @@ def send_telegram_message(chat_id, bot=None,  message='None'):
         response = requests.post(url, json=data)
 
         if response.status_code == 200:
-            # print(response)
             break
         else:
-            # print(response)
             continue
 
