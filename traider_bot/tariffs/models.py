@@ -7,7 +7,7 @@ class Tariff(models.Model):
     max_accounts = models.IntegerField()
     max_bots = models.IntegerField()
     max_income_per_month = models.IntegerField()
-    response_time_from_support = models.CharField(max_length=50)
+    response_time_from_support = models.IntegerField(default=7)
     price = models.DecimalField(max_digits=5, decimal_places=2, default=10)
 
     def __str__(self):
