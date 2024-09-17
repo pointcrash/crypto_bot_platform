@@ -8,6 +8,10 @@ class Tariff(models.Model):
     max_bots = models.IntegerField()
     max_income_per_month = models.IntegerField()
     response_time_from_support = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=5, decimal_places=2, default=10)
+
+    def __str__(self):
+        return self.title
 
 
 class UserTariff(models.Model):
