@@ -5,6 +5,7 @@ from bots.views_api import *
 urlpatterns = [
     path('<int:bot_id>/logs/', BotLogsViewSet.as_view({'get': 'list'})),
     path('<int:bot_id>/user_logs/', UserBotLogViewSet.as_view({'get': 'list'})),
+    path('<int:bot_id>/delete_all_logs/', BotLogsViewSet.as_view({'get': 'delete_all_logs_by_bot'})),
 
     path('by-account/<int:account_id>/', BotReadOnlyViewSet.as_view({'get': 'list_by_account'})),
     path('by-user/<int:user_id>/', BotReadOnlyViewSet.as_view({'get': 'list_by_user_id'})),

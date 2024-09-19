@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -104,6 +105,14 @@ class BotLogsViewSet(viewsets.ModelViewSet):
         bot_id = self.kwargs.get('bot_id')
         queryset = Log.objects.filter(bot=bot_id)
         return queryset
+
+    def delete_all_logs_by_bot(self, request):
+        queryset = self.get_queryset()
+        if queryset.exists():
+            queryset.delete()
+            return Response({"detail": f"All logs for bot have been deleted."}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({"detail": "No logs found for this bot."}, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserBotLogViewSet(viewsets.ModelViewSet):
