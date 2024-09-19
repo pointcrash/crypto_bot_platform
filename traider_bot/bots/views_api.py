@@ -106,10 +106,10 @@ class BotLogsViewSet(viewsets.ModelViewSet):
         queryset = Log.objects.filter(bot=bot_id)
         return queryset
 
-    def delete_all_logs_by_bot(self, request):
-        queryset = self.get_queryset()
-        if queryset.exists():
-            queryset.delete()
+    def delete_all_logs_by_bot(self, request, bot_id):
+        logs = Log.objects.filter(bot=bot_id)
+        if logs.exists():
+            logs.delete()
             return Response({"detail": f"All logs for bot have been deleted."}, status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({"detail": "No logs found for this bot."}, status=status.HTTP_404_NOT_FOUND)
@@ -246,7 +246,8 @@ class CloseSelectedPositionView(APIView):
             return JsonResponse({'success': True, 'message': 'Position closed', 'response': response}, status=200)
         except Exception as e:
             logger.error(f'Error stopping all bots: {e}')
-            return JsonResponse({'success': False, 'message': str(e), '**traceback**': str(traceback.format_exc())}, status=500)
+            return JsonResponse({'success': False, 'message': str(e), '**traceback**': str(traceback.format_exc())},
+                                status=500)
 
 
 class GetOrdersAndPositionsHistoryBotsView(APIView):
