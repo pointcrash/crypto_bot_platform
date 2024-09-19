@@ -114,6 +114,14 @@ class BotLogsViewSet(viewsets.ModelViewSet):
         else:
             return Response({"detail": "No logs found for this bot."}, status=status.HTTP_404_NOT_FOUND)
 
+    def delete_all_logs(self, request):
+        logs = Log.objects.all()
+        if logs.exists():
+            logs.delete()
+            return Response({"detail": f"All logs have been deleted."}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({"detail": "No logs found for this bot."}, status=status.HTTP_404_NOT_FOUND)
+
 
 class UserBotLogViewSet(viewsets.ModelViewSet):
     serializer_class = UserBotLogSerializer
