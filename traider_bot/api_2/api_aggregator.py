@@ -10,7 +10,12 @@ from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, by
 
 
 def get_quantity_from_price(bot, price, amount):
-    return (Decimal(str(amount * bot.leverage)) / price).quantize(Decimal(bot.symbol.minOrderQty), rounding=ROUND_DOWN)
+    min_order_qty = Decimal(bot.symbol.minOrderQty)
+    result = (Decimal(str(amount * bot.leverage)) / price).quantize(min_order_qty, rounding=ROUND_DOWN)
+
+    custom_logging(bot, f'get_quantity_from_price: amount = {amount}, price = {price},'
+                        f' bot.leverage = {bot.leverage}, minOrderQty = {bot.symbol.minOrderQty}, result = {result}')
+    return result
 
 
 def min_qty_check(symbol, leverage, price, amount):

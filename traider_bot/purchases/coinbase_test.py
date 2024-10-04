@@ -7,7 +7,7 @@
 #     "description": "Product description",
 #     "pricing_type": "fixed_price",
 #     "local_price": {
-#         "amount": "100.00",
+#         "amount": "1.00",
 #         "currency": "USDT"
 #     },
 #     "metadata": {

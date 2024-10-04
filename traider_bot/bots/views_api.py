@@ -103,7 +103,7 @@ class BotLogsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         bot_id = self.kwargs.get('bot_id')
-        queryset = Log.objects.filter(bot=bot_id)
+        queryset = Log.objects.filter(bot=bot_id).order_by('-id')
         return queryset
 
     def delete_all_logs_by_bot(self, request, bot_id):
