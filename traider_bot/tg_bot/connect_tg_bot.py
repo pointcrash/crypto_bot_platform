@@ -1,6 +1,7 @@
+import os
 import requests
 
-bot_token = '5855519015:AAFNqrfuqav-Mti1uTkgCrq4WdO2BVC3Cl0'
+bot_token = os.getenv('API_TOKEN')
 
 
 def get_data():

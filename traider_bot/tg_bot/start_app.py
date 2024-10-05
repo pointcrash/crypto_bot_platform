@@ -17,7 +17,6 @@ def handle_start(message):
     user_id = message.text.split()[1] if len(message.text.split()) > 1 else None
     if user_id:
         url = 'https://' + MAIN_SERVER_URL + '/api/v1/tg/bot-connect/'
-        # url = "https://bravo.almazor.co/api/v1/tg/bot-connect/"
         data = {
             "chat_id": message.chat.id,
             "username": username,
