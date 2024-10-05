@@ -4,6 +4,7 @@ import requests
 import telebot
 
 API_TOKEN = os.getenv('API_TOKEN')
+MAIN_SERVER_URL = os.getenv('MAIN_SERVER_URL')
 bot = telebot.TeleBot(API_TOKEN)
 
 
@@ -15,7 +16,8 @@ def handle_start(message):
 
     user_id = message.text.split()[1] if len(message.text.split()) > 1 else None
     if user_id:
-        url = "https://bravo.almazor.co/api/v1/tg/bot-connect/"
+        url = 'https://' + MAIN_SERVER_URL + '/api/v1/tg/bot-connect/'
+        # url = "https://bravo.almazor.co/api/v1/tg/bot-connect/"
         data = {
             "chat_id": message.chat.id,
             "username": username,
