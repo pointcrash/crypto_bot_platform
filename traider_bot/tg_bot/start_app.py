@@ -3,7 +3,7 @@ import os
 import requests
 import telebot
 
-API_TOKEN = os.getenv('API_TOKEN')
+API_TOKEN = os.getenv('TELEGRAM_API_TOKEN')
 bot = telebot.TeleBot(API_TOKEN)
 
 
