@@ -77,3 +77,17 @@ def create_invoice_view(request):
     else:
         return JsonResponse({'success': False, 'message': 'Неверный тип запроса (должен быть POST)'}, status=500)
 
+
+def purchases_callback_view(request):
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        invoice_id = request.POST.get('invoice_id')
+        amount_crypto = request.POST.get('amount_crypto')
+        currency = request.POST.get('currency')
+        order_id = request.POST.get('order_id')
+        token = request.POST.get('token')
+
+        print(order_id)
+        print(status)
+        print(invoice_id)
+
