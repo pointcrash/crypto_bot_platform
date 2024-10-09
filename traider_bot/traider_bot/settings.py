@@ -307,4 +307,6 @@ ACCOUNT_ADAPTER = 'traider_bot.adapters.MyAccountAdapter'
 
 FRONTEND_URL = os.getenv('FRONTEND_URL')
 
+CRYPTOCLOUD_AUTH_TOKEN = os.getenv('CRYPTOCLOUD_AUTH_TOKEN')
+CRYPTOCLOUD_SHOP_ID = os.getenv('CRYPTOCLOUD_SHOP_ID')
 
