@@ -60,8 +60,8 @@ def create_invoice_view(request):
             'Content-Type': 'application/json'
         }
 
-        response = requests.post(url, json=data, headers=headers)
         try:
+            response = requests.post(url, json=data, headers=headers)
             response_data = response.json()
 
             if response.status_code == 200 and 'result' in response_data:
@@ -71,8 +71,8 @@ def create_invoice_view(request):
                     {'success': False, 'message': response_data.get('message', 'Ошибка при создании счета')},
                     status=response.status_code)
 
-        except ValueError:
-            return JsonResponse({'success': False, 'message': 'Некорректный ответ от API'}, status=500)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': 'Некорректный ответ от API', 'error': str(e)}, status=500)
 
     else:
         return JsonResponse({'success': False, 'message': 'Неверный тип запроса (должен быть POST)'}, status=500)
