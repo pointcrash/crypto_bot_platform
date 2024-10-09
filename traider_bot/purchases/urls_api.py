@@ -9,6 +9,6 @@ router.register(r'purchases', PurchaseViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('create_invoice/', CreateInvoiceView.as_view()),
-    path('purchases/callback/', PurchasesCallbackView.as_view()),
+    path('invoice/create/', CreateInvoiceView.as_view()),
+    path('invoice/postback/', PurchasesCallbackView.as_view()),
 ]
