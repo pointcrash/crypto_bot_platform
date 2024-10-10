@@ -47,24 +47,26 @@ class CreateInvoiceView(APIView):
         if request.method == 'POST':
             try:
                 data = json.loads(request.body)
-                amount = data.get('amount')
                 email = data.get('email')
                 product_id = int(data.get('product_id'))
 
             except json.JSONDecodeError:
                 return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
+            if not product_id or not email:
+                return JsonResponse({'success': False, 'message': 'Не переданы обязательные параметры'}, status=400)
+
             url = 'https://api.cryptocloud.plus/v2/invoice/create'
             auth_token = settings.CRYPTOCLOUD_AUTH_TOKEN
             shop_id = settings.CRYPTOCLOUD_SHOP_ID
             order_id = uuid.uuid4().hex
 
-            if not amount or not email:
-                return JsonResponse({'success': False, 'message': 'Не переданы обязательные параметры'}, status=400)
+            product = get_object_or_404(ServiceProduct, id=product_id)
+            Purchase.objects.create(user=request.user, product=product, order_id=order_id)
 
             data = {
                 'shop_id': shop_id,
-                'amount': amount,
+                'amount': product.price,
                 'currency': 'USD',
                 'email': email,
                 'order_id': order_id,
@@ -75,8 +77,6 @@ class CreateInvoiceView(APIView):
                 'Content-Type': 'application/json'
             }
 
-            product = get_object_or_404(ServiceProduct, id=product_id)
-            Purchase.objects.create(user=request.user, product=product, order_id=order_id)
 
             try:
                 response = requests.post(url, json=data, headers=headers)
