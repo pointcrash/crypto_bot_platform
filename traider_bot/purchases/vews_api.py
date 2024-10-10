@@ -1,3 +1,5 @@
+import json
+import logging
 import uuid
 
 import requests
@@ -7,9 +9,13 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.views import APIView
 
+from tariffs.models import UserTariff
 from .models import ServiceProduct, Purchase
 from .serializers import ServiceProductSerializer, PurchaseSerializer
+from django.shortcuts import get_object_or_404
 
+
+logger = logging.getLogger('debug_logger')
 
 
 class ServiceProductViewSet(viewsets.ModelViewSet):
@@ -39,12 +45,19 @@ class CreateInvoiceView(APIView):
 
     def post(self, request):
         if request.method == 'POST':
+            try:
+                data = json.loads(request.body)
+                amount = data.get('amount')
+                email = data.get('email')
+                product_id = int(data.get('product_id'))
+
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
             url = 'https://api.cryptocloud.plus/v2/invoice/create'
             auth_token = settings.CRYPTOCLOUD_AUTH_TOKEN
             shop_id = settings.CRYPTOCLOUD_SHOP_ID
             order_id = uuid.uuid4().hex
-            amount = request.POST.get('amount')
-            email = request.POST.get('email')
 
             if not amount or not email:
                 return JsonResponse({'success': False, 'message': 'Не переданы обязательные параметры'}, status=400)
@@ -61,6 +74,9 @@ class CreateInvoiceView(APIView):
                 'Authorization': f'Token {auth_token}',
                 'Content-Type': 'application/json'
             }
+
+            product = get_object_or_404(ServiceProduct, id=product_id)
+            Purchase.objects.create(user=request.user, product=product, order_id=order_id)
 
             try:
                 response = requests.post(url, json=data, headers=headers)
@@ -84,15 +100,46 @@ class PurchasesCallbackView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        if request.method == 'POST':
-            status = request.POST.get('status')
-            invoice_id = request.POST.get('invoice_id')
-            amount_crypto = request.POST.get('amount_crypto')
-            currency = request.POST.get('currency')
-            order_id = request.POST.get('order_id')
-            token = request.POST.get('token')
+        logger.info(f"ПОЛУЧЕНО СООБЩЕНИЕ ОБ ОПЛАТЕ: {request.POST.dict()}")
+        status = request.POST.get('status')
+        order_id = request.POST.get('order_id')
+        token = request.POST.get('token')
 
-            print(order_id)
-            print(status)
-            print(invoice_id)
+        if status == 'success':
+            if not order_id or not token:
+                logger.error(f"Недостаточно данных в запросе: {request.POST.dict()}")
+                return JsonResponse({'success': False, 'message': 'Не переданы необходимые параметры'}, status=400)
+
+            purchase = Purchase.objects.filter(order_id=order_id).first()
+            if purchase:
+                try:
+                    purchase.enrolled = True
+                    purchase.save()
+
+                    user = purchase.user
+                    tariff = purchase.product.tariff
+                    UserTariff.objects.create(user=user, tariff=tariff)
+
+                    purchase.completed = True
+                    purchase.save()
+
+                    logger.info(f"Покупка была успешно оплачена: {order_id}")
+                    return JsonResponse({'success': True, 'message': 'Покупка была успешно оплачена'}, status=200)
+
+                except Exception as e:
+                    logger.error(f"Ошибка обработки покупки {order_id}: {str(e)}")
+                    return JsonResponse({'success': False, 'message': 'Ошибка обработки покупки'}, status=500)
+            else:
+                logger.error(f"Покупка с order_id {order_id} не найдена.")
+                return JsonResponse({'success': False, 'message': 'Покупка не найдена'}, status=404)
+
+        # Если статус не 'success'
+        logger.error(f"Ошибка оплаты покупки с order_id {order_id}.")
+        return JsonResponse({'success': False, 'message': f"Ошибка оплаты покупки с order_id {order_id}."}, status=400)
+
+
+
+
+
+
 
