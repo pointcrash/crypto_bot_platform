@@ -6,11 +6,12 @@ from rest_framework.response import Response
 
 from tariffs.models import UserTariff, Tariff
 from tariffs.serializers import UserTariffSerializer, TariffSerializer
+from traider_bot.permissions import IsAdminOrReadOnly
 
 
 class UserTariffViewSet(viewsets.ModelViewSet):
     serializer_class = UserTariffSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
         user = self.request.user
@@ -30,6 +31,8 @@ class UserTariffViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         if not queryset.exists():
             return Response({"detail": "No tariffs found for this user."}, status=404)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class TariffReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):

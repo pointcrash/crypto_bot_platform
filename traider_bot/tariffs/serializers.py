@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from purchases.models import ServiceProduct
 from tariffs.models import UserTariff, Tariff
 
 
@@ -13,8 +14,11 @@ class UserTariffSerializer(serializers.ModelSerializer):
 
 
 class TariffSerializer(serializers.ModelSerializer):
+    service_product_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Tariff
         fields = '__all__'
 
+    def get_service_product_id(self, obj):
+        return ServiceProduct.objects.filter(tariff=obj).first().id
