@@ -32,8 +32,8 @@ class PurchaseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return Purchase.objects.all()
+        # if self.request.user.is_staff:
+        #     return Purchase.objects.all()
         return Purchase.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):

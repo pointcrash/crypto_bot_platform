@@ -15,17 +15,17 @@ class ServiceProductSerializer(serializers.ModelSerializer):
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
-    user_id = serializers.PrimaryKeyRelatedField(
-        write_only=True,
-        queryset=User.objects.all(),
-        source='user'
-    )
-    product_id = serializers.PrimaryKeyRelatedField(
-        write_only=True,
-        queryset=ServiceProduct.objects.all(),
-        source='product'
-    )
-    user = UserSerializer(read_only=True)
+    # user_id = serializers.PrimaryKeyRelatedField(
+    #     write_only=True,
+    #     queryset=User.objects.all(),
+    #     source='user'
+    # )
+    # product_id = serializers.PrimaryKeyRelatedField(
+    #     write_only=True,
+    #     queryset=ServiceProduct.objects.all(),
+    #     source='product'
+    # )
+    # user = UserSerializer(read_only=True)
     product = ServiceProductSerializer(read_only=True)
 
     class Meta:
@@ -34,6 +34,6 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['user'] = UserSerializer(instance.user).data if instance.user else None
+        # ret['user'] = UserSerializer(instance.user).data if instance.user else None
         ret['product'] = ServiceProductSerializer(instance.product).data if instance.product else None
         return ret
