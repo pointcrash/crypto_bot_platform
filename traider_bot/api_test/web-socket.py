@@ -14,8 +14,8 @@ def main():
     symbol = 'BTCUSDT'
     symbo1 = 'ETHUSDT'
 
-    # twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret, testnet=True)
-    twm = ThreadedWebsocketManager(api_key=main_api_key, api_secret=main_api_secret, testnet=False)
+    twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret, testnet=True)
+    # twm = ThreadedWebsocketManager(api_key=main_api_key, api_secret=main_api_secret, testnet=False)
     # global_list_twm_for_binance['my_account'] = twm
 
     # start is required to initialise its internal loop

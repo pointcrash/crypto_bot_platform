@@ -21,4 +21,5 @@ class TariffSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_service_product_id(self, obj):
-        return ServiceProduct.objects.filter(tariff=obj).first().id
+        product = ServiceProduct.objects.filter(tariff=obj).first()
+        return product.id if product else ''
