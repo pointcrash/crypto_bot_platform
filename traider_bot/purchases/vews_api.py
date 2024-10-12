@@ -66,7 +66,7 @@ class CreateInvoiceView(APIView):
 
             data = {
                 'shop_id': shop_id,
-                'amount': product.price,
+                'amount': str(int(str(product.price))),
                 'currency': 'USD',
                 'email': email,
                 'order_id': order_id,
