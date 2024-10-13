@@ -46,7 +46,7 @@ class CreateInvoiceView(APIView):
     def post(self, request):
         if request.method == 'POST':
             try:
-                data = json.loads(request.body)
+                data = request.data
                 email = data.get('email')
                 product_id = int(data.get('product_id'))
 
