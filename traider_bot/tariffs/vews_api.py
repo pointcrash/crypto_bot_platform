@@ -24,6 +24,8 @@ class UserTariffViewSet(viewsets.ModelViewSet):
     def list_by_user_id(self, request, user_id):
         user = User.objects.get(id=user_id)
         queryset = UserTariff.objects.filter(user=user)
+        if not queryset.exists():
+            return Response({"detail": "No tariffs found for this user."}, status=404)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
