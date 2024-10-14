@@ -110,6 +110,10 @@ class PurchasesCallbackView(APIView):
                 logger.error(f"Недостаточно данных в запросе: {request.POST.dict()}")
                 return JsonResponse({'success': False, 'message': 'Не переданы необходимые параметры'}, status=400)
 
+            if token != settings.CRYPTOCLOUD_SECRET:
+                logger.error(f"Токен postback от Cryptocloud несовпадает: {token} != {settings.CRYPTOCLOUD_SECRET}")
+                return JsonResponse({'success': False, 'message': 'Неверный токен'}, status=400)
+
             purchase = Purchase.objects.filter(order_id=order_id).first()
             if purchase:
                 try:
