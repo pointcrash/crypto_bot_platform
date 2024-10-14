@@ -16,8 +16,7 @@ class Tariff(models.Model):
     max_income_per_month = models.IntegerField()
     response_time_from_support = models.IntegerField(default=7)
     price = models.DecimalField(max_digits=5, decimal_places=2, default=10)
-    type = models.CharField(choices=TARIFF_TYPE_CHOICES, default='inactive', null=True)
-
+    type = models.CharField(choices=TARIFF_TYPE_CHOICES, default='INACTIVE', null=True)
 
     def __str__(self):
         return self.title
@@ -27,6 +26,3 @@ class UserTariff(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-
-

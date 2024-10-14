@@ -38,6 +38,6 @@ class UserTariffViewSet(viewsets.ModelViewSet):
 
 
 class TariffReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Tariff.objects.all()
+    queryset = Tariff.objects.filter(type='ACTIVE')
     serializer_class = TariffSerializer
     permission_classes = [IsAuthenticated]
