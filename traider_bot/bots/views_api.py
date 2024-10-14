@@ -22,6 +22,7 @@ from bots.zinger.logic_market.start_logic import zinger_worker_market
 from bots.serializers import *
 from orders.models import Position, Order
 from orders.serializers import PositionSerializer, OrderSerializer
+from tariffs.models import UserTariff
 from traider_bot.permissions import IsOwnerOrAdmin, IsBotOwnerOrAdmin, IsAdminOrReadOnly
 import traceback
 
@@ -72,6 +73,27 @@ class BotModelViewSet(viewsets.ModelViewSet):
         else:
             queryset = BotModel.objects.filter(owner=user)
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        user_tariff = UserTariff.objects.filter(user=user).first()
+
+        if not user_tariff:
+            return Response({"error": "Тариф не подключен"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            tariff = user_tariff.tariff
+            if BotModel.objects.filter(owner=user).count() >= tariff.max_bots:
+                return Response(
+                    {"error": f"Вы не можете создать больше {tariff.max_bots} ботов."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class BotReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):

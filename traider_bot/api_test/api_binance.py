@@ -11,7 +11,7 @@ api_secret = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
 main_api_key = 'DtQ4NHexgkjnoNLKFeEiPjeFsN5vJr8UsUBigfelxO4DAyykSBZAyLRteiktUjJj'
 main_api_secret = '6G3BhdLPDywx5y7QsxrYOFj3glD4bMglpifUOfjwo1gfE7KMfoadVkJCyXwac3b2'
 
-# client = Client(api_key, api_secret, testnet=True)
+client = Client(api_key, api_secret, testnet=True)
 # main_client = Client(main_api_key, main_api_secret, testnet=False)
 
 
@@ -39,7 +39,7 @@ def get_data_ago_to_ms(days):
 # print(client.futures_change_leverage(symbol='BTCUSDT', leverage=9))  # Изменить плечо
 # print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму
 # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
-# print(main_client.futures_position_information(symbol='BTCUSDT'))  # Инфо по позиции
+print(client.futures_income_history())  # Инфо по позиции
 
 # print(main_client.futures_change_margin_type(symbol='BTCUSDT', marginType='ISOLATED'))  # Инфо по позиции
 

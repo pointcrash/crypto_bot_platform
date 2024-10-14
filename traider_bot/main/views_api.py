@@ -12,6 +12,7 @@ from api_2.api_aggregator import get_futures_account_balance, internal_transfer,
 from main.forms import InternalTransferForm
 from main.models import Account, ExchangeService, Referral
 from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer
+from tariffs.models import UserTariff
 from traider_bot.permissions import IsOwnerOrAdmin
 
 
@@ -53,6 +54,27 @@ class AccountsViewSet(viewsets.ModelViewSet):
         queryset = Account.objects.filter(owner=owner_id)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        user_tariff = UserTariff.objects.filter(user=user).first()
+
+        if not user_tariff:
+            return Response({"error": "Тариф не подключен"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            tariff = user_tariff.tariff
+            if Account.objects.filter(owner=user).count() >= tariff.max_accounts:
+                return Response(
+                    {"error": f"Вы не можете создать больше {tariff.max_accounts} аккаунтов."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 def login_test(request):
