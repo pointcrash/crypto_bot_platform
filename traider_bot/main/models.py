@@ -114,8 +114,8 @@ class AccountBalance(models.Model):
     margin = models.CharField(max_length=25, null=True, blank=True)
     un_pnl = models.CharField(max_length=25)
 
-    time_create = models.DateTimeField(auto_now_add=True)
-    time_update = models.DateTimeField(auto_now=True)
+    time_create = models.DateTimeField(null=True, blank=True)
+    time_update = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.margin:
