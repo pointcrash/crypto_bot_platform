@@ -1,5 +1,5 @@
 import json
-
+from collections import defaultdict
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -182,6 +182,17 @@ class AccountBalanceHistoryView(viewsets.ReadOnlyModelViewSet):
         accounts_queryset = Account.objects.filter(owner=user)
         queryset = AccountBalance.objects.filter(account__in=accounts_queryset).order_by('-time_update')
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        grouped_data = defaultdict(list)
+
+        for account_balance in queryset:
+            account_name = account_balance.account.name
+            serializer = self.get_serializer(account_balance)
+            grouped_data[account_name].append(serializer.data)
+
+        return Response(grouped_data)
 
 
 # class UpdateAccountBalanceView(APIView):
