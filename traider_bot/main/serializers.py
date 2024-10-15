@@ -3,7 +3,7 @@ from django.db.models import Count
 from rest_framework import serializers
 
 from bots.models import BotModel
-from main.models import Account, ExchangeService, Referral
+from main.models import Account, ExchangeService, Referral, AccountBalance
 
 
 def masking_data_string(string):
@@ -43,6 +43,12 @@ class AccountNameOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ['id', 'name']
+
+
+class AccountBalanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AccountBalance
+        fields = '__all__'
 
 
 class ExchangeServiceSerializer(serializers.ModelSerializer):

@@ -10,8 +10,9 @@ from rest_framework.views import APIView
 
 from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets
 from main.forms import InternalTransferForm
-from main.models import Account, ExchangeService, Referral
-from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer
+from main.models import Account, ExchangeService, Referral, AccountBalance
+from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer, \
+    AccountBalanceSerializer
 from tariffs.models import UserTariff
 from traider_bot.permissions import IsOwnerOrAdmin
 
@@ -170,3 +171,32 @@ class AddReferredUserView(APIView):
             serializer.save()
             return Response({"detail": "User added to referral list."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AccountBalanceHistoryView(viewsets.ReadOnlyModelViewSet):
+    serializer_class = AccountBalanceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        accounts_queryset = Account.objects.filter(owner=user)
+        queryset = AccountBalance.objects.filter(account__in=accounts_queryset).order_by('-time_update')
+        return queryset
+
+
+# class UpdateAccountBalanceView(APIView):
+#     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+#
+#     def get(self, request):
+#         try:
+#             accounts_queryset = Account.objects.filter(owner=request.user)
+#             for account in accounts_queryset:
+#                 try:
+#                     current_account_balance = get_futures_account_balance(account)
+#                     history_queryset = AccountBalance.objects.filter(account=account).order_by('-time_update')
+
+        #     balance = get_user_assets(account, symbol="USDT")
+        #     return JsonResponse({'success': True, 'message': 'Balance was successfully received', 'body': balance})
+        #
+        # except Exception as e:
+        #     return JsonResponse({'success': False, 'message': str(e)}, status=500)

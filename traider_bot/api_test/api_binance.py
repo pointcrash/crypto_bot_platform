@@ -11,9 +11,6 @@ api_secret = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
 main_api_key = 'DtQ4NHexgkjnoNLKFeEiPjeFsN5vJr8UsUBigfelxO4DAyykSBZAyLRteiktUjJj'
 main_api_secret = '6G3BhdLPDywx5y7QsxrYOFj3glD4bMglpifUOfjwo1gfE7KMfoadVkJCyXwac3b2'
 
-client = Client(api_key, api_secret, testnet=True)
-# main_client = Client(main_api_key, main_api_secret, testnet=False)
-
 
 def get_data_ago_to_ms(days):
     current_date = datetime.now()
@@ -21,42 +18,51 @@ def get_data_ago_to_ms(days):
     return int(date_ago.timestamp() * 1000)
 
 
-# Получение информации о балансе
-# print(len(client.futures_klines(symbol='BTCUSDT', interval='15m', limit=50)))  # Получение свечей
-# print(client.futures_mark_price(symbol='BTCUSDT'))  # Получаем данные по цене
-# print(client.futures_symbol_ticker(symbol='BTCUSDT'))  # Получаем ТОЛЬКО price данные по цене??
-# print(client.futures_comission_rate(symbol='BTCUSDT'))  # {'symbol': 'BTCUSDT', 'makerCommissionRate': '0.000200', 'takerCommissionRate': '0.000400'}
-# print(client.futures_leverage_bracket())  # СПРОСИТЬ У ЮРЫ!!!
-# print(client.futures_place_batch_order(batchOrders=[order1, order2]))  # Разместить несколько ордеров (max 5)
-# print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='LONG', type='MARKET', quantity=0.02))  # Разместить ордер
-# print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='SHORT', type='LIMIT', price=41000, timeInForce='GTC', quantity=0.02))  # Разместить ордер
-# print(client.futures_get_all_orders(symbol='BTCUSDT'))  # Список ордеров
-# print(client.futures_get_open_orders(symbol='BTCUSDT'))  # Список ордеров
-# print(client.futures_get_order(symbol='BTCUSDT', orderId='3653110189'))  # Инфо по открытому ордеру
-# print(client.futures_cancel_order(symbol='BTCUSDT', orderId='3653110189'))  # Отменить ордер
-# print(client.futures_cancel_all_open_orders(symbol='BTCUSDT'))
-# print(client.futures_account_balance())  # Получить баланс кошелька
-# print(client.futures_change_leverage(symbol='BTCUSDT', leverage=9))  # Изменить плечо
-# print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму
-# print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
-print(client.futures_income_history())  # Инфо по позиции
+if __name__ == '__main__':
+    client = Client(api_key, api_secret, testnet=True)
+    # main_client = Client(main_api_key, main_api_secret, testnet=False)
 
-# print(main_client.futures_change_margin_type(symbol='BTCUSDT', marginType='ISOLATED'))  # Инфо по позиции
+    # Получение информации о балансе
+    # print(len(client.futures_klines(symbol='BTCUSDT', interval='15m', limit=50)))  # Получение свечей
+    # print(client.futures_mark_price(symbol='BTCUSDT'))  # Получаем данные по цене
+    # print(client.futures_symbol_ticker(symbol='BTCUSDT'))  # Получаем ТОЛЬКО price данные по цене??
+    # print(client.futures_comission_rate(symbol='BTCUSDT'))  # {'symbol': 'BTCUSDT', 'makerCommissionRate': '0.000200', 'takerCommissionRate': '0.000400'}
+    # print(client.futures_leverage_bracket())  # СПРОСИТЬ У ЮРЫ!!!
+    # print(client.futures_place_batch_order(batchOrders=[order1, order2]))  # Разместить несколько ордеров (max 5)
+    # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='LONG', type='MARKET', quantity=0.02))  # Разместить ордер
+    # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='SHORT', type='LIMIT', price=41000, timeInForce='GTC', quantity=0.02))  # Разместить ордер
+    # print(client.futures_get_all_orders(symbol='BTCUSDT'))  # Список ордеров
+    # print(client.futures_get_open_orders(symbol='BTCUSDT'))  # Список ордеров
+    # print(client.futures_get_order(symbol='BTCUSDT', orderId='3653110189'))  # Инфо по открытому ордеру
+    # print(client.futures_cancel_order(symbol='BTCUSDT', orderId='3653110189'))  # Отменить ордер
+    # print(client.futures_cancel_all_open_orders(symbol='BTCUSDT'))
+    # print(client.futures_account_balance())  # Получить баланс кошелька
+    # print(client.futures_change_leverage(symbol='BTCUSDT', leverage=9))  # Изменить плечо
+    # print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму
+    # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
+    for balance in client.futures_account_balance():
+        print(balance)
 
-# response = (main_client.futures_position_information())  # Инфо по позиции
-# for i in response:
-#     if float(i['positionAmt']) != 0:
-#         print(i)
-# print(client.futures_klines(symbol='BTCUSDT', interval='5m', limit=20)[::-1])
-# print(main_client.futures_income_history(symbol='NOTUSDT', incomeType='REALIZED_PNL', startTime=get_data_ago_to_ms(30)))
-# x = main_client.futures_account_trades(symbol='NOTUSDT', startTime=get_data_ago_to_ms(23), endTime=get_data_ago_to_ms(16))
-# for y in x:
-#     print(y)
+    # print(client.futures_income_history())  # Инфо по позиции
 
-# print(client.futures_income_history(symbol='BTCUSDT', incomeType='FUNDING_FEE'))
-# print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='SHORT', type='TAKE_PROFIT_MARKET', quantity='0.02', stopPrice=Decimal(60000)))  # Разместить ордер
+    # print(main_client.futures_change_margin_type(symbol='BTCUSDT', marginType='ISOLATED'))  # Инфо по позиции
 
-# print(client.futures_get_order(symbol='BTCUSDT'))  #
+    # response = (main_client.futures_position_information())  # Инфо по позиции
+    # for i in response:
+    #     if float(i['positionAmt']) != 0:
+    #         print(i)
+    # print(client.futures_klines(symbol='BTCUSDT', interval='5m', limit=20)[::-1])
+    # print(main_client.futures_income_history(symbol='NOTUSDT', incomeType='REALIZED_PNL', startTime=get_data_ago_to_ms(30)))
+    # x = main_client.futures_account_trades(symbol='NOTUSDT', startTime=get_data_ago_to_ms(23), endTime=get_data_ago_to_ms(16))
+    # for y in x:
+    #     print(y)
+
+    # print(client.futures_income_history(symbol='BTCUSDT', incomeType='FUNDING_FEE'))
+    # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='SHORT', type='TAKE_PROFIT_MARKET', quantity='0.02', stopPrice=Decimal(60000)))  # Разместить ордер
+
+    # print(client.futures_get_order(symbol='BTCUSDT'))  #
+
+
 def get_exchange_information():
     def count_decimal_places(number_str):
         if '.' in number_str:
