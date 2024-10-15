@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Account(models.Model):
@@ -122,6 +123,11 @@ class AccountBalance(models.Model):
                 self.margin = str(float(self.balance) - float(self.available_balance))
             except ValueError:
                 self.margin = '0'
+
+        if not self.time_create:
+            self.time_create = timezone.now()
+
+        self.time_update = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):

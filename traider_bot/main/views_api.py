@@ -193,21 +193,3 @@ class AccountBalanceHistoryView(viewsets.ReadOnlyModelViewSet):
             grouped_data[account_name].append(serializer.data)
 
         return Response(grouped_data)
-
-
-# class UpdateAccountBalanceView(APIView):
-#     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
-#
-#     def get(self, request):
-#         try:
-#             accounts_queryset = Account.objects.filter(owner=request.user)
-#             for account in accounts_queryset:
-#                 try:
-#                     current_account_balance = get_futures_account_balance(account)
-#                     history_queryset = AccountBalance.objects.filter(account=account).order_by('-time_update')
-
-        #     balance = get_user_assets(account, symbol="USDT")
-        #     return JsonResponse({'success': True, 'message': 'Balance was successfully received', 'body': balance})
-        #
-        # except Exception as e:
-        #     return JsonResponse({'success': False, 'message': str(e)}, status=500)

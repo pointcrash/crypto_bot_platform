@@ -1,9 +1,12 @@
 import logging
+import time
+
+from django.contrib.auth.models import User
 
 from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform
 from bots.general_functions import send_telegram_notice
 from bots.models import BotModel
-from main.models import Account
+from main.models import Account, AccountBalance
 from orders.models import Position
 
 logger = logging.getLogger('django')
@@ -78,3 +81,48 @@ def account_positions_check():
                     entry_price=psn.get('entryPrice'),
                     unrealised_pnl=psn.get('unrealisedPnl'),
                 )
+
+
+def account_balance_history_update():
+    accounts = Account.objects.all()
+    for account in accounts:
+        try:
+            balance_data = get_futures_account_balance(account)
+        except Exception as e:
+            logger.info(f"Ошибка получения баланса для аккаунта {account.name}. Ошибка: {e}")
+
+        AccountBalance.objects.create(
+            account=account,
+            asset='USDT',
+            balance=balance_data['fullBalance'],
+            available_balance=balance_data['availableBalance'],
+            un_pnl=balance_data['unrealizedPnl'],
+        )
+
+        time.sleep(10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
