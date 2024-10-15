@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from main.views_api import *
@@ -8,6 +8,8 @@ router.register(r'account-balance-history', AccountBalanceHistoryView, basename=
 
 
 urlpatterns = [
+    path('', include(router.urls)),
+
     path('user/', CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
     path('users/', UsersViewSet.as_view({'get': 'list'})),
     path('users/<int:pk>/', UsersViewSet.as_view({'put': 'update', 'get': 'retrieve', 'delete': 'destroy'})),
