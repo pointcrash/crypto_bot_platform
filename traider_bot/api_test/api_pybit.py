@@ -43,8 +43,8 @@ def bybit_get_position_info():
 
 def bybit_test():
     session = get_session()
-    # response = session.get_transaction_log(accountType="UNIFIED", currency='USDT')
-    response = session.get_wallet_balance(accountType="UNIFIED", currency='USDT')
+    response = session.get_transaction_log(accountType="UNIFIED", currency='USDT')
+    # response = session.get_wallet_balance(accountType="UNIFIED", currency='USDT')
     return response
 
 

@@ -40,10 +40,10 @@ if __name__ == '__main__':
     # print(client.futures_change_leverage(symbol='BTCUSDT', leverage=9))  # Изменить плечо
     # print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму
     # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
-    for balance in client.futures_account_balance():
-        print(balance)
+    # for balance in client.futures_account_balance():
+    #     print(balance)
 
-    # print(client.futures_income_history())  # Инфо по позиции
+    print(client.futures_income_history())  # Инфо по позиции
 
     # print(main_client.futures_change_margin_type(symbol='BTCUSDT', marginType='ISOLATED'))  # Инфо по позиции
 
