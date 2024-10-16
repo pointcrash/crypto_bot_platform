@@ -22,18 +22,18 @@ class Account(models.Model):
     )
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    name = models.CharField(unique=True)
+    name = models.CharField(unique=True, max_length=25)
     service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
-    API_TOKEN = models.CharField()
-    SECRET_KEY = models.CharField()
+    API_TOKEN = models.CharField(max_length=255)
+    SECRET_KEY = models.CharField(max_length=255)
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='CONTRACT', null=True)
     is_mainnet = models.BooleanField()
-    url = models.CharField(default='https://api-testnet.bybit.com')
-    address = models.CharField(blank=True, null=True)
+    url = models.CharField(default='https://api-testnet.bybit.com', max_length=255)
+    address = models.CharField(max_length=255, blank=True, null=True)
 
     low_margin_value = models.IntegerField(blank=True, null=True)
-    low_margin_value_type = models.CharField(choices=LOW_MARGIN_VALUE_CHOICES, default='$', null=True, blank=True)
-    low_margin_actions = models.CharField(choices=LOW_MARGIN_ACTIONS_CHOICES, null=True, blank=True)
+    low_margin_value_type = models.CharField(max_length=10, choices=LOW_MARGIN_VALUE_CHOICES, default='$', null=True, blank=True)
+    low_margin_actions = models.CharField(max_length=255, choices=LOW_MARGIN_ACTIONS_CHOICES, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.is_mainnet:

@@ -44,6 +44,6 @@ class OrdersAdmin(admin.ModelAdmin):
 
 @admin.register(AccountBalance)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'account', 'asset', 'balance', 'time_update', )
-    list_display_links = ('id', 'account', 'asset', 'balance', 'time_update', )
-    search_fields = ('id', 'account', 'asset', 'time_update', )
+    list_display = ('id', 'account', 'asset', 'balance', 'time_create', 'time_update', )
+    list_display_links = ('id', 'account', 'asset', 'balance', 'time_create', 'time_update', )
+    search_fields = ('id', 'account', 'asset', 'time_create', 'time_update', )
