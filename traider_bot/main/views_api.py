@@ -1,4 +1,6 @@
 import json
+import requests
+
 from collections import defaultdict
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -73,9 +75,18 @@ class AccountsViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-
+        account_obj = serializer.instance
+        account_id = account_obj.id
         headers = self.get_success_headers(serializer.data)
+
+        url = f"http://ws-manager:8008/ws/conn/new_account/{account_id}"
+        requests.get(url)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        url = f"http://ws-manager:8008/ws/conn/update_account/{instance.id}"
+        requests.get(url)
 
 
 def login_test(request):

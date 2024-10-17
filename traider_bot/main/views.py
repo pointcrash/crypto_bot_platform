@@ -248,7 +248,6 @@ def edit_account(request, acc_id):
             acc = form.save(commit=False)
             form.save()
 
-            # logger.info(f'ssssssssssssssssssssssssssssssssss')
             url = f"http://ws-manager:8008/ws/conn/update_account/{acc.pk}"
             requests.get(url)
 

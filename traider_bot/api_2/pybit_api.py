@@ -158,58 +158,34 @@ def bybit_get_pnl_by_time(bot, start_time, end_time):
     return total_pnl
 
 
+def bybit_get_transaction_log(account, symbol='USDT', acc_type="UNIFIED"):
+    session = get_session(account)
+    response = session.get_transaction_log(accountType=acc_type, currency=symbol)
+
+    result_list = response['result']['list']
+
+    def formatter(data: dict) -> dict:
+        formatted_data = {
+            'symbol': data['symbol'],
+            'side': data['side'],
+            'orderId': data['orderId'],
+            'change': data['change'],
+            'cashFlow': data['cashFlow'],
+            'fee': data['fee'],
+            'transactionTime': data['transactionTime'],
+            'type': data['type'],
+        }
+
+        return formatted_data
+
+    transaction_log = [formatter(data) for data in result_list]
+
+    return transaction_log
+
+
 if __name__ == "__main__":
     test_session = HTTP(
         testnet=True,
         api_key="dMwQJxAlfO7Qvl848e",
         api_secret="QrN3JS2VCXwVjV76sHAMwUJFa81KrPMSA0yl",
     )
-
-    # print(test_session.set_trading_stop(
-    #     category="linear",
-    #     symbol="BTCUSDT",
-    #     trailingStop="1200",
-    #     activePrice="63761",
-    #     positionIdx=1,
-    # ))
-
-    # print(test_session.withdraw(
-    #     coin="USDT",
-    #     chain="TRX",
-    #     address="TLjWZpgjsovzZdH55vvMuMu1gheVSj6nU3",
-    #     amount="5",
-    #     timestamp=int(time.time()) * 1000,
-    #     forceChain=1,
-    #     accountType="FUND",
-    # ))
-
-    # response = (test_session.get_open_orders(
-    #     category="linear",
-    #     symbol="ETHUSDT",
-    #     openOnly=0,
-    # ))
-    #
-    # for order in response['result']['list']:
-    #     print(order_formatters(order))
-
-    # print(test_session.place_batch_order(
-    #     category="linear",
-    #     request=[
-    #         {
-    #             "category": "linear",
-    #             "symbol": "BTCUSDT",
-    #             "orderType": "Market",
-    #             "side": "Buy",
-    #             "positionIdx": 1,
-    #             "qty": '0.02',
-    #         },
-    #         {
-    #             "category": "linear",
-    #             "symbol": "BTCUSDT",
-    #             "orderType": "Market",
-    #             "side": "Sell",
-    #             "positionIdx": 2,
-    #             "qty": '0.02',
-    #         }
-    #     ]
-    # ))
