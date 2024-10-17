@@ -3,7 +3,7 @@ from django.db.models import Count
 from rest_framework import serializers
 
 from bots.models import BotModel
-from main.models import Account, ExchangeService, Referral, AccountBalance
+from main.models import Account, ExchangeService, Referral, AccountBalance, WSManager
 
 
 def masking_data_string(string):
@@ -20,6 +20,7 @@ def masking_data_string(string):
 
 class AccountSerializer(serializers.ModelSerializer):
     bots_count = serializers.SerializerMethodField()
+    ws_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
@@ -27,6 +28,9 @@ class AccountSerializer(serializers.ModelSerializer):
 
     def get_bots_count(self, obj):
         return BotModel.objects.filter(account=obj).count()
+
+    def get_ws_status(self, obj):
+        return WSManager.objects.get(account=obj).status
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
