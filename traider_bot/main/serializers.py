@@ -30,7 +30,11 @@ class AccountSerializer(serializers.ModelSerializer):
         return BotModel.objects.filter(account=obj).count()
 
     def get_ws_status(self, obj):
-        return WSManager.objects.get(account=obj).status
+        try:
+            ws_status = WSManager.objects.get(account=obj).status
+        except WSManager.DoesNotExist:
+            ws_status = 'does not exist'
+        return ws_status
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
