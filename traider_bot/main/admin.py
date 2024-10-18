@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from bots.models import Log
-from main.models import Account, ActiveBot, ExchangeService, WSManager, Referral, AccountBalance
+from main.models import Account, ActiveBot, ExchangeService, WSManager, Referral, AccountBalance, AccountHistory
 
 
 # Register your models here.
@@ -47,3 +47,10 @@ class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'account', 'asset', 'balance', 'time_create', 'time_update', )
     list_display_links = ('id', 'account', 'asset', 'balance', 'time_create', 'time_update', )
     search_fields = ('id', 'account', 'asset', 'time_create', 'time_update', )
+
+
+@admin.register(AccountHistory)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'account', 'symbol', 'type', 'change', 'transaction_time', )
+    list_display_links = ('id', 'account', 'symbol', 'type', 'change', 'transaction_time', )
+    search_fields = ('id', 'account', 'symbol', 'type', 'change',  'transaction_time', )

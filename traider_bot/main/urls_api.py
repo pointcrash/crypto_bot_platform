@@ -5,6 +5,7 @@ from main.views_api import *
 
 router = DefaultRouter()
 router.register(r'account-balance-history', AccountBalanceHistoryView, basename='account-balance-history')
+router.register(r'account-transaction-history', AccountTransactionHistoryView, basename='account-transaction-history')
 
 
 urlpatterns = [

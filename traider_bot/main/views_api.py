@@ -12,9 +12,9 @@ from rest_framework.views import APIView
 
 from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets
 from main.forms import InternalTransferForm
-from main.models import Account, ExchangeService, Referral, AccountBalance
+from main.models import Account, ExchangeService, Referral, AccountBalance, AccountHistory
 from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer, \
-    AccountBalanceSerializer
+    AccountBalanceSerializer, AccountTransactionHistorySerializer
 from tariffs.models import UserTariff
 from traider_bot.permissions import IsOwnerOrAdmin
 
@@ -202,6 +202,28 @@ class AccountBalanceHistoryView(viewsets.ReadOnlyModelViewSet):
         for account_balance in queryset:
             account_name = account_balance.account.name
             serializer = self.get_serializer(account_balance)
+            grouped_data[account_name].append(serializer.data)
+
+        return Response(grouped_data)
+
+
+class AccountTransactionHistoryView(viewsets.ReadOnlyModelViewSet):
+    serializer_class = AccountTransactionHistorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        accounts_queryset = Account.objects.filter(owner=user)
+        queryset = AccountHistory.objects.filter(account__in=accounts_queryset)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        grouped_data = defaultdict(list)
+
+        for transaction in queryset:
+            account_name = transaction.account.name
+            serializer = self.get_serializer(transaction)
             grouped_data[account_name].append(serializer.data)
 
         return Response(grouped_data)
