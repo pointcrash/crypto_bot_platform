@@ -266,6 +266,35 @@ def binance_withdraw(account, symbol, amount, chain, address):
     return response
 
 
+def binance_get_income_history(account, start_time=None, end_time=None):
+    ''' startTime & endTime must be (ms) '''
+
+    client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
+
+    if not start_time or not end_time:
+        response = client.futures_income_history()
+    else:
+        response = client.futures_income_history(startTime=start_time, endTime=end_time)
+
+    def formatter(data: dict) -> dict:
+        formatted_data = {
+            'symbol': data.get('symbol', ''),
+            'side': data.get('side', ''),
+            'orderId': data.get('tradeId', ''),
+            'change': data.get('income', ''),
+            'cashFlow': data.get('cashFlow', ''),
+            'fee': data.get('fee', ''),
+            'transactionTime': data.get('time', ''),
+            'type': data.get('incomeType', ''),
+        }
+
+        return formatted_data
+
+    income_history = [formatter(data) for data in response]
+
+    return income_history
+
+
 def get_binance_exchange_information(account):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
 

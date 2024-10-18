@@ -132,3 +132,20 @@ class AccountBalance(models.Model):
 
     def __str__(self):
         return self.account.name
+
+
+class AccountHistory(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='accounthistory')
+    symbol = models.CharField(max_length=25)
+    side = models.CharField(max_length=25)
+    order_id = models.CharField(max_length=50)
+    change = models.CharField(max_length=25)
+    cash_flow = models.CharField(max_length=25)
+    fee = models.CharField(max_length=25)
+    transaction_time = models.CharField(max_length=25)
+    type = models.CharField(max_length=25)
+
+    time_create = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.account.name

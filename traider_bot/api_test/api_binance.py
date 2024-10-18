@@ -43,7 +43,9 @@ if __name__ == '__main__':
     # for balance in client.futures_account_balance():
     #     print(balance)
 
-    print(client.futures_income_history())  # Инфо по позиции
+    x = (client.futures_income_history())  # Инфо по позиции
+    for i in x:
+        print(i)
 
     # print(main_client.futures_change_margin_type(symbol='BTCUSDT', marginType='ISOLATED'))  # Инфо по позиции
 

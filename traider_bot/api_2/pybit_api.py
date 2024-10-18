@@ -158,9 +158,15 @@ def bybit_get_pnl_by_time(bot, start_time, end_time):
     return total_pnl
 
 
-def bybit_get_transaction_log(account, symbol='USDT', acc_type="UNIFIED"):
+def bybit_get_transaction_log(account, symbol='USDT', acc_type="UNIFIED", start_time=None, end_time=None):
+    ''' startTime & endTime must be (ms) '''
+
     session = get_session(account)
-    response = session.get_transaction_log(accountType=acc_type, currency=symbol)
+
+    if not start_time or not end_time:
+        response = session.get_transaction_log(accountType=acc_type, currency=symbol)
+    else:
+        response = session.get_transaction_log(accountType=acc_type, currency=symbol, startTime=start_time, endTime=end_time)
 
     result_list = response['result']['list']
 

@@ -6,7 +6,7 @@ from django.utils import timezone
 from api_2.api_bybit import *
 from api_2.api_binance import *
 from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets, \
-    bybit_get_pnl_by_time, bybit_get_wallet_balance, bybit_get_all_position_info
+    bybit_get_pnl_by_time, bybit_get_wallet_balance, bybit_get_all_position_info, bybit_get_transaction_log
 
 
 def get_quantity_from_price(bot, price, amount):
@@ -213,6 +213,13 @@ def withdraw(account, symbol, amount, chain, address):
         return binance_withdraw(account, symbol, amount, chain, address)
     elif account.service.name == 'ByBit':
         return bybit_withdraw(account, symbol, amount, chain, address)
+
+
+def transaction_history(account, start_time=None, end_time=None):
+    if account.service.name == 'Binance':
+        return binance_get_income_history(account, start_time, end_time)
+    elif account.service.name == 'ByBit':
+        return bybit_get_transaction_log(account, start_time, end_time)
 
 
 def get_pnl_by_time(bot, start_time, end_time=None):

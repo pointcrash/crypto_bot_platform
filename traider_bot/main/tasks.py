@@ -3,10 +3,12 @@ import time
 
 from django.contrib.auth.models import User
 
-from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform
+from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform, \
+    transaction_history
 from bots.general_functions import send_telegram_notice
 from bots.models import BotModel
-from main.models import Account, AccountBalance
+from main.models import Account, AccountBalance, AccountHistory
+from main.tests import generate_date_ranges
 from orders.models import Position
 
 logger = logging.getLogger('django')
@@ -102,27 +104,31 @@ def account_balance_history_update():
         time.sleep(10)
 
 
+def get_account_transaction_history():
+    accounts = Account.objects.all()
+    for account in accounts:
+        acc_history_last = AccountHistory.objects.filter(account=account).last()
+        start_time = acc_history_last.transaction_time if acc_history_last else None
+        date_ranges = generate_date_ranges(start_time) if start_time else generate_date_ranges()
 
+        try:
+            for date in date_ranges:
+                history_data = transaction_history(account, start_time=date[0], end_time=date[1])
 
+                for transaction in history_data:
+                    AccountHistory.objects.create(
+                        account=account,
+                        symbol=transaction.get('symbol'),
+                        side=transaction.get('side'),
+                        order_id=transaction.get('orderId'),
+                        change=transaction.get('change'),
+                        cash_flow=transaction.get('cashFlow'),
+                        fee=transaction.get('fee'),
+                        transaction_time=transaction.get('transactionTime'),
+                        type=transaction.get('type'),
+                    )
 
+                time.sleep(3)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        except Exception as e:
+            logger.info(f"Ошибка получения истории для аккаунта {account.name}. Ошибка: {e}")
