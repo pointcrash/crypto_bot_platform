@@ -6,7 +6,7 @@ def generate_date_ranges(start_time=None):
     current_time = datetime.now()
 
     if start_time:
-        start_time = convert_timestamp_to_datetime(start_time)
+        start_time = convert_timestamp_to_datetime(int(start_time) + 1)
     if not start_time or current_time - start_time > timedelta(days=90):
         start_time = current_time - timedelta(days=90)
 
