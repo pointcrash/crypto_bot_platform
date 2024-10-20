@@ -137,11 +137,11 @@ class AccountBalance(models.Model):
 class AccountHistory(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='accounthistory')
     symbol = models.CharField(max_length=25)
-    side = models.CharField(max_length=25)
-    order_id = models.CharField(max_length=50)
+    side = models.CharField(max_length=25, blank=True, null=True)
+    order_id = models.CharField(max_length=50, blank=True, null=True)
     change = models.CharField(max_length=25)
-    cash_flow = models.CharField(max_length=25)
-    fee = models.CharField(max_length=25)
+    cash_flow = models.CharField(max_length=25, blank=True, null=True)
+    fee = models.CharField(max_length=25, blank=True, null=True)
     transaction_time = models.CharField(max_length=25)
     type = models.CharField(max_length=25)
 
