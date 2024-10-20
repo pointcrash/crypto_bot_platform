@@ -8,7 +8,7 @@ from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders,
 from bots.general_functions import send_telegram_notice
 from bots.models import BotModel
 from main.models import Account, AccountBalance, AccountHistory
-from main.tests import generate_date_ranges
+from main.tests import generate_date_ranges, convert_timestamp_to_datetime
 from orders.models import Position
 
 logger = logging.getLogger('django')
@@ -124,7 +124,7 @@ def get_account_transaction_history():
                         change=transaction.get('change'),
                         cash_flow=transaction.get('cashFlow'),
                         fee=transaction.get('fee'),
-                        transaction_time=transaction.get('transactionTime'),
+                        transaction_time=convert_timestamp_to_datetime(transaction.get('transactionTime')),
                         type=transaction.get('type'),
                     )
 
