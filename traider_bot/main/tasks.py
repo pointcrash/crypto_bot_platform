@@ -107,11 +107,11 @@ def account_balance_history_update():
 def get_account_transaction_history():
     accounts = Account.objects.all()
     for account in accounts:
-        acc_history_last = AccountHistory.objects.filter(account=account).last()
-        start_time = acc_history_last.transaction_time if acc_history_last else None
-        date_ranges = generate_date_ranges(start_time) if start_time else generate_date_ranges()
-
         try:
+            acc_history_last = AccountHistory.objects.filter(account=account).last()
+            start_time = acc_history_last.transaction_time if acc_history_last else None
+            date_ranges = generate_date_ranges(start_time) if start_time else generate_date_ranges()
+
             for date in date_ranges:
                 history_data = transaction_history(account, start_time=date[0], end_time=date[1])
 
@@ -128,7 +128,7 @@ def get_account_transaction_history():
                         type=transaction.get('type'),
                     )
 
-                time.sleep(3)
+                # time.sleep(3)
 
         except Exception as e:
-            logger.info(f"Ошибка получения истории для аккаунта {account.name}. Ошибка: {e}")
+            logger.error(f"Ошибка получения истории для аккаунта {account.name}. Ошибка: {e}")
