@@ -53,7 +53,7 @@ def get_position_inform(bot):
         psn_list = bybit_get_position_inform(bot)
 
     for psn in psn_list:
-        psn['qty'] = psn['qty'] if Decimal(psn['qty']) != 0 else str(int(psn['qty']))
+        psn['qty'] = psn['qty'] if Decimal(psn['qty']) != 0 else str(Decimal(psn['qty']).normalize())
         psn['markPrice'] = str(float(psn['markPrice'])) if psn['markPrice'] else 0
         psn['entryPrice'] = str(float(psn['entryPrice'])) if psn['entryPrice'] else 0
         if psn.get('unrealisedPnl'):
