@@ -128,7 +128,7 @@ class GetFuturesBalanceAllAccountsView(APIView):
                 balance['account'] = account.name
                 balance['balance'] = balance.pop('fullBalance')
                 balance['available_balance'] = balance.pop('availableBalance')
-                balance['margin'] = str(float(balance['balance']) - float(balance['available_balance']))
+                balance['margin'] = balance['balance'] - balance['available_balance']
                 balances_list.append(balance)
 
             return JsonResponse({'success': True, 'body': balances_list})
