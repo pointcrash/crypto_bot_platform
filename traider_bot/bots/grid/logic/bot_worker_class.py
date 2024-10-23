@@ -127,7 +127,7 @@ class WorkGridClass:
             'price': str(round(order_price, int(self.bot.symbol.priceScale))),
             'qty': str(get_quantity_from_price(self.bot, order_price, self.bot.amount_long / self.grid.grid_count)),
         }
-        if Decimal(order['qty']) == 0:
+        if Decimal(order['qty']) == 0 and self.bot.is_active is True:
             min_amount = (Decimal(self.bot.symbol.minOrderQty) * self.current_price / self.bot.leverage).quantize(
                 Decimal(1), rounding=ROUND_UP) * self.grid.grid_count
             custom_user_bot_logging(self.bot, f'Недостаточный стартовый капитал для открытия ордера, требуется не менее {min_amount}')

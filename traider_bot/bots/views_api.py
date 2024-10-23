@@ -155,7 +155,7 @@ class UserBotLogViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         bot_id = self.kwargs.get('bot_id')
-        queryset = UserBotLog.objects.filter(bot=bot_id)
+        queryset = UserBotLog.objects.filter(bot=bot_id).order_by('-id')
         return queryset
 
 
