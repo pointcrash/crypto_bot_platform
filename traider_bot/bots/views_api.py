@@ -42,6 +42,11 @@ class BBViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+    # def perform_update(self, serializer):
+    #     pass
+        # if 0 == 0:
+        #     instance = serializer.save()
+
 
 class GridViewSet(viewsets.ModelViewSet):
     serializer_class = GridSerializer
