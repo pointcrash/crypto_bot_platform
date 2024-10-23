@@ -36,16 +36,16 @@ if __name__ == '__main__':
     # print(client.futures_get_order(symbol='BTCUSDT', orderId='3653110189'))  # Инфо по открытому ордеру
     # print(client.futures_cancel_order(symbol='BTCUSDT', orderId='3653110189'))  # Отменить ордер
     # print(client.futures_cancel_all_open_orders(symbol='BTCUSDT'))
-    # print(client.futures_account_balance())  # Получить баланс кошелька
+    # print(client.futures_exchange_info())  # Получить баланс кошелька
     # print(client.futures_change_leverage(symbol='BTCUSDT', leverage=9))  # Изменить плечо
     # print(client.futures_get_position_mode(symbol='BTCUSDT'))  # Инфо по One-way/Hedge режиму
     # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
     # for balance in client.futures_account_balance():
     #     print(balance)
 
-    x = (client.futures_income_history())  # Инфо по позиции
-    for i in x:
-        print(i)
+    # x = (client.futures_income_history())  # Инфо по позиции
+    # for i in x:
+    #     print(i)
 
     # print(main_client.futures_change_margin_type(symbol='BTCUSDT', marginType='ISOLATED'))  # Инфо по позиции
 

@@ -282,7 +282,8 @@ def get_bybit_exchange_information(account):
             'priceTickSize': i['priceFilter']['tickSize'],
             'minQty': i['lotSizeFilter']['minOrderQty'],
             'maxQty': i['lotSizeFilter']['maxOrderQty'],
-            'stepQtySize': i['lotSizeFilter']['qtyStep']
+            'stepQtySize': i['lotSizeFilter']['qtyStep'],
+            'minNotional': '',
         } for i in data_set['result']['list'] if i['symbol'].endswith('USDT')
     }
 

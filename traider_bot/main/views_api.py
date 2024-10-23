@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets
+from bots.general_functions import all_symbols_update
 from main.forms import InternalTransferForm
 from main.models import Account, ExchangeService, Referral, AccountBalance, AccountHistory
 from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer, \
@@ -227,3 +228,14 @@ class AccountTransactionHistoryView(viewsets.ReadOnlyModelViewSet):
             grouped_data[account_name].append(serializer.data)
 
         return Response(grouped_data)
+
+
+class UpdateSymbolsView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        try:
+            all_symbols_update()
+            return Response({"detail": "Symbols updated successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": f"Get error {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

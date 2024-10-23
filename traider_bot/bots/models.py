@@ -18,6 +18,7 @@ class Symbol(models.Model):
     minOrderQty = models.CharField(max_length=20, null=True)
     maxOrderQty = models.CharField(max_length=20, null=True)
     qtyStep = models.CharField(max_length=20, blank=True, null=True)
+    min_notional = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.name

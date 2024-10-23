@@ -315,7 +315,8 @@ def get_binance_exchange_information(account):
             'priceScale': count_decimal_places(i['filters'][0]['tickSize']),
             'minQty': i['filters'][2]['minQty'],
             'maxQty': i['filters'][2]['maxQty'],
-            'stepQtySize': i['filters'][2]['stepSize']
+            'stepQtySize': i['filters'][2]['stepSize'],
+            'minNotional': i['filters'][5]['notional'],
         } for i in symbols_raw_data['symbols'] if i['symbol'].endswith('USDT')
     }
 

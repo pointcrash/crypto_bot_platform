@@ -280,6 +280,7 @@ def all_symbols_update():
                 coin.maxOrderQty = symbol_data['maxQty']
                 coin.tickSize = symbol_data['priceTickSize']
                 coin.qtyStep = symbol_data['stepQtySize']
+                coin.min_notional = symbol_data['minNotional']
                 coin.save()
             else:
                 Symbol.objects.create(

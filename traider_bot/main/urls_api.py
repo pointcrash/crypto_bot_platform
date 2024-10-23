@@ -23,9 +23,9 @@ urlpatterns = [
     path('accounts/by-owner/<int:owner_id>/', AccountsViewSet.as_view({'get': 'list_by_owner'})),
 
     path('exchange-services/', ExchangeServiceReadOnlyViewSet.as_view({'get': 'list'})),
-
     path('get-trusted-ip/', GetTrustedIPView.as_view(), name='get_trusted_ip'),
-
     path('referrals/<str:referral_code>/add/', AddReferredUserView.as_view(), name='add-referred-user'),
+
+    path('update_symbols', UpdateSymbolsView.as_view(), name='update_symbols'),
 
 ]
