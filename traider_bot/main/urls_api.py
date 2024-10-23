@@ -18,6 +18,7 @@ urlpatterns = [
     path('accounts/', AccountsViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('accounts/<int:pk>/', AccountsViewSet.as_view({'put': 'update', 'get': 'retrieve', 'delete': 'destroy'})),
     path('accounts/<int:acc_id>/get-futures-balance/', GetFuturesBalanceView.as_view()),
+    path('accounts/all/get-futures-balances/', GetFuturesBalanceAllAccountsView.as_view()),
     path('accounts/<int:acc_id>/get-fund-balance/', GetFundBalanceView.as_view()),
     path('accounts/<int:acc_id>/internal-transfer/', InternalTransferView.as_view()),
     path('accounts/by-owner/<int:owner_id>/', AccountsViewSet.as_view({'get': 'list_by_owner'})),

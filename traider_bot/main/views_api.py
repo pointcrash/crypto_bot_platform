@@ -1,4 +1,6 @@
 import json
+from decimal import Decimal
+
 import requests
 
 from collections import defaultdict
@@ -109,6 +111,27 @@ class GetFuturesBalanceView(APIView):
             account = Account.objects.get(pk=acc_id)
             balance = get_futures_account_balance(account)
             return JsonResponse({'success': True, 'message': 'Balance was successfully received', 'body': balance})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+class GetFuturesBalanceAllAccountsView(APIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+
+    def get(self, request):
+        try:
+            balances_list = []
+            accounts = Account.objects.filter(owner=request.user)
+            for account in accounts:
+                balance = get_futures_account_balance(account)
+                balance['account'] = account.name
+                balance['balance'] = balance.pop('fullBalance')
+                balance['available_balance'] = balance.pop('availableBalance')
+                balance['margin'] = str(float(balance['balance']) - float(balance['available_balance']))
+                balances_list.append(balance)
+
+            return JsonResponse({'success': True, 'body': balances_list})
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform, \
     transaction_history
-from bots.general_functions import send_telegram_notice
+from bots.general_functions import send_telegram_notice, all_symbols_update
 from bots.models import BotModel
 from main.models import Account, AccountBalance, AccountHistory
 from main.tests import generate_date_ranges, convert_timestamp_to_datetime
@@ -132,3 +132,7 @@ def get_account_transaction_history():
 
         except Exception as e:
             logger.error(f"Ошибка получения истории для аккаунта {account.name}. Ошибка: {e}")
+
+
+def auto_symbols_update():
+    all_symbols_update()
