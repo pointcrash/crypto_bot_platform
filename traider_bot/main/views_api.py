@@ -121,15 +121,17 @@ class GetFuturesBalanceAllAccountsView(APIView):
 
     def get(self, request):
         try:
-            balances_list = []
+            balances_list = defaultdict(list)
             accounts = Account.objects.filter(owner=request.user)
+
             for account in accounts:
                 balance = get_futures_account_balance(account)
-                balance['account'] = account.name
                 balance['balance'] = balance.pop('fullBalance')
                 balance['available_balance'] = balance.pop('availableBalance')
                 balance['margin'] = round(balance['balance'] - balance['available_balance'], 2)
                 balances_list.append(balance)
+
+                balances_list[account.name].append(balance)
 
             return JsonResponse({'success': True, 'body': balances_list})
 
