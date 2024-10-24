@@ -1,5 +1,6 @@
 import logging
 import time
+from datetime import date
 
 from django.contrib.auth.models import User
 
@@ -88,20 +89,25 @@ def account_positions_check():
 def account_balance_history_update():
     accounts = Account.objects.all()
     for account in accounts:
+
+        current_day = date.today()
+        if AccountBalance.objects.filter(time_create__date=current_day).first():
+            continue
+
         try:
             balance_data = get_futures_account_balance(account)
+            AccountBalance.objects.create(
+                account=account,
+                asset='USDT',
+                balance=balance_data['fullBalance'],
+                available_balance=balance_data['availableBalance'],
+                un_pnl=balance_data['unrealizedPnl'],
+            )
         except Exception as e:
             logger.info(f"Ошибка получения баланса для аккаунта {account.name}. Ошибка: {e}")
+            AccountBalance.objects.create(account=account)
 
-        AccountBalance.objects.create(
-            account=account,
-            asset='USDT',
-            balance=balance_data['fullBalance'],
-            available_balance=balance_data['availableBalance'],
-            un_pnl=balance_data['unrealizedPnl'],
-        )
-
-        time.sleep(10)
+        time.sleep(3)
 
 
 def get_account_transaction_history():
