@@ -91,7 +91,7 @@ def account_balance_history_update():
     for account in accounts:
 
         current_day = date.today()
-        if AccountBalance.objects.filter(time_create__date=current_day).first():
+        if AccountBalance.objects.filter(account=account, time_create__date=current_day).first():
             continue
 
         try:
