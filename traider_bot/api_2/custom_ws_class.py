@@ -6,6 +6,7 @@ import traceback
 import websocket
 
 from api_2.custom_logging_api import custom_logging
+from bots.general_functions import custom_user_bot_logging
 
 
 class CustomWSClient:
@@ -49,13 +50,18 @@ class CustomWSClient:
             custom_logging(self.bot, f"**СООБЩЕНИЕ ВЫЗВАШЕЕ ОШИБКУ:** {message}")
 
     def _on_close(self, ws, close_code, reason):
-        pass
+        close_code = close_code or 'Unknown'
+        reason = reason or 'No reason provided'
+        custom_logging(self.bot, f'WebSocket closed. Close code: {close_code}, Reason: {reason}')
+        custom_user_bot_logging(self.bot, f'WebSocket closed. Close code: {close_code}, Reason: {reason}')
 
     def _on_open(self, ws):
+        custom_logging(self.bot, f'WebSocket connection open.')
         print('BotID', self.bot.id, "Connection opened")
 
     def _on_error(self, ws, error):
-        print('BotID', self.bot.id, f"Error: {error}")
+        custom_logging(self.bot, f'Error: {error}')
+        # print('BotID', self.bot.id, f"Error: {error}")
 
     def _on_pong(self, ws):
         pass
