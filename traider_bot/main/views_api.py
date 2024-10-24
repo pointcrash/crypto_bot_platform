@@ -217,7 +217,7 @@ class AccountBalanceHistoryView(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         accounts_queryset = Account.objects.filter(owner=user)
-        queryset = AccountBalance.objects.filter(account__in=accounts_queryset).order_by('-time_update')
+        queryset = AccountBalance.objects.filter(account__in=accounts_queryset).order_by('-time_create')
         return queryset
 
     def list(self, request, *args, **kwargs):

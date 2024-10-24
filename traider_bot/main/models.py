@@ -108,17 +108,17 @@ def create_referral(sender, instance, created, **kwargs):
 
 class AccountBalance(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='accountbalance')
-    asset = models.CharField(max_length=25, null=True)
-    balance = models.CharField(max_length=25)
-    available_balance = models.CharField(max_length=25)
+    asset = models.CharField(max_length=25, default='USDT')
+    balance = models.CharField(max_length=25, null=True, blank=True)
+    available_balance = models.CharField(max_length=25, null=True, blank=True)
     margin = models.CharField(max_length=25, null=True, blank=True)
-    un_pnl = models.CharField(max_length=25)
+    un_pnl = models.CharField(max_length=25, null=True, blank=True)
 
     time_create = models.DateTimeField(null=True, blank=True)
     time_update = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if not self.margin:
+        if not self.margin and self.balance and self.available_balance:
             try:
                 self.margin = str(float(self.balance) - float(self.available_balance))
             except ValueError:
