@@ -129,7 +129,6 @@ class GetFuturesBalanceAllAccountsView(APIView):
                 balance['balance'] = balance.pop('fullBalance')
                 balance['available_balance'] = balance.pop('availableBalance')
                 balance['margin'] = round(balance['balance'] - balance['available_balance'], 2)
-                balances_list.append(balance)
 
                 balances_list[account.name].append(balance)
 
