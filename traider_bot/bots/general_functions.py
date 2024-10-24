@@ -265,7 +265,6 @@ def all_symbols_update():
             account = Account.objects.filter(name='RomanBinanceMainnet', service=service).first()
 
         symbol_set = get_exchange_information(account, service.name)
-        print('Длинна списка монет: ', len(symbol_set))
         if not service:
             return
         for symbol_name in symbol_set:
@@ -294,6 +293,7 @@ def all_symbols_update():
                     maxOrderQty=symbol_data['maxQty'],
                     tickSize=symbol_data['priceTickSize'],
                     qtyStep=symbol_data['stepQtySize'],
+                    min_notional=symbol_data['minNotional'],
                 )
 
 
