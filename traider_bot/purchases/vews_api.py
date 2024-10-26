@@ -2,6 +2,7 @@ import json
 import logging
 import uuid
 
+import jwt
 import requests
 from django.conf import settings
 from django.http import JsonResponse
@@ -105,14 +106,22 @@ class PurchasesCallbackView(APIView):
         order_id = request.POST.get('order_id')
         token = request.POST.get('token')
 
+        secret_key = settings.CRYPTOCLOUD_SECRET
+
         if status == 'success':
             if not order_id or not token:
                 logger.error(f"Недостаточно данных в запросе: {request.POST.dict()}")
                 return JsonResponse({'success': False, 'message': 'Не переданы необходимые параметры'}, status=400)
 
-            if token != settings.CRYPTOCLOUD_SECRET:
-                logger.error(f"Токен postback от Cryptocloud несовпадает: {token} != {settings.CRYPTOCLOUD_SECRET}")
-                return JsonResponse({'success': False, 'message': 'Неверный токен'}, status=400)
+            try:
+                decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
+                logger.error(f"Decoded token payload: {decoded_token}")
+            except jwt.ExpiredSignatureError:
+                logger.error("Token has expired")
+                return JsonResponse({'success': False, 'message': 'Token has expired'}, status=400)
+            except jwt.InvalidTokenError:
+                logger.error("Invalid token")
+                return JsonResponse({'success': False, 'message': 'Invalid token'}, status=400)
 
             purchase = Purchase.objects.filter(order_id=order_id).first()
             if purchase:
