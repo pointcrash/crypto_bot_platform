@@ -120,7 +120,7 @@ class AccountBalance(models.Model):
     def save(self, *args, **kwargs):
         if not self.margin and self.balance and self.available_balance:
             try:
-                self.margin = str(float(self.balance) - float(self.available_balance))
+                self.margin = str(round(float(self.balance) - float(self.available_balance), 2))
             except ValueError:
                 self.margin = '0'
 

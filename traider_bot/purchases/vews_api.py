@@ -142,6 +142,15 @@ class PurchasesCallbackView(APIView):
         return JsonResponse({'success': False, 'message': f"Ошибка оплаты покупки с order_id {order_id}."}, status=400)
 
 
+class PurchaseGuestTariffView(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def post(self, request):
+        status = request.POST.get('status')
+        order_id = request.POST.get('order_id')
+        token = request.POST.get('token')
+
+        return JsonResponse({'success': False, 'message': f"Ошибка оплаты покупки с order_id {order_id}."}, status=400)
 
 
 
