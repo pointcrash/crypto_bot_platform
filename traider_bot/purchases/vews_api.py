@@ -117,10 +117,10 @@ class PurchasesCallbackView(APIView):
                 decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
                 logger.error(f"Decoded token payload: {decoded_token}")
             except jwt.ExpiredSignatureError:
-                logger.error("Token has expired")
+                logger.error(f"Token has expired {token}")
                 return JsonResponse({'success': False, 'message': 'Token has expired'}, status=400)
             except jwt.InvalidTokenError:
-                logger.error("Invalid token")
+                logger.error(f"Invalid token {token}")
                 return JsonResponse({'success': False, 'message': 'Invalid token'}, status=400)
 
             purchase = Purchase.objects.filter(order_id=order_id).first()
