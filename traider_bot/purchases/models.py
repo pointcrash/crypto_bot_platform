@@ -10,7 +10,7 @@ class ServiceProduct(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(blank=True, null=True)
     type = models.CharField(max_length=50, default='No type')
-    tariff = models.ForeignKey(Tariff, on_delete=models.DO_NOTHING, blank=True, null=True)
+    tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -29,8 +29,8 @@ class ServiceProduct(models.Model):
 
 
 class Purchase(models.Model):
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    product = models.ForeignKey(ServiceProduct, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(ServiceProduct, on_delete=models.SET_NULL, null=True)
     order_id = models.CharField(max_length=32, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     enrolled = models.BooleanField(default=False)
