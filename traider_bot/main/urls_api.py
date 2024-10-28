@@ -28,5 +28,6 @@ urlpatterns = [
     path('referrals/<str:referral_code>/add/', AddReferredUserView.as_view(), name='add-referred-user'),
 
     path('update_symbols', UpdateSymbolsView.as_view(), name='update_symbols'),
+    path('accounts/connect_ws/', AccountWSConnectView.as_view(), name='account_ws_connect'),
 
 ]

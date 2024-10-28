@@ -263,3 +263,17 @@ class UpdateSymbolsView(APIView):
             return Response({"detail": "Symbols updated successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"detail": f"Get error {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AccountWSConnectView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            account_id = request.POST.get('account_id')
+            url = f"http://ws-manager:8008/ws/conn/update_account/{account_id}"
+            response = requests.get(url)
+
+            return Response({"detail": f"{response}"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": f"{response}, {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
