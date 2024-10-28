@@ -77,7 +77,7 @@ class WSManager(models.Model):
     time_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.account
+        return self.account.name
 
 
 class Referral(models.Model):
