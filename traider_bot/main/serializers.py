@@ -21,6 +21,7 @@ def masking_data_string(string):
 class AccountSerializer(serializers.ModelSerializer):
     bots_count = serializers.SerializerMethodField()
     ws_status = serializers.SerializerMethodField()
+    ws_error = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
@@ -34,6 +35,15 @@ class AccountSerializer(serializers.ModelSerializer):
             ws_status = WSManager.objects.get(account=obj).status
         except WSManager.DoesNotExist:
             ws_status = 'does not exist'
+        return ws_status
+
+    def get_ws_error(self, obj):
+        try:
+            ws_status = WSManager.objects.get(account=obj).error_text
+        except WSManager.DoesNotExist:
+            ws_status = 'does not exist'
+        except Exception as e:
+            ws_status = 'unknown error'
         return ws_status
 
     def to_representation(self, instance):
