@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal
 
 import requests
@@ -270,10 +271,11 @@ class AccountWSConnectView(APIView):
 
     def post(self, request):
         try:
-            account_id = request.POST.get('account_id')
+            account_id = int(request.POST.get('account_id'))
             url = f"http://ws-manager:8008/ws/conn/update_account/{account_id}"
             response = requests.get(url)
+            logging.info(f'{response.text}')
 
-            return Response({"detail": f"{response}"}, status=status.HTTP_200_OK)
+            return Response({"detail": f"{response.text}"}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"detail": f"{response}, {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": f"{response.text}, {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
