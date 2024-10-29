@@ -160,10 +160,13 @@ def change_position_mode(bot, hedge_mode=True):
 
 
 def get_futures_account_balance(account):
-    if account.service.name == 'Binance':
-        return binance_account_balance(account)
-    elif account.service.name == 'ByBit':
-        return bybit_get_wallet_balance(account)
+    try:
+        if account.service.name == 'Binance':
+            return binance_account_balance(account)
+        elif account.service.name == 'ByBit':
+            return bybit_get_wallet_balance(account)
+    except Exception as e:
+        raise Exception(e)
 
     ''' Returned data:
     {   
