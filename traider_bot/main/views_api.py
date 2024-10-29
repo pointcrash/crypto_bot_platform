@@ -82,7 +82,7 @@ class AccountsViewSet(viewsets.ModelViewSet):
         try:
             self.perform_create(serializer)
         except Exception as e:
-            return JsonResponse({'success': False, 'message': f'Ошибка при создании аккаунта', 'error': f'{e}'}, status=500)
+            return JsonResponse({'success': False, 'message': f'Ошибка при создании аккаунта', 'error': f'{e}'}, status=400)
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
