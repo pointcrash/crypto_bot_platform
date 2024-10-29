@@ -85,6 +85,12 @@ class AccountsViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
+
+        try:
+            get_futures_account_balance(instance)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Ошибка при создании аккаунта', 'error': f'{e}'}, status=200)
+
         url = f"http://ws-manager:8008/ws/conn/new_account/{instance.id}"
         requests.get(url)
 
