@@ -157,7 +157,7 @@ class PurchaseGuestTariffView(APIView):
         guest_tariff = Tariff.objects.filter(title='Guest', type='ACTIVE').first()
 
         if guest_tariff is not None:
-            if UserTariff.objects.filter(user=user, tariff=guest_tariff).exist():
+            if UserTariff.objects.filter(user=user, tariff=guest_tariff).exists():
                 return JsonResponse({'success': False, 'message': f"Гостевой тариф уже был подключен"}, status=400)
             else:
                 UserTariff.objects.create(user=user, tariff=guest_tariff)
