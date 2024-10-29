@@ -10,7 +10,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.views import APIView
 
-from tariffs.models import UserTariff
+from tariffs.models import UserTariff, Tariff
 from .models import ServiceProduct, Purchase
 from .serializers import ServiceProductSerializer, PurchaseSerializer
 from django.shortcuts import get_object_or_404
@@ -153,11 +153,17 @@ class PurchaseGuestTariffView(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def post(self, request):
-        status = request.POST.get('status')
-        order_id = request.POST.get('order_id')
-        token = request.POST.get('token')
+        user = request.user
+        guest_tariff = Tariff.objects.filter(title='Guest', type='ACTIVE').first()
 
-        return JsonResponse({'success': False, 'message': f"Ошибка оплаты покупки с order_id {order_id}."}, status=400)
+        if guest_tariff is not None:
+            if UserTariff.objects.filter(user=user, tariff=guest_tariff).exist():
+                return JsonResponse({'success': False, 'message': f"Гостевой тариф уже был подключен"}, status=400)
+            else:
+                UserTariff.objects.create(user=user, tariff=guest_tariff)
+                return JsonResponse({'success': True, 'message': f"Гостевой тариф активирован"}, status=200)
+        else:
+            return JsonResponse({'success': False, 'message': f"Гостевой тариф не найден"}, status=404)
 
 
 
