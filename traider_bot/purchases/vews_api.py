@@ -61,6 +61,14 @@ class CreateInvoiceView(APIView):
             order_id = uuid.uuid4().hex
 
             product = get_object_or_404(ServiceProduct, id=product_id)
+
+            if product.tariff.title == 'Guest':
+                if UserTariff.objects.filter(user=request.user, tariff=product.tariff).exists():
+                    return JsonResponse({'success': False, 'message': f"Гостевой тариф уже был подключен"}, status=400)
+                else:
+                    UserTariff.objects.create(user=request.user, tariff=product.tariff)
+                    return JsonResponse({'success': True, 'message': f"Гостевой тариф активирован"}, status=200)
+
             Purchase.objects.create(user=request.user, product=product, order_id=order_id)
 
             data = {
