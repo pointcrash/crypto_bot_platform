@@ -38,6 +38,13 @@ class UserTariffViewSet(viewsets.ModelViewSet):
 
 
 class TariffReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Tariff.objects.filter(type='ACTIVE')
     serializer_class = TariffSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if UserTariff.objects.filter(user=user).first():
+            queryset = Tariff.objects.filter(type='ACTIVE').exclude(title='Guest').order_by('price')
+        else:
+            queryset = Tariff.objects.filter(type='ACTIVE').order_by('price')
+        return queryset
