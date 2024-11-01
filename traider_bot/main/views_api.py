@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 
 from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets
 from bots.general_functions import all_symbols_update
+from bots.models import BotModel
 from main.forms import InternalTransferForm
 from main.models import Account, ExchangeService, Referral, AccountBalance, AccountHistory
 from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer, \
@@ -102,6 +103,14 @@ class AccountsViewSet(viewsets.ModelViewSet):
         instance = serializer.save()
         url = f"http://ws-manager:8008/ws/conn/update_account/{instance.id}"
         requests.get(url)
+
+    def perform_destroy(self, instance):
+        bots = BotModel.objects.filter(account=instance)
+        for bot in bots:
+            if bot.is_active:
+                return JsonResponse({'success': False, 'message': 'Невозможно удалить. На данном аккаунте имеются активные боты'}, status=400)
+
+        instance.delete()
 
 
 def login_test(request):
