@@ -488,7 +488,7 @@ def get_cur_positions_and_orders_info(bot):
     positions = get_position_inform(bot)
     for position in positions:
         position['leverage'] = bot.leverage
-        position['cost'] = round(float(position['qty']) * float(position['markPrice']), 2)
+        position['cost'] = round(float(position['qty']) * float(position['entryPrice']), 2)
         position['margin'] = round(position['cost'] / position['leverage'], 2)
         if position['margin']:
             position['roi'] = round(float(position['unrealisedPnl']) / position['margin'] * 100, 2)
