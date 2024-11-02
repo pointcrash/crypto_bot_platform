@@ -19,7 +19,7 @@ class TariffSerializer(serializers.ModelSerializer):
 class UserTariffSerializer(serializers.ModelSerializer):
     user_username = serializers.ReadOnlyField(source='user.username')
     # tariff_title = serializers.ReadOnlyField(source='tariff.title')
-    tariff_data = TariffSerializer(read_only=True)
+    tariff_data = TariffSerializer(source='tariff', read_only=True)
 
     class Meta:
         model = UserTariff
