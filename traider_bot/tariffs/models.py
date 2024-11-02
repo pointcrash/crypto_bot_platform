@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -26,3 +28,9 @@ class UserTariff(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    expiration_time = models.DateTimeField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.expiration_time:
+            self.expiration_time = self.created_at + timedelta(days=30)
+        super().save(*args, **kwargs)

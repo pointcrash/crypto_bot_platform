@@ -1,8 +1,6 @@
 import logging
 import time
-from datetime import date
-
-from django.contrib.auth.models import User
+from datetime import date, timedelta
 
 from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform, \
     transaction_history
@@ -11,6 +9,7 @@ from bots.models import BotModel
 from main.models import Account, AccountBalance, AccountHistory
 from main.tests import generate_date_ranges, convert_timestamp_to_datetime
 from orders.models import Position
+from tariffs.models import UserTariff
 
 logger = logging.getLogger('django')
 
@@ -142,3 +141,14 @@ def get_account_transaction_history():
 
 def auto_symbols_update():
     all_symbols_update()
+
+
+def expiration_time_update():
+    user_tariffs = UserTariff.objects.all()
+
+    for tariff in user_tariffs:
+        if not tariff.expiration_time:
+            tariff.expiration_time = tariff.created_at + timedelta(days=30)
+
+    UserTariff.objects.bulk_update(user_tariffs, ['expiration_time'])
+
