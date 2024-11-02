@@ -31,6 +31,9 @@ class UserTariff(models.Model):
     expiration_time = models.DateTimeField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.pk:
+            super().save(*args, **kwargs)
+
         if not self.expiration_time:
             self.expiration_time = self.created_at + timedelta(days=30)
-        super().save(*args, **kwargs)
+            super().save(update_fields=["expiration_time"])
