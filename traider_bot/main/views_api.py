@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -104,11 +105,21 @@ class AccountsViewSet(viewsets.ModelViewSet):
         url = f"http://ws-manager:8008/ws/conn/update_account/{instance.id}"
         requests.get(url)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        try:
+            self.perform_destroy(instance)
+        except ValidationError as e:
+            return Response({"success": False, "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def perform_destroy(self, instance):
         bots = BotModel.objects.filter(account=instance)
         for bot in bots:
             if bot.is_active:
-                return JsonResponse({'success': False, 'message': 'Невозможно удалить. На данном аккаунте имеются активные боты'}, status=400)
+                raise ValidationError("Невозможно удалить. На данном аккаунте имеются активные боты")
 
         instance.delete()
 
