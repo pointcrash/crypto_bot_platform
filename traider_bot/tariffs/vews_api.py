@@ -14,16 +14,12 @@ class UserTariffViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_superuser:
-            queryset = UserTariff.objects.all()
-        else:
-            queryset = UserTariff.objects.filter(user=user)
+        queryset = UserTariff.objects.filter(user=self.request.user).order_by('-created_at')
         return queryset
 
     def list_by_user_id(self, request, user_id):
         user = User.objects.get(id=user_id)
-        queryset = UserTariff.objects.filter(user=user)
+        queryset = UserTariff.objects.filter(user=user).order_by('-created_at')
         if not queryset.exists():
             return Response({"detail": "No tariffs found for this user."}, status=404)
         serializer = self.get_serializer(queryset, many=True)
@@ -33,6 +29,7 @@ class UserTariffViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         if not queryset.exists():
             return Response({"detail": "No tariffs found for this user."}, status=404)
+        queryset = queryset[:1]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 

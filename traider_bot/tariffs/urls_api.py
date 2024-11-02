@@ -5,7 +5,7 @@ from tariffs.vews_api import UserTariffViewSet, TariffReadOnlyViewSet
 
 router = DefaultRouter()
 router.register(r'list', TariffReadOnlyViewSet, basename='tariff-list')
-router.register(r'users', UserTariffViewSet, basename='users-tariff')
+router.register(r'user', UserTariffViewSet, basename='users-tariff')
 
 urlpatterns = [
     path('', include(router.urls)),
