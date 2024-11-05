@@ -44,8 +44,8 @@ class BBViewSet(viewsets.ModelViewSet):
 
     # def perform_update(self, serializer):
     #     pass
-        # if 0 == 0:
-        #     instance = serializer.save()
+    # if 0 == 0:
+    #     instance = serializer.save()
 
 
 class GridViewSet(viewsets.ModelViewSet):
@@ -292,12 +292,28 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
         try:
             bot = get_object_or_404(BotModel, pk=bot_id)
 
+            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name, status='FILLED').order_by('-time_update')
             position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by(
                 '-time_update')
-            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by(
-                '-time_update')
 
-            position_history_serialized = PositionSerializer(position_history, many=True).data
+            psn_his_long = list(position_history.filter(side='LONG'))
+            psn_his_short = list(position_history.filter(side='SHORT'))
+
+            filtered_positions = [psn_his_long[0]]
+
+            for current, next_pos in zip(psn_his_long, psn_his_long[1:]):
+                if current.qty != next_pos.qty:
+                    filtered_positions.append(next_pos)
+
+            filtered_positions.append(psn_his_short[0])
+
+            for current, next_pos in zip(psn_his_short, psn_his_short[1:]):
+                if current.qty != next_pos.qty:
+                    filtered_positions.append(next_pos)
+
+            filtered_positions.sort(key=lambda x: x.id, reverse=True)
+
+            filtered_positions_data = PositionSerializer(filtered_positions, many=True).data
             order_history_serialized = OrderSerializer(order_history, many=True).data
 
             positions, orders = get_cur_positions_and_orders_info(bot)
@@ -306,7 +322,7 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
                 {
                     'success': True,
                     'data': {
-                        'position_history': position_history_serialized,
+                        'position_history': filtered_positions_data,
                         'order_history': order_history_serialized,
                         'positions': positions,
                         'orders': orders
