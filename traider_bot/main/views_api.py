@@ -66,7 +66,7 @@ class AccountsViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         user = request.user
-        user_tariff = UserTariff.objects.filter(user=user).first()
+        user_tariff = UserTariff.objects.filter(user=user).order_by('created_at').last()
 
         if not user_tariff:
             return Response({"error": "Тариф не подключен"}, status=status.HTTP_400_BAD_REQUEST)

@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class Tariff(models.Model):
@@ -19,6 +20,7 @@ class Tariff(models.Model):
     response_time_from_support = models.IntegerField(default=7)
     price = models.DecimalField(max_digits=5, decimal_places=2, default=10)
     type = models.CharField(max_length=25, choices=TARIFF_TYPE_CHOICES, default='INACTIVE', null=True)
+    duration = models.DurationField(default=timedelta(days=30), null=True)
 
     def __str__(self):
         return self.title
@@ -31,9 +33,12 @@ class UserTariff(models.Model):
     expiration_time = models.DateTimeField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            super().save(*args, **kwargs)
+        created_date = self.created_at or timezone.now()
 
         if not self.expiration_time:
-            self.expiration_time = self.created_at + timedelta(days=30)
-            super().save(update_fields=["expiration_time"])
+            if self.tariff and self.tariff.duration:
+                self.expiration_time = created_date + self.tariff.duration
+            else:
+                self.expiration_time = created_date + timedelta(days=30)
+
+        super().save(*args, **kwargs)
