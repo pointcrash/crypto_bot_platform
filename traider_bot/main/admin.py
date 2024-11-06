@@ -32,7 +32,7 @@ class OrdersAdmin(admin.ModelAdmin):
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'account', 'status', )
     list_display_links = ('id', 'account', )
-    search_fields = ('id', 'account', 'status', )
+    search_fields = ('id', 'account__name', 'status', )
 
 
 @admin.register(Referral)
@@ -46,7 +46,7 @@ class OrdersAdmin(admin.ModelAdmin):
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'account', 'asset', 'balance', 'time_create', 'time_update', )
     list_display_links = ('id', 'account', 'asset', 'balance', 'time_create', 'time_update', )
-    search_fields = ('id', 'account', 'asset', 'time_create', 'time_update', )
+    search_fields = ('id', 'account__name', 'asset', 'time_create', 'time_update', )
 
 
 @admin.register(AccountHistory)

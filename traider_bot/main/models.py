@@ -118,13 +118,13 @@ class AccountBalance(models.Model):
     time_update = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if not self.margin and self.balance and self.available_balance:
-            try:
-                self.margin = str(round(float(self.balance) - float(self.available_balance), 2))
-            except ValueError:
-                self.margin = '0'
-        elif self.margin:
-            self.margin = str(round(float(self.margin), 2))
+        # if not self.margin and self.balance and self.available_balance:
+        #     try:
+        #         self.margin = str(round(float(self.balance) - float(self.available_balance), 2))
+        #     except ValueError:
+        #         self.margin = '0'
+        # elif self.margin:
+        #     self.margin = str(round(float(self.margin), 2))
 
         if not self.time_create:
             self.time_create = timezone.now()
