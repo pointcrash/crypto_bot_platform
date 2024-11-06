@@ -113,7 +113,7 @@ class AccountsViewSet(viewsets.ModelViewSet):
         except ValidationError as e:
             return Response({"success": False, "message": str(e.detail[0])}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"success": True, "message": "Аккаунт успешно удален"}, status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
         bots = BotModel.objects.filter(account=instance)
