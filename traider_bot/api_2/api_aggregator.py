@@ -221,9 +221,9 @@ def withdraw(account, symbol, amount, chain, address):
 
 def transaction_history(account, start_time=None, end_time=None):
     if account.service.name == 'Binance':
-        return binance_get_income_history(account, start_time, end_time)
+        return binance_get_income_history(account, start_time=start_time, end_time=start_time)
     elif account.service.name == 'ByBit':
-        return bybit_get_transaction_log(account, start_time, end_time)
+        return bybit_get_transaction_log(account, start_time=start_time, end_time=end_time)
 
 
 def get_pnl_by_time(bot, start_time, end_time=None):
