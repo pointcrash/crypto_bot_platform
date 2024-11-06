@@ -10,6 +10,7 @@ from main.models import Account, AccountBalance, AccountHistory
 from main.tests import generate_date_ranges, convert_timestamp_to_datetime
 from orders.models import Position
 from tariffs.models import UserTariff
+from decimal import Decimal, ROUND_HALF_UP
 
 logger = logging.getLogger('django')
 
@@ -157,8 +158,6 @@ def rounding_margin_from_account_balances():
     account_balances = AccountBalance.objects.all()
     for ac_b in account_balances:
         if ac_b.margin:
-            ac_b.margin = str(round(float(ac_b.margin), 2))
-        else:
-            ac_b.margin = "0.00"
+            ac_b.margin = str(Decimal(ac_b.margin).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
 
     AccountBalance.objects.bulk_update(account_balances, ['margin'])

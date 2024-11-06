@@ -53,4 +53,4 @@ class OrdersAdmin(admin.ModelAdmin):
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ('id', 'account', 'symbol', 'type', 'change', 'transaction_time', )
     list_display_links = ('id', 'account', 'symbol', 'type', 'change', 'transaction_time', )
-    search_fields = ('id', 'account', 'symbol', 'type', 'change',  'transaction_time', )
+    search_fields = ('id', 'account__name', 'symbol', 'type', 'change',  'transaction_time', )
