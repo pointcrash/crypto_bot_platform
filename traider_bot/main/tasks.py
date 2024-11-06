@@ -159,5 +159,6 @@ def rounding_margin_from_account_balances():
     for ac_b in account_balances:
         if ac_b.margin:
             ac_b.margin = str(Decimal(ac_b.margin).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+            ac_b.save()
 
-    AccountBalance.objects.bulk_update(account_balances, ['margin'])
+
