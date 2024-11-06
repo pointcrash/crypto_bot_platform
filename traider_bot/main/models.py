@@ -26,7 +26,7 @@ class Account(models.Model):
     service = models.ForeignKey('ExchangeService', on_delete=models.SET_NULL, null=True)
     API_TOKEN = models.CharField(max_length=255)
     SECRET_KEY = models.CharField(max_length=255)
-    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='CONTRACT', null=True)
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='UNIFIED', null=True)
     is_mainnet = models.BooleanField()
     url = models.CharField(default='https://api-testnet.bybit.com', max_length=255)
     address = models.CharField(max_length=255, blank=True, null=True)
