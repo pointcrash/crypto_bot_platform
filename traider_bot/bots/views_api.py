@@ -301,13 +301,13 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
 
             filtered_positions = [psn_his_long[0]]
 
-            for current, next_pos in zip(psn_his_long, psn_his_long[1:]):
+            for current, next_pos in zip(psn_his_long[:-1], psn_his_long[1:]):
                 if current.qty != next_pos.qty:
                     filtered_positions.append(next_pos)
 
             filtered_positions.append(psn_his_short[0])
 
-            for current, next_pos in zip(psn_his_short, psn_his_short[1:]):
+            for current, next_pos in zip(psn_his_short[:-1], psn_his_short[1:]):
                 if current.qty != next_pos.qty:
                     filtered_positions.append(next_pos)
 
