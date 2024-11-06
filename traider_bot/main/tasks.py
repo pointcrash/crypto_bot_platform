@@ -156,6 +156,11 @@ def expiration_time_update():
 def rounding_margin_from_account_balances():
     account_balances = AccountBalance.objects.all()
     for ac_b in account_balances:
-        ac_b.margin = str(round(float(ac_b.margin), 2))
+        if not ac_b.margin and ac_b.balance and ac_b.available_balance:
+            ac_b.margin = str(round(float(ac_b.balance) - float(ac_b.available_balance), 2))
+        elif not ac_b.margin and not ac_b.balance or not ac_b.available_balance:
+            ac_b.margin = "0"
+        else:
+            ac_b.margin = str(round(float(ac_b.margin), 2))
 
     AccountBalance.objects.bulk_update(account_balances, ['margin'])
