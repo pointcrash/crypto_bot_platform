@@ -298,18 +298,21 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
 
             psn_his_long = list(position_history.filter(side='LONG'))
             psn_his_short = list(position_history.filter(side='SHORT'))
+            filtered_positions = []
 
-            filtered_positions = [psn_his_long[0]]
+            if psn_his_long:
+                filtered_positions.append(psn_his_long[0])
 
-            for current, next_pos in zip(psn_his_long[:-1], psn_his_long[1:]):
-                if current.qty != next_pos.qty:
-                    filtered_positions.append(next_pos)
+                for current, next_pos in zip(psn_his_long[:-1], psn_his_long[1:]):
+                    if current.qty != next_pos.qty:
+                        filtered_positions.append(next_pos)
 
-            filtered_positions.append(psn_his_short[0])
+            if psn_his_short:
+                filtered_positions.append(psn_his_short[0])
 
-            for current, next_pos in zip(psn_his_short[:-1], psn_his_short[1:]):
-                if current.qty != next_pos.qty:
-                    filtered_positions.append(next_pos)
+                for current, next_pos in zip(psn_his_short[:-1], psn_his_short[1:]):
+                    if current.qty != next_pos.qty:
+                        filtered_positions.append(next_pos)
 
             filtered_positions.sort(key=lambda x: x.id, reverse=True)
 
