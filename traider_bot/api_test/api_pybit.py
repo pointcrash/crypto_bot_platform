@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from pybit.unified_trading import HTTP
 
 
-main_api_key = 'ILF3a7JQfa1ugTCsf5'
-main_api_secret = '3TkLM6WYDyokVJyywzF130E1OULHAGTooqpU'
+main_api_key = 'Rwt3UiqjKvIXe39h1W'
+main_api_secret = 'kyzgLKPSWlYzQUbJtX51tWkyiuYW3IQHXgO3'
 
 
 def get_session():
@@ -65,6 +65,7 @@ if __name__ == '__main__':
     # for date in dates:
     #     print(date)
     x = bybit_test()
-    for i in x['result']['list']:
-        print(i)
+    print(x)
+    # for i in x['result']['list']:
+    #     print(i)
     # print(bybit_test())

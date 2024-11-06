@@ -120,6 +120,8 @@ def get_account_transaction_history():
 
             for date in date_ranges:
                 history_data = transaction_history(account, start_time=date[0], end_time=date[1])
+                logger.info(f"{account.name}. Дата: {date}")
+                logger.info(f"для аккаунта {account.name}. history_data: {history_data}")
 
                 for transaction in history_data:
                     AccountHistory.objects.create(
