@@ -152,3 +152,10 @@ def expiration_time_update():
 
     UserTariff.objects.bulk_update(user_tariffs, ['expiration_time'])
 
+
+def rounding_margin_from_account_balances():
+    account_balances = AccountBalance.objects.all()
+    for ac_b in account_balances:
+        ac_b.margin = str(round(float(ac_b.margin), 2))
+
+    AccountBalance.objects.bulk_update(account_balances, ['margin'])
