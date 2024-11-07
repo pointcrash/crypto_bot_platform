@@ -144,7 +144,7 @@ class AccountHistory(models.Model):
     change = models.CharField(max_length=25)
     cash_flow = models.CharField(max_length=25, blank=True, null=True)
     fee = models.CharField(max_length=25, blank=True, null=True)
-    transaction_time = models.CharField(max_length=25)
+    transaction_time = models.CharField(max_length=30)
     type = models.CharField(max_length=25)
 
     time_create = models.DateTimeField(auto_now_add=True)
