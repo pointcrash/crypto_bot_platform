@@ -121,9 +121,8 @@ def get_account_transaction_history():
             for date in date_ranges:
                 history_data = transaction_history(account, start_time=date[0], end_time=date[1])
 
-                for transaction in history_data:
-
-                    AccountHistory.objects.create(
+                account_history_objects = [
+                    AccountHistory(
                         account=account,
                         symbol=transaction.get('symbol'),
                         side=transaction.get('side'),
@@ -133,9 +132,10 @@ def get_account_transaction_history():
                         fee=transaction.get('fee'),
                         transaction_time=convert_timestamp_to_datetime(transaction.get('transactionTime')),
                         type=transaction.get('type'),
-                    )
+                    ) for transaction in history_data
+                ]
 
-                # time.sleep(3)
+                AccountHistory.objects.bulk_create(account_history_objects)
 
         except Exception as e:
             logger.error(f"Ошибка получения истории для аккаунта {account.name}. Ошибка: {e}")
