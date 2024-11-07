@@ -122,6 +122,8 @@ def get_account_transaction_history():
                 history_data = transaction_history(account, start_time=date[0], end_time=date[1])
 
                 for transaction in history_data:
+                    logger.error(f"для аккаунта {account.name}. transaction: {transaction}")
+
                     AccountHistory.objects.create(
                         account=account,
                         symbol=transaction.get('symbol'),
