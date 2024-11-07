@@ -123,6 +123,7 @@ def get_account_transaction_history():
 
                 for transaction in history_data:
                     logger.error(f"для аккаунта {account.name}. transaction: {transaction}")
+                    logger.error(f"для аккаунта {account.name}. transaction_time: {convert_timestamp_to_datetime(transaction.get('transactionTime'))}")
 
                     AccountHistory.objects.create(
                         account=account,
