@@ -1,12 +1,15 @@
 import json
 import logging
 import threading
+import time
 import traceback
 
 import websocket
 
 from api_2.custom_logging_api import custom_logging
 from bots.general_functions import custom_user_bot_logging
+
+bot_logger = logging.getLogger('bot_logger')
 
 
 class CustomWSClient:
@@ -20,7 +23,14 @@ class CustomWSClient:
         self.service = bot.account.service.name
         self.ping_interval = 20
         self.ping_timeout = 10
+        self.max_retries = 5  # Максимальное количество попыток переподключения
+        self.retry_delay = 5  # Задержка перед переподключением (в секундах)
+        self.retry_count = 0
+        self.stop_reconnect = False
         self.wst = None
+        self.ws = None
+
+    def _initialize_ws(self):
         self.ws = websocket.WebSocketApp(
             url=self.url,
             on_message=self._on_message,
@@ -31,12 +41,19 @@ class CustomWSClient:
         )
 
     def start(self):
-        self.wst = threading.Thread(
-            target=lambda: self.ws.run_forever(), name=f'CustomWSClient_Thread_BotID_{self.bot.id}')
+        self.stop_reconnect = False
+        self.retry_count = 0  # Сброс попыток при запуске
+        self._connect()
 
-        # Configure as daemon; start.
+    def _connect(self):
+        self._initialize_ws()
+        self.wst = threading.Thread(
+            target=lambda: self.ws.run_forever(),
+            name=f'CustomWSClient_Thread_BotID_{self.bot.id}'
+        )
         self.wst.daemon = True
         self.wst.start()
+        bot_logger.info(f'Bot {self.bot.pk} socket started')
 
     def _on_message(self, ws, message):
         try:
@@ -53,16 +70,33 @@ class CustomWSClient:
     def _on_close(self, ws, close_code, reason):
         close_code = close_code or 'Unknown'
         reason = reason or 'No reason provided'
+
         custom_logging(self.bot, f'WebSocket closed. Close code: {close_code}, Reason: {reason}')
         custom_user_bot_logging(self.bot, f'WebSocket closed. Close code: {close_code}, Reason: {reason}')
+        bot_logger.info(f'Bot {self.bot.pk} connection closed. Close code: {close_code}, Reason: {reason}')
+
+        self._attempt_reconnect()
 
     def _on_open(self, ws):
         custom_logging(self.bot, f'WebSocket connection open.')
-        print('BotID', self.bot.id, "Connection opened")
+        bot_logger.info(f'Bot {self.bot.pk} connection opened')
+        self.retry_count = 0
 
     def _on_error(self, ws, error):
         custom_logging(self.bot, f'Error: {error}')
-        # print('BotID', self.bot.id, f"Error: {error}")
+        bot_logger.error(f'Bot {self.bot.pk} get error {error}', exc_info=False)
+
+    def _attempt_reconnect(self):
+        if self.stop_reconnect:
+            bot_logger.info(f'Bot {self.bot.pk} not tried reconnect because used manual stop')
+            return
+        if self.retry_count < self.max_retries:
+            self.retry_count += 1
+            bot_logger.info(f'Attempting to reconnect Bot {self.bot.pk}, attempt {self.retry_count}/{self.max_retries}')
+            time.sleep(self.retry_delay)
+            self._connect()
+        else:
+            bot_logger.error(f'Maximum retry attempts reached for Bot {self.bot.pk}. Giving up.')
 
     def _on_pong(self, ws):
         pass
@@ -82,7 +116,7 @@ class CustomWSClient:
 
     def is_connected(self):
         try:
-            if self.ws.sock.connected:
+            if self.ws.sock and self.ws.sock.connected:
                 return True
             else:
                 return False
@@ -90,11 +124,11 @@ class CustomWSClient:
             return False
 
     def exit(self):
+        self.stop_reconnect = True
         self.ws.close()
-        self.wst.join()
-        while self.ws.sock:
-            continue
-        print('BotID', self.bot.id, "WebSocket connection closed.")
+        if self.wst:
+            self.wst.join()
+        bot_logger.info(f'Bot {self.bot.pk} connection closed')
 
 
 def get_logger_for_bot_ws_msg(bot_id):

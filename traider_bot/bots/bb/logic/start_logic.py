@@ -16,7 +16,7 @@ def bb_bot_ws_connect(bot):
     ws_client = CustomWSClient(callback=bb_handler_wrapper(bb_worker_class), bot=bot)
     ws_client.start()
 
-    time.sleep(5)
+    # time.sleep(5)
 
     ''' Subscribe to klines, position and order info topics '''
     ws_client.sub_to_user_info()

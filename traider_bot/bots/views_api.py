@@ -239,12 +239,12 @@ class BotStartView(APIView):
             bot.is_active = True
             bot.save(update_fields=['is_active'])
 
-            if bot.work_model == 'bb':
-                ws_client = bb_bot_ws_connect(bot)
+            # if bot.work_model == 'bb':
+            #     ws_client = bb_bot_ws_connect(bot)
                 # bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
-            elif bot.work_model == 'grid':
-                ws_client = grid_bot_ws_connect(bot)
+            # elif bot.work_model == 'grid':
+            #     ws_client = grid_bot_ws_connect(bot)
 
             #     bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
             #
@@ -254,8 +254,8 @@ class BotStartView(APIView):
             # if bot_thread is not None:
             #     bot_thread.start()
 
-            if ws_client:
-                bot_id_ws_clients[bot_id] = ws_client
+            # if ws_client:
+            #     bot_id_ws_clients[bot_id] = ws_client
 
             return JsonResponse({'success': True, 'message': 'Bot started successfully'})
 

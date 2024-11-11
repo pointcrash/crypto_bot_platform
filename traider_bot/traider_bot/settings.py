@@ -169,7 +169,7 @@ LOGGING = {
             'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
         },
         'simple': {
-            'format': '%(asctime)s %(levelname)s %(message)s'
+            'format': '%(levelname)s %(asctime)s %(message)s'
         },
     },
     'handlers': {
@@ -191,17 +191,27 @@ LOGGING = {
             'filename': 'logs/django.log',
             'formatter': 'verbose',
         },
+        'file_verbose_bot_info': {
+            'class': 'logging.FileHandler',
+            'filename': 'logs/bots.log',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
             'handlers': ['console_simple', 'file_verbose'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
         'debug_logger': {
             'handlers': ['console_verbose', 'file_verbose'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
+        },
+        'bot_logger': {
+            'handlers': ['console_verbose', 'file_verbose_bot_info'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
