@@ -199,7 +199,7 @@ LOGGING = {
             'propagate': True,
         },
         'debug_logger': {
-            'handlers': ['console_simple', 'file_verbose'],
+            'handlers': ['console_verbose', 'file_verbose'],
             'level': 'DEBUG',
             'propagate': True,
         },

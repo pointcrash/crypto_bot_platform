@@ -12,9 +12,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api_2.api_aggregator import place_order
-from bots.bb.logic.start_logic import bb_worker
+from bots.bb.logic.start_logic import bb_bot_ws_connect
 from bots.general_functions import get_cur_positions_and_orders_info
-from bots.grid.logic.start_logic import grid_worker
+from bots.global_variables import bot_id_ws_clients
+from bots.grid.logic.start_logic import grid_worker, grid_bot_ws_connect
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
 from bots.zinger.logic_market.start_logic import zinger_worker_market
@@ -175,14 +176,21 @@ class StopBotView(APIView):
             logger.info(
                 f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
-            if event_number == 1:
-                terminate_bot(bot, user)
-            elif event_number == 2:
-                terminate_bot_with_cancel_orders(bot, user)
-            elif event_number == 3:
-                terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
-            else:
-                return JsonResponse({'success': False, 'message': 'Invalid event number'}, status=400)
+            bot.is_active = False
+            bot.save(update_fields=['is_active'])
+
+            # ws_clint = bot_id_ws_clients.pop(bot_id)
+            # ws_clint.exit()
+
+            # if event_number == 1:
+            #     terminate_bot(bot, user)
+            # elif event_number == 2:
+            #     terminate_bot_with_cancel_orders(bot, user)
+            # elif event_number == 3:
+            #     terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
+            # else:
+            #     return JsonResponse({'success': False, 'message': 'Invalid event number'}, status=400)
+
             return JsonResponse({'success': True, 'message': 'Bot stopped successfully'})
         except Exception as e:
             logger.error(f'Error stopping bot: {e}')
@@ -222,25 +230,32 @@ class BotStartView(APIView):
     def post(self, request, bot_id):
         try:
             bot = get_object_or_404(BotModel, pk=bot_id)
-            bot_thread = None
+            # bot_thread = None
+            ws_client = None
             user = request.user
             logger.info(
                 f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
 
             bot.is_active = True
-            bot.save()
+            bot.save(update_fields=['is_active'])
 
             if bot.work_model == 'bb':
-                bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
+                ws_client = bb_bot_ws_connect(bot)
+                # bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
 
-            if bot.work_model == 'grid':
-                bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
+            elif bot.work_model == 'grid':
+                ws_client = grid_bot_ws_connect(bot)
 
-            elif bot.work_model == 'zinger':
-                bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
+            #     bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
+            #
+            # elif bot.work_model == 'zinger':
+            #     bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
+            #
+            # if bot_thread is not None:
+            #     bot_thread.start()
 
-            if bot_thread is not None:
-                bot_thread.start()
+            if ws_client:
+                bot_id_ws_clients[bot_id] = ws_client
 
             return JsonResponse({'success': True, 'message': 'Bot started successfully'})
 

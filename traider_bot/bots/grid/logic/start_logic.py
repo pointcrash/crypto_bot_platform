@@ -9,6 +9,29 @@ from .handlers_messages import grid_handler_wrapper
 from ...general_functions import custom_logging, clear_cache_bot_data, custom_user_bot_logging
 
 
+def grid_bot_ws_connect(bot):
+    worker_class = WorkGridClass(bot)
+
+    ''' Connection WS '''
+    ws_client = CustomWSClient(callback=grid_handler_wrapper(worker_class), bot=bot)
+    ws_client.start()
+
+    time.sleep(5)
+
+    ''' Subscribe to klines, position and order info topics '''
+    ws_client.sub_to_user_info()
+
+    ''' Subscribe to mark price topic '''
+    ws_client.sub_to_mark_price()
+
+    ''' Change leverage and position mode '''
+    worker_class.preparatory_actions()
+
+    worker_class.initial_placing_orders()
+
+    return ws_client
+
+
 def grid_worker(bot):
     bot.cycle_time_start = datetime.now()
     bot.save()

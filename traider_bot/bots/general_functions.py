@@ -11,8 +11,8 @@ from api_2.api_aggregator import get_exchange_information, get_position_inform, 
 from api_2.formattres import order_formatters
 from single_bot.logic.global_variables import lock, global_list_bot_id, global_list_threads
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
-django.setup()
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traider_bot.settings')
+# django.setup()
 
 from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message

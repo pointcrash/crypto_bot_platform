@@ -42,6 +42,7 @@ class CustomWSClient:
         try:
             message = json.loads(message)
             if message['symbol'] == self.symbol:
+                print(message)
                 self.logger.debug(message)
                 self.callback(message)
         except Exception as e:
