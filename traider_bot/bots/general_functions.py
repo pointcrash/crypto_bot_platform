@@ -530,3 +530,13 @@ def custom_user_bot_logging(bot, content):
 
     in_time = f'{date.time()} | {date.date()}'
     UserBotLog.objects.create(bot=bot, content=f'{bot_info} {content}', time=f'{in_time} (GMT {str_gmt})')
+
+
+def update_bots_conn_status(bot, new_status):
+    bot.conn_status = new_status
+    bot.save(update_fields=['conn_status'])
+
+
+def update_bots_is_active(bot, new_status):
+    bot.is_active = new_status
+    bot.save(update_fields=['is_active'])

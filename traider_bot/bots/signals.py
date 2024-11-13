@@ -1,5 +1,6 @@
 import logging
 
+from django.core.cache import cache
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -28,9 +29,5 @@ def bot_tracking_is_active_change(sender, instance, **kwargs):
             if ws_client:  # add ws_client to global variable
                 bot_id_ws_clients[instance.pk] = ws_client
 
-        if instance.is_active is False:
-            try:
-                ws_clint = bot_id_ws_clients.pop(instance.pk)
-                ws_clint.exit()
-            except Exception as e:
-                logger.error('bot save signals failed', exc_info=True)
+        else:
+            cache.set(f'close_ws_{instance.id}')

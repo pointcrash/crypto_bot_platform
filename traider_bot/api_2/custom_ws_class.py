@@ -7,7 +7,8 @@ import traceback
 import websocket
 
 from api_2.custom_logging_api import custom_logging
-from bots.general_functions import custom_user_bot_logging
+from bots.general_functions import custom_user_bot_logging, update_bots_conn_status, update_bots_is_active
+from django.core.cache import cache
 
 bot_logger = logging.getLogger('bot_logger')
 
@@ -16,6 +17,7 @@ class CustomWSClient:
     def __init__(self, callback=None, bot=None):
         self.url = "ws://ws-manager:8765"
         self.bot = bot
+        self.bot_id = bot.id
         self.symbol = bot.symbol.name
         self.callback = callback
         self.logger = get_logger_for_bot_ws_msg(bot.id)
@@ -24,7 +26,7 @@ class CustomWSClient:
         self.ping_interval = 20
         self.ping_timeout = 10
         self.max_retries = 5  # Максимальное количество попыток переподключения
-        self.retry_delay = 5  # Задержка перед переподключением (в секундах)
+        self.retry_delay = 10  # Задержка перед переподключением (в секундах)
         self.retry_count = 0
         self.stop_reconnect = False
         self.wst = None
@@ -57,6 +59,12 @@ class CustomWSClient:
 
     def _on_message(self, ws, message):
         try:
+            if cache.exists(f'close_ws_{self.bot_id}'):
+                bot_logger.info(f'Bot {self.bot.pk} got signal to close')
+                cache.delete(f'close_ws_{self.bot_id}')
+                self.exit()
+                return
+
             message = json.loads(message)
             if message['symbol'] == self.symbol:
                 print(message)
@@ -68,6 +76,8 @@ class CustomWSClient:
             custom_logging(self.bot, f"**СООБЩЕНИЕ ВЫЗВАШЕЕ ОШИБКУ:** {message}")
 
     def _on_close(self, ws, close_code, reason):
+        # update_bots_conn_status(self.bot, new_status=False)
+
         close_code = close_code or 'Unknown'
         reason = reason or 'No reason provided'
 
@@ -78,6 +88,7 @@ class CustomWSClient:
         self._attempt_reconnect()
 
     def _on_open(self, ws):
+        update_bots_conn_status(self.bot, new_status=True)
         custom_logging(self.bot, f'WebSocket connection open.')
         bot_logger.info(f'Bot {self.bot.pk} connection opened')
         self.retry_count = 0
@@ -97,6 +108,7 @@ class CustomWSClient:
             self._connect()
         else:
             bot_logger.error(f'Maximum retry attempts reached for Bot {self.bot.pk}. Giving up.')
+            # update_bots_is_active(self.bot, new_status=False)
 
     def _on_pong(self, ws):
         pass

@@ -45,6 +45,7 @@ class BotModel(models.Model):
     pnl = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True, default=0)
 
     is_active = models.BooleanField(default=False)
+    conn_status = models.BooleanField(default=False)
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
     cycle_time_start = models.DateTimeField(null=True, blank=True)
