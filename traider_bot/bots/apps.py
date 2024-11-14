@@ -1,5 +1,3 @@
-import multiprocessing
-
 from django.apps import AppConfig
 
 
@@ -9,4 +7,5 @@ class BotsConfig(AppConfig):
 
     def ready(self):
         import bots.signals
+
 
