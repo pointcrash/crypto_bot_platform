@@ -77,3 +77,9 @@ class UserBotLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserBotLog
         fields = '__all__'
+
+
+class SimpleBotModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BotModel
+        fields = '__all__'

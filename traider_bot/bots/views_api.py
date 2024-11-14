@@ -14,7 +14,6 @@ from rest_framework.views import APIView
 from api_2.api_aggregator import place_order
 from bots.bb.logic.start_logic import bb_bot_ws_connect
 from bots.general_functions import get_cur_positions_and_orders_info
-from bots.global_variables import bot_id_ws_clients
 from bots.grid.logic.start_logic import grid_worker, grid_bot_ws_connect
 from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
     terminate_bot_with_cancel_orders_and_drop_positions
@@ -207,14 +206,14 @@ class DeleteBotView(APIView):
             logger.info(
                 f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
-            if event_number == 1:
-                terminate_bot(bot, user)
-            elif event_number == 2:
-                terminate_bot_with_cancel_orders(bot, user)
-            elif event_number == 3:
-                terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
-            else:
-                return JsonResponse({'success': False, 'message': 'Invalid event number'}, status=400)
+            # if event_number == 1:
+            #     terminate_bot(bot, user)
+            # elif event_number == 2:
+            #     terminate_bot_with_cancel_orders(bot, user)
+            # elif event_number == 3:
+            #     terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
+            # else:
+            #     return JsonResponse({'success': False, 'message': 'Invalid event number'}, status=400)
 
             bot.delete()
             return JsonResponse({'success': True, 'message': 'Bot deleted successfully'})

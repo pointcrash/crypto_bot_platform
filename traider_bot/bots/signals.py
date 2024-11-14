@@ -1,12 +1,10 @@
 import logging
 
 from django.core.cache import cache
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
-from .bb.logic.start_logic import bb_bot_ws_connect
-from .global_variables import bot_id_ws_clients
-from .grid.logic.start_logic import grid_bot_ws_connect
+from .celery_tasks import run_bot_ws_socket
 from .models import BotModel
 
 logger = logging.getLogger('debug_logger')
@@ -17,17 +15,24 @@ def bot_tracking_is_active_change(sender, instance, **kwargs):
     previous_instance = sender.objects.get(pk=instance.pk)
 
     if previous_instance.is_active != instance.is_active:
+        cache.set(f'bot_{instance.id}_status_changed', True, timeout=60)
+        logger.debug('Bot status was change')
+
+
+@receiver(post_save, sender=BotModel)
+def bot_status_changed(sender, instance, **kwargs):
+    if cache.get(f'bot_{instance.id}_status_changed'):
+        cache.delete(f'bot_{instance.id}_status_changed')
+
         if instance.is_active is True:
-            ws_client = None
+            logger.debug('Bot status was change to ACTIVE')
 
-            if instance.work_model == 'bb':
-                ws_client = bb_bot_ws_connect(instance)
+            if cache.get(f'close_ws_{instance.id}'):  # Проверяем/удаляем флаг закрытия сокета
+                cache.delete(f'close_ws_{instance.id}')  # если такой был установлен
 
-            elif instance.work_model == 'grid':
-                ws_client = grid_bot_ws_connect(instance)
-
-            if ws_client:  # add ws_client to global variable
-                bot_id_ws_clients[instance.pk] = ws_client
+            run_bot_ws_socket.delay(instance.id)  # Отдаем задачу запуска сокета - Селери
 
         else:
-            cache.set(f'close_ws_{instance.id}')
+            logger.debug('Bot status was change to UNACTIVE')
+            cache.set(f'close_ws_{instance.id}', True, timeout=60)
+            logger.debug('Set signal to ws_close')

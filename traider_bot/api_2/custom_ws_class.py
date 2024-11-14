@@ -31,6 +31,7 @@ class CustomWSClient:
         self.stop_reconnect = False
         self.wst = None
         self.ws = None
+        self.sub_list = []
 
     def _initialize_ws(self):
         self.ws = websocket.WebSocketApp(
@@ -59,15 +60,15 @@ class CustomWSClient:
 
     def _on_message(self, ws, message):
         try:
-            if cache.exists(f'close_ws_{self.bot_id}'):
+            if cache.get(f'close_ws_{self.bot_id}'):
                 bot_logger.info(f'Bot {self.bot.pk} got signal to close')
                 cache.delete(f'close_ws_{self.bot_id}')
+                self.bot.is_active = False
                 self.exit()
                 return
 
             message = json.loads(message)
             if message['symbol'] == self.symbol:
-                print(message)
                 self.logger.debug(message)
                 self.callback(message)
         except Exception as e:
@@ -76,7 +77,7 @@ class CustomWSClient:
             custom_logging(self.bot, f"**СООБЩЕНИЕ ВЫЗВАШЕЕ ОШИБКУ:** {message}")
 
     def _on_close(self, ws, close_code, reason):
-        # update_bots_conn_status(self.bot, new_status=False)
+        update_bots_conn_status(self.bot, new_status=False)
 
         close_code = close_code or 'Unknown'
         reason = reason or 'No reason provided'
@@ -93,6 +94,12 @@ class CustomWSClient:
         bot_logger.info(f'Bot {self.bot.pk} connection opened')
         self.retry_count = 0
 
+        bot_logger.debug(f'sub_list {self.sub_list}')
+        if self.sub_list:
+            for sub_method in self.sub_list:
+                sub_method()
+            self.sub_list = []
+
     def _on_error(self, ws, error):
         custom_logging(self.bot, f'Error: {error}')
         bot_logger.error(f'Bot {self.bot.pk} get error {error}', exc_info=False)
@@ -108,20 +115,37 @@ class CustomWSClient:
             self._connect()
         else:
             bot_logger.error(f'Maximum retry attempts reached for Bot {self.bot.pk}. Giving up.')
-            # update_bots_is_active(self.bot, new_status=False)
+            update_bots_is_active(self.bot, new_status=False)
 
     def _on_pong(self, ws):
         pass
 
     def sub_to_user_info(self):
+        self.logger.debug('Message from sub_to_user_info')
+
+        if self.sub_to_user_info not in self.sub_list:
+            self.sub_list.append(self.sub_to_user_info)
+
         self.ws.send(json.dumps({'title': 'conn', 'account': self.account_name}))
 
-    def sub_to_kline(self, interval):
+    def sub_to_kline(self, interval=None):
+        self.logger.debug('Message from sub_to_kline')
+        if not interval:
+            interval = self.bot.bb.interval
+
+        if self.sub_to_kline not in self.sub_list:
+            self.sub_list.append(self.sub_to_kline)
+
         subscribe_message = {'title': 'sub', 'topic': 'kline', 'service': self.service, 'symbol': self.bot.symbol.name,
                              'interval': interval}
         self.ws.send(json.dumps(subscribe_message))
 
     def sub_to_mark_price(self):
+        self.logger.debug('Message from sub_to_mark_price')
+
+        if self.sub_to_mark_price not in self.sub_list:
+            self.sub_list.append(self.sub_to_mark_price)
+
         subscribe_message = {'title': 'sub', 'topic': 'mark_price', 'service': self.service,
                              'symbol': self.bot.symbol.name}
         self.ws.send(json.dumps(subscribe_message))

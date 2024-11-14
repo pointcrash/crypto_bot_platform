@@ -160,6 +160,8 @@ CACHES = {
     }
 }
 
+CELERY_BROKER_URL = os.getenv('REDIS_URL')
+
 
 LOGGING = {
     'version': 1,
