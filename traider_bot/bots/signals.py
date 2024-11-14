@@ -1,4 +1,5 @@
 import logging
+import time
 
 from django.core.cache import cache
 from django.db.models.signals import pre_save, post_save
@@ -18,6 +19,10 @@ def bot_tracking_is_active_change(sender, instance, **kwargs):
         cache.set(f'bot_{instance.id}_status_changed', True, timeout=60)
         logger.debug('Bot status was change')
 
+    else:
+        if instance.is_active:
+            cache.set(f'bot_{instance.id}_must_be_restart', True, timeout=60)
+
 
 @receiver(post_save, sender=BotModel)
 def bot_status_changed(sender, instance, **kwargs):
@@ -36,3 +41,15 @@ def bot_status_changed(sender, instance, **kwargs):
             logger.debug('Bot status was change to UNACTIVE')
             cache.set(f'close_ws_{instance.id}', True, timeout=60)
             logger.debug('Set signal to ws_close')
+
+    elif cache.get(f'bot_{instance.id}_must_be_restart'):
+        cache.delete(f'bot_{instance.id}_must_be_restart')
+
+        cache.set(f'close_ws_{instance.id}', True, timeout=60)
+
+        while cache.get(f'close_ws_{instance.id}'):
+            time.sleep(0.3)
+
+        run_bot_ws_socket.delay(instance.id)  # Отдаем задачу запуска сокета - Селери
+
+

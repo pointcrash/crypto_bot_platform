@@ -1,23 +1,16 @@
 import logging
-import threading
-import time
 from decimal import Decimal
 
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api_2.api_aggregator import place_order
-from bots.bb.logic.start_logic import bb_bot_ws_connect
 from bots.general_functions import get_cur_positions_and_orders_info
-from bots.grid.logic.start_logic import grid_worker, grid_bot_ws_connect
-from bots.terminate_bot_logic import terminate_bot, terminate_bot_with_cancel_orders, \
-    terminate_bot_with_cancel_orders_and_drop_positions
-from bots.zinger.logic_market.start_logic import zinger_worker_market
 
 from bots.serializers import *
 from orders.models import Position, Order
@@ -41,11 +34,6 @@ class BBViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
-
-    # def perform_update(self, serializer):
-    #     pass
-    # if 0 == 0:
-    #     instance = serializer.save()
 
 
 class GridViewSet(viewsets.ModelViewSet):
@@ -178,18 +166,6 @@ class StopBotView(APIView):
             bot.is_active = False
             bot.save(update_fields=['is_active'])
 
-            # ws_clint = bot_id_ws_clients.pop(bot_id)
-            # ws_clint.exit()
-
-            # if event_number == 1:
-            #     terminate_bot(bot, user)
-            # elif event_number == 2:
-            #     terminate_bot_with_cancel_orders(bot, user)
-            # elif event_number == 3:
-            #     terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
-            # else:
-            #     return JsonResponse({'success': False, 'message': 'Invalid event number'}, status=400)
-
             return JsonResponse({'success': True, 'message': 'Bot stopped successfully'})
         except Exception as e:
             logger.error(f'Error stopping bot: {e}')
@@ -206,15 +182,6 @@ class DeleteBotView(APIView):
             logger.info(
                 f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
-            # if event_number == 1:
-            #     terminate_bot(bot, user)
-            # elif event_number == 2:
-            #     terminate_bot_with_cancel_orders(bot, user)
-            # elif event_number == 3:
-            #     terminate_bot_with_cancel_orders_and_drop_positions(bot, user)
-            # else:
-            #     return JsonResponse({'success': False, 'message': 'Invalid event number'}, status=400)
-
             bot.delete()
             return JsonResponse({'success': True, 'message': 'Bot deleted successfully'})
 
@@ -229,32 +196,12 @@ class BotStartView(APIView):
     def post(self, request, bot_id):
         try:
             bot = get_object_or_404(BotModel, pk=bot_id)
-            # bot_thread = None
-            ws_client = None
             user = request.user
             logger.info(
                 f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
 
             bot.is_active = True
             bot.save(update_fields=['is_active'])
-
-            # if bot.work_model == 'bb':
-            #     ws_client = bb_bot_ws_connect(bot)
-                # bot_thread = threading.Thread(target=bb_worker, args=(bot,), name=f'BotThread_{bot.id}')
-
-            # elif bot.work_model == 'grid':
-            #     ws_client = grid_bot_ws_connect(bot)
-
-            #     bot_thread = threading.Thread(target=grid_worker, args=(bot,), name=f'BotThread_{bot.id}')
-            #
-            # elif bot.work_model == 'zinger':
-            #     bot_thread = threading.Thread(target=zinger_worker_market, args=(bot,), name=f'BotThread_{bot.id}')
-            #
-            # if bot_thread is not None:
-            #     bot_thread.start()
-
-            # if ws_client:
-            #     bot_id_ws_clients[bot_id] = ws_client
 
             return JsonResponse({'success': True, 'message': 'Bot started successfully'})
 
@@ -269,8 +216,11 @@ class DeactivateAllMyBotsView(APIView):
     def post(self, request):
         try:
             user = request.user
-            BotModel.objects.filter(owner=user, is_active=True).update(is_active=False)
-            time.sleep(3)
+            bots = BotModel.objects.filter(owner=user, is_active=True)
+            bots.update(is_active=False)
+
+            for bot in bots:
+                cache.set(f'close_ws_{bot.id}', True, timeout=60)
 
             return JsonResponse({'success': True, 'message': 'All bots stopped successfully'})
 
@@ -306,7 +256,8 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
         try:
             bot = get_object_or_404(BotModel, pk=bot_id)
 
-            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name, status='FILLED').order_by('-time_update')
+            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name,
+                                                 status='FILLED').order_by('-time_update')
             position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by(
                 '-time_update')
 
