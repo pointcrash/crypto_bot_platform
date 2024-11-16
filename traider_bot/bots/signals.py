@@ -13,6 +13,9 @@ logger = logging.getLogger('debug_logger')
 
 @receiver(pre_save, sender=BotModel)
 def bot_tracking_is_active_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return
+
     previous_instance = sender.objects.get(pk=instance.pk)
 
     if previous_instance.is_active != instance.is_active:
@@ -21,7 +24,8 @@ def bot_tracking_is_active_change(sender, instance, **kwargs):
 
     else:
         if instance.is_active:
-            cache.set(f'bot_{instance.id}_must_be_restart', True, timeout=60)
+            if instance.conn_status != previous_instance.conn_status:
+                cache.set(f'bot_{instance.id}_must_be_restart', True, timeout=60)
 
 
 @receiver(post_save, sender=BotModel)

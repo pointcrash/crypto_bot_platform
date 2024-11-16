@@ -161,10 +161,8 @@ class CustomWSClient:
 
     def exit(self):
         self.stop_reconnect = True
+        bot_logger.info(f'Bot {self.bot.pk} initiate "exit" method for ws')
         self.ws.close()
-        if self.wst:
-            self.wst.join()
-        bot_logger.info(f'Bot {self.bot.pk} connection closed')
 
 
 def get_logger_for_bot_ws_msg(bot_id):
