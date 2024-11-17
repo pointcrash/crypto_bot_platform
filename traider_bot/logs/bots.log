@@ -1,0 +1,287 @@
+INFO 2024-11-15 20:55:02,744 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 20:56:02,889 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 20:56:02,889 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f30b76f5340>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f30b76f5340>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f30b76f5340>>]
+ERROR 2024-11-15 20:56:02,893 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 20:56:04,149 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 20:56:04,361 custom_ws_class Bot 19 got signal to close
+INFO 2024-11-15 20:56:04,375 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 20:56:04,375 custom_ws_class Bot 19 not tried reconnect because used manual stop
+INFO 2024-11-15 20:57:04,586 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 20:57:04,586 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f30b76da540>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f30b76da540>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f30b76da540>>]
+ERROR 2024-11-15 20:57:04,589 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 20:57:04,593 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 20:57:05,407 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:09:41,966 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:10:42,124 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:10:42,124 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>]
+ERROR 2024-11-15 21:10:42,127 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:10:42,135 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:10:42,877 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:11:43,022 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:11:43,022 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>]
+ERROR 2024-11-15 21:11:43,026 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:11:43,030 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:11:43,835 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:12:43,879 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:12:43,879 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:12:43,971 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:12:43,972 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd490>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd490>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd490>>]
+ERROR 2024-11-15 21:12:43,975 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:12:43,977 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:12:44,756 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:12:44,766 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:12:53,880 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:13:53,907 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:13:53,907 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b07440>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b07440>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b07440>>]
+ERROR 2024-11-15 21:13:53,911 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:13:53,914 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:13:53,918 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:13:53,918 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abfd70>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abfd70>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abfd70>>]
+ERROR 2024-11-15 21:13:53,921 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:13:53,925 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:13:54,752 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:13:54,759 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:14:54,817 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:14:54,818 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:14:54,890 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:14:54,890 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>]
+INFO 2024-11-15 21:14:54,890 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:14:54,891 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b055b0>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b055b0>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b055b0>>]
+ERROR 2024-11-15 21:14:54,894 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:14:54,895 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:14:54,897 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:14:54,897 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:14:54,905 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:14:54,905 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:14:55,672 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:14:55,677 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:14:55,678 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:14:55,699 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:14:55,699 custom_ws_class sub_list []
+INFO 2024-11-15 21:15:04,818 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:15:04,906 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:09,750 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,750 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,768 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:09,769 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>]
+ERROR 2024-11-15 21:16:09,772 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:16:09,774 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:16:09,783 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,783 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,789 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,789 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,790 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,790 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,856 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:09,856 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>]
+ERROR 2024-11-15 21:16:09,860 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:16:09,863 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:16:09,873 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,873 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,888 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,889 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,892 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:09,892 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>]
+ERROR 2024-11-15 21:16:09,895 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:16:09,898 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:16:09,907 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,908 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,935 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:09,935 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd880>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd880>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd880>>]
+INFO 2024-11-15 21:16:09,935 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:09,936 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b36060>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b36060>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b36060>>]
+ERROR 2024-11-15 21:16:09,939 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:16:09,940 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:16:09,942 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+ERROR 2024-11-15 21:16:09,943 custom_ws_class Bot 19 get error [Errno 32] Broken pipe
+INFO 2024-11-15 21:16:09,952 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,953 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:09,953 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-15 21:16:09,953 custom_ws_class Attempting to reconnect Bot 19, attempt 1/5
+INFO 2024-11-15 21:16:10,588 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,588 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,590 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,591 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,592 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,592 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,602 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,603 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,605 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,613 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,617 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,618 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,621 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,622 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,622 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,622 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,623 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,623 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,633 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,634 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,636 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,636 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,648 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,664 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,669 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,670 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,674 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,675 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,686 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,686 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,747 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,748 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:10,758 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,759 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:10,759 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:10,759 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:14,412 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:14,423 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:14,424 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:19,751 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,769 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,769 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b055b0>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b055b0>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b055b0>>]
+INFO 2024-11-15 21:16:19,784 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,790 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,791 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,806 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,807 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b07440>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b07440>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b07440>>]
+INFO 2024-11-15 21:16:19,809 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,809 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11d00>>]
+INFO 2024-11-15 21:16:19,815 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,815 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abfd70>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abfd70>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abfd70>>]
+INFO 2024-11-15 21:16:19,874 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,890 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,908 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,954 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,954 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:19,970 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,970 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd490>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd490>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd490>>]
+INFO 2024-11-15 21:16:19,976 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,977 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b64da0>>]
+INFO 2024-11-15 21:16:19,989 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,989 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b36060>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b36060>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05b36060>>]
+INFO 2024-11-15 21:16:19,992 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,992 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05c11370>>]
+INFO 2024-11-15 21:16:19,997 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:19,998 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd880>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd880>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f6a05abd880>>]
+INFO 2024-11-15 21:16:20,470 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:20,482 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:20,482 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:20,498 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:20,505 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:20,510 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:20,510 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:20,516 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:20,516 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:20,693 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:20,705 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:20,705 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:20,710 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:20,712 custom_ws_class Bot 19 socket started
+INFO 2024-11-15 21:16:20,721 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:20,722 custom_ws_class sub_list []
+INFO 2024-11-15 21:16:20,727 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-15 21:16:20,727 custom_ws_class sub_list []
+INFO 2024-11-16 12:29:20,415 custom_ws_class Bot 22 socket started
+INFO 2024-11-16 12:30:20,549 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-16 12:30:20,550 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f0cd37a16a0>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f0cd37a16a0>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f0cd37a16a0>>]
+ERROR 2024-11-16 12:30:20,554 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+INFO 2024-11-16 12:30:21,402 custom_ws_class Bot 22 socket started
+ERROR 2024-11-16 12:30:21,411 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+INFO 2024-11-16 12:30:21,418 custom_ws_class Bot 22 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-16 12:30:21,419 custom_ws_class Attempting to reconnect Bot 22, attempt 1/5
+INFO 2024-11-16 12:30:31,418 custom_ws_class Bot 22 socket started
+INFO 2024-11-16 12:31:31,456 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-16 12:31:31,457 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f0cd37a3950>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f0cd37a3950>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f0cd37a3950>>]
+ERROR 2024-11-16 12:31:31,461 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+ERROR 2024-11-16 12:31:31,464 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+INFO 2024-11-16 12:31:32,308 custom_ws_class Bot 22 socket started
+INFO 2024-11-16 12:48:23,749 custom_ws_class Bot 22 socket started
+INFO 2024-11-16 12:49:23,893 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-16 12:49:23,893 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7fac9986fa70>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7fac9986fa70>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7fac9986fa70>>]
+ERROR 2024-11-16 12:49:23,896 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+ERROR 2024-11-16 12:49:23,900 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+INFO 2024-11-16 12:49:24,709 custom_ws_class Bot 22 socket started
+INFO 2024-11-16 12:57:24,379 custom_ws_class Bot 22 socket started
+INFO 2024-11-16 12:57:24,402 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-16 12:57:24,403 custom_ws_class sub_list []
+INFO 2024-11-16 13:06:14,563 custom_ws_class Bot 22 got signal to close
+INFO 2024-11-16 13:06:14,564 custom_ws_class Bot 22 initiate "exit" method for ws
+INFO 2024-11-16 13:06:14,572 custom_ws_class Bot 22 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-16 13:06:14,572 custom_ws_class Bot 22 not tried reconnect because used manual stop
+INFO 2024-11-17 15:27:24,813 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 15:28:24,960 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-17 15:28:24,961 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f10f3a63da0>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f10f3a63da0>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f10f3a63da0>>]
+ERROR 2024-11-17 15:28:24,964 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+ERROR 2024-11-17 15:28:24,973 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+INFO 2024-11-17 15:28:25,781 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 15:29:25,923 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-17 15:29:25,924 custom_ws_class sub_list [<bound method CustomWSClient.sub_to_user_info of <api_2.custom_ws_class.CustomWSClient object at 0x7f10f3c26960>>, <bound method CustomWSClient.sub_to_kline of <api_2.custom_ws_class.CustomWSClient object at 0x7f10f3c26960>>, <bound method CustomWSClient.sub_to_mark_price of <api_2.custom_ws_class.CustomWSClient object at 0x7f10f3c26960>>]
+ERROR 2024-11-17 15:29:25,927 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+ERROR 2024-11-17 15:29:25,930 custom_ws_class Bot 22 get error [Errno 32] Broken pipe
+INFO 2024-11-17 15:29:26,779 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 15:36:27,621 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 15:39:47,643 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 15:47:54,829 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 15:47:54,855 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-17 15:47:54,856 custom_ws_class sub_list []
+INFO 2024-11-17 15:48:12,667 custom_ws_class Bot 22 got signal to close
+INFO 2024-11-17 15:48:12,668 custom_ws_class Bot 22 initiate "exit" method for ws
+INFO 2024-11-17 15:48:12,675 custom_ws_class Bot 22 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 15:48:12,675 custom_ws_class Bot 22 not tried reconnect because used manual stop
+INFO 2024-11-17 15:58:40,828 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 15:58:40,853 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-17 15:58:40,854 custom_ws_class sub_list []
+INFO 2024-11-17 15:58:51,081 custom_ws_class Bot 19 socket started
+INFO 2024-11-17 15:58:51,092 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-17 15:58:51,092 custom_ws_class sub_list []
+INFO 2024-11-17 15:59:15,664 custom_ws_class Bot 19 got signal to close
+INFO 2024-11-17 15:59:15,665 custom_ws_class Bot 19 initiate "exit" method for ws
+INFO 2024-11-17 15:59:15,678 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 15:59:15,679 custom_ws_class Bot 19 not tried reconnect because used manual stop
+INFO 2024-11-17 16:05:09,670 custom_ws_class Bot 19 socket started
+INFO 2024-11-17 16:05:09,692 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-17 16:05:09,692 custom_ws_class sub_list []
+INFO 2024-11-17 16:05:36,675 custom_ws_class Bot 22 got signal to close
+INFO 2024-11-17 16:05:36,676 custom_ws_class Bot 22 initiate "exit" method for ws
+INFO 2024-11-17 16:05:36,683 custom_ws_class Bot 22 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 16:05:36,683 custom_ws_class Bot 22 not tried reconnect because used manual stop
+INFO 2024-11-17 16:05:47,833 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 16:05:47,844 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-17 16:05:47,844 custom_ws_class sub_list []
+INFO 2024-11-17 16:06:15,676 custom_ws_class Bot 22 got signal to close
+INFO 2024-11-17 16:06:15,676 custom_ws_class Bot 19 got signal to close
+INFO 2024-11-17 16:06:15,676 custom_ws_class Bot 22 initiate "exit" method for ws
+INFO 2024-11-17 16:06:15,677 custom_ws_class Bot 19 initiate "exit" method for ws
+INFO 2024-11-17 16:06:15,685 custom_ws_class Bot 22 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 16:06:15,685 custom_ws_class Bot 22 not tried reconnect because used manual stop
+INFO 2024-11-17 16:06:15,686 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 16:06:15,686 custom_ws_class Bot 19 not tried reconnect because used manual stop
+INFO 2024-11-17 21:28:48,009 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 21:28:48,033 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-17 21:28:48,033 custom_ws_class sub_list []
+INFO 2024-11-17 21:29:05,432 custom_ws_class Bot 19 socket started
+INFO 2024-11-17 21:29:05,442 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-17 21:29:05,443 custom_ws_class sub_list []
+INFO 2024-11-17 21:38:51,793 custom_ws_class Bot 22 got signal to close
+INFO 2024-11-17 21:38:51,794 custom_ws_class Bot 22 initiate "exit" method for ws
+INFO 2024-11-17 21:38:51,823 custom_ws_class Bot 22 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 21:38:51,823 custom_ws_class Bot 22 not tried reconnect because used manual stop
+INFO 2024-11-17 21:38:53,382 custom_ws_class Bot 19 got signal to close
+INFO 2024-11-17 21:38:53,382 custom_ws_class Bot 19 initiate "exit" method for ws
+INFO 2024-11-17 21:38:53,388 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 21:38:53,388 custom_ws_class Bot 19 not tried reconnect because used manual stop
+INFO 2024-11-17 21:38:53,700 custom_ws_class Bot 22 socket started
+INFO 2024-11-17 21:38:53,727 custom_ws_class Bot 22 connection opened
+DEBUG 2024-11-17 21:38:53,727 custom_ws_class sub_list []
+INFO 2024-11-17 21:38:55,242 custom_ws_class Bot 19 socket started
+INFO 2024-11-17 21:38:55,261 custom_ws_class Bot 19 connection opened
+DEBUG 2024-11-17 21:38:55,261 custom_ws_class sub_list []
+INFO 2024-11-17 21:39:36,778 custom_ws_class Bot 22 got signal to close
+INFO 2024-11-17 21:39:36,779 custom_ws_class Bot 22 initiate "exit" method for ws
+INFO 2024-11-17 21:39:36,786 custom_ws_class Bot 22 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 21:39:36,786 custom_ws_class Bot 22 not tried reconnect because used manual stop
+INFO 2024-11-17 21:39:39,799 custom_ws_class Bot 19 got signal to close
+INFO 2024-11-17 21:39:39,799 custom_ws_class Bot 19 initiate "exit" method for ws
+INFO 2024-11-17 21:39:39,805 custom_ws_class Bot 19 connection closed. Close code: Unknown, Reason: No reason provided
+INFO 2024-11-17 21:39:39,805 custom_ws_class Bot 19 not tried reconnect because used manual stop

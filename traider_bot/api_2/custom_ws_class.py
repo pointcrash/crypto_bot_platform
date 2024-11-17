@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import threading
 import time
 import traceback
@@ -60,6 +61,8 @@ class CustomWSClient:
 
     def _on_message(self, ws, message):
         try:
+            cache.set(f'ws-{self.bot.id}-q-{os.getenv("CELERY_QUEUE_NAME")}', True, timeout=3)
+
             if cache.get(f'close_ws_{self.bot_id}'):
                 bot_logger.info(f'Bot {self.bot.pk} got signal to close')
                 cache.delete(f'close_ws_{self.bot_id}')

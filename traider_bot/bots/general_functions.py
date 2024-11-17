@@ -18,7 +18,7 @@ from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 from timezone.models import TimeZone
 from main.models import ActiveBot, ExchangeService, Account
-from bots.models import Symbol, Log, UserBotLog
+from bots.models import Symbol, Log, UserBotLog, BotModel
 from api_test.api_v5_bybit import cancel_all, get_qty, get_list, get_side, get_position_price, \
     get_symbol_set, get_order_status, get_pnl, get_order_leaves_qty, \
     get_order_created_time
@@ -533,10 +533,8 @@ def custom_user_bot_logging(bot, content):
 
 
 def update_bots_conn_status(bot, new_status):
-    bot.conn_status = new_status
-    bot.save(update_fields=['conn_status'])
+    BotModel.objects.filter(pk=bot.pk).update(conn_status=new_status)
 
 
 def update_bots_is_active(bot, new_status):
-    bot.is_active = new_status
-    bot.save(update_fields=['is_active'])
+    BotModel.objects.filter(pk=bot.pk).update(is_active=new_status)
