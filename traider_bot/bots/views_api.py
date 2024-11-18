@@ -146,6 +146,14 @@ class UserBotLogViewSet(viewsets.ModelViewSet):
         queryset = UserBotLog.objects.filter(bot=bot_id).order_by('-id')
         return queryset
 
+    def delete_all_logs_by_bot(self, request, bot_id):
+        logs = UserBotLog.objects.filter(bot=bot_id)
+        if logs.exists():
+            logs.delete()
+            return Response({"detail": f"All user-logs for bot have been deleted."}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({"detail": "No user-logs found for this bot."}, status=status.HTTP_404_NOT_FOUND)
+
 
 class SymbolViewSet(viewsets.ModelViewSet):
     queryset = Symbol.objects.all()
