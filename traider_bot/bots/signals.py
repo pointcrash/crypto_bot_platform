@@ -24,8 +24,10 @@ def bot_tracking_is_active_change(sender, instance, **kwargs):
 
     else:
         if instance.is_active:
-            logger.debug('Set signal to ws restart')
-            cache.set(f'bot_{instance.id}_must_be_restart', True, timeout=60)
+            if (previous_instance.leverage, previous_instance.amount_long, previous_instance.amount_short) != \
+                    (instance.leverage, instance.amount_long, instance.amount_short):
+                logger.debug('Set signal to ws restart')
+                cache.set(f'bot_{instance.id}_must_be_restart', True, timeout=60)
 
 
 @receiver(post_save, sender=BotModel)
@@ -57,5 +59,3 @@ def bot_status_changed(sender, instance, **kwargs):
 
         logger.debug(f'bot_{instance.id}socket must be restart run_bot_ws_socket.delay')
         run_bot_ws_socket.delay(instance.id)  # Отдаем задачу запуска сокета - Селери
-
-
