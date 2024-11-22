@@ -6,7 +6,7 @@ from binance.exceptions import BinanceAPIException
 from django.core.cache import cache
 
 from api_2.api_aggregator import change_position_mode, set_leverage, get_quantity_from_price, place_batch_order, \
-    place_order
+    place_order, get_open_orders
 from bots.general_functions import custom_user_bot_logging, custom_logging
 
 
@@ -52,6 +52,14 @@ class WorkGridClass:
         return (self.grid.high_price - self.grid.low_price) / (self.grid.grid_count + 1)
 
     def initial_placing_orders(self):
+        len_order_list = len(get_open_orders(self.bot))
+
+        if len_order_list == self.grid.grid_count:
+            return
+
+        elif 0 < len_order_list < self.grid.grid_count:
+            raise Exception('Incorrect number of orders')
+
         order_list = self.get_order_list()
         custom_logging(self.bot, f'order_list: {order_list}')
         order_chunks = [order_list[i:i + 5] for i in range(0, len(order_list), 5)]
@@ -130,7 +138,8 @@ class WorkGridClass:
         if Decimal(order['qty']) == 0 and self.bot.is_active is True:
             min_amount = (Decimal(self.bot.symbol.minOrderQty) * self.current_price / self.bot.leverage).quantize(
                 Decimal(1), rounding=ROUND_UP) * self.grid.grid_count
-            custom_user_bot_logging(self.bot, f'Недостаточный стартовый капитал для открытия ордера, требуется не менее {min_amount}')
+            custom_user_bot_logging(self.bot,
+                                    f'Недостаточный стартовый капитал для открытия ордера, требуется не менее {min_amount}')
             self.bot.is_active = False
             self.bot.save()
 
