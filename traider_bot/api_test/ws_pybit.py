@@ -5,8 +5,8 @@ ws = WebSocket(
     trace_logging=False,
     testnet=True,
     channel_type="private",
-    api_key="7rCy48L5n9daxtqRnq",
-    api_secret="7CwA9GKhRcwOFCf6v5EL7Wkt1VytQsKVIKMC",
+    api_key="Rwt3UiqjKvIXe39h1W",
+    api_secret="kyzgLKPSWlYzQUbJtX51tWkyiuYW3IQHXgO3",
 )
 
 
