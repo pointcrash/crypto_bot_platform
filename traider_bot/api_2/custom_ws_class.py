@@ -72,7 +72,7 @@ class CustomWSClient:
 
             message = json.loads(message)
             if message['symbol'] == self.symbol:
-                # self.logger.debug(message)
+                self.logger.debug(message)
                 self.callback(message)
         except Exception as e:
             custom_logging(self.bot, f'GET ERROR IN "_on_message" func: {e}')
