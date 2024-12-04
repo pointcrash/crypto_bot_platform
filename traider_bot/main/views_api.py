@@ -98,7 +98,8 @@ class AccountsViewSet(viewsets.ModelViewSet):
             raise Exception(e)
 
         url = f"http://ws-manager:8008/ws/conn/new_account/{instance.id}"
-        requests.get(url)
+        response = requests.get(url)
+        print(response)
 
     def perform_update(self, serializer):
         instance = serializer.save()
