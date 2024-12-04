@@ -24,6 +24,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '165.227.142.240',
     '139.59.206.100',
+    '164.90.181.246',
 ]
 
 # CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS') == 'True'

@@ -13,6 +13,7 @@ from api_2.api_aggregator import place_order
 from bots.general_functions import get_cur_positions_and_orders_info
 
 from bots.serializers import *
+from bots.terminate_bot_logic import terminate_bot_with_cancel_orders, terminate_bot
 from orders.models import Position, Order
 from orders.serializers import PositionSerializer, OrderSerializer
 from tariffs.models import UserTariff
@@ -171,8 +172,13 @@ class StopBotView(APIView):
             logger.info(
                 f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
-            bot.is_active = False
-            bot.save(update_fields=['is_active'])
+            # bot.is_active = False
+            # bot.save(update_fields=['is_active'])
+
+            if event_number == 1:
+                terminate_bot(bot, user)
+            elif event_number == 2:
+                terminate_bot_with_cancel_orders(bot, user)
 
             return JsonResponse({'success': True, 'message': 'Bot stopped successfully'})
         except Exception as e:
@@ -189,6 +195,11 @@ class DeleteBotView(APIView):
             user = request.user
             logger.info(
                 f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
+
+            if event_number == 1:
+                terminate_bot(bot, user)
+            elif event_number == 2:
+                terminate_bot_with_cancel_orders(bot, user)
 
             bot.delete()
             return JsonResponse({'success': True, 'message': 'Bot deleted successfully'})

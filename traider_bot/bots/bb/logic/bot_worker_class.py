@@ -14,11 +14,14 @@ from bots.bb.logic.avg_logic import BBAutoAverage
 from bots.bb.logic.bb_class import BollingerBands
 from bots.general_functions import custom_user_bot_logging
 from bots.models import BotsData
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 
 
 class WorkBollingerBandsClass:
     def __init__(self, bot):
         self.bot = bot
+        self.tg_acc = TelegramAccount.objects.filter(owner=bot.owner).first()
         self.symbol = bot.symbol.name
         self.bb = BollingerBands(bot)
         self.avg_obj = BBAutoAverage(bot, self.bb)
@@ -292,3 +295,11 @@ class WorkBollingerBandsClass:
     def bot_cycle_time_start_update(self):
         self.bot.cycle_time_start = datetime.now()
         self.bot.save()
+
+    def send_tg_message(self, message):
+        pre_message = f'Bot ID-{self.bot.id}-{self.symbol}: '
+        message = pre_message + message
+        send_telegram_message(
+            self.tg_acc.chat_id,
+            message=message,
+        )
