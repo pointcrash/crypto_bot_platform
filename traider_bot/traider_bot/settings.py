@@ -325,3 +325,6 @@ CRYPTOCLOUD_SHOP_ID = os.getenv('CRYPTOCLOUD_SHOP_ID')
 CRYPTOCLOUD_SECRET = os.getenv('CRYPTOCLOUD_SECRET')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
+
+MEDIA_URL = '/media/'  # URL для доступа к медиа-файлам
+MEDIA_ROOT = '/app/media'  # Путь для сохранения файлов
