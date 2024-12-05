@@ -1,6 +1,7 @@
 import logging
 import time
 from datetime import date, timedelta
+from django.core.cache import cache
 
 from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform, \
     transaction_history
@@ -161,5 +162,23 @@ def rounding_margin_from_account_balances():
         if ac_b.margin:
             ac_b.margin = str(Decimal(ac_b.margin).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
             ac_b.save()
+
+
+def bots_alive_check():
+    bot_id_need_to_deactivate = []
+    bots = BotModel.objects.all()
+    pattern = 'ws-*-q-*'
+    keys = cache.keys(pattern)
+
+    active_bot_id_list = [int((next(x for x in key.split('-') if x.isdigit()))) for key in keys]
+
+    for bot in bots:
+        if bot.is_active and bot.id not in active_bot_id_list:
+            logger.debug(f'BOT-{bot.id} is active and not in active_bot_id_list: {active_bot_id_list}')
+            bot_id_need_to_deactivate.append(bot.id)
+
+    BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False)
+
+
 
 
