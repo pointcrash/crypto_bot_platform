@@ -18,15 +18,21 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ['id', 'ticket', 'author', 'author_username', 'content', 'created_at', 'is_read', 'files']
 
     def create(self, validated_data):
-        files_data = validated_data.pop('files', [])
-
+        files_data = self.initial_data.get('files', [])
         max_files = 5
         if len(files_data) > max_files:
             raise serializers.ValidationError(f"You can upload up to {max_files} files only.")
+        message = TicketMessage.objects.create(
+            ticket=validated_data['ticket'],
+            author=validated_data['author'],
+            content=validated_data['content']
+        )
+        for file in files_data:
+            TicketFile.objects.create(
+                message=message,
+                file=file
+            )
 
-        message = TicketMessage.objects.create(**validated_data)
-        for file_data in files_data:
-            TicketFile.objects.create(message=message, **file_data)
         return message
 
 
