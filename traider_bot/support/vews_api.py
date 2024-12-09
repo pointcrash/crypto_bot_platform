@@ -41,6 +41,6 @@ class MessageViewSet(viewsets.ModelViewSet):
             message = self.get_object()
             message.is_read = request.data.get('is_read', True)
             message.save()
-            return Response({'status': 'read status updated'})
+            return Response({'status': 'the messages is marked as read'})
         except TicketMessage.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)

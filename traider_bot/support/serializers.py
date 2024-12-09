@@ -3,12 +3,31 @@ from rest_framework import serializers
 from support.models import *
 
 
+class TicketFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TicketFile
+        fields = ['id', 'file', 'uploaded_at']
+
+
 class MessageSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
+    files = TicketFileSerializer(many=True, required=False)
 
     class Meta:
         model = TicketMessage
-        fields = ['id', 'ticket', 'author', 'author_username', 'content', 'created_at', 'is_read', 'file']
+        fields = ['id', 'ticket', 'author', 'author_username', 'content', 'created_at', 'is_read', 'files']
+
+    def create(self, validated_data):
+        files_data = validated_data.pop('files', [])
+
+        max_files = 5
+        if len(files_data) > max_files:
+            raise serializers.ValidationError(f"You can upload up to {max_files} files only.")
+
+        message = TicketMessage.objects.create(**validated_data)
+        for file_data in files_data:
+            TicketFile.objects.create(message=message, **file_data)
+        return message
 
 
 class TicketSerializer(serializers.ModelSerializer):
