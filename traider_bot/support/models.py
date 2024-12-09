@@ -55,7 +55,12 @@ class TicketMessage(models.Model):
     content = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to=ticket_file_upload_path, blank=True, null=True, validators=[validate_file])
+
+
+class TicketFile(models.Model):
+    message = models.ForeignKey(TicketMessage, related_name='files', on_delete=models.CASCADE)
+    file = models.FileField(upload_to=ticket_file_upload_path, validators=[validate_file])
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
 '''------------END----------------'''
