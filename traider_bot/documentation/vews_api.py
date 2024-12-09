@@ -11,6 +11,12 @@ class DocPageReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DocPageSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        language = self.request.query_params.get('language')
+        queryset = queryset.filter(language=language) if language else queryset
+        return queryset
+
 
 class DocPageForAdminViewSet(viewsets.ModelViewSet):
     queryset = DocPage.objects.all()
