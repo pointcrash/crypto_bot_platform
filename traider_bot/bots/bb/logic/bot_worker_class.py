@@ -21,6 +21,7 @@ from tg_bot.send_message import send_telegram_message
 class WorkBollingerBandsClass:
     def __init__(self, bot):
         self.bot = bot
+        self.account = bot.account
         self.tg_acc = TelegramAccount.objects.filter(owner=bot.owner).first()
         self.symbol = bot.symbol.name
         self.bb = BollingerBands(bot)
@@ -297,7 +298,7 @@ class WorkBollingerBandsClass:
         self.bot.save()
 
     def send_tg_message(self, message):
-        pre_message = f'Bot ID-{self.bot.id}-{self.symbol}: '
+        pre_message = f'Account: {self.account.name}\nBot: {self.bot.id}\nSymbol: {self.symbol}\n'
         message = pre_message + message
         send_telegram_message(
             self.tg_acc.chat_id,
