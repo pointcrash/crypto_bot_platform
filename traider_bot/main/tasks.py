@@ -105,7 +105,7 @@ def account_balance_history_update():
                 un_pnl=balance_data['unrealizedPnl'],
             )
         except Exception as e:
-            logger.info(f"Ошибка получения баланса для аккаунта {account.name}. Ошибка: {e}")
+            logger.error(f"Ошибка получения баланса для аккаунта {account.name}. Ошибка: {e}")
             AccountBalance.objects.create(account=account)
 
         time.sleep(3)
@@ -169,12 +169,14 @@ def bots_alive_check():
     bots = BotModel.objects.all()
     pattern = 'ws-*-q-*'
     keys = cache.keys(pattern)
+    logger.info(f'keys-{keys}')
 
     active_bot_id_list = [int((next(x for x in key.split('-') if x.isdigit()))) for key in keys]
+    logger.info(f'active_bot_id_list-{active_bot_id_list}')
 
     for bot in bots:
         if bot.is_active and bot.id not in active_bot_id_list:
-            logger.debug(f'BOT-{bot.id} is active and not in active_bot_id_list: {active_bot_id_list}')
+            logger.info(f'BOT-{bot.id} is active and not in active_bot_id_list: {active_bot_id_list}')
             bot_id_need_to_deactivate.append(bot.id)
 
     BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False)
