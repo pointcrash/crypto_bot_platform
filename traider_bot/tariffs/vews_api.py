@@ -40,7 +40,7 @@ class TariffReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if UserTariff.objects.filter(user=user).first():
+        if user.is_authenticated and UserTariff.objects.filter(user=user).first():
             queryset = Tariff.objects.filter(type='ACTIVE').exclude(title='Guest').order_by('price')
         else:
             queryset = Tariff.objects.filter(type='ACTIVE').order_by('price')
