@@ -13,6 +13,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils import timezone
 
 from api_2.api_aggregator import get_futures_account_balance, internal_transfer, get_user_assets
 from bots.general_functions import all_symbols_update
@@ -68,7 +69,7 @@ class AccountsViewSet(viewsets.ModelViewSet):
         user = request.user
         user_tariff = UserTariff.objects.filter(user=user).order_by('created_at').last()
 
-        if not user_tariff:
+        if not user_tariff or timezone.now() > user_tariff.expiration_time:
             return Response({"error": "Тариф не подключен"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             tariff = user_tariff.tariff
