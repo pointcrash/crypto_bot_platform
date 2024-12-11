@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 
 from tariffs.models import UserTariff, Tariff
@@ -36,7 +36,7 @@ class UserTariffViewSet(viewsets.ModelViewSet):
 
 class TariffReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TariffSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         user = self.request.user
