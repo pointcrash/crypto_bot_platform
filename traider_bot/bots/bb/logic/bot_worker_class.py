@@ -194,9 +194,9 @@ class WorkBollingerBandsClass:
             self.ml_status_save()
             # self.count_cycles += 1
 
-            if self.bot.bb.endless_cycle is False:
-                self.bot.is_active = False
-                self.bot.save()
+            # if self.bot.bb.endless_cycle is False:
+            #     self.bot.is_active = False
+            #     self.bot.save()
 
     def turn_after_ml(self):
         if self.bot.bb.take_after_ml and self.bot.bb.take_on_ml and self.ml_filled:

@@ -55,6 +55,10 @@ def handle_order_stream_message(msg, bot_class_obj):
                     cancel_order(bot_class_obj.bot, bot_class_obj.sl_order)
                     bot_class_obj.sl_order = None
 
+                    if bot_class_obj.bot.bb.endless_cycle is False:
+                        bot_class_obj.bot.is_active = False
+                        bot_class_obj.bot.save()
+
                     # time.sleep(1)
                     # bot_class_obj.calc_and_save_pnl_per_cycle()
 
