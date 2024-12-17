@@ -37,3 +37,11 @@ class IsTicketOwnerOrAdmin(permissions.BasePermission):
 
         return obj.ticket.owner == request.user or request.user.is_staff
 
+
+class IsOrderOwnerOrAdmin(permissions.BasePermission):
+    """
+    Custom permission to only allow owners of an object or admins to edit it.
+    """
+
+    def has_object_permission(self, request, view, order):
+        return order.account.owner == request.user or request.user.is_staff
