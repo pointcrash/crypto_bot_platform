@@ -198,15 +198,20 @@ def bybit_get_open_orders(bot):
 
 
 def bybit_get_current_price(bot, category='linear'):
-    endpoint = "/v5/market/tickers"
-    method = "GET"
-    params = f"category={category}&symbol={bot.symbol.name}"
+    response = None
 
-    custom_logging(bot, f'bybit_get_current_price({params})', 'REQUEST')
-    response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    custom_logging(bot, response, 'RESPONSE')
+    try:
+        endpoint = "/v5/market/tickers"
+        method = "GET"
+        params = f"category={category}&symbol={bot.symbol.name}"
 
-    return Decimal(response["result"]["list"][0]["lastPrice"])
+        custom_logging(bot, f'bybit_get_current_price({params})', 'REQUEST')
+        response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
+        custom_logging(bot, response, 'RESPONSE')
+
+        return Decimal(response["result"]["list"][0]["lastPrice"])
+    except Exception as e:
+        raise Exception(f'Exception - {e}, response - {response}')
 
 
 def bybit_set_leverage(bot, category='linear'):

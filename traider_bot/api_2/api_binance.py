@@ -98,8 +98,9 @@ def binance_place_order(bot, client, side, order_type, price, qty, position_side
         )
         custom_logging(bot, response, 'RESPONSE')
         return response
-    except:
+    except Exception as e:
         custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
+        return e
 
 
 @with_binance_client
@@ -139,8 +140,9 @@ def binance_place_conditional_order(bot, client, side, position_side, trigger_pr
         )
         custom_logging(bot, response, 'RESPONSE')
         return response
-    except:
+    except Exception as e:
         custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
+        return e
 
 
 @with_binance_client
@@ -200,8 +202,9 @@ def binance_get_current_price(bot, client):
         custom_logging(bot, response, 'RESPONSE')
         price = Decimal(response["price"])
         return price
-    except:
+    except Exception as e:
         custom_logging(bot, f"API Traceback: {traceback.format_exc()}")
+        raise Exception(e)
 
 
 @with_binance_client
