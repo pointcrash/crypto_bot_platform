@@ -143,7 +143,7 @@ class PlaceManualOrderView(APIView):
                                                      order_type=order_type))
 
             return Response({
-                "detail": "Order placed successfully",
+                "detail": "The order has been sent",
                 "order-responses": f"{order_responses}"
             }, status=status.HTTP_200_OK)
 
