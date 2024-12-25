@@ -1,3 +1,4 @@
+import traceback
 from decimal import Decimal
 
 from django.shortcuts import render
@@ -65,7 +66,16 @@ class PlaceManualOrderView(APIView):
             action ("Open", "Close", "LTS", "STL")
             '''
 
-            bot = BotModel.objects.get(data.get('bot_id'))
+            required_fields = ['bot_id', 'side', 'action', 'is_percent', 'percent', 'margin', 'price']
+
+            missing_fields = [field for field in required_fields if field not in request.data]
+            if missing_fields:
+                return Response(
+                    {"error": f"Missing required fields: {', '.join(missing_fields)}"},
+                    status=400
+                )
+
+            bot = BotModel.objects.get(pk=data.get('bot_id'))
             side = data.get('side')
             action = data.get('action')
             is_percent = data.get('is_percent')
@@ -127,7 +137,7 @@ class PlaceManualOrderView(APIView):
                                                          current_price=current_price, bot=bot, margin=margin,
                                                          order_type=order_type))
             else:
-                position_side = side
+                position_side = side.upper()
                 order_responses.append(order_placing(action=action, position_side=position_side, price=price,
                                                      current_price=current_price, bot=bot, margin=margin,
                                                      order_type=order_type))
@@ -139,6 +149,7 @@ class PlaceManualOrderView(APIView):
 
         except Exception as e:
             return Response({
-                "detail": f"Get error {e}",
+                "detail": f"Get error {str(e)}",
+                "traceback": traceback.format_exc(),
                 "order-responses": f"{order_responses}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
