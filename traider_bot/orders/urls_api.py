@@ -4,6 +4,6 @@ from orders.views_api import PositionViewSet, CancelOrderView, PlaceManualOrderV
 
 urlpatterns = [
     path('positions/', PositionViewSet.as_view({'get': 'list_by_bots'})),
-    path('orders/cancel-order/<int:orderId>/', CancelOrderView.as_view()),
+    path('orders/cancel-order/<str:orderId>/', CancelOrderView.as_view()),
     path('orders/place-order/', PlaceManualOrderView.as_view()),
 ]
