@@ -90,16 +90,16 @@ class PlaceManualOrderView(APIView):
 
             if is_percent is True:
                 position_info = get_position_inform(bot)
-                long_psn = position_info[0] if position_info[0].get('side') == 'LONG' else position_info[1]
-                short_psn = position_info[0] if position_info[0].get('side') == 'SHORT' else position_info[1]
+                long_psn = position_info[0] if position_info[0]['side'] == 'LONG' else position_info[1]
+                short_psn = position_info[0] if position_info[0]['side'] == 'SHORT' else position_info[1]
 
-                if long_psn.get('qty'):
-                    margin_long = Decimal(long_psn.get('qty')) * Decimal(long_psn.get('entry_price')) / bot.leverage
+                if long_psn['qty']:
+                    margin_long = Decimal(long_psn['qty']) * Decimal(long_psn['entry_price']) / bot.leverage
                 else:
                     margin_long = 0
 
-                if short_psn.get('qty'):
-                    margin_short = Decimal(short_psn.get('qty')) * Decimal(short_psn.get('entry_price')) / bot.leverage
+                if short_psn['qty']:
+                    margin_short = Decimal(short_psn['qty']) * Decimal(short_psn['entry_price']) / bot.leverage
                 else:
                     margin_short = 0
 
