@@ -92,8 +92,17 @@ class PlaceManualOrderView(APIView):
                 position_info = get_position_inform(bot)
                 long_psn = position_info[0] if position_info[0].get('side') == 'LONG' else position_info[1]
                 short_psn = position_info[0] if position_info[0].get('side') == 'SHORT' else position_info[1]
-                margin_long = Decimal(long_psn.get('qty')) * Decimal(long_psn.get('entry_price')) / bot.leverage
-                margin_short = Decimal(short_psn.get('qty')) * Decimal(short_psn.get('entry_price')) / bot.leverage
+
+                if long_psn.get('qty'):
+                    margin_long = Decimal(long_psn.get('qty')) * Decimal(long_psn.get('entry_price')) / bot.leverage
+                else:
+                    raise Exception('There is no open position')
+
+                if short_psn.get('qty'):
+                    margin_short = Decimal(short_psn.get('qty')) * Decimal(short_psn.get('entry_price')) / bot.leverage
+                else:
+                    raise Exception('There is no open position')
+
                 amount_usdt_long = margin_long * percent / 100
                 amount_usdt_short = margin_short * percent / 100
 
