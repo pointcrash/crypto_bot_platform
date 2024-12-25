@@ -1,5 +1,6 @@
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
+from django.conf import settings
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -16,7 +17,7 @@ from main.serializers import UserSerializer, ReferralSerializer
 # Create your views here.
 def password_reset_confirm_redirect(request, uidb64, token):
     return HttpResponseRedirect(
-        f"https://bravo.almazor.co/password-reset/confirm/{uidb64}/{token}/"
+        f"{settings.FRONTEND_URL}/trade/password-reset/confirm/{uidb64}/{token}/"
     )
 
 
