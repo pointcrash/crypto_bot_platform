@@ -57,6 +57,7 @@ class PlaceManualOrderView(APIView):
 
     def post(self, request):
         order_responses = []
+        order_params = []
 
         try:
             data = request.data
@@ -129,6 +130,15 @@ class PlaceManualOrderView(APIView):
                     response = place_order(bot=bot, side=action, order_type=order_type, price=current_price,
                                            amount_usdt=margin, position_side=position_side)
 
+                order_params.append({
+                    'action': action,
+                    'position_side': position_side,
+                    'price': price,
+                    'current_price': current_price,
+                    'order_type': order_type,
+                    'margin': margin,
+                })
+
                 return response
 
             if side == "Both":
@@ -161,12 +171,13 @@ class PlaceManualOrderView(APIView):
 
             return Response({
                 "detail": "The order has been sent",
-                "order-responses": f"{order_responses}"
+                "order_responses": f"{order_responses}",
+                "order_params": f"{order_params}"
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({
                 "detail": f"Get error {str(e)}",
                 "traceback": traceback.format_exc(),
-                "order-responses": f"{order_responses}"
+                "order_responses": f"{order_responses}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
