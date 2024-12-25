@@ -43,9 +43,9 @@ def login_test(request):
 class CancelOrderView(APIView):
     permission_classes = [IsOrderOwnerOrAdmin]
 
-    def post(self, request, order_pk):
+    def post(self, request, orderId):
         try:
-            order = Order.objects.get(pk=order_pk)
+            order = Order.objects.get(orderId=orderId)
             cancel_order(order.bot, order.order_id)
             return Response({"detail": "Order cancelled"}, status=status.HTTP_200_OK)
         except Exception as e:
