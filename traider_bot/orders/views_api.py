@@ -96,12 +96,12 @@ class PlaceManualOrderView(APIView):
                 if long_psn.get('qty'):
                     margin_long = Decimal(long_psn.get('qty')) * Decimal(long_psn.get('entry_price')) / bot.leverage
                 else:
-                    raise Exception('There is no open position')
+                    margin_long = 0
 
                 if short_psn.get('qty'):
                     margin_short = Decimal(short_psn.get('qty')) * Decimal(short_psn.get('entry_price')) / bot.leverage
                 else:
-                    raise Exception('There is no open position')
+                    margin_short = 0
 
                 amount_usdt_long = margin_long * percent / 100
                 amount_usdt_short = margin_short * percent / 100
@@ -139,7 +139,7 @@ class PlaceManualOrderView(APIView):
                         elif position_side == 'SHORT' and amount_usdt_short > 0:
                             margin = amount_usdt_short
                         else:
-                            return Response({"detail": f"Calculate order margin error"},
+                            return Response({"detail": f"Calculate order margin error. One or both positions is empty"},
                                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                     order_responses.append(order_placing(action=action, position_side=position_side, price=price,
@@ -147,6 +147,14 @@ class PlaceManualOrderView(APIView):
                                                          order_type=order_type))
             else:
                 position_side = side.upper()
+                if is_percent:
+                    if position_side == 'LONG' and amount_usdt_long > 0:
+                        margin = amount_usdt_long
+                    elif position_side == 'SHORT' and amount_usdt_short > 0:
+                        margin = amount_usdt_short
+                    else:
+                        return Response({"detail": f"Calculate order margin error. One or both positions is empty"},
+                                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 order_responses.append(order_placing(action=action, position_side=position_side, price=price,
                                                      current_price=current_price, bot=bot, margin=margin,
                                                      order_type=order_type))
