@@ -154,16 +154,20 @@ class PlaceManualOrderView(APIView):
             else:
                 position_side = side.upper()
                 if is_percent:
-                    if position_side == 'LONG' and amount_usdt_long > 0:
-                        margin = amount_usdt_long
-                    elif position_side == 'SHORT' and amount_usdt_short > 0:
-                        margin = amount_usdt_short
+                    psn_qty = get_qty_per_psn(position_side)
+
+                    if psn_qty > 0:
+                        order_responses.append(
+                            order_placing(action=action, position_side=position_side, price=price,
+                                          current_price=current_price, bot=bot, qty=psn_qty,
+                                          order_type=order_type))
                     else:
                         return Response({"detail": f"Calculate order margin error. One or both positions is empty"},
                                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                order_responses.append(order_placing(action=action, position_side=position_side, price=price,
-                                                     current_price=current_price, bot=bot, margin=margin,
-                                                     order_type=order_type))
+                else:
+                    order_responses.append(order_placing(action=action, position_side=position_side, price=price,
+                                                         current_price=current_price, bot=bot, margin=margin,
+                                                         order_type=order_type))
 
             return Response({
                 "detail": "The order has been sent",
