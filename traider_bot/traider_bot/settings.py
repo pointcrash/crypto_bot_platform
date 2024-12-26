@@ -287,6 +287,7 @@ REST_AUTH = {
     'JWT_AUTH_SAMESITE': 'None',
 
     'PASSWORD_RESET_USE_SITES_DOMAIN': True,
+    'LOGOUT_ON_PASSWORD_CHANGE': True,
 
     # 'TOKEN_MODEL': 'None',
     # 'SESSION_LOGIN': False,
