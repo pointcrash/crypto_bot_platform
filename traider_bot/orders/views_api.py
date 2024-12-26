@@ -43,10 +43,10 @@ def login_test(request):
 class CancelOrderView(APIView):
     permission_classes = [IsOrderOwnerOrAdmin]
 
-    def post(self, request, orderId):
+    def post(self, request, bot_id, order_id):
         try:
-            order = Order.objects.get(order_id=orderId)
-            cancel_order(order.bot, order.order_id)
+            bot = BotModel.objects.get(pk=bot_id)
+            cancel_order(bot, order_id)
             return Response({"detail": "Order cancelled"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"detail": f"Get error {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
