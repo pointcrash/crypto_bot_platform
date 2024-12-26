@@ -91,23 +91,16 @@ class PlaceManualOrderView(APIView):
 
             if is_percent is True:
                 position_info = get_position_inform(bot)
-                long_psn = position_info[0] if position_info[0]['side'] == 'LONG' else position_info[1]
-                short_psn = position_info[0] if position_info[0]['side'] == 'SHORT' else position_info[1]
 
-                if long_psn['qty']:
-                    margin_long = Decimal(long_psn['qty']) * Decimal(long_psn['entryPrice']) / bot.leverage
-                else:
-                    margin_long = 0
+            def get_qty_per_psn(psn_side):
+                psn = position_info[0] if position_info[0]['side'] == psn_side else position_info[1]
+                # short_psn = position_info[0] if position_info[0]['side'] == 'SHORT' else position_info[1]
 
-                if short_psn['qty']:
-                    margin_short = Decimal(short_psn['qty']) * Decimal(short_psn['entryPrice']) / bot.leverage
-                else:
-                    margin_short = 0
+                # short_qty = Decimal(short_psn['qty']) * percent / 100
+                qty = Decimal(psn['qty']) * percent / 100
+                return qty
 
-                amount_usdt_long = margin_long * percent / 100
-                amount_usdt_short = margin_short * percent / 100
-
-            def order_placing(action, position_side, price, current_price, bot, margin, order_type):
+            def order_placing(action, position_side, price, current_price, bot, order_type, margin=None, qty=None):
                 if (action == 'Open' and position_side == 'LONG') or (action == 'Close' and position_side == 'SHORT'):
                     action = 'BUY'
                 elif (action == 'Close' and position_side == 'LONG') or (action == 'Open' and position_side == 'SHORT'):
@@ -118,17 +111,17 @@ class PlaceManualOrderView(APIView):
                 if price:
                     if action == 'BUY' and price < current_price or action == 'SELL' and price > current_price:
                         response = place_order(bot=bot, side=action, order_type=order_type, price=price,
-                                               amount_usdt=margin, position_side=position_side)
+                                               amount_usdt=margin, qty=qty, position_side=position_side)
 
                     else:
                         trigger_direction = 1 if price > current_price else 2
                         response = place_conditional_order(bot=bot, side=action, position_side=position_side,
                                                            trigger_price=price, trigger_direction=trigger_direction,
-                                                           amount_usdt=margin)
+                                                           amount_usdt=margin, qty=qty)
 
                 else:
                     response = place_order(bot=bot, side=action, order_type=order_type, price=current_price,
-                                           amount_usdt=margin, position_side=position_side)
+                                           amount_usdt=margin, qty=qty, position_side=position_side)
 
                 order_params.append({
                     'action': action,
@@ -143,18 +136,21 @@ class PlaceManualOrderView(APIView):
 
             if side == "Both":
                 for position_side in ['LONG', 'SHORT']:
-                    if is_percent:
-                        if position_side == 'LONG' and amount_usdt_long > 0:
-                            margin = amount_usdt_long
-                        elif position_side == 'SHORT' and amount_usdt_short > 0:
-                            margin = amount_usdt_short
+                    if is_percent is True:
+                        psn_qty = get_qty_per_psn(position_side)
+
+                        if psn_qty > 0:
+                            order_responses.append(
+                                order_placing(action=action, position_side=position_side, price=price,
+                                              current_price=current_price, bot=bot, qty=psn_qty,
+                                              order_type=order_type))
                         else:
                             return Response({"detail": f"Calculate order margin error. One or both positions is empty"},
                                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-                    order_responses.append(order_placing(action=action, position_side=position_side, price=price,
-                                                         current_price=current_price, bot=bot, margin=margin,
-                                                         order_type=order_type))
+                    else:
+                        order_responses.append(order_placing(action=action, position_side=position_side, price=price,
+                                                             current_price=current_price, bot=bot, margin=margin,
+                                                             order_type=order_type))
             else:
                 position_side = side.upper()
                 if is_percent:
