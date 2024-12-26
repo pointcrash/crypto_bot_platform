@@ -287,7 +287,7 @@ REST_AUTH = {
     'JWT_AUTH_SAMESITE': 'None',
 
     'PASSWORD_RESET_USE_SITES_DOMAIN': True,
-    'PASSWORD_CHANGE_SERIALIZER': 'authentication.serializers.CustomPasswordResetSerializer',
+    'PASSWORD_RESET_SERIALIZER': 'authentication.serializers.CustomPasswordResetSerializer',
     'LOGOUT_ON_PASSWORD_CHANGE': True,
 
     # 'TOKEN_MODEL': 'None',
