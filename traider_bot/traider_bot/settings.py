@@ -286,6 +286,8 @@ REST_AUTH = {
     'JWT_AUTH_SECURE': True,
     'JWT_AUTH_SAMESITE': 'None',
 
+    'PASSWORD_RESET_USE_SITES_DOMAIN': True,
+
     # 'TOKEN_MODEL': 'None',
     # 'SESSION_LOGIN': False,
 }
@@ -328,7 +330,3 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 
 MEDIA_URL = '/media/'  # URL для доступа к медиа-файлам
 MEDIA_ROOT = '/app/media'  # Путь для сохранения файлов
-
-DJANGO_REST_AUTH = {
-    'PASSWORD_RESET_CONFIRM_URL': 'custom-reset-password-url/',
-}
