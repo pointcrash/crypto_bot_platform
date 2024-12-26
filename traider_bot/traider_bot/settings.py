@@ -328,3 +328,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 
 MEDIA_URL = '/media/'  # URL для доступа к медиа-файлам
 MEDIA_ROOT = '/app/media'  # Путь для сохранения файлов
+
+DJANGO_REST_AUTH = {
+    'PASSWORD_RESET_CONFIRM_URL': 'custom-reset-password-url/',
+}
