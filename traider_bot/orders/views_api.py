@@ -45,7 +45,7 @@ class CancelOrderView(APIView):
 
     def post(self, request, orderId):
         try:
-            order = Order.objects.get(orderId=orderId)
+            order = Order.objects.get(order_id=orderId)
             cancel_order(order.bot, order.order_id)
             return Response({"detail": "Order cancelled"}, status=status.HTTP_200_OK)
         except Exception as e:
