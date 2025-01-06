@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 
 from main.models import Referral
 from main.serializers import UserSerializer, ReferralSerializer
+from tariffs.models import UserTariff, Tariff
 
 
 # Create your views here.
@@ -57,6 +58,9 @@ class CustomRegisterView(RegisterView):
 
         try:
             user = self.perform_create(serializer)
+            guest_tariff = Tariff.objects.get(title='Guest')
+            UserTariff.objects.create(user=user, tariff=guest_tariff)
+
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
