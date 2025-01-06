@@ -1,7 +1,10 @@
 import logging
 import time
 from datetime import date, timedelta
+
+from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.utils import timezone
 
 from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform, \
     transaction_history
@@ -12,6 +15,9 @@ from main.tests import generate_date_ranges, convert_timestamp_to_datetime
 from orders.models import Position
 from tariffs.models import UserTariff
 from decimal import Decimal, ROUND_HALF_UP
+
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 
 logger = logging.getLogger('django')
 
@@ -188,6 +194,35 @@ def bots_alive_check():
         BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False)
     if bot_id_need_to_activate:
         BotModel.objects.filter(pk__in=bot_id_need_to_activate).update(is_active=True)
+
+
+def user_tariffs_check():
+    users = User.objects.all()
+    for user in users:
+        user_tariff = UserTariff.objects.filter(user=user).order_by('-created_at').first()
+
+        if user_tariff.tariff.title != 'Guest':
+            if timezone.now() > user_tariff.expiration_time:
+                user_bots = BotModel.objects.filter(owner=user)
+
+                for bot in user_bots:
+                    bot.is_active = False
+                    bot.save()
+
+            elif user_tariff.expiration_time - timezone.now() < timedelta(days=7):
+                tg_acc = TelegramAccount.objects.filter(owner=user).first()
+                if tg_acc:
+                    remaining_time = user_tariff.expiration_time - timezone.now()
+                    days = remaining_time.days
+
+                    message = f'Your tariff expires in {days} days.'
+
+                    send_telegram_message(
+                        tg_acc.chat_id,
+                        message=message,
+                    )
+
+
 
 
 
