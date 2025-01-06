@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
@@ -29,7 +30,15 @@ class UserTariffViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         if not queryset.exists():
             return Response({"detail": "No tariffs found for this user."}, status=404)
+
         queryset = queryset[:1]
+        user_tariff = queryset.first()
+
+        if user_tariff.tariff.title != 'Guest' and timezone.now() > user_tariff.expiration_time:
+            user_tariff = UserTariff.objects.filter(tariff__title='Guest').first()
+
+        queryset = [user_tariff]
+
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -40,8 +49,5 @@ class TariffReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_authenticated and UserTariff.objects.filter(user=user).first():
-            queryset = Tariff.objects.filter(type='ACTIVE').exclude(title='Guest').order_by('price')
-        else:
-            queryset = Tariff.objects.filter(type='ACTIVE').order_by('price')
+        queryset = Tariff.objects.filter(type='ACTIVE').exclude(title='Guest').order_by('price')
         return queryset
