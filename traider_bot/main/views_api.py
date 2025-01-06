@@ -22,7 +22,7 @@ from main.forms import InternalTransferForm
 from main.models import Account, ExchangeService, Referral, AccountBalance, AccountHistory
 from main.serializers import UserSerializer, AccountSerializer, ExchangeServiceSerializer, ReferralSerializer, \
     AccountBalanceSerializer, AccountTransactionHistorySerializer
-from tariffs.models import UserTariff
+from tariffs.models import UserTariff, Tariff
 from traider_bot.permissions import IsOwnerOrAdmin
 
 
@@ -69,15 +69,16 @@ class AccountsViewSet(viewsets.ModelViewSet):
         user = request.user
         user_tariff = UserTariff.objects.filter(user=user).order_by('created_at').last()
 
-        if not user_tariff or timezone.now() > user_tariff.expiration_time:
-            return Response({"error": "Тариф не подключен"}, status=status.HTTP_400_BAD_REQUEST)
+        if timezone.now() > user_tariff.expiration_time:
+            tariff = Tariff.objects.get(title='Guest')
         else:
             tariff = user_tariff.tariff
-            if Account.objects.filter(owner=user).count() >= tariff.max_accounts:
-                return Response(
-                    {"error": f"Вы не можете создать больше {tariff.max_accounts} аккаунтов."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+
+        if Account.objects.filter(owner=user).count() >= tariff.max_accounts:
+            return Response(
+                {"error": f"Вы не можете создать больше {tariff.max_accounts} аккаунтов."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

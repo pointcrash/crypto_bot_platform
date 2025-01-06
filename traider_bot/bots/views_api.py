@@ -17,7 +17,7 @@ from bots.serializers import *
 from bots.terminate_bot_logic import terminate_bot_with_cancel_orders, terminate_bot
 from orders.models import Position, Order
 from orders.serializers import PositionSerializer, OrderSerializer
-from tariffs.models import UserTariff
+from tariffs.models import UserTariff, Tariff
 from traider_bot.permissions import IsOwnerOrAdmin, IsBotOwnerOrAdmin, IsAdminOrReadOnly
 import traceback
 
@@ -73,16 +73,16 @@ class BotModelViewSet(viewsets.ModelViewSet):
         user = request.user
         user_tariff = UserTariff.objects.filter(user=user).order_by('created_at').last()
 
-        if not user_tariff or timezone.now() > user_tariff.expiration_time:
-            return Response({"error": "Тариф не подключен"}, status=status.HTTP_400_BAD_REQUEST)
-
+        if timezone.now() > user_tariff.expiration_time:
+            tariff = Tariff.objects.get(title='Guest')
         else:
             tariff = user_tariff.tariff
-            if BotModel.objects.filter(owner=user).count() >= tariff.max_bots:
-                return Response(
-                    {"error": f"Вы не можете создать больше {tariff.max_bots} ботов."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+
+        if BotModel.objects.filter(owner=user).count() >= tariff.max_bots:
+            return Response(
+                {"error": f"Вы не можете создать больше {tariff.max_bots} ботов."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
