@@ -112,9 +112,12 @@ def handle_position_stream_message(msg, bot_class_obj):
                 bot_class_obj.ml_filled = False
                 bot_class_obj.ml_qty = 0
                 bot_class_obj.ml_status_save()
+                custom_user_bot_logging(bot_class_obj.bot, f'ПОЗИЦИЯ ЗАКРЫТА Я ДОЛЖЕН ЗАПИСАТЬ ПНЛ ЗА ЦИКЛ (ЧЕРЕЗ СЕКУНДУ)')
+
                 # bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
 
                 time.sleep(1)
+                custom_user_bot_logging(bot_class_obj.bot, f'ПОЗИЦИЯ ЗАКРЫТА Я ДОЛЖЕН ЗАПИСАТЬ ПНЛ ЗА ЦИКЛ')
                 bot_class_obj.calc_and_save_pnl_per_cycle()
         # bot_class_obj.replace_closing_orders()
 
