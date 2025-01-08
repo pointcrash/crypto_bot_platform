@@ -105,6 +105,7 @@ def handle_position_stream_message(msg, bot_class_obj):
 
         else:
             bot_logger.debug('Получено сообщение о закрытии позиции')
+            custom_user_bot_logging(bot_class_obj.bot, f'ПОЗИЦИЯ ЗАКРЫТА (СООБЩЕНИЕ ДО ПРОВЕРКИ)')
             if msg['side'] == bot_class_obj.position_info.get('side'):
                 bot_logger.debug('Сообщение о закрытии позиции прошло проверку')
                 bot_class_obj.position_info['qty'] = 0
