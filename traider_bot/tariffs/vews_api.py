@@ -23,6 +23,15 @@ class UserTariffViewSet(viewsets.ModelViewSet):
         queryset = UserTariff.objects.filter(user=user).order_by('-created_at')
         if not queryset.exists():
             return Response({"detail": "No tariffs found for this user."}, status=404)
+
+        queryset = queryset[:1]
+        user_tariff = queryset.first()
+
+        if user_tariff.tariff.title != 'Guest' and timezone.now() > user_tariff.expiration_time:
+            user_tariff = UserTariff.objects.filter(tariff__title='Guest').first()
+
+        queryset = [user_tariff]
+
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
