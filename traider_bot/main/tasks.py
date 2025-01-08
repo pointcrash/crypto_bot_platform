@@ -200,9 +200,12 @@ def user_tariffs_check():
     users = User.objects.all()
     for user in users:
         user_tariff = UserTariff.objects.filter(user=user).order_by('-created_at').first()
+        logger.debug(f'{user_tariff} user tariff')
 
         if not user_tariff:
             continue
+
+        logger.debug(f'{user_tariff} user tariff repeat')
 
         if user_tariff.tariff.title != 'Guest':
             if timezone.now() > user_tariff.expiration_time:
