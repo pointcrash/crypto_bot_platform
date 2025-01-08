@@ -201,7 +201,7 @@ def user_tariffs_check():
     for user in users:
         user_tariff = UserTariff.objects.filter(user=user).order_by('-created_at').first()
 
-        if user_tariff is None:
+        if not user_tariff:
             continue
 
         if user_tariff.tariff.title != 'Guest':
