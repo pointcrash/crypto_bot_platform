@@ -201,6 +201,9 @@ def user_tariffs_check():
     for user in users:
         user_tariff = UserTariff.objects.filter(user=user).order_by('-created_at').first()
 
+        if user_tariff is None:
+            continue
+
         if user_tariff.tariff.title != 'Guest':
             if timezone.now() > user_tariff.expiration_time:
                 user_bots = BotModel.objects.filter(owner=user)
