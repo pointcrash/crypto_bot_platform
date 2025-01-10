@@ -48,10 +48,12 @@ def handle_order_stream_message(msg, bot_class_obj):
                     custom_user_bot_logging(bot_class_obj.bot,
                                             f' Выход на центральной линии. Ордер исполнен. ID: {order_id}')
                     bot_class_obj.send_tg_message(message=f'Выход на центральной линии. Ордер исполнен. ID: {order_id}')
+                    bot_class_obj.send_info_income_per_deal()
 
                 elif order_id == bot_class_obj.close_psn_main_order_id:
                     custom_user_bot_logging(bot_class_obj.bot, f' Закрывающий ордер исполнен. ID: {order_id}')
                     bot_class_obj.send_tg_message(message=f'Позиция закрыта, цикл завершен.')
+                    bot_class_obj.send_info_income_per_deal()
                     cancel_order(bot_class_obj.bot, bot_class_obj.sl_order)
                     bot_class_obj.sl_order = None
 
@@ -104,10 +106,9 @@ def handle_position_stream_message(msg, bot_class_obj):
             # bot_class_obj.cached_data(key='positionInfo', value=bot_class_obj.position_info)
 
         else:
-            bot_logger.debug('Получено сообщение о закрытии позиции')
-            custom_user_bot_logging(bot_class_obj.bot, f'ПОЗИЦИЯ ЗАКРЫТА (СООБЩЕНИЕ ДО ПРОВЕРКИ)')
+            custom_user_bot_logging(bot_class_obj.bot, f'QTY = 0 (СООБЩЕНИЕ ДО ПРОВЕРКИ)')
+            custom_user_bot_logging(bot_class_obj.bot, f'msg side = {msg['side']}, saved psn side = {bot_class_obj.position_info.get('side')}')
             if msg['side'] == bot_class_obj.position_info.get('side'):
-                bot_logger.debug('Сообщение о закрытии позиции прошло проверку')
                 bot_class_obj.position_info['qty'] = 0
                 bot_class_obj.have_psn = False
                 bot_class_obj.ml_filled = False

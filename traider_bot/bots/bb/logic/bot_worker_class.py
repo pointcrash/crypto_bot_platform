@@ -5,6 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from django.core.cache import cache
+from django.utils import timezone
 from django.utils.timezone import make_naive
 
 from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, \
@@ -38,6 +39,8 @@ class WorkBollingerBandsClass:
         self.position_info = dict()
         self.count_cycles = 0
         self.trailing_price = 0
+
+        self.last_deal_time = datetime.now()
 
         self.psn_locker = threading.Lock()
         self.avg_locker = threading.Lock()
@@ -261,6 +264,14 @@ class WorkBollingerBandsClass:
             self.cached_data('ClosedTrPrice', self.trailing_price * (1 - (trailing_percent / 100)))
         elif self.current_price <= self.trailing_price * (1 - (trailing_percent / 100)):
             return True
+
+    def send_info_income_per_deal(self):
+        pnl = get_pnl_by_time(bot=self.bot, start_time=self.last_deal_time, end_time=datetime.now())
+        pnl = round(Decimal(pnl), 5)
+
+        message = f'PNL за последнюю сделку составил: {pnl}'
+        custom_user_bot_logging(self.bot, message)
+        self.send_tg_message(message=message)
 
     def calc_and_save_pnl_per_cycle(self):
         pnl = get_pnl_by_time(bot=self.bot, start_time=make_naive(self.bot.cycle_time_start), end_time=datetime.now())
