@@ -19,8 +19,8 @@ def get_data_ago_to_ms(days):
 
 
 if __name__ == '__main__':
-    client = Client(api_key, api_secret, testnet=True)
-    # main_client = Client(main_api_key, main_api_secret, testnet=False)
+    # client = Client(api_key, api_secret, testnet=True)
+    main_client = Client(main_api_key, main_api_secret, testnet=False)
 
     # Получение информации о балансе
     # print(len(client.futures_klines(symbol='BTCUSDT', interval='15m', limit=50)))  # Получение свечей
@@ -42,6 +42,21 @@ if __name__ == '__main__':
     # print(client.futures_change_position_mode(symbol='BTCUSDT', dualsideposition=True))  # Изменить режим на Hedge
     # for balance in client.futures_account_balance():
     #     print(balance)
+
+    def binance_get_pnl_by_time(client, start_time=datetime.now()-timedelta(days=23), end_time=datetime.now()-timedelta(days=16)):
+        start_time = int(start_time.timestamp() * 1000)
+        end_time = int(end_time.timestamp() * 1000)
+        total_pnl = 0
+
+        response = client.futures_account_trades(symbol='1000RATSUSDT', startTime=start_time, endTime=end_time)
+        print(response)
+        for trade in response:
+            total_pnl += float(trade['realizedPnl'])
+            total_pnl -= float(trade['commission'])
+
+        print(total_pnl)
+
+    binance_get_pnl_by_time(client=main_client)
 
     # x = (client.futures_income_history())  # Инфо по позиции
     # for i in x:

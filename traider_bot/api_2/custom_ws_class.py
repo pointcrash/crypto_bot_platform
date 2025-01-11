@@ -58,6 +58,7 @@ class CustomWSClient:
         self.wst.daemon = True
         self.wst.start()
         bot_logger.info(f'Bot {self.bot.pk} socket started')
+        update_bots_conn_status(self.bot, new_status=True)
 
     def _on_message(self, ws, message):
         try:

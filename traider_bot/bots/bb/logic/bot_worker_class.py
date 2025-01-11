@@ -6,7 +6,6 @@ from decimal import Decimal
 
 from django.core.cache import cache
 from django.utils import timezone
-from django.utils.timezone import make_naive
 
 from api_2.api_aggregator import change_position_mode, set_leverage, cancel_all_orders, place_order, \
     get_position_inform, place_conditional_order, get_pnl_by_time
@@ -40,7 +39,7 @@ class WorkBollingerBandsClass:
         self.count_cycles = 0
         self.trailing_price = 0
 
-        self.last_deal_time = datetime.now()
+        self.last_deal_time = timezone.now()
 
         self.psn_locker = threading.Lock()
         self.avg_locker = threading.Lock()
@@ -266,16 +265,20 @@ class WorkBollingerBandsClass:
             return True
 
     def send_info_income_per_deal(self):
-        pnl = get_pnl_by_time(bot=self.bot, start_time=self.last_deal_time, end_time=datetime.now())
+        pnl = get_pnl_by_time(bot=self.bot, start_time=self.last_deal_time, end_time=timezone.now())
         pnl = round(Decimal(pnl), 5)
 
         message = f'PNL за последнюю сделку составил: {pnl}'
         custom_user_bot_logging(self.bot, message)
         self.send_tg_message(message=message)
 
+        self.last_deal_time = timezone.now()
+
     def calc_and_save_pnl_per_cycle(self):
-        pnl = get_pnl_by_time(bot=self.bot, start_time=make_naive(self.bot.cycle_time_start), end_time=datetime.now())
+        custom_user_bot_logging(self.bot, f'сейчас буду запрашивать пнл за цикл')
+        pnl = get_pnl_by_time(bot=self.bot, start_time=self.bot.cycle_time_start, end_time=timezone.now())
         pnl = round(Decimal(pnl), 5)
+        custom_user_bot_logging(self.bot, f'pnl получен: {pnl}')
 
         botsdata, created = BotsData.objects.get_or_create(bot=self.bot)
 
@@ -305,7 +308,7 @@ class WorkBollingerBandsClass:
         self.bot.save()
 
     def bot_cycle_time_start_update(self):
-        self.bot.cycle_time_start = datetime.now()
+        self.bot.cycle_time_start = timezone.now()
         self.bot.save()
 
     def send_tg_message(self, message):
