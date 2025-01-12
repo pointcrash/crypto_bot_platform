@@ -36,6 +36,8 @@ class SymbolSerializer(serializers.ModelSerializer):
 
 
 class BotsDataSerializer(serializers.ModelSerializer):
+    bot = serializers.PrimaryKeyRelatedField(queryset=BotModel.objects.all())
+
     class Meta:
         model = BotsData
         fields = '__all__'
