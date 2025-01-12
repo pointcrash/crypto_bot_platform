@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from bots.models import BotModel, BBBotModel, Log, UserBotLog, StepHedge, Symbol, Grid
+from bots.models import BotModel, BBBotModel, Log, UserBotLog, StepHedge, Symbol, Grid, BotsData
 from main.models import Account
 from main.serializers import AccountNameOnlySerializer
 
@@ -35,12 +35,19 @@ class SymbolSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class BotsDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BotsData
+        fields = '__all__'
+
+
 class BotModelReadOnlySerializer(serializers.ModelSerializer):
     account = AccountNameOnlySerializer(read_only=True)
     account_name = serializers.ReadOnlyField(source='account.name')
     account_service = serializers.ReadOnlyField(source='account.service.name')
     account_mainnet = serializers.ReadOnlyField(source='account.is_mainnet')
     symbol = SymbolSerializer(read_only=True)
+    bots_data = BotsDataSerializer(read_only=True)
     symbol_name = serializers.ReadOnlyField(source='symbol.name')
     bb = BBBotModelSerializer(read_only=True)
     zinger = StepHedgeSerializer(read_only=True)
@@ -57,6 +64,7 @@ class BotModelSerializer(serializers.ModelSerializer):
     account_service = serializers.ReadOnlyField(source='account.service.name')
     account_mainnet = serializers.ReadOnlyField(source='account.is_mainnet')
     symbol = serializers.PrimaryKeyRelatedField(queryset=Symbol.objects.all())
+    bots_data = BotsDataSerializer(read_only=True)
     symbol_name = serializers.ReadOnlyField(source='symbol.name')
     bb = serializers.PrimaryKeyRelatedField(queryset=BBBotModel.objects.all(), required=False, allow_null=True)
     zinger = serializers.PrimaryKeyRelatedField(queryset=StepHedge.objects.all(), required=False, allow_null=True)
