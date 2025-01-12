@@ -48,6 +48,25 @@ def bybit_test():
     return response
 
 
+def bybit_get_pnl_by_time(start_time, end_time):
+    session = get_session()
+    start_time = int(start_time.timestamp() * 1000)
+    end_time = int(end_time.timestamp() * 1000)
+    total_pnl = 0
+
+    response = session.get_closed_pnl(
+        category="linear",
+        symbol='1000BONKUSDT',
+        startTime=start_time,
+        endTime=end_time,
+    )
+
+    for trade in response['result']['list']:
+        total_pnl += float(trade['closedPnl'])
+
+    return total_pnl
+
+
 def get_dates_in_ms(days_back=30, interval_days=7):
     dates_in_ms = []
     current_date = datetime.now()
@@ -61,11 +80,42 @@ def get_dates_in_ms(days_back=30, interval_days=7):
 
 
 if __name__ == '__main__':
-    # dates = get_dates_in_ms(30, 7)
-    # for date in dates:
-    #     print(date)
-    x = bybit_test()
-    print(x)
+    def get_pnl_by_time_copy_without_bot(service_name, start_time, end_time=None):
+        get_pnl_func = None
+
+        #  Get 'get_pnl_func'
+        if service_name == 'Binance':
+            # get_pnl_func = binance_get_pnl_by_time
+            get_pnl_func = None
+        elif service_name == 'ByBit':
+            get_pnl_func = bybit_get_pnl_by_time
+
+        #  Calculate sum total pnl by time
+        if get_pnl_func is not None:
+            total_pnl = 0
+            if end_time is None:
+                end_time = datetime.now()
+
+            while end_time - start_time > timedelta(days=7):
+                seven_days_later = start_time + timedelta(days=7)
+                pnl = get_pnl_func(start_time, seven_days_later)
+                total_pnl += pnl
+                start_time = seven_days_later
+
+            if end_time - start_time < timedelta(days=7):
+                pnl = get_pnl_func(start_time, end_time)
+                total_pnl += pnl
+
+            return total_pnl
+
+
+    print(get_pnl_by_time_copy_without_bot('ByBit', start_time=datetime.now() - timedelta(days=29)))
+
+    # start_time = datetime.now() - timedelta(days=7)
+    # end_time = datetime.now()
+    #
+    # x = bybit_get_pnl_by_time(start_time, end_time)
+    # print(x)
     # for i in x['result']['list']:
     #     print(i)
     # print(bybit_test())

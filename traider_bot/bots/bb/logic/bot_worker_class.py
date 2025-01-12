@@ -13,7 +13,7 @@ from api_2.custom_logging_api import custom_logging
 from bots.bb.logic.avg_logic import BBAutoAverage
 from bots.bb.logic.bb_class import BollingerBands
 from bots.general_functions import custom_user_bot_logging
-from bots.models import BotsData
+from bots.models import BotsData, BotModel
 from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 
@@ -267,6 +267,7 @@ class WorkBollingerBandsClass:
     def send_info_income_per_deal(self):
         pnl = get_pnl_by_time(bot=self.bot, start_time=self.last_deal_time, end_time=timezone.now())
         pnl = round(Decimal(pnl), 5)
+        self.update_bots_pnl_and_refresh_bots_data(added_pnl=pnl)
 
         message = f'PNL за последнюю сделку составил: {pnl}'
         custom_user_bot_logging(self.bot, message)
@@ -318,3 +319,10 @@ class WorkBollingerBandsClass:
             self.tg_acc.chat_id,
             message=message,
         )
+
+    def update_bots_pnl_and_refresh_bots_data(self, added_pnl):
+        current_pnl = self.bot.pnl
+        new_pnl = current_pnl + added_pnl
+
+        self.bot.pnl = new_pnl
+        BotModel.objects.filter(pk=self.bot.pk).update(pnl=new_pnl)
