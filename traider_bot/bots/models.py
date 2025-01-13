@@ -49,6 +49,7 @@ class BotModel(models.Model):
     time_create = models.DateTimeField(auto_now_add=True, null=True)
     time_update = models.DateTimeField(auto_now=True, null=True)
     cycle_time_start = models.DateTimeField(null=True, blank=True)
+    bot_time_start = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ['account', 'symbol']
