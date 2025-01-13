@@ -53,7 +53,7 @@ class BotModelReadOnlySerializer(serializers.ModelSerializer):
     bb = BBBotModelSerializer(read_only=True)
     zinger = StepHedgeSerializer(read_only=True)
     grid = GridSerializer(read_only=True)
-    bots_data = BotsDataSerializer(read_only=True)
+    data = BotsDataSerializer(read_only=True)
 
     class Meta:
         model = BotModel
@@ -70,7 +70,7 @@ class BotModelSerializer(serializers.ModelSerializer):
     bb = serializers.PrimaryKeyRelatedField(queryset=BBBotModel.objects.all(), required=False, allow_null=True)
     zinger = serializers.PrimaryKeyRelatedField(queryset=StepHedge.objects.all(), required=False, allow_null=True)
     grid = serializers.PrimaryKeyRelatedField(queryset=Grid.objects.all(), required=False, allow_null=True)
-    bots_data = serializers.PrimaryKeyRelatedField(queryset=BotsData.objects.all(), required=False, allow_null=True)
+    data = BotsDataSerializer(read_only=True)
 
     class Meta:
         model = BotModel

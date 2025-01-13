@@ -223,7 +223,7 @@ class BotStartView(APIView):
 
             bot.is_active = True
             bot.bot_time_start = timezone.now()
-            bot.save(update_fields=['is_active'])
+            bot.save(update_fields=['is_active', 'bot_time_start'])
 
             return JsonResponse({'success': True, 'message': 'Bot started successfully'})
 

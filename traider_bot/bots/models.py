@@ -255,7 +255,7 @@ class JsonObjectClass(models.Model):
 
 
 class BotsData(models.Model):
-    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True)
+    bot = models.OneToOneField(BotModel, on_delete=models.CASCADE, blank=True, null=True, related_name='data')
     total_pnl = models.DecimalField(max_digits=20, decimal_places=5, default=0, blank=True)
     count_cycles = models.IntegerField(default=0, blank=True)
     cycle_pnl_dict = models.JSONField(default=dict, blank=True)
