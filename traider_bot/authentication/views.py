@@ -58,8 +58,6 @@ class CustomRegisterView(RegisterView):
 
         try:
             user = self.perform_create(serializer)
-            guest_tariff = Tariff.objects.get(title='Guest')
-            UserTariff.objects.create(user=user, tariff=guest_tariff)
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
@@ -80,7 +78,9 @@ class CustomRegisterView(RegisterView):
 
     def perform_create(self, serializer):
         user = super().perform_create(serializer)
+        self.add_guest_tariff(user)
         self.add_to_referrals(user)
+
         return user
 
     def add_to_referrals(self, user):
@@ -107,3 +107,7 @@ class CustomRegisterView(RegisterView):
     def bonus_tariff_by_promocode(self, user):
         bonus_tariff = Tariff.objects.get(type='ACTIVE', title='Advanced')
         UserTariff.objects.create(user=user, tariff=bonus_tariff)
+
+    def add_guest_tariff(self, user):
+        guest_tariff = Tariff.objects.get(title='Guest')
+        UserTariff.objects.create(user=user, tariff=guest_tariff)
