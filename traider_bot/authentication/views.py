@@ -1,3 +1,5 @@
+import time
+
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
 from django.conf import settings
@@ -58,9 +60,7 @@ class CustomRegisterView(RegisterView):
 
         try:
             user = self.perform_create(serializer)
-            guest_tariff = Tariff.objects.get(title='Guest')
-            UserTariff.objects.create(user=user, tariff=guest_tariff)
-
+            self.add_guest_tariff(user)
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
@@ -81,7 +81,12 @@ class CustomRegisterView(RegisterView):
     def perform_create(self, serializer):
         user = super().perform_create(serializer)
         self.add_to_referrals(user)
+
         return user
+
+    def add_guest_tariff(self, user):
+        guest_tariff = Tariff.objects.get(title='Guest')
+        UserTariff.objects.create(user=user, tariff=guest_tariff)
 
     def add_to_referrals(self, user):
         ref_code = self.request.data.get('ref_code')
