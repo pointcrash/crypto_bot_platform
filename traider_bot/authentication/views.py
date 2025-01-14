@@ -79,7 +79,7 @@ class CustomRegisterView(RegisterView):
 
     def perform_create(self, serializer):
         user = super().perform_create(serializer)
-        self.add_guest_tariff(user)
+        # self.add_guest_tariff(user)
         self.add_to_referrals(user)
 
         return user
