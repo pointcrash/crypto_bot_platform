@@ -88,6 +88,10 @@ class CustomRegisterView(RegisterView):
         if not ref_code:
             return
 
+        if ref_code == 'FREETRADE':
+            self.bonus_tariff_by_promocode(user)
+            return
+
         try:
             referral = Referral.objects.get(code=ref_code)
         except Referral.DoesNotExist:
@@ -97,11 +101,8 @@ class CustomRegisterView(RegisterView):
         referral.referred_users.add(user)
         referral.save()
 
-        if referral.user.username == 'mazor.1104@gmail.com' or referral.user.username == 'admin':
-            self.bonus_tariff_by_ref(user)
-
         return
 
-    def bonus_tariff_by_ref(self, user):
+    def bonus_tariff_by_promocode(self, user):
         bonus_tariff = Tariff.objects.get(type='ACTIVE', title='Advanced')
-        user_tariff = UserTariff.objects.create(user=user, tariff=bonus_tariff)
+        UserTariff.objects.create(user=user, tariff=bonus_tariff)
