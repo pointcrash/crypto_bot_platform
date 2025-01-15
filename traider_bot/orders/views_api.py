@@ -193,19 +193,16 @@ class PlaceManualOrderView(APIView):
 class GetOrdersHistoryByTimeView(APIView):
     permission_classes = [IsAuthenticated, ]
 
-    def post(self, request):
+    def get(self, request):
         try:
-            body = json.loads(request.body)
+            bot_id = request.GET.get('bot')
+            from_timestamp = request.GET.get('from')
+            to_timestamp = request.GET.get('to')
 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-
-        try:
-            bot_id = int(body.get('bot_id'))
             bot = BotModel.objects.get(id=bot_id)
 
-            start_time = int(body.get('start_time'))  # Unix timestamp
-            end_time = int(body.get('end_time'))
+            start_time = int(from_timestamp)  # Unix timestamp
+            end_time = int(to_timestamp)
 
             start_time = datetime.fromtimestamp(start_time)
             end_time = datetime.fromtimestamp(end_time)
