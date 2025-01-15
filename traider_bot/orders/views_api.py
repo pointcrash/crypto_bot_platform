@@ -204,8 +204,8 @@ class GetOrdersHistoryByTimeView(APIView):
             bot_id = int(body.get('bot_id'))
             bot = BotModel.objects.get(id=bot_id)
 
-            start_time = body.get('start_time')  # Unix timestamp
-            end_time = body.get('end_time')
+            start_time = int(body.get('start_time'))  # Unix timestamp
+            end_time = int(body.get('end_time'))
 
             start_time = datetime.fromtimestamp(start_time)
             end_time = datetime.fromtimestamp(end_time)
