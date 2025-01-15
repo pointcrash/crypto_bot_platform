@@ -210,12 +210,12 @@ class GetOrdersHistoryByTimeView(APIView):
             start_time = datetime.fromtimestamp(start_time)
             end_time = datetime.fromtimestamp(end_time)
 
-            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name, status='FILLED',
-                                                 time_create__range=(start_time, end_time)).order_by('-time_update')
+            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name, status='FILLED').order_by('-time_update')
 
             order_history_serialized = OrderSerializer(order_history, many=True).data
 
-            return JsonResponse({'success': True, 'orders': order_history_serialized})
+            return JsonResponse({'success': True, 'orders': order_history_serialized,
+                                 'start_time': start_time, 'end_time': end_time})
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
