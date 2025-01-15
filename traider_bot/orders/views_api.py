@@ -193,7 +193,7 @@ class PlaceManualOrderView(APIView):
 class GetOrdersHistoryByTimeView(APIView):
     permission_classes = [IsAuthenticated, ]
 
-    def get(self, request):
+    def post(self, request):
         try:
             body = json.loads(request.body)
 
