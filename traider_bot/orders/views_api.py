@@ -1,6 +1,9 @@
+import json
 import traceback
+from datetime import datetime
 from decimal import Decimal
 
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
@@ -11,7 +14,7 @@ from api_2.api_aggregator import cancel_order, place_order, place_conditional_or
     get_position_inform
 from bots.models import BotModel
 from orders.models import Position, Order
-from orders.serializers import PositionSerializer
+from orders.serializers import PositionSerializer, OrderSerializer
 from traider_bot.permissions import IsOrderOwnerOrAdmin
 
 
@@ -185,3 +188,33 @@ class PlaceManualOrderView(APIView):
                 "traceback": traceback.format_exc(),
                 "order_responses": f"{order_responses}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GetOrdersHistoryByTimeView(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, bot_id):
+        try:
+            bot = BotModel.objects.get(id=bot_id)
+
+            try:
+                body = json.loads(request.body)
+
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+            start_time = body.get('start_time')  # Unix timestamp
+            end_time = body.get('end_time')
+
+            start_time = datetime.fromtimestamp(start_time)
+            end_time = datetime.fromtimestamp(end_time)
+
+            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name, status='FILLED',
+                                                 time_create__range=(start_time, end_time)).order_by('-time_update')
+
+            order_history_serialized = OrderSerializer(order_history, many=True).data
+
+            return JsonResponse({'success': True, 'orders': order_history_serialized})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
