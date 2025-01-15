@@ -66,7 +66,6 @@ class BotModelSerializer(serializers.ModelSerializer):
     account_service = serializers.ReadOnlyField(source='account.service.name')
     account_mainnet = serializers.ReadOnlyField(source='account.is_mainnet')
     symbol = serializers.PrimaryKeyRelatedField(queryset=Symbol.objects.all())
-    symbol_data = SymbolSerializer(read_only=True)
     symbol_name = serializers.ReadOnlyField(source='symbol.name')
     bb = serializers.PrimaryKeyRelatedField(queryset=BBBotModel.objects.all(), required=False, allow_null=True)
     zinger = serializers.PrimaryKeyRelatedField(queryset=StepHedge.objects.all(), required=False, allow_null=True)

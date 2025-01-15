@@ -9,7 +9,7 @@ from django.utils import timezone
 from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform, \
     transaction_history
 from bots.general_functions import send_telegram_notice, all_symbols_update
-from bots.models import BotModel
+from bots.models import BotModel, Symbol
 from main.models import Account, AccountBalance, AccountHistory
 from main.tests import generate_date_ranges, convert_timestamp_to_datetime
 from orders.models import Position
@@ -226,7 +226,5 @@ def user_tariffs_check():
                     )
 
 
-
-
-
-
+def min_notional_for_all_symbols():
+    Symbol.objects.all().update(min_notional='5')
