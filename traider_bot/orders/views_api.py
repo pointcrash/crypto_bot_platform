@@ -204,13 +204,14 @@ class GetOrdersHistoryByTimeView(APIView):
             bot_id = int(body.get('bot_id'))
             bot = BotModel.objects.get(id=bot_id)
 
-            start_time = int(body.get('start_time'))  # Unix timestamp
-            end_time = int(body.get('end_time'))
+            start_time = body.get('start_time')  # Unix timestamp
+            end_time = body.get('end_time')
 
-            start_time = datetime.fromtimestamp(start_time)
-            end_time = datetime.fromtimestamp(end_time)
+            start_time = datetime.fromisoformat(start_time)
+            end_time = datetime.fromisoformat(end_time)
 
-            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name, status='FILLED').order_by('-time_update')
+            order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name, status='FILLED',
+                                                 time_create__range=(start_time, end_time)).order_by('-time_update')
 
             order_history_serialized = OrderSerializer(order_history, many=True).data
 
