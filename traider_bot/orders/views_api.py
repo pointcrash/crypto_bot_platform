@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -191,7 +191,7 @@ class PlaceManualOrderView(APIView):
 
 
 class GetOrdersHistoryByTimeView(APIView):
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [AllowAny, ]
 
     def get(self, request):
         try:
