@@ -176,10 +176,16 @@ class PlaceManualOrderView(APIView):
                                                          current_price=current_price, bot=bot, margin=margin,
                                                          order_type=order_type))
 
+            ret_msg_list = []
+            for response in order_responses:
+                if response.get('retMsg'):
+                    ret_msg_list.append(response.get('retMsg'))
+
             return Response({
                 "detail": "The order has been sent",
-                "order_responses": f"{order_responses}",
-                "order_params": f"{order_params}"
+                "order_responses": order_responses,
+                "ret_msg_list": ret_msg_list,
+                "order_params": order_params,
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
