@@ -181,6 +181,14 @@ class PlaceManualOrderView(APIView):
                 if response.get('retMsg'):
                     ret_msg_list.append(response.get('retMsg'))
 
+            # if len(ret_msg_list) > 0:
+            #     return Response({
+            #         "success": "False",
+            #         "order_responses": order_responses,
+            #         "ret_msg_list": ret_msg_list,
+            #         "order_params": order_params,
+            #     }, status=status.HTTP_400_BAD_REQUEST)
+
             return Response({
                 "detail": "The order has been sent",
                 "order_responses": order_responses,
