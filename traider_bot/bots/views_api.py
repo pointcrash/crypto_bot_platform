@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from django.utils import timezone
 
 from api_2.api_aggregator import place_order
-from bots.general_functions import get_cur_positions_and_orders_info
+from bots.general_functions import get_cur_positions_and_orders_info, custom_user_bot_logging, custom_logging
 
 from bots.serializers import *
 from bots.terminate_bot_logic import terminate_bot_with_cancel_orders, terminate_bot
@@ -37,6 +37,25 @@ class BBViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        original_data = {field: getattr(instance, field) for field in request.data.keys()}
+        updated_data = request.data
+
+        changes = {
+            field: {'old': original_data[field], 'new': updated_data[field]}
+            for field in updated_data.keys()
+            if original_data.get(field) != updated_data[field]
+        }
+
+        if changes:
+            custom_user_bot_logging(instance.bot, 'Данные стратегии были изменены')
+            custom_logging(instance.bot, f'Данные стратегии были изменены: {changes}')
+
+        response = super().update(request, *args, **kwargs)
+
+        return response
+
 
 class GridViewSet(viewsets.ModelViewSet):
     serializer_class = GridSerializer
@@ -50,6 +69,25 @@ class GridViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        original_data = {field: getattr(instance, field) for field in request.data.keys()}
+        updated_data = request.data
+
+        changes = {
+            field: {'old': original_data[field], 'new': updated_data[field]}
+            for field in updated_data.keys()
+            if original_data.get(field) != updated_data[field]
+        }
+
+        if changes:
+            custom_user_bot_logging(instance.bot, 'Данные стратегии были изменены')
+            custom_logging(instance.bot, f'Данные стратегии были изменены: {changes}')
+
+        response = super().update(request, *args, **kwargs)
+
+        return response
 
 
 class ZingerViewSet(viewsets.ModelViewSet):

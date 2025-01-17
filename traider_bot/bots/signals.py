@@ -6,6 +6,7 @@ from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from .celery_tasks import run_bot_ws_socket
+from .general_functions import custom_user_bot_logging
 from .models import BotModel
 
 logger = logging.getLogger('debug_logger')
@@ -29,6 +30,8 @@ def bot_tracking_is_active_change(sender, instance, **kwargs):
                 logger.debug('Set signal to ws restart')
                 cache.set(f'bot_{instance.id}_must_be_restart', True, timeout=60)
 
+        custom_user_bot_logging(instance, 'Данные бота были изменены')
+
 
 @receiver(post_save, sender=BotModel)
 def bot_status_changed(sender, instance, **kwargs):
@@ -47,6 +50,7 @@ def bot_status_changed(sender, instance, **kwargs):
             logger.debug('Bot status was change to UNACTIVE')
             cache.set(f'close_ws_{instance.id}', True, timeout=60)
             logger.debug('Set signal to ws_close')
+            custom_user_bot_logging(instance, 'Бот остановлен вручную')
 
     elif cache.get(f'bot_{instance.id}_must_be_restart'):
         logger.debug(f'bot_{instance.id} socket must be restart')
