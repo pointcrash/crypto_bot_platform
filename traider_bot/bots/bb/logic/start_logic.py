@@ -6,11 +6,12 @@ from api_2.custom_ws_class import CustomWSClient
 from .bot_worker_class import WorkBollingerBandsClass
 
 from .handlers_messages import bb_handler_wrapper
-from ...general_functions import custom_logging, clear_cache_bot_data
+from ...general_functions import custom_logging, clear_cache_bot_data, custom_user_bot_logging
 
 
 def bb_bot_ws_connect(bot):
     bb_worker_class = WorkBollingerBandsClass(bot)
+    custom_user_bot_logging(bot, 'Бот запущен')
 
     ''' Connection WS '''
     ws_client = CustomWSClient(callback=bb_handler_wrapper(bb_worker_class), bot=bot)
