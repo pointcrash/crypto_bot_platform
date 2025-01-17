@@ -11,7 +11,6 @@ from ...general_functions import custom_logging, clear_cache_bot_data, custom_us
 
 def bb_bot_ws_connect(bot):
     bb_worker_class = WorkBollingerBandsClass(bot)
-    custom_user_bot_logging(bot, 'Бот запущен')
 
     ''' Connection WS '''
     ws_client = CustomWSClient(callback=bb_handler_wrapper(bb_worker_class), bot=bot)
