@@ -23,6 +23,9 @@ def bot_tracking_is_active_change(sender, instance, **kwargs):
         cache.set(f'bot_{instance.id}_status_changed', True, timeout=60)
         logger.debug('Bot status was change')
 
+        if not instance.is_active:
+            custom_user_bot_logging(instance, 'Бот остановлен')
+
     else:
         if instance.is_active:
             if (previous_instance.leverage, previous_instance.amount_long, previous_instance.amount_short) != \
