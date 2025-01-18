@@ -103,7 +103,6 @@ class CustomRegisterView(RegisterView):
         referral.referred_users.add(user)
         referral.save()
 
-
         return
 
     def bonus_tariff_by_promocode(self, user):
