@@ -50,10 +50,13 @@ def account_margin_check():
                         send_telegram_notice(account, message)
 
                         bots = BotModel.objects.filter(account=account, is_active=True)
-                        bots.update(is_active=False)
+                        # bots.update(is_active=False)
 
                         for bot in bots:
                             cancel_all_orders(bot)
+                            bot.is_active = False
+                            bot.save()
+
         except Exception as e:
             # logger.info(f'{e}')
             continue
