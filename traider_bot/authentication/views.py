@@ -2,6 +2,7 @@ from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import transaction
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -60,8 +61,8 @@ class CustomRegisterView(RegisterView):
         try:
             user = self.perform_create(serializer)
         except Exception as e:
-            if User.objects.get(username=request.data['username']).exist():
-                User.objects.get(username=request.data['username']).delete()
+            # if User.objects.get(username=request.data['username']).exist():
+            #     User.objects.get(username=request.data['username']).delete()
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
         headers = self.get_success_headers(serializer.data)
@@ -79,11 +80,13 @@ class CustomRegisterView(RegisterView):
         return response
 
     def perform_create(self, serializer):
-        user = super().perform_create(serializer)
-        self.add_guest_tariff(user)
-        self.add_to_referrals(user)
-
-        return user
+        user = None
+        with transaction.atomic():
+            user = super().perform_create(serializer)
+        if user:
+            self.add_guest_tariff(user)
+            self.add_to_referrals(user)
+            return user
 
     def add_to_referrals(self, user):
         ref_code = self.request.data.get('ref_code')
