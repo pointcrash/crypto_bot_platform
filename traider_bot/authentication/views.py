@@ -60,8 +60,8 @@ class CustomRegisterView(RegisterView):
         try:
             user = self.perform_create(serializer)
         except Exception as e:
-            if User.objects.filter(username=request.data['username']).exist():
-                User.objects.filter(username=request.data['username']).delete()
+            if User.objects.get(username=request.data['username']).exist():
+                User.objects.get(username=request.data['username']).delete()
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
         headers = self.get_success_headers(serializer.data)
