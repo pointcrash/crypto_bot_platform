@@ -4,21 +4,28 @@ from decimal import Decimal, ROUND_UP
 
 from binance.exceptions import BinanceAPIException
 from django.core.cache import cache
+from django.utils import timezone
 
 from api_2.api_aggregator import change_position_mode, set_leverage, get_quantity_from_price, place_batch_order, \
-    place_order, get_open_orders
+    place_order, get_open_orders, get_pnl_by_time
 from bots.general_functions import custom_user_bot_logging, custom_logging
+from bots.models import BotModel
+from tg_bot.models import TelegramAccount
+from tg_bot.send_message import send_telegram_message
 
 
 class WorkGridClass:
     def __init__(self, bot):
         self.bot = bot
+        self.account = bot.account
+        self.tg_acc = TelegramAccount.objects.filter(owner=bot.owner).first()
         self.grid = bot.grid
         self.symbol = bot.symbol.name
         self.current_price = None
         self.price_step = self.get_price_step()
 
         self.logger = self.get_logger_for_bot_ws_msg(bot.id)
+        self.last_deal_time = timezone.now()
 
     def cached_data(self, key, value):
         cache.set(f'bot{self.bot.id}_{key}', str(value))
@@ -150,3 +157,29 @@ class WorkGridClass:
     def current_price_waiting(self):
         while not self.current_price:
             time.sleep(0.1)
+
+    def send_tg_message(self, message):
+        pre_message = f'Account: {self.account.name}\nBot: {self.bot.id}\nSymbol: {self.symbol}\n'
+        message = pre_message + message
+        send_telegram_message(
+            self.tg_acc.chat_id,
+            message=message,
+        )
+
+    def send_info_income_per_deal(self):
+        pnl = get_pnl_by_time(bot=self.bot, start_time=self.last_deal_time, end_time=timezone.now())
+        pnl = round(Decimal(pnl), 5)
+        self.update_bots_pnl_and_refresh_bots_data(added_pnl=pnl)
+
+        message = f'PNL за последнюю сделку составил: {pnl}'
+        custom_user_bot_logging(self.bot, message)
+        self.send_tg_message(message=message)
+
+        self.last_deal_time = timezone.now()
+
+    def update_bots_pnl_and_refresh_bots_data(self, added_pnl):
+        current_pnl = self.bot.pnl
+        new_pnl = current_pnl + added_pnl
+
+        self.bot.pnl = new_pnl
+        BotModel.objects.filter(pk=self.bot.pk).update(pnl=new_pnl)

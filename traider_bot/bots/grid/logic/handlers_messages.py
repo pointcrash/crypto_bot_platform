@@ -30,11 +30,19 @@ def grid_handler_wrapper(bb_worker_class_obj):
 
 def handle_order_stream_message(msg, bot_class_obj):
     custom_logging(bot_class_obj.bot, f'ORDER {msg}')
+    order_id = msg['orderId']
 
     if msg['status'].upper() == 'FILLED':
         if not msg['reduceOnly']:
+            custom_user_bot_logging(bot_class_obj.bot, f' Открывающий ордер исполнен. ID: {order_id}')
+            bot_class_obj.send_tg_message(message=f'Открывающий ордер исполнен. ID: {order_id}')
+
             bot_class_obj.place_close_order(psn_side=msg['psnSide'], price=msg['price'], qty=msg['qty'])
         else:
+            custom_user_bot_logging(bot_class_obj.bot, f' Закрывающий ордер исполнен. ID: {order_id}')
+            bot_class_obj.send_tg_message(message=f'Закрывающий ордер исполнен. ID: {order_id}')
+            bot_class_obj.send_info_income_per_deal()
+
             bot_class_obj.place_new_open_order(psn_side=msg['psnSide'], price=msg['price'], qty=msg['qty'])
 
 
