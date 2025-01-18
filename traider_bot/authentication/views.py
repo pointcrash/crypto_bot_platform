@@ -1,6 +1,7 @@
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView
 from django.conf import settings
+from django.db import transaction
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -57,7 +58,8 @@ class CustomRegisterView(RegisterView):
         serializer.is_valid(raise_exception=True)
 
         try:
-            user = self.perform_create(serializer)
+            with transaction.atomic():
+                user = self.perform_create(serializer)
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
@@ -95,7 +97,7 @@ class CustomRegisterView(RegisterView):
         try:
             referral = Referral.objects.get(code=ref_code)
         except Referral.DoesNotExist:
-            user.delete()
+            # user.delete()
             raise Exception('Referral code does not exist')
 
         referral.referred_users.add(user)
