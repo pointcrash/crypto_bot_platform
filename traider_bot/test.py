@@ -1,13 +1,9 @@
-import time
-from datetime import datetime
+from slugify import slugify
 
-current_unix_time = int(time.time())
+string = 'how to create a portal'
+string_ru = 'как МНе создать портал?!!'
 
-# Количество секунд в одном дне
-seconds_in_a_day = 86400
-
-# Вычитание одного дня
-time_minus_one_day = current_unix_time - seconds_in_a_day
-
-print(time_minus_one_day)
-print(current_unix_time)
+slug = slugify(string)
+slug_ru = slugify(string_ru)
+print(slug)
+print(slug_ru)
