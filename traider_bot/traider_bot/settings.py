@@ -61,6 +61,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://*.localhost:3000',
     'http://*.127.0.0.1:3000',
     'http://127.0.0.1:3000',
+    'https://127.0.0.1:3000',
 ]
 
 INSTALLED_APPS = [
@@ -316,7 +317,6 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -332,4 +332,7 @@ CRYPTOCLOUD_SECRET = os.getenv('CRYPTOCLOUD_SECRET')
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 
 MEDIA_URL = '/media/'  # URL для доступа к медиа-файлам
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь для сохранения файлов
+MEDIA_ROOT = '/app/media'  # Путь для сохранения файлов
+
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
