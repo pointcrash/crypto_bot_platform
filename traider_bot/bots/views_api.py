@@ -317,9 +317,9 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
             bot = get_object_or_404(BotModel, pk=bot_id)
 
             order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name,
-                                                 status='FILLED').order_by('-time_update')[:1000]
+                                                 status='FILLED').order_by('-time_update')
             position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by(
-                '-time_update')[:1000]
+                '-time_update')
 
             psn_his_long = list(position_history.filter(side='LONG'))
             psn_his_short = list(position_history.filter(side='SHORT'))
