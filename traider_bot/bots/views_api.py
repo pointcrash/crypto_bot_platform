@@ -350,10 +350,10 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
                 {
                     'success': True,
                     'data': {
-                        'position_history': filtered_positions_data,
-                        'order_history': order_history_serialized,
-                        'positions': positions,
-                        'orders': orders
+                        'position_history': filtered_positions_data[:1000],
+                        'order_history': order_history_serialized[:1000],
+                        'positions': positions[:1000],
+                        'orders': orders[:1000]
                     }
                 }
             )
