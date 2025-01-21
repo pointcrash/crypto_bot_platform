@@ -317,7 +317,7 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
             bot = get_object_or_404(BotModel, pk=bot_id)
 
             order_history = Order.objects.filter(account=bot.account, symbol_name=bot.symbol.name,
-                                                 status='FILLED').order_by('-time_update')
+                                                 status='FILLED').order_by('-time_update')[:100]
             position_history = Position.objects.filter(account=bot.account, symbol_name=bot.symbol.name).order_by(
                 '-time_update')
 
@@ -340,7 +340,7 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
                         filtered_positions.append(next_pos)
 
             filtered_positions.sort(key=lambda x: x.id, reverse=True)
-            filtered_positions = filtered_positions[:10]
+            filtered_positions = filtered_positions[:100]
 
             filtered_positions_data = PositionSerializer(filtered_positions, many=True).data
             order_history_serialized = OrderSerializer(order_history, many=True).data
