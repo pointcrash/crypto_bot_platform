@@ -1,6 +1,8 @@
 from rest_framework import viewsets, status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from articles.models import Article
 from articles.serializers import ArticleSerializer
@@ -32,9 +34,11 @@ class ArticleForAdminViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         queryset = super().get_queryset()
         language = self.request.query_params.get('language')
         queryset = queryset.filter(language=language) if language else queryset
         return queryset
+

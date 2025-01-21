@@ -1,7 +1,12 @@
 from django.db import models
 from slugify import slugify
+import os
 
 from documentation.models import LANGUAGE_CHOICE
+
+
+def article_file_upload_path(instance, filename):
+    return os.path.join('article_files', str(instance.slug), filename)
 
 
 class Article(models.Model):
@@ -21,7 +26,8 @@ class Article(models.Model):
     description = models.CharField(max_length=255)
     body = models.TextField(blank=True)
     slug = models.CharField(max_length=255, unique=True, blank=True)
-    cover = models.ImageField(upload_to='news/covers/', blank=True, null=True)
+    cover = models.ImageField(upload_to='articles/covers/', blank=True, null=True)
+    # cover = models.FileField(upload_to=article_file_upload_path, validators=[validate_file])
     published = models.BooleanField(default=False)
     language = models.CharField(max_length=5, choices=LANGUAGE_CHOICE, null=True)
     views = models.IntegerField(default=0)
