@@ -332,4 +332,4 @@ CRYPTOCLOUD_SECRET = os.getenv('CRYPTOCLOUD_SECRET')
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 
 MEDIA_URL = '/media/'  # URL для доступа к медиа-файлам
-MEDIA_ROOT = '/app/media'  # Путь для сохранения файлов
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь для сохранения файлов
