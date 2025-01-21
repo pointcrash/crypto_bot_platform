@@ -14,7 +14,7 @@ class ArticleReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         language = self.request.query_params.get('language')
-        queryset = queryset.filter(language=language) if language else queryset.none()
+        queryset = queryset.filter(language=language) if language else queryset
         queryset = queryset.filter(published=True)
         return queryset
 
