@@ -340,6 +340,7 @@ class GetOrdersAndPositionsHistoryBotsView(APIView):
                         filtered_positions.append(next_pos)
 
             filtered_positions.sort(key=lambda x: x.id, reverse=True)
+            filtered_positions = filtered_positions[:1000]
 
             filtered_positions_data = PositionSerializer(filtered_positions, many=True).data
             order_history_serialized = OrderSerializer(order_history, many=True).data
