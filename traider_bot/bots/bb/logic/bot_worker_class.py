@@ -309,8 +309,9 @@ class WorkBollingerBandsClass:
         self.bot.save()
 
     def bot_cycle_time_start_update(self):
-        self.bot.cycle_time_start = timezone.now()
-        self.bot.save()
+        time_start = timezone.now()
+        self.bot.cycle_time_start = time_start
+        BotModel.objects.filter(pk=self.bot.pk).update(cycle_time_start=time_start)
 
     def send_tg_message(self, message):
         pre_message = f'Account: {self.account.name}\nBot: {self.bot.id}\nSymbol: {self.symbol}\n'
