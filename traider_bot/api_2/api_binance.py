@@ -38,7 +38,7 @@ def binance_get_position_inform(bot, client):
     custom_logging(bot, f'binance_get_position_inform(symbol={bot.symbol.name})', 'REQUEST')
     try:
         response = client.futures_position_information(symbol=bot.symbol.name)
-        custom_logging(bot, response, 'RESPONSE')
+        # custom_logging(bot, response, 'RESPONSE')
         position_inform_list = format_data(response)
         return position_inform_list
     except:
@@ -188,7 +188,7 @@ def binance_get_open_orders(bot, client):
     custom_logging(bot, f'binance_get_open_orders({bot.symbol.name})', 'REQUEST')
     try:
         response = client.futures_get_open_orders(symbol=bot.symbol.name)
-        custom_logging(bot, response, 'RESPONSE')
+        # custom_logging(bot, response, 'RESPONSE')
         return response
     except:
         custom_logging(bot, f"API Traceback: {traceback.format_exc()}")

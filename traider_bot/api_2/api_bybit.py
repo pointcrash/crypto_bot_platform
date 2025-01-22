@@ -77,7 +77,7 @@ def bybit_get_position_inform(bot):
     params = f"category=linear&symbol={bot.symbol.name}"
     custom_logging(bot, f'bybit_get_position_inform({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    custom_logging(bot, response, 'RESPONSE')
+    # custom_logging(bot, response, 'RESPONSE')
     try:
         response = response['result']['list']
         position_inform_list = format_data(response)
@@ -187,7 +187,7 @@ def bybit_get_open_orders(bot):
 
     custom_logging(bot, f'bybit_get_open_orders({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
-    custom_logging(bot, response, 'RESPONSE')
+    # custom_logging(bot, response, 'RESPONSE')
 
     try:
         response = response['result']['list']
