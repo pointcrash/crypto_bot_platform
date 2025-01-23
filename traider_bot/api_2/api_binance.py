@@ -35,7 +35,7 @@ def binance_get_position_inform(bot, client):
 
         return sort_position_inform(position_inform_list)
 
-    custom_logging(bot, f'binance_get_position_inform(symbol={bot.symbol.name})', 'REQUEST')
+    # custom_logging(bot, f'binance_get_position_inform(symbol={bot.symbol.name})', 'REQUEST')
     try:
         response = client.futures_position_information(symbol=bot.symbol.name)
         # custom_logging(bot, response, 'RESPONSE')
