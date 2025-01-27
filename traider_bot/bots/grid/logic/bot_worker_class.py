@@ -9,7 +9,7 @@ from django.utils import timezone
 from api_2.api_aggregator import change_position_mode, set_leverage, get_quantity_from_price, place_batch_order, \
     place_order, get_open_orders, get_pnl_by_time
 from bots.general_functions import custom_user_bot_logging, custom_logging
-from bots.models import BotModel
+from bots.models import BotModel, BotsData
 from tg_bot.models import TelegramAccount
 from tg_bot.send_message import send_telegram_message
 
@@ -23,6 +23,7 @@ class WorkGridClass:
         self.symbol = bot.symbol.name
         self.current_price = None
         self.price_step = self.get_price_step()
+        self.bots_data = None
 
         self.logger = self.get_logger_for_bot_ws_msg(bot.id)
         self.last_deal_time = timezone.now()
@@ -45,6 +46,7 @@ class WorkGridClass:
 
     def preparatory_actions(self):
         custom_user_bot_logging(self.bot, f' Бот запущен')
+        self.bots_data_init()
 
         try:
             change_position_mode(self.bot)
@@ -180,6 +182,14 @@ class WorkGridClass:
     def update_bots_pnl_and_refresh_bots_data(self, added_pnl):
         current_pnl = self.bot.pnl
         new_pnl = current_pnl + added_pnl
+        self.update_total_pnl(added_pnl)
 
         self.bot.pnl = new_pnl
         BotModel.objects.filter(pk=self.bot.pk).update(pnl=new_pnl)
+
+    def bots_data_init(self):
+        self.bots_data, created = BotsData.objects.get_or_create(bot=self.bot)
+
+    def update_total_pnl(self, added_pnl):
+        self.bots_data.total_pnl = self.bots_data.total_pnl + added_pnl
+        self.bots_data.save()
