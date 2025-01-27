@@ -31,6 +31,7 @@ class Account(models.Model):
     url = models.CharField(default='https://api-testnet.bybit.com', max_length=255)
     address = models.CharField(max_length=255, blank=True, null=True)
 
+    margin_alert_is_active = models.BooleanField(default=False)
     low_margin_value = models.IntegerField(blank=True, null=True)
     low_margin_value_type = models.CharField(max_length=10, choices=LOW_MARGIN_VALUE_CHOICES, default='$', null=True, blank=True)
     low_margin_actions = models.CharField(max_length=255, choices=LOW_MARGIN_ACTIONS_CHOICES, null=True, blank=True)
