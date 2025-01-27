@@ -3,6 +3,7 @@ import traceback
 from datetime import datetime
 from decimal import Decimal
 
+from binance.exceptions import BinanceAPIException
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import viewsets, status
@@ -178,6 +179,9 @@ class PlaceManualOrderView(APIView):
 
             ret_msg_list = []
             for response in order_responses:
+                if isinstance(response, BinanceAPIException):
+                    ret_msg_list.append(response.message)
+
                 if response.get('retMsg'):
                     ret_msg_list.append(response.get('retMsg'))
 
