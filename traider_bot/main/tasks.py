@@ -194,9 +194,9 @@ def bots_alive_check():
             bot_id_need_to_activate.append(bot.id)
 
     if bot_id_need_to_deactivate:
-        BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False)
+        BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False, conn_status=False)
     if bot_id_need_to_activate:
-        BotModel.objects.filter(pk__in=bot_id_need_to_activate).update(is_active=True)
+        BotModel.objects.filter(pk__in=bot_id_need_to_activate).update(is_active=True, conn_status=True)
 
 
 def user_tariffs_check():
