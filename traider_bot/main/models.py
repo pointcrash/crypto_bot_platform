@@ -28,6 +28,7 @@ class Account(models.Model):
     SECRET_KEY = models.CharField(max_length=255)
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='UNIFIED', null=True)
     is_mainnet = models.BooleanField()
+    is_demonet = models.BooleanField(blank=True, null=True)
     url = models.CharField(default='https://api-testnet.bybit.com', max_length=255)
     address = models.CharField(max_length=255, blank=True, null=True)
 
@@ -37,10 +38,20 @@ class Account(models.Model):
     low_margin_actions = models.CharField(max_length=255, choices=LOW_MARGIN_ACTIONS_CHOICES, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if self.is_mainnet:
-            self.url = 'https://api.bybit.com'
+        if self.service.name == 'Binance':
+            pass
+
         else:
-            self.url = 'https://api-testnet.bybit.com'
+
+            if self.is_mainnet:
+                self.url = 'https://api.bybit.com'
+            else:
+                bybit_demo_url = 'https://api-demo.bybit.com'
+                self.is_mainnet = True
+                self.is_demonet = True
+                self.url = bybit_demo_url
+                # self.url = 'https://api-testnet.bybit.com'
+
         super().save(*args, **kwargs)
 
     def __str__(self):
