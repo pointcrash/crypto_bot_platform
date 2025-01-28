@@ -268,6 +268,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_CONTENT_LENGTH': 52428800,
 }
 
 SIMPLE_JWT = {
@@ -330,6 +331,8 @@ CRYPTOCLOUD_SHOP_ID = os.getenv('CRYPTOCLOUD_SHOP_ID')
 CRYPTOCLOUD_SECRET = os.getenv('CRYPTOCLOUD_SECRET')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+
 
 MEDIA_URL = '/media/'  # URL для доступа к медиа-файлам
 MEDIA_ROOT = '/app/media'  # Путь для сохранения файлов
