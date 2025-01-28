@@ -34,6 +34,7 @@ class WorkBollingerBandsClass:
         self.ml_order_id = None
         self.close_psn_main_order_id = None
         self.open_order_id = None
+        self.avg_order_id = None
         self.sl_order = None
         self.position_info = dict()
         self.count_cycles = 0

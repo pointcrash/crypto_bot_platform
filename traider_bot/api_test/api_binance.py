@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # print(client.futures_place_batch_order(batchOrders=[order1, order2]))  # Разместить несколько ордеров (max 5)
     # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='LONG', type='MARKET', quantity=0.02))  # Разместить ордер
     # print(client.futures_create_order(symbol='BTCUSDT', side='BUY', positionSide='SHORT', type='LIMIT', price=41000, timeInForce='GTC', quantity=0.02))  # Разместить ордер
-    # print(client.futures_get_all_orders(symbol='BTCUSDT'))  # Список ордеров
+    # print(main_client.get_user_asset())  # Список ордеров
     # print(client.futures_get_open_orders(symbol='BTCUSDT'))  # Список ордеров
     # print(client.futures_get_order(symbol='BTCUSDT', orderId='3653110189'))  # Инфо по открытому ордеру
     # print(client.futures_cancel_order(symbol='BTCUSDT', orderId='3653110189'))  # Отменить ордер
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
         print(total_pnl)
 
-    binance_get_pnl_by_time(client=main_client)
+    # binance_get_pnl_by_time(client=main_client)
 
     # x = (client.futures_income_history())  # Инфо по позиции
     # for i in x:

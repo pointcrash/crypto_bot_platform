@@ -244,8 +244,10 @@ def binance_get_user_asset(account, symbol):
     client = Client(account.API_TOKEN, account.SECRET_KEY, testnet=not account.is_mainnet)
     response = client.get_user_asset(asset=symbol)
 
-    # return response
-    return response[0]['free']
+    if response:
+        return response[0]['free']
+    else:
+        return 0
 
 
 def binance_internal_transfer(account, symbol, amount, from_account_type, to_account_type):
