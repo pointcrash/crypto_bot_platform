@@ -12,6 +12,7 @@ class ArticleReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [AllowAny]
+    lookup_field = "slug"
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -24,7 +25,7 @@ class ArticleReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
         article = self.get_object()
 
         article.views += 1
-        article.save()
+        article.save(update_fields=["views"])
 
         serializer = self.get_serializer(article)
         return Response(serializer.data)
