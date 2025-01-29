@@ -8,7 +8,8 @@ import traceback
 import websocket
 
 from api_2.custom_logging_api import custom_logging
-from bots.general_functions import custom_user_bot_logging, update_bots_conn_status, update_bots_is_active
+from bots.general_functions import custom_user_bot_logging, update_bots_conn_status, update_bots_is_active, \
+    update_bots_forcibly_stopped
 from django.core.cache import cache
 
 bot_logger = logging.getLogger('bot_logger')
@@ -74,7 +75,7 @@ class CustomWSClient:
             message = json.loads(message)
             if message['symbol'] == self.symbol:
                 # self.logger.debug(message)
-                bot_logger.debug(message)
+                bot_logger.debug(f'BOT-{self.bot_id}, message: {message}')
                 self.callback(message)
         except Exception as e:
             custom_logging(self.bot, f'GET ERROR IN "_on_message" func: {e}')
@@ -121,6 +122,7 @@ class CustomWSClient:
         else:
             bot_logger.error(f'Maximum retry attempts reached for Bot {self.bot.pk}. Giving up.')
             update_bots_is_active(self.bot, new_status=False)
+            update_bots_forcibly_stopped(self.bot, forcibly_stopped=True)
 
     def _on_pong(self, ws):
         pass

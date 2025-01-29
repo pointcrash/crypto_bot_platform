@@ -538,3 +538,8 @@ def update_bots_conn_status(bot, new_status):
 
 def update_bots_is_active(bot, new_status):
     BotModel.objects.filter(pk=bot.pk).update(is_active=new_status)
+
+
+def update_bots_forcibly_stopped(bot, forcibly_stopped):
+    BotModel.objects.filter(pk=bot.pk).update(forcibly_stopped=forcibly_stopped)
+

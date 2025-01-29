@@ -260,8 +260,10 @@ class BotStartView(APIView):
                 f'{user} запустил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}')
 
             bot.is_active = True
+            bot.enabled_manually = True
+            bot.forcibly_stopped = False
             bot.bot_time_start = timezone.now()
-            bot.save(update_fields=['is_active', 'bot_time_start'])
+            bot.save(update_fields=['is_active', 'bot_time_start', 'enabled_manually', 'forcibly_stopped'])
 
             return JsonResponse({'success': True, 'message': 'Bot started successfully'})
 

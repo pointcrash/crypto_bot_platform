@@ -26,7 +26,8 @@ def stop_bot_with_cancel_orders_and_drop_positions(bot):
 
 def terminate_bot(bot, user=None):
     bot.is_active = False
-    bot.save(update_fields=['is_active'])
+    bot.enabled_manually = False
+    bot.save(update_fields=['is_active', 'enabled_manually'])
 
     # if bot.is_active:
     #     bot.is_active = False
