@@ -185,7 +185,7 @@ def binance_cancel_order(bot, client, order_id):
 
 @with_binance_client
 def binance_get_open_orders(bot, client):
-    custom_logging(bot, f'binance_get_open_orders({bot.symbol.name})', 'REQUEST')
+    # custom_logging(bot, f'binance_get_open_orders({bot.symbol.name})', 'REQUEST')
     try:
         response = client.futures_get_open_orders(symbol=bot.symbol.name)
         # custom_logging(bot, response, 'RESPONSE')

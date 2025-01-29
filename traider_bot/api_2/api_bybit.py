@@ -185,7 +185,7 @@ def bybit_get_open_orders(bot):
     method = "GET"
     params = f"category=linear&symbol={bot.symbol.name}"
 
-    custom_logging(bot, f'bybit_get_open_orders({params})', 'REQUEST')
+    # custom_logging(bot, f'bybit_get_open_orders({params})', 'REQUEST')
     response = json.loads(HTTP_Request(bot.account, endpoint, method, params))
     # custom_logging(bot, response, 'RESPONSE')
 
