@@ -5,7 +5,7 @@ from .models import Symbol, Log, StepHedge, BotModel, BBBotModel, BotsData
 
 @admin.register(BotModel)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'symbol', 'account', 'is_active', 'conn_status', 'work_model', 'time_create', 'time_update',)
+    list_display = ('id', 'symbol', 'account', 'is_active', 'conn_status', 'enabled_manually', 'forcibly_stopped', 'work_model', 'time_create', 'time_update',)
     list_display_links = ('id', 'symbol',)
     search_fields = ('symbol', 'is_active', 'work_model')
 
