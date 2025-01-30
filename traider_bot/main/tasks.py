@@ -194,7 +194,15 @@ def bots_alive_check():
             bot_id_need_to_activate.append(bot.id)
 
     if bot_id_need_to_deactivate:
-        BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False, conn_status=False)
+        bots_to_deactivate = BotModel.objects.filter(pk__in=bot_id_need_to_deactivate)
+
+        for bot in bots_to_deactivate:
+            bot.is_active = False
+            bot.conn_status = False
+            bot.save()
+
+        # BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False, conn_status=False)
+
     if bot_id_need_to_activate:
         BotModel.objects.filter(pk__in=bot_id_need_to_activate).update(is_active=True, conn_status=True)
 
@@ -231,3 +239,35 @@ def user_tariffs_check():
 
 def min_notional_for_all_symbols():
     Symbol.objects.all().update(min_notional='5')
+
+
+def emergency_launch_bots():
+    bots = BotModel.objects.all()
+
+    for bot in bots:
+        if bot.enabled_manually and not bot.is_active and not bot.forcibly_stopped:
+            bot.is_active = True
+            bot.save(update_fields=['is_active'])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
