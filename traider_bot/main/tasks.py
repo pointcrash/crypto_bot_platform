@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from api_2.api_aggregator import get_futures_account_balance, cancel_all_orders, get_all_position_inform, \
     transaction_history
-from bots.general_functions import send_telegram_notice, all_symbols_update
+from bots.general_functions import send_telegram_notice, all_symbols_update, custom_logging, custom_user_bot_logging
 from bots.models import BotModel, Symbol
 from main.models import Account, AccountBalance, AccountHistory
 from main.tests import generate_date_ranges, convert_timestamp_to_datetime
@@ -199,7 +199,12 @@ def bots_alive_check():
         for bot in bots_to_deactivate:
             bot.is_active = False
             bot.conn_status = False
+            bot.forcibly_stopped = True
             bot.save()
+
+            message = "WebSocket connection was lost"
+            custom_logging(bot, message)
+            custom_user_bot_logging(bot, message)
 
         # BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False, conn_status=False)
 
