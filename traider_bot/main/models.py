@@ -42,15 +42,10 @@ class Account(models.Model):
             pass
 
         else:
-
             if self.is_mainnet:
                 self.url = 'https://api.bybit.com'
             else:
-                bybit_demo_url = 'https://api-demo.bybit.com'
-                self.is_mainnet = True
-                self.is_demonet = True
-                self.url = bybit_demo_url
-                # self.url = 'https://api-testnet.bybit.com'
+                self.url = 'https://api-demo.bybit.com'
 
         super().save(*args, **kwargs)
 

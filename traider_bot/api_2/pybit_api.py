@@ -10,8 +10,8 @@ from api_2.custom_logging_api import custom_logging
 
 def get_session(account):
     session = HTTP(
-        testnet=not account.is_mainnet,
-        demo=account.is_demonet,
+        testnet=False,
+        demo=not account.is_mainnet,
         api_key=account.API_TOKEN,
         api_secret=account.SECRET_KEY,
     )
