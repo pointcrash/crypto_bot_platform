@@ -255,7 +255,13 @@ def emergency_launch_bots():
             bot.save(update_fields=['is_active'])
 
 
+def change_all_test_accounts_to_demo():
+    accounts = Account.objects.all()
 
+    for account in accounts:
+        if account.is_demonet is True:
+            account.is_mainnet = False
+            account.save(update_fields=['is_mainnet'])
 
 
 
