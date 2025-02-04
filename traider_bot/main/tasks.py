@@ -197,14 +197,20 @@ def bots_alive_check():
         bots_to_deactivate = BotModel.objects.filter(pk__in=bot_id_need_to_deactivate)
 
         for bot in bots_to_deactivate:
-            bot.is_active = False
-            bot.conn_status = False
-            bot.forcibly_stopped = True
-            bot.save()
+            if bot.restart_try is False:
+                bot.is_active = False
+                bot.conn_status = False
+                bot.save(update_fields=['is_active', 'conn_status'])
 
-            message = "WebSocket connection was lost"
-            custom_logging(bot, message)
-            custom_user_bot_logging(bot, message)
+            else:
+                bot.is_active = False
+                bot.conn_status = False
+                bot.forcibly_stopped = True
+                bot.save(update_fields=['is_active', 'conn_status', 'forcibly_stopped'])
+
+                message = "WebSocket connection was lost"
+                custom_logging(bot, message)
+                custom_user_bot_logging(bot, message)
 
         # BotModel.objects.filter(pk__in=bot_id_need_to_deactivate).update(is_active=False, conn_status=False)
 
@@ -252,7 +258,8 @@ def emergency_launch_bots():
     for bot in bots:
         if bot.enabled_manually and not bot.is_active and not bot.forcibly_stopped:
             bot.is_active = True
-            bot.save(update_fields=['is_active'])
+            bot.restart_try = True
+            bot.save(update_fields=['is_active', 'restart_try'])
 
 
 def change_all_test_accounts_to_demo():

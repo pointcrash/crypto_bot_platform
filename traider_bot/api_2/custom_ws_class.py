@@ -95,6 +95,10 @@ class CustomWSClient:
         self._attempt_reconnect()
 
     def _on_open(self, ws):
+        if self.bot.restart_try is True:
+            self.bot.restart_try = False
+            self.bot.save(update_fields=['restart_try'])
+
         update_bots_conn_status(self.bot, new_status=True)
         custom_logging(self.bot, f'WebSocket connection open.')
         bot_logger.info(f'Bot {self.bot.pk} connection opened')
