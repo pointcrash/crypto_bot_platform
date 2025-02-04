@@ -1,4 +1,5 @@
 import logging
+import os
 from decimal import Decimal
 
 from django.core.cache import cache
@@ -263,6 +264,9 @@ class BotStartView(APIView):
             bot.enabled_manually = True
             bot.forcibly_stopped = False
             bot.bot_time_start = timezone.now()
+
+            cache.set(f'ws-{bot.id}-q-{os.getenv("CELERY_QUEUE_NAME")}', True, timeout=30)  # Bots alive space
+
             bot.save(update_fields=['is_active', 'bot_time_start', 'enabled_manually', 'forcibly_stopped'])
 
             return JsonResponse({'success': True, 'message': 'Bot started successfully'})
