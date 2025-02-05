@@ -26,6 +26,9 @@ def account_margin_check():
     accounts = Account.objects.all()
     for account in accounts:
         try:
+            if not account.margin_alert_is_active:
+                continue
+
             if account.low_margin_value:
                 low_margin = False
                 message = 'Маржа опустилась ниже указанного значения'
@@ -37,10 +40,15 @@ def account_margin_check():
                 if account.low_margin_value_type == '$':
                     if available_balance < account.low_margin_value:
                         low_margin = True
+                        message += f'\n Указанное значение - {account.low_margin_value}{account.low_margin_value_type}'
+                        message += f'\n Доступный баланс - {available_balance}$'
 
                 elif account.low_margin_value_type == '%':
                     if available_balance < full_balance * account.low_margin_value / 100:
                         low_margin = True
+                        message += f'\n Указанное значение - {account.low_margin_value}{account.low_margin_value_type}'
+                        message += f'\n Полный баланс - {full_balance}$'
+                        message += f'\n Доступный баланс - {available_balance}$'
 
                 if low_margin:
                     if account.low_margin_actions == 'alert':
