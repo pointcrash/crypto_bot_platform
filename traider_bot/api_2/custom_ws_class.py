@@ -63,7 +63,11 @@ class CustomWSClient:
 
     def _on_message(self, ws, message):
         try:
-            cache.set(f'ws-{self.bot.id}-q-{os.getenv("CELERY_QUEUE_NAME")}', True, timeout=90)
+            if self.bot.restart_try is True:
+                self.bot.restart_try = False
+                self.bot.save(update_fields=['restart_try'])
+
+            cache.set(f'ws-{self.bot.id}-q-{os.getenv("CELERY_QUEUE_NAME")}', True, timeout=5)
 
             if cache.get(f'close_ws_{self.bot_id}'):
                 bot_logger.info(f'Bot {self.bot.pk} got signal to close')
@@ -95,10 +99,6 @@ class CustomWSClient:
         self._attempt_reconnect()
 
     def _on_open(self, ws):
-        if self.bot.restart_try is True:
-            self.bot.restart_try = False
-            self.bot.save(update_fields=['restart_try'])
-
         update_bots_conn_status(self.bot, new_status=True)
         custom_logging(self.bot, f'WebSocket connection open.')
         bot_logger.info(f'Bot {self.bot.pk} connection opened')

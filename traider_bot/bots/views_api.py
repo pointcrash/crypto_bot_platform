@@ -265,7 +265,7 @@ class BotStartView(APIView):
             bot.forcibly_stopped = False
             bot.bot_time_start = timezone.now()
 
-            cache.set(f'ws-{bot.id}-q-{os.getenv("CELERY_QUEUE_NAME")}', True, timeout=30)  # Bots alive space
+            cache.set(f'ws-{bot.id}-q-{os.getenv("CELERY_QUEUE_NAME")}', True, timeout=10)  # Bots alive space
 
             bot.save(update_fields=['is_active', 'bot_time_start', 'enabled_manually', 'forcibly_stopped'])
 
