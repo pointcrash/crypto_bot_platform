@@ -53,7 +53,7 @@ urlpatterns = [
     path('api/v1/', include('tg_bot.urls_api')),
 
     path('api/auth/', include('authentication.urls')),
-    path('trade/auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='front_custom_confirm_email'),
+    path('ru/trade/auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='front_custom_confirm_email'),
     path('api/v1/auth/account-confirm-email/<str:key>/', ConfirmEmailView.as_view(), name='custom_confirm_email'),
 
     path('api/v1/', include(router.urls)),
