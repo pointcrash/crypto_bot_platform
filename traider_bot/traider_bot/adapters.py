@@ -11,7 +11,6 @@ class MyAccountAdapter(DefaultAccountAdapter):
         # lang = request.POST.get("lang", "ru")
         data = json.loads(request.body)
         lang = data.get("lang", "ru")
-        print(data)
 
         url = reverse("front_custom_confirm_email", args=[emailconfirmation.key])
         return f"{settings.FRONTEND_URL}/{lang}{url}"
