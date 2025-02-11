@@ -11,11 +11,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils import timezone
 
-from api_2.api_aggregator import place_order
+from api_2.api_aggregator import place_order, cancel_all_orders
 from bots.general_functions import get_cur_positions_and_orders_info, custom_user_bot_logging, custom_logging
 
 from bots.serializers import *
-from bots.terminate_bot_logic import terminate_bot_with_cancel_orders, terminate_bot
+from bots.terminate_bot_logic import terminate_bot, drop_psn_for_terminate_bot
 from orders.models import Position, Order
 from orders.serializers import PositionSerializer, OrderSerializer
 from tariffs.models import UserTariff, Tariff
@@ -206,20 +206,38 @@ class SymbolViewSet(viewsets.ModelViewSet):
 class StopBotView(APIView):
     permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
-    def post(self, request, bot_id, event_number):
+    def post(self, request, bot_id):
         try:
             bot = get_object_or_404(BotModel, pk=bot_id)
             user = request.user
+            data = request.data
+            cancel_orders = data.get('cancel_order')
+            drop_psn = data.get('drop_psn')
+
+            print(drop_psn)
+            print(cancel_orders)
+
             logger.info(
                 f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
             # bot.is_active = False
             # bot.save(update_fields=['is_active'])
 
-            if event_number == 1:
-                terminate_bot(bot, user)
-            elif event_number == 2:
-                terminate_bot_with_cancel_orders(bot, user)
+            terminate_bot(bot, user)
+
+            if cancel_orders is True:
+                cancel_all_orders(bot)
+
+            if drop_psn is True:
+                drop_psn_for_terminate_bot(bot)
+
+            # if event_number == 1:
+            #     terminate_bot(bot, user)
+            # elif event_number == 2:
+            #     terminate_bot_with_cancel_orders(bot, user)
+            # elif event_number == 3:
+            #     # terminate_bot_with_cancel_orders(bot, user)
+            #     pass
 
             return JsonResponse({'success': True, 'message': 'Bot stopped successfully'})
         except Exception as e:
@@ -230,17 +248,33 @@ class StopBotView(APIView):
 class DeleteBotView(APIView):
     permission_classes = [IsAuthenticated, IsBotOwnerOrAdmin]
 
-    def post(self, request, bot_id, event_number):
+    def post(self, request, bot_id):
         try:
             bot = get_object_or_404(BotModel, pk=bot_id)
             user = request.user
+
+            data = request.data
+            close_orders = data.get('close_order')
+            drop_psn = data.get('drop_psn')
+
+            print(drop_psn)
+            print(close_orders)
+
             logger.info(
                 f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
 
-            if event_number == 1:
-                terminate_bot(bot, user)
-            elif event_number == 2:
-                terminate_bot_with_cancel_orders(bot, user)
+            terminate_bot(bot, user)
+
+            if close_orders is True:
+                cancel_all_orders(bot)
+
+            if drop_psn is True:
+                drop_psn_for_terminate_bot(bot)
+
+            # if event_number == 1:
+            #     terminate_bot(bot, user)
+            # elif event_number == 2:
+            #     terminate_bot_with_cancel_orders(bot, user)
 
             bot.delete()
             return JsonResponse({'success': True, 'message': 'Bot deleted successfully'})

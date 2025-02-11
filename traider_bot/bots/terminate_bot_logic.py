@@ -1,6 +1,6 @@
 import time
 
-from api_2.api_aggregator import cancel_all_orders
+from api_2.api_aggregator import cancel_all_orders, get_position_inform, place_order
 from bots.general_functions import custom_logging
 
 
@@ -38,11 +38,20 @@ def terminate_bot(bot, user=None):
         custom_logging(bot, f'Бот был деактивирован вручную пользователем "{user.username}"')
 
 
-def terminate_bot_with_cancel_orders(bot, user=None):
-    terminate_bot(bot, user)
-    cancel_all_orders(bot)
+def drop_psn_for_terminate_bot(bot):
+    psn_list = get_position_inform(bot=bot)
+    for psn in psn_list:
+        side = 'SELL' if psn['side'] == 'LONG' else 'BUY'
+        qty = psn['qty']
+        place_order(bot=bot, side=side, position_side=psn['side'], qty=qty, price=None, order_type='MARKET')
 
 
-def terminate_bot_with_cancel_orders_and_drop_positions(bot, user=None):
-    terminate_bot_with_cancel_orders(bot, user)
+# def terminate_bot_with_cancel_orders(bot, user=None):
+#     terminate_bot(bot, user)
+#     cancel_all_orders(bot)
+
+
+# def terminate_bot_with_cancel_orders_and_drop_positions(bot, user=None):
+#     terminate_bot_with_cancel_orders(bot, user)
+#     drop_psn(bot=bot)
 
