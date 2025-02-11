@@ -6,16 +6,9 @@ from django.urls import reverse
 
 
 class MyAccountAdapter(DefaultAccountAdapter):
-
     def get_email_confirmation_url(self, request, emailconfirmation):
-        lang = "not_lang"
-
-        if request.body:
-            try:
-                data = json.loads(request.body)
-                lang = data.get("lang", lang)  # Если "lang" есть, берём его, иначе "ru"
-            except json.JSONDecodeError:
-                pass
+        # lang = 'ru'
+        user_language = request.LANGUAGE_CODE
 
         url = reverse("front_custom_confirm_email", args=[emailconfirmation.key])
-        return f"{settings.FRONTEND_URL}/{lang}{url}"
+        return f"{settings.FRONTEND_URL}/{user_language}{url}"
