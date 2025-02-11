@@ -46,12 +46,11 @@ def drop_psn_for_terminate_bot(bot):
         place_order(bot=bot, side=side, position_side=psn['side'], qty=qty, price=None, order_type='MARKET')
 
 
-# def terminate_bot_with_cancel_orders(bot, user=None):
-#     terminate_bot(bot, user)
-#     cancel_all_orders(bot)
+def terminate_bot_with_cancel_orders(bot, user=None):
+    terminate_bot(bot, user)
+    cancel_all_orders(bot)
 
 
-# def terminate_bot_with_cancel_orders_and_drop_positions(bot, user=None):
-#     terminate_bot_with_cancel_orders(bot, user)
-#     drop_psn(bot=bot)
+def terminate_bot_with_cancel_orders_and_drop_positions(bot, user=None):
+    terminate_bot_with_cancel_orders(bot, user)
 

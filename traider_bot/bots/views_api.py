@@ -218,7 +218,7 @@ class StopBotView(APIView):
             print(cancel_orders)
 
             logger.info(
-                f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
+                f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}, close_orders {cancel_orders}, drop_psn {drop_psn}')
 
             # bot.is_active = False
             # bot.save(update_fields=['is_active'])
@@ -254,18 +254,18 @@ class DeleteBotView(APIView):
             user = request.user
 
             data = request.data
-            close_orders = data.get('close_order')
+            cancel_orders = data.get('close_order')
             drop_psn = data.get('drop_psn')
 
             print(drop_psn)
-            print(close_orders)
+            print(cancel_orders)
 
             logger.info(
-                f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}. Event number-{event_number}')
+                f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}, close_orders {cancel_orders}, drop_psn {drop_psn}')
 
             terminate_bot(bot, user)
 
-            if close_orders is True:
+            if cancel_orders is True:
                 cancel_all_orders(bot)
 
             if drop_psn is True:
