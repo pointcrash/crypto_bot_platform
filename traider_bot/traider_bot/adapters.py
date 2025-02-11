@@ -7,8 +7,8 @@ from django.urls import reverse
 
 class MyAccountAdapter(DefaultAccountAdapter):
     def get_email_confirmation_url(self, request, emailconfirmation):
-        # lang = 'ru'
-        user_language = request.LANGUAGE_CODE
+        lang = 'ru'
+        # user_language = request.LANGUAGE_CODE
 
         url = reverse("front_custom_confirm_email", args=[emailconfirmation.key])
-        return f"{settings.FRONTEND_URL}/{user_language}{url}"
+        return f"{settings.FRONTEND_URL}/{lang}{url}"
