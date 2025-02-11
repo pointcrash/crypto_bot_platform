@@ -14,6 +14,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
+    'bravo.cryptonna.com',
     'bravo.almazor.co',
     'delta.almazor.co',
     'adm.almazor.co',
@@ -50,6 +51,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.bravo.almazor.co',
+    'https://*.bravo.cryptonna.com',
     'https://*.trade.cryptonna.com',
     'https://*.209.38.180.77',
     'https://127.0.0.1',
