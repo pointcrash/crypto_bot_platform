@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from decimal import Decimal
@@ -253,7 +254,7 @@ class DeleteBotView(APIView):
             bot = get_object_or_404(BotModel, pk=bot_id)
             user = request.user
 
-            data = request.data
+            data = json.loads(request.body)
             cancel_orders = data.get('close_order')
             drop_psn = data.get('drop_psn')
 
