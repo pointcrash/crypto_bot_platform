@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from api_2.api_bybit import *
 from api_2.api_binance import *
+from api_2.decorators import exception_telegram_notice_decorator
 from api_2.pybit_api import bybit_place_batch_order, bybit_internal_transfer, bybit_withdraw, bybit_get_user_assets, \
     bybit_get_pnl_by_time, bybit_get_wallet_balance, bybit_get_all_position_info, bybit_get_transaction_log
 
@@ -80,6 +81,7 @@ def get_position_inform(bot):
 '''
 
 
+@exception_telegram_notice_decorator(message='При выставлении ордера произошла ошибка')
 def place_order(bot, side, order_type, price, amount_usdt=None, qty=None, position_side=None, timeInForce=None):
     if order_type.upper() == 'LIMIT' and not timeInForce:
         timeInForce = 'GTC'
@@ -97,6 +99,7 @@ def place_order(bot, side, order_type, price, amount_usdt=None, qty=None, positi
                                  price=price, qty=qty, position_side=position_side)
 
 
+@exception_telegram_notice_decorator(message='При выставлении ордера произошла ошибка')
 def place_conditional_order(bot, side, position_side, trigger_price, trigger_direction, qty=None, amount_usdt=None):
     if not qty:
         qty = get_quantity_from_price(bot, trigger_price, amount_usdt)
@@ -110,6 +113,7 @@ def place_conditional_order(bot, side, position_side, trigger_price, trigger_dir
                                              trigger_price=trigger_price, trigger_direction=trigger_direction, qty=qty)
 
 
+@exception_telegram_notice_decorator(message='При выставлении группы ордеров произошла ошибка')
 def place_batch_order(bot, order_list):
     if bot.account.service.name == 'Binance':
         return binance_place_batch_order(bot, order_list)
