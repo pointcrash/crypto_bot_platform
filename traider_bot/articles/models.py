@@ -14,6 +14,8 @@ class Article(models.Model):
         ('NEWS', 'NEWS'),
         ('ARTICLE', 'ARTICLE'),
         ('SYMBOL', 'SYMBOL'),
+        ('INDICATOR', 'INDICATOR'),
+        ('BYBIT', 'BYBIT'),
     )
 
     ARTICLE_CATEGORY_TYPE_CHOICES = (
