@@ -212,14 +212,14 @@ class StopBotView(APIView):
             bot = get_object_or_404(BotModel, pk=bot_id)
             user = request.user
             data = request.data
-            cancel_orders = data.get('cancel_order')
+            cancel_orders = data.get('cancel_orders')
             drop_psn = data.get('drop_psn')
 
             print(drop_psn)
             print(cancel_orders)
 
             logger.info(
-                f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}, close_orders {cancel_orders}, drop_psn {drop_psn}')
+                f'{user} остановил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}, cancel_orders {cancel_orders}, drop_psn {drop_psn}')
 
             # bot.is_active = False
             # bot.save(update_fields=['is_active'])
@@ -255,14 +255,14 @@ class DeleteBotView(APIView):
             user = request.user
 
             data = json.loads(request.body)
-            cancel_orders = data.get('close_order')
+            cancel_orders = data.get('cancel_orders')
             drop_psn = data.get('drop_psn')
 
             print(drop_psn)
             print(cancel_orders)
 
             logger.info(
-                f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}, close_orders {cancel_orders}, drop_psn {drop_psn}')
+                f'{user} удалил бота ID: {bot.id}, Account: {bot.account}, Coin: {bot.symbol.name}, cancel_orders {cancel_orders}, drop_psn {drop_psn}')
 
             terminate_bot(bot, user)
 
