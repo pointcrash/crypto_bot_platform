@@ -20,7 +20,7 @@ from tariffs.models import UserTariff, Tariff
 # Create your views here.
 def password_reset_confirm_redirect(request, uidb64, token):
     return HttpResponseRedirect(
-        f"{settings.FRONTEND_URL}/trade/password-reset/confirm/{uidb64}/{token}/"
+        f"{settings.FRONTEND_URL}en/trade/password-reset/confirm/{uidb64}/{token}/"
     )
 
 
