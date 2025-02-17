@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from pybit.unified_trading import HTTP
 
 
-main_api_key = 'Rwt3UiqjKvIXe39h1W'
-main_api_secret = 'kyzgLKPSWlYzQUbJtX51tWkyiuYW3IQHXgO3'
+main_api_key = 'Rh1W'
+main_api_secret = 'kyzgLKPSuYW3IQHXgO3'
 
 
 def get_session():

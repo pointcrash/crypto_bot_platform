@@ -13,11 +13,11 @@ from api_test.api_v5_bybit import HTTP_Request
 from main.models import Account
 from bots.models import BotModel
 
-api_key_binance = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
-api_secret_binance = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
+api_key_binance = '40804baa6b'
+api_secret_binance = 'cd843d65fbf4caba1fe973bbec'
 
-api_key_bybit = 'XlXhlUPG4GCBGRdFld'
-api_secret_bybit = 'JBpwCjzkzXbxriLdptaoLyLR2wvdNSz0NisU'
+api_key_bybit = 'XlXhlRdFld'
+api_secret_bybit = 'JBpwCjLR2wvdNSz0NisU'
 
 
 def place_order(account, symbol, qty, side, order_type, timeInForce=None, price=None, ):

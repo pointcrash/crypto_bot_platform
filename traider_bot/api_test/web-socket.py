@@ -3,11 +3,11 @@ from single_bot.logic.global_variables import global_list_twm_for_binance
 
 from binance import ThreadedWebsocketManager
 
-api_key = '40804baa38ed8e089157f32bee8c2311b0745b611b1dfb65ddfeda95af7f3b6b'
-api_secret = 'cd843d65f675cc9b3619871733f8d1c8b26a63a729ddcaabf4caba1fe973bbec'
+api_key = '40804b11b1dfb65ddfeda95af7f3b6b'
+api_secret = 'cd843d65f675cc9b3bf4caba1fe973bbec'
 
-main_api_key = 'DtQ4NHexgkjnoNLKFeEiPjeFsN5vJr8UsUBigfelxO4DAyykSBZAyLRteiktUjJj'
-main_api_secret = '6G3BhdLPDywx5y7QsxrYOFj3glD4bMglpifUOfjwo1gfE7KMfoadVkJCyXwac3b2'
+main_api_key = 'DtQ4NHexgkjnoNLKFAyykSBZAyLRteiktUjJj'
+main_api_secret = '6G3BhdLPDyw7KMfoadVkJCyXwac3b2'
 
 
 def main():
